@@ -1,7 +1,5 @@
 import os
 from setuptools import setup, find_packages
-from setuptools.command.install import install
-
 
 PACKAGE_NAME = 'pygls'
 VERSION = '0.1.0'
