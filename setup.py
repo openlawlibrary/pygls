@@ -34,8 +34,8 @@ setup(
     license=LICENSE,
     packages=packages,
     include_package_data=True,
-    data_files = [
-        ('Lib/site-packages/pygls', [ './CHANGELOG.md', './README.md', ])
+    data_files=[
+        ('Lib/site-packages/pygls', ['./CHANGELOG.md', './README.md', ])
     ],
     zip_safe=False,
     install_requires=[
