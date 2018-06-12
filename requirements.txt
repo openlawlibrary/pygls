@@ -1,0 +1,3 @@
+configparser
+future
+json-rpc

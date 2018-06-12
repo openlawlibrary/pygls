@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PYGLS",
+            "module": "pygls",
+            "type": "python",
+            "pythonPath": "${config:python.pythonPath}",
+            "request": "launch",
+            "stopOnEntry": false,
+            "console": "none",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--tcp"
+            ],
+            "cwd": "${workspaceFolder}",
+            "debugOptions": [
+                "RedirectOutput"
+            ]
+        }
+    ]
+}
