@@ -8,6 +8,7 @@ from itertools import zip_longest
 
 from .workspace import Workspace
 from . import lsp, _utils, uris
+from .decorators import call_user_features
 
 log = logging.getLogger(__name__)
 
@@ -15,23 +16,38 @@ log = logging.getLogger(__name__)
 LINT_DEBOUNCE_S = 0.5  # 500 ms
 
 
-class LSPBase(object):
+class LSPFeatureManager(object):
+    '''
+    Class for registering user defined features
+
+    Attributes:
+        _features(dict): Registered features
+        _feature_options(dict): Registered feature's options
+        _commands(dict): Registered commands
+    '''
 
     def __init__(self):
-        self.workspace = None
-        self.workspace_folders = {}
-
-        self._shutdown = False
-
-        self._base_features = {}
-        self._setup_base_features()
-
+        # Key(str): LSP feature name
+        # Value(func): Feature
         self._features = {}
+
+        # Key(str): LSP feature name
+        # Value(dict): Feature options
         self._feature_options = {}
 
+        # Key(string): Command name
+        # Value(func): Command
         self._commands = {}
 
     def register(self, feature_name, **options):
+        '''
+        Decorator used to register user defined features
+        Params:
+            feature_name(str): Name of the LSP feature or command
+                               EG: 'textDocument/completions'
+            options(dict): Options for feature or command
+                           EG: triggerCharacters=['.']
+        '''
         def decorator(f):
             # Register commands separately
             if feature_name is lsp.REGISTER_COMMAND:
@@ -44,6 +60,74 @@ class LSPBase(object):
 
             return f
         return decorator
+
+
+def to_lsp_name(method_name):
+    '''
+    Convert method name to LSP real name
+    EXAMPLE:
+    text_document__did_open -> textDocument/didOpen
+    '''
+    method_name = method_name.replace('__', '/')
+    m_chars = list(method_name)
+    m_replaced = []
+
+    for i, ch in enumerate(m_chars):
+        if ch is '_':
+            continue
+
+        if m_chars[i-1] is '_':
+            m_replaced.append(ch.capitalize())
+            continue
+
+        m_replaced.append(ch)
+
+    return ''.join(m_replaced)
+
+
+class LSMeta(type):
+    """
+    A metaclass to dynamically add decorators to generic LSP features.
+
+    EXAMPLE:
+    If `lsp.TEXT_DOC_DID_OPEN` is registered, it will be called after the
+    same method from base_features
+    """
+
+    def __new__(self, cls_name, cls_bases, cls):
+        # Skip for classes that are derived from LSPBase
+        if cls_name is 'LSPBase':
+            for attr_name, attr_val in cls.items():
+                if callable(attr_val) and not attr_name.startswith('_'):
+                    method_name = to_lsp_name(attr_name)
+                    cls[attr_name] = call_user_features(attr_val, method_name)
+
+        return super(LSMeta, self).__new__(
+            self, cls_name, cls_bases, cls)
+
+
+class LSPBase(LSPFeatureManager, metaclass=LSMeta):
+    '''
+    Class with implemented generic LSP features
+
+    Attributes:
+        workspace(Workspace): Object that represents workspace
+        workspace_folders(dict): Multi-root workspace's folders
+        _shutdown(bool): True if client sent shutdown notification
+        _base_features(dict): Registered generic LSP features
+    '''
+
+    def __init__(self):
+        super(LSPBase, self).__init__()
+
+        self.workspace = None
+        self.workspace_folders = {}
+
+        self._shutdown = False
+
+        self._base_features = {}
+
+        self._setup_base_features()
 
     def _setup_base_features(self):
         # General
@@ -63,7 +147,7 @@ class LSPBase(object):
         self._base_features[lsp.TEXT_DOC_DID_CLOSE] = self.text_document__did_close
         self._base_features[lsp.TEXT_DOC_DID_SAVE] = self.text_document__did_save
 
-    def capabilities(self):
+    def _capabilities(self):
         '''
         We should create server capabilities based on registered features
         and client capabilities
@@ -119,7 +203,8 @@ class LSPBase(object):
             self.workspace_folders[folder['uri']] = folder
 
         # Get our capabilities
-        return {'capabilities': self.capabilities()}
+        c = self._capabilities()
+        return {'capabilities': c}
 
     def initialized(self):
         pass
