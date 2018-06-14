@@ -12,7 +12,6 @@ import sys
 import functools
 
 from .lsp_impl import LSPBase
-from .jsonrpc.dispatchers import MethodDispatcher
 from .jsonrpc.endpoint import Endpoint
 from .jsonrpc.streams import JsonRpcStreamReader, JsonRpcStreamWriter
 

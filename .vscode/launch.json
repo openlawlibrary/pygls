@@ -17,6 +17,15 @@
             "debugOptions": [
                 "RedirectOutput"
             ]
+        },
+        {
+            "name": "RunExample",
+            "type": "python",
+            "pythonPath": "${config:python.pythonPath}",
+            "request": "launch",
+            "stopOnEntry": true,
+            "console": "none",
+            "program": "${file}"
         }
     ]
 }

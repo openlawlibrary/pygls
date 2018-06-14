@@ -50,6 +50,7 @@ COMPLETION = 'textDocument/completion'
 COMPLETION_RESOLVE = 'completionItem/resolve'
 HOVER = 'textDocument/hover'
 CODE_ACTION = 'textDocument/codeAction'
+CODE_LENS = 'textDocument/codeLens'
 
 
 class CompletionItemKind(object):

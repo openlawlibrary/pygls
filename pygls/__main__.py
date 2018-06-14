@@ -62,6 +62,19 @@ def main():
             'items': [{'label': 'AAA'}, {'label': 'BBB'}]
         }
 
+    @ls.register('textDocument/codeLens')
+    def code_lens(textDocument=None, doc_uri=None, **_kwargs):
+        try:
+            res = ls.get_configuration({'items': [
+                {'scopeUri': textDocument['uri']}]})
+
+            x = 5
+        except Exception as e:
+            a = e
+            return
+
+        return
+
     @ls.register(lsp.TEXT_DOC_DID_OPEN)
     def tx_doc_did_open(textDocument=None, **_kwargs):
         # This will be called after generic textDocument/didOpen method
