@@ -161,7 +161,7 @@ class LSPBase(LSPFeatureManager, metaclass=LSMeta):
                 'resolveProvider': True,  # We may need to make this configurable
             },
             'completionProvider': {
-                'resolveProvider': True,  # We know everything ahead of time
+                'resolveProvider': False,  # We know everything ahead of time
                 'triggerCharacters': ['.']
             },
             'documentFormattingProvider': True,

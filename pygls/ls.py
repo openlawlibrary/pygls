@@ -10,6 +10,7 @@ import logging
 import socketserver
 import sys
 import functools
+import inspect
 
 from .lsp_impl import LSPBase
 from .jsonrpc.endpoint import Endpoint
@@ -50,9 +51,11 @@ class LanguageServer(LSPBase):
 
             @functools.wraps(method)
             def handler(params):
-                # We should pass 'self' as param
-                # for better unit test support
-                return method(**(params or {}))
+                args = inspect.getargspec(method)[0]
+                if 'ls' in args:
+                    return method(ls=self, **(params or {}))
+                else:
+                    return method(**(params or {}))
 
             return handler
         except:

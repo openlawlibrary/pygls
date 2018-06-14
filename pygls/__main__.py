@@ -56,7 +56,7 @@ def main():
     ls = LanguageServer()
 
     @ls.register(lsp.COMPLETION, triggerCharacters=['.'])
-    def completions(textDocument=None, position=None, **_kwargs):
+    def completions(ls, textDocument=None, position=None, **_kwargs):
         return {
             'isIncomplete': False,
             'items': [{'label': 'AAA'}, {'label': 'BBB'}]
@@ -64,16 +64,12 @@ def main():
 
     @ls.register('textDocument/codeLens')
     def code_lens(textDocument=None, doc_uri=None, **_kwargs):
-        try:
-            res = ls.get_configuration({'items': [
-                {'scopeUri': textDocument['uri']}]})
-
-            x = 5
-        except Exception as e:
-            a = e
-            return
-
-        return
+        # try:
+        #     res = ls.get_configuration({'items': [
+        #         {'scopeUri': textDocument['uri']}]})
+        # except Exception as e:
+        #     pass
+        pass
 
     @ls.register(lsp.TEXT_DOC_DID_OPEN)
     def tx_doc_did_open(textDocument=None, **_kwargs):
