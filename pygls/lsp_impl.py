@@ -72,25 +72,25 @@ class LSPBase(object):
             and client supports it
         '''
         server_capabilities = {
-            'codeActionProvider': False,
-            # 'codeLensProvider': {
-            #     'resolveProvider': False,  # We may need to make this configurable
-            # },
+            'codeActionProvider': True,
+            'codeLensProvider': {
+                'resolveProvider': True,  # We may need to make this configurable
+            },
             'completionProvider': {
-                'resolveProvider': False,  # We know everything ahead of time
+                'resolveProvider': True,  # We know everything ahead of time
                 'triggerCharacters': ['.']
             },
-            'documentFormattingProvider': False,
-            'documentHighlightProvider': False,
-            'documentRangeFormattingProvider': False,
-            'documentSymbolProvider': False,
+            'documentFormattingProvider': True,
+            'documentHighlightProvider': True,
+            'documentRangeFormattingProvider': True,
+            'documentSymbolProvider': True,
             'definitionProvider': True,
             'executeCommandProvider': {
                 'commands': list(self._commands.keys())
             },
-            'hoverProvider': False,
-            'referencesProvider': False,
-            'renameProvider': False,
+            'hoverProvider': True,
+            'referencesProvider': True,
+            'renameProvider': True,
             'signatureHelpProvider': {
                 'triggerCharacters': ['(', ',']
             },
@@ -174,3 +174,12 @@ class LSPBase(object):
                 del self.workspace_folders[for_remove['uri']]
             except:
                 pass
+
+    def get_configuration(self, params):
+        '''
+        Get configuration for a specific file
+        Figuring out how to get result from request future
+        '''
+        # rf = self._endpoint.request(lsp.CONFIGURATION, params)
+        # return rf.result()
+        pass

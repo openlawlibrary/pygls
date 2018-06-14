@@ -31,7 +31,8 @@ class Endpoint(object):
 
         self._client_request_futures = {}
         self._server_request_futures = {}
-        self._executor_service = futures.ThreadPoolExecutor(max_workers=max_workers)
+        self._executor_service = futures.ThreadPoolExecutor(
+            max_workers=max_workers)
 
     def shutdown(self):
         self._executor_service.shutdown()
@@ -106,11 +107,13 @@ class Endpoint(object):
             self._handle_notification(message['method'], message.get('params'))
         elif 'method' not in message:
             log.debug("Handling response from client %s", message)
-            self._handle_response(message['id'], message.get('result'), message.get('error'))
+            self._handle_response(message['id'], message.get(
+                'result'), message.get('error'))
         else:
             try:
                 log.debug("Handling request from client %s", message)
-                self._handle_request(message['id'], message['method'], message.get('params'))
+                self._handle_request(
+                    message['id'], message['method'], message.get('params'))
             except JsonRpcException as e:
                 log.exception("Failed to handle request %s", message['id'])
                 self._consumer({
@@ -141,13 +144,15 @@ class Endpoint(object):
         try:
             handler_result = handler(params)
         except Exception:  # pylint: disable=broad-except
-            log.exception("Failed to handle notification %s: %s", method, params)
+            log.exception("Failed to handle notification %s: %s",
+                          method, params)
             return
 
         if callable(handler_result):
             log.debug("Executing async notification handler %s", handler_result)
             notification_future = self._executor_service.submit(handler_result)
-            notification_future.add_done_callback(self._notification_callback(method, params))
+            notification_future.add_done_callback(
+                self._notification_callback(method, params))
 
     @staticmethod
     def _notification_callback(method, params):
@@ -155,9 +160,11 @@ class Endpoint(object):
         def callback(future):
             try:
                 future.result()
-                log.debug("Successfully handled async notification %s %s", method, params)
+                log.debug(
+                    "Successfully handled async notification %s %s", method, params)
             except Exception:  # pylint: disable=broad-except
-                log.exception("Failed to handle async notification %s %s", method, params)
+                log.exception(
+                    "Failed to handle async notification %s %s", method, params)
         return callback
 
     def _handle_cancel_notification(self, msg_id):
@@ -165,7 +172,8 @@ class Endpoint(object):
         request_future = self._client_request_futures.pop(msg_id, None)
 
         if not request_future:
-            log.warn("Received cancel notification for unknown message id %s", msg_id)
+            log.warn(
+                "Received cancel notification for unknown message id %s", msg_id)
             return
 
         # Will only work if the request hasn't started executing
@@ -187,7 +195,8 @@ class Endpoint(object):
             self._client_request_futures[msg_id] = request_future
             request_future.add_done_callback(self._request_callback(msg_id))
         else:
-            log.debug("Got result from synchronous request handler: %s", handler_result)
+            log.debug(
+                "Got result from synchronous request handler: %s", handler_result)
             self._consumer({
                 'jsonrpc': JSONRPC_VERSION,
                 'id': msg_id,
@@ -215,7 +224,8 @@ class Endpoint(object):
                 message['error'] = e.to_dict()
             except Exception:  # pylint: disable=broad-except
                 log.exception("Failed to handle request %s", request_id)
-                message['error'] = JsonRpcInternalError.of(sys.exc_info()).to_dict()
+                message['error'] = JsonRpcInternalError.of(
+                    sys.exc_info()).to_dict()
 
             self._consumer(message)
 
