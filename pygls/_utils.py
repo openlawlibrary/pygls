@@ -119,5 +119,28 @@ def clip_column(column, lines, line_number):
     return min(column, max_column)
 
 
+def to_lsp_name(method_name):
+    '''
+    Convert method name to LSP real name
+    EXAMPLE:
+    text_document__did_open -> textDocument/didOpen
+    '''
+    method_name = method_name.replace('__', '/')
+    m_chars = list(method_name)
+    m_replaced = []
+
+    for i, ch in enumerate(m_chars):
+        if ch is '_':
+            continue
+
+        if m_chars[i-1] is '_':
+            m_replaced.append(ch.capitalize())
+            continue
+
+        m_replaced.append(ch)
+
+    return ''.join(m_replaced)
+
+
 def to_dict(obj):
     return json.loads(json.dumps(obj, default=lambda o: o.__dict__))
