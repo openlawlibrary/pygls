@@ -49,8 +49,23 @@ TEXT_DOC_PUBLISH_DIAGNOSTICS = 'textDocument/publishDiagnostics'
 COMPLETION = 'textDocument/completion'
 COMPLETION_RESOLVE = 'completionItem/resolve'
 HOVER = 'textDocument/hover'
+SIGNATURE_HELP = 'textDocument/signatureHelp'
+DEFINITION = 'textDocument/definition'
+TYPE_DEFINITION = 'textDocument/typeDefinition'
+IMPLEMENTATION = 'textDocument/implementation'
+REFERENCES = 'textDocument/references'
+DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight'
+DOCUMENT_SYMBOL = 'textDocument/documentSymbol'
 CODE_ACTION = 'textDocument/codeAction'
 CODE_LENS = 'textDocument/codeLens'
+CODE_LENS_RESOLVE = 'codeLens/resolve'
+DOCUMENT_LINK = 'textDocument/documentLink'
+DOCUMENT_LINK_RESOLVE = 'documentLink/resolve'
+COLOR_PRESENTATION = 'textDocument/colorPresentation'
+FORMATTING = 'textDocument/formatting'
+RANGE_FORMATTING = 'textDocument/rangeFormatting'
+ON_TYPE_FORMATTING = 'textDocument/onTypeFormatting'
+RENAME = 'textDocument/rename'
 
 
 class CompletionItemKind(object):
@@ -119,3 +134,137 @@ class TextDocumentSyncKind(object):
     NONE = 0
     FULL = 1
     INCREMENTAL = 2
+
+
+class CompletionOptions(object):
+
+    def __init__(self, resolveProvider=None, triggerCharacters=None):
+        self.resolveProvider = resolveProvider
+        self.triggerCharacters = triggerCharacters
+
+
+class SignatureHelpOptions(object):
+
+    def __init__(self, triggerCharacters):
+        self.triggerCharacters = triggerCharacters
+
+
+class CodeLensOptions(object):
+
+    def __init__(self, resolveProvider):
+        self.resolveProvider = resolveProvider
+
+
+class DocumentOnTypeFormattingOptions(object):
+
+    def __init__(self, firstTriggerCharacter, moreTriggerCharacter):
+        self.firstTriggerCharacter = firstTriggerCharacter
+        self.moreTriggerCharacter = moreTriggerCharacter
+
+
+class DocumentLinkOptions(object):
+
+    def __init__(self, resolveProvider):
+        self.resolveProvider = resolveProvider
+
+
+class ExecuteCommandOptions(object):
+
+    def __init__(self, commands):
+        self.commands = commands
+
+
+class SaveOptions(object):
+
+    def __init__(self, includeText):
+        self.includeText = includeText
+
+
+class ColorProviderOptions(object):
+    pass
+
+
+class TextDocumentSyncOptions(object):
+
+    def __init__(self, openClose, change, willSave, willSaveWaitUntil, save):
+        self.openClose = openClose
+        self.change = change
+        self.willSave = willSave
+        self.willSaveWaitUntil = willSaveWaitUntil
+        self.save = save
+
+
+class StaticRegistrationOptions(object):
+
+    def __init__(self, id):
+        self.id = id
+
+
+class ServerCapabilities(object):
+
+    def __init__(self, ls):
+        features = ls._features.keys()
+        feature_options = ls._feature_options
+        commands = ls._commands
+
+        self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
+        self.hoverProvider = HOVER in features
+
+        if COMPLETION in features:
+            self.completionProvider = CompletionOptions(
+                resolveProvider=COMPLETION_RESOLVE in features,
+                triggerCharacters=feature_options.get(
+                    COMPLETION, {}).get('triggerCharacters', [])
+            )
+
+        if SIGNATURE_HELP in features:
+            self.signatureHelpProvider = SignatureHelpOptions(
+                triggerCharacters=feature_options.get(
+                    SIGNATURE_HELP, {}).get('triggerCharacters', [])
+            )
+
+        self.definitionProvider = DEFINITION in features
+
+        # Additional options
+        self.typeDefinitionProvider = False
+        self.implementationProvider = False
+
+        self.referencesProvider = REFERENCES in features
+        self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
+        self.documentSymbolProvider = DOCUMENT_SYMBOL in features
+        self.workspaceSymbolProvider = SYMBOL in features
+        self.codeActionProvider = CODE_ACTION in features
+
+        if CODE_LENS in features:
+            self.codeLensProvider = CodeLensOptions(
+                resolveProvider=CODE_LENS_RESOLVE in features
+            )
+
+        self.documentFormattingProvider = FORMATTING in features
+        self.documentRangeFormattingProvider = RANGE_FORMATTING in features
+
+        if FORMATTING in features:
+            self.documentOnTypeFormattingProvider = DocumentOnTypeFormattingOptions(
+                firstTriggerCharacter=feature_options.get(
+                    ON_TYPE_FORMATTING, {}).get('firstTriggerCharacter', ''),
+                moreTriggerCharacter=feature_options.get(
+                    ON_TYPE_FORMATTING, {}).get('moreTriggerCharacter', [])
+            )
+
+        self.renameProvider = RENAME in features
+
+        if DOCUMENT_LINK in features:
+            self.documentLinkProvider = DocumentLinkOptions(
+                resolveProvider=DOCUMENT_LINK_RESOLVE in features
+            )
+
+        self.colorProvider = False
+
+        self.executeCommandProvider = ExecuteCommandOptions(
+            commands=list(commands.keys())
+        )
+
+        self.workspace = {
+            'workspaceFolders': True,
+            'changeNotifications': True
+        }

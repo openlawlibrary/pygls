@@ -133,8 +133,8 @@ class LSPBase(LSPFeatureManager, metaclass=LSMeta):
         # General
         self._base_features[lsp.INITIALIZE] = self.initialize
         self._base_features[lsp.INITIALIZED] = self.initialized
-        # self._base_features[lsp.SHUTDOWN] = self.m_shutdown
-        # self._base_features[lsp.EXIT] = self.m_exit
+        self._base_features[lsp.SHUTDOWN] = self.shutdown
+        self._base_features[lsp.EXIT] = self.exit
 
         # Workspace
         self._base_features[lsp.EXECUTE_COMMAND] = self.execute_command
@@ -147,51 +147,26 @@ class LSPBase(LSPFeatureManager, metaclass=LSMeta):
         self._base_features[lsp.TEXT_DOC_DID_CLOSE] = self.text_document__did_close
         self._base_features[lsp.TEXT_DOC_DID_SAVE] = self.text_document__did_save
 
-    def _capabilities(self):
+    def _capabilities(self, client_capabilities):
         '''
-        We should create server capabilities based on registered features
-        and client capabilities
-        EG:
-            if lsp.CODE_ACTION in self._features
-            and client supports it
+            Server capabilities depends on registered features
+            TODO: It should depend on a client capabilities also
         '''
-        server_capabilities = {
-            'codeActionProvider': True,
-            'codeLensProvider': {
-                'resolveProvider': True,  # We may need to make this configurable
-            },
-            'completionProvider': {
-                'resolveProvider': False,  # We know everything ahead of time
-                'triggerCharacters': ['.']
-            },
-            'documentFormattingProvider': True,
-            'documentHighlightProvider': True,
-            'documentRangeFormattingProvider': True,
-            'documentSymbolProvider': True,
-            'definitionProvider': True,
-            'executeCommandProvider': {
-                'commands': list(self._commands.keys())
-            },
-            'hoverProvider': True,
-            'referencesProvider': True,
-            'renameProvider': True,
-            'signatureHelpProvider': {
-                'triggerCharacters': ['(', ',']
-            },
-            'textDocumentSync': lsp.TextDocumentSyncKind.INCREMENTAL,
-            'workspace': {
-                'workspaceFolders': {
-                    'supported': True,
-                    'changeNotifications': True
-                }
-            }
-        }
-        log.info('Server capabilities: %s', server_capabilities)
-        return server_capabilities
+        server_capabilities = lsp.ServerCapabilities(self)
 
-    def initialize(self, processId=None, rootUri=None, rootPath=None, initializationOptions=None, **_kwargs):
+        # Convert to dict for json serialization
+        sc_dict = _utils.to_dict(server_capabilities)
+
+        log.info('Server capabilities: %s', sc_dict)
+
+        return sc_dict
+
+    def initialize(self, processId=None, rootUri=None, rootPath=None,
+                   initializationOptions=None, **_kwargs):
+
         log.debug('Language server initialized with %s %s %s %s',
                   processId, rootUri, rootPath, initializationOptions)
+
         if rootUri is None:
             rootUri = uris.from_fs_path(
                 rootPath) if rootPath is not None else ''
@@ -202,22 +177,32 @@ class LSPBase(LSPFeatureManager, metaclass=LSMeta):
         for folder in workspace_folders:
             self.workspace_folders[folder['uri']] = folder
 
-        # Get our capabilities
-        c = self._capabilities()
-        return {'capabilities': c}
+        client_capabilities = _kwargs['capabilities']
+
+        return {'capabilities': self._capabilities(client_capabilities)}
 
     def initialized(self):
         pass
 
+    def shutdown(self, **_kwargs):
+        self._shutdown = True
+
+    def exit(self, **_kwargs):
+        self._endpoint.shutdown()
+        self._jsonrpc_stream_reader.close()
+        self._jsonrpc_stream_writer.close()
+
     def text_document__did_close(self, textDocument=None, **_kwargs):
         self.workspace.rm_document(textDocument['uri'])
-        # The same user defined method will be called here
 
     def text_document__did_open(self, textDocument=None, **_kwargs):
-        self.workspace.put_document(
-            textDocument['uri'], textDocument['text'], version=textDocument.get('version'))
+        self.workspace.put_document(doc_uri=textDocument['uri'],
+                                    source=textDocument['text'],
+                                    version=textDocument.get('version'))
 
-    def text_document__did_change(self, contentChanges=None, textDocument=None, **_kwargs):
+    def text_document__did_change(self, contentChanges=None,
+                                  textDocument=None, **_kwargs):
+
         for change in contentChanges:
             self.workspace.update_document(
                 textDocument['uri'],
@@ -228,14 +213,11 @@ class LSPBase(LSPFeatureManager, metaclass=LSMeta):
     def text_document__did_save(self, textDocument=None, **_kwargs):
         pass
 
-    def text_document__rename(self, textDocument=None, position=None, newName=None, **_kwargs):
+    def text_document__rename(self, textDocument=None, position=None,
+                              newName=None, **_kwargs):
         return self.rename(textDocument['uri'], position, newName)
 
     def workspace__did_change_configuration(self, settings=None):
-        pass
-
-    def workspace__did_change_watched_files(self, **_kwargs):
-        # Externally changed files may result in changed diagnostics
         pass
 
     def execute_command(self, command=None, arguments=None):
