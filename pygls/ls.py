@@ -42,6 +42,11 @@ class LanguageServer(LSPBase):
 
     def __getitem__(self, item):
         try:
+            if self._shutdown and item != 'exit':
+                # exit is the only allowed method during shutdown
+                log.debug("Ignoring non-exit method during shutdown: %s", item)
+                raise KeyError
+
             try:
                 # Look at base features
                 method = self._base_features[item]

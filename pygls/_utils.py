@@ -4,6 +4,7 @@ import inspect
 import logging
 import os
 import threading
+import json
 
 log = logging.getLogger(__name__)
 
@@ -57,12 +58,14 @@ def find_parents(root, path, names):
     # Split the relative by directory, generate all the parent directories, then check each of them.
     # This avoids running a loop that has different base-cases for unix/windows
     # e.g. /a/b and /a/b/c/d/e.py -> ['/a/b', 'c', 'd']
-    dirs = [root] + os.path.relpath(os.path.dirname(path), root).split(os.path.sep)
+    dirs = [root] + \
+        os.path.relpath(os.path.dirname(path), root).split(os.path.sep)
 
     # Search each of /a/b/c, /a/b, /a
     while dirs:
         search_dir = os.path.join(*dirs)
-        existing = list(filter(os.path.exists, [os.path.join(search_dir, n) for n in names]))
+        existing = list(
+            filter(os.path.exists, [os.path.join(search_dir, n) for n in names]))
         if existing:
             return existing
         dirs.pop()
@@ -111,5 +114,10 @@ def format_docstring(contents):
 def clip_column(column, lines, line_number):
     # Normalise the position as per the LSP that accepts character positions > line length
     # https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#position
-    max_column = len(lines[line_number].rstrip('\r\n')) if len(lines) > line_number else 0
+    max_column = len(lines[line_number].rstrip('\r\n')
+                     ) if len(lines) > line_number else 0
     return min(column, max_column)
+
+
+def to_dict(obj):
+    return json.loads(json.dumps(obj, default=lambda o: o.__dict__))
