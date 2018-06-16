@@ -203,9 +203,9 @@ class StaticRegistrationOptions(object):
 class ServerCapabilities(object):
 
     def __init__(self, ls):
-        features = ls._features.keys()
-        feature_options = ls._feature_options
-        commands = ls._commands
+        features = ls.features.keys()
+        feature_options = ls.feature_options
+        commands = ls.commands
 
         self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
         self.hoverProvider = HOVER in features

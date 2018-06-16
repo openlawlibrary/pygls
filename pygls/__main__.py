@@ -72,7 +72,7 @@ def main():
         pass
 
     @ls.register(lsp.TEXT_DOC_DID_OPEN)
-    def tx_doc_did_open(textDocument=None, **_kwargs):
+    def tx_doc_did_open(ls, textDocument=None, **_kwargs):
         # This will be called after generic textDocument/didOpen method
         # NOTE: Not implemented yet
         # NOTE: * For easier testing
@@ -82,9 +82,9 @@ def main():
         pass
 
     @ls.register(lsp.REGISTER_COMMAND, name='custom.Command')
-    def custom_command(params):
+    def custom_command(ls, params):
         # Commands are registered with required 'name' argument
-        pass
+        ls.workspace.show_message('Command `custom.Command` executed')
 
     if args.tcp:
         ls.start_tcp(args.host, args.port)

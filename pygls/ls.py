@@ -1,44 +1,95 @@
 '''
-This module contains LanguageServer
-There are two ways of starting it:
- - start_tcp
- - start_io
+This module contains all generic language server features.
+
 '''
 
-# Copyright 2017 Palantir Technologies, Inc.
 import logging
-import socketserver
-import sys
 import functools
 import inspect
 
-from .lsp_impl import LSPBase
-from .jsonrpc.endpoint import Endpoint
-from .jsonrpc.streams import JsonRpcStreamReader, JsonRpcStreamWriter
+from itertools import zip_longest
+
+from .workspace import Workspace
+from . import lsp, _utils, uris
+from .decorators import call_user_features
+from .feature_manager import FeatureManager
+
+from .jsonrpc.json_rpc_server import JsonRPCServer
 
 log = logging.getLogger(__name__)
 
 
-class _StreamHandlerWrapper(socketserver.StreamRequestHandler, object):
-    """A wrapper class that is used to construct a custom handler class."""
-
-    delegate = None
-
-    def setup(self):
-        super(_StreamHandlerWrapper, self).setup()
-        self.delegate.setup_streams(self.rfile, self.wfile)
-
-    def handle(self):
-        self.delegate.start()
-
-
-class LanguageServer(LSPBase):
-    """ Implementation of the Microsoft VSCode Language Server Protocol
-    https://github.com/Microsoft/language-server-protocol/blob/master/versions/protocol-1-x.md
+class LSMeta(type):
     """
+    A metaclass to dynamically add decorators to generic LSP features.
+
+    EXAMPLE:
+    If `lsp.TEXT_DOC_DID_OPEN` is registered, it will be called after the
+    same method from base_features
+    """
+
+    def __new__(self, cls_name, cls_bases, cls):
+        # Skip for classes that are derived from LanguageServer
+        if cls_name == 'LanguageServer':
+            for attr_name, attr_val in cls.items():
+                # Add wrappers only for "public" methods
+                # TODO: Find better way to filter methods
+                skip_methods = ['register', 'get_configuration']
+
+                if callable(attr_val) and not attr_name.startswith('_') and \
+                        attr_name not in skip_methods:
+
+                    method_name = _utils.to_lsp_name(attr_name)
+                    cls[attr_name] = call_user_features(attr_val, method_name)
+
+        return super(LSMeta, self).__new__(
+            self, cls_name, cls_bases, cls)
+
+
+class LanguageServer(JsonRPCServer, metaclass=LSMeta):
+    '''
+    Class with implemented generic LSP features
+    https://github.com/Microsoft/language-server-protocol/blob/master/versions/protocol-1-x.md
+
+    Attributes:
+        workspace(Workspace): Object that represents workspace
+        workspace_folders(dict): Multi-root workspace's folders
+        _shutdown(bool): True if client sent shutdown notification
+        _base_features(dict): Registered generic LSP features
+    '''
 
     def __init__(self):
         super(LanguageServer, self).__init__()
+
+        self.fm = FeatureManager()
+
+        self._shutdown = False
+
+        self.workspace = None
+        self.workspace_folders = {}
+
+        self._base_features = {}
+
+        self._setup_base_features()
+
+    @property
+    def features(self):
+        return self.fm.features
+
+    @property
+    def feature_options(self):
+        return self.fm.feature_options
+
+    @property
+    def commands(self):
+        return self.fm.commands
+
+    @property
+    def base_features(self):
+        return self._base_features
+
+    def register(self, feature_name, **options):
+        return self.fm.register(feature_name, **options)
 
     def __getitem__(self, item):
         try:
@@ -49,10 +100,10 @@ class LanguageServer(LSPBase):
 
             try:
                 # Look at base features
-                method = self._base_features[item]
+                method = self.base_features[item]
             except:
                 # Look at user defined features
-                method = self._features[item]
+                method = self.features[item]
 
             @functools.wraps(method)
             def handler(params):
@@ -67,33 +118,124 @@ class LanguageServer(LSPBase):
             # log
             raise KeyError()
 
-    def setup_streams(self, rx, tx):
-        self._jsonrpc_stream_reader = JsonRpcStreamReader(rx)
-        self._jsonrpc_stream_writer = JsonRpcStreamWriter(tx)
-        self._endpoint = Endpoint(self, self._jsonrpc_stream_writer.write)
+    def _setup_base_features(self):
+        # General
+        self._base_features[lsp.INITIALIZE] = self.initialize
+        self._base_features[lsp.INITIALIZED] = self.initialized
+        self._base_features[lsp.SHUTDOWN] = self.shutdown
+        self._base_features[lsp.EXIT] = self.exit
 
-    def start_tcp(self, bind_addr, port):
-        # Construct a custom wrapper class around the user's handler_class
-        wrapper_class = type(
-            LanguageServer.__name__ + 'Handler',
-            (_StreamHandlerWrapper,),
-            {'delegate': self}
-        )
+        # Workspace
+        self._base_features[lsp.EXECUTE_COMMAND] = self.execute_command
+        self._base_features[lsp.DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_workspace_folders
+        self._base_features[lsp.DID_CHANGE_CONFIGURATION] = self.workspace__did_change_configuration
 
-        server = socketserver.TCPServer((bind_addr, port), wrapper_class)
+        # Text Synchronization
+        self._base_features[lsp.TEXT_DOC_DID_OPEN] = self.text_document__did_open
+        self._base_features[lsp.TEXT_DOC_DID_CHANGE] = self.text_document__did_change
+        self._base_features[lsp.TEXT_DOC_DID_CLOSE] = self.text_document__did_close
+        self._base_features[lsp.TEXT_DOC_DID_SAVE] = self.text_document__did_save
+
+    def _capabilities(self, client_capabilities):
+        '''
+            Server capabilities depends on registered features
+            TODO: It should depend on a client capabilities also
+        '''
+        server_capabilities = lsp.ServerCapabilities(self)
+
+        # Convert to dict for json serialization
+        sc_dict = _utils.to_dict(server_capabilities)
+
+        log.info('Server capabilities: %s', sc_dict)
+
+        return sc_dict
+
+    def initialize(self, processId=None, rootUri=None, rootPath=None,
+                   initializationOptions=None, **_kwargs):
+
+        log.debug('Language server initialized with %s %s %s %s',
+                  processId, rootUri, rootPath, initializationOptions)
+
+        if rootUri is None:
+            rootUri = uris.from_fs_path(
+                rootPath) if rootPath is not None else ''
+
+        self.workspace = Workspace(rootUri, self._endpoint)
+
+        workspace_folders = _kwargs['workspaceFolders'] or []
+        for folder in workspace_folders:
+            self.workspace_folders[folder['uri']] = folder
+
+        client_capabilities = _kwargs['capabilities']
+
+        return {'capabilities': self._capabilities(client_capabilities)}
+
+    def initialized(self):
+        pass
+
+    def shutdown(self, **_kwargs):
+        self._shutdown = True
+
+    def exit(self, **_kwargs):
+        self._endpoint.shutdown()
+        self._jsonrpc_stream_reader.close()
+        self._jsonrpc_stream_writer.close()
+
+    def text_document__did_close(self, textDocument=None, **_kwargs):
+        self.workspace.rm_document(textDocument['uri'])
+
+    def text_document__did_open(self, textDocument=None, **_kwargs):
+        self.workspace.put_document(doc_uri=textDocument['uri'],
+                                    source=textDocument['text'],
+                                    version=textDocument.get('version'))
+
+    def text_document__did_change(self, contentChanges=None,
+                                  textDocument=None, **_kwargs):
+
+        for change in contentChanges:
+            self.workspace.update_document(
+                textDocument['uri'],
+                change,
+                version=textDocument.get('version')
+            )
+
+    def text_document__did_save(self, textDocument=None, **_kwargs):
+        pass
+
+    def text_document__rename(self, textDocument=None, position=None,
+                              newName=None, **_kwargs):
+        return self.rename(textDocument['uri'], position, newName)
+
+    def workspace__did_change_configuration(self, settings=None):
+        pass
+
+    def execute_command(self, command=None, arguments=None):
         try:
-            log.info('Serving %s on (%s, %s)',
-                     LanguageServer.__name__, bind_addr, port)
-            server.serve_forever()
-        finally:
-            log.info('Shutting down')
-            server.server_close()
+            return self.commands[command](self, arguments)
+        except:
+            pass
 
-    def start_io(self):
-        log.info('Starting %s IO language server', handler_class.__name__)
-        self.setup_streams(sys.stdin.buffer, sys.stdout.buffer)
-        self.start()
+    def workspace__did_change_workspace_folders(self, event=None):
+        added_folders = event['added'] or []
+        removed_folders = event['removed'] or []
 
-    def start(self):
-        """Entry point for the server."""
-        self._jsonrpc_stream_reader.listen(self._endpoint.consume)
+        for for_add, for_remove in zip_longest(added_folders, removed_folders):
+            # Add folder
+            try:
+                self.workspace_folders[for_add['uri']] = for_add
+            except:
+                pass
+            # Remove folder
+            try:
+                del self.workspace_folders[for_remove['uri']]
+            except:
+                pass
+
+    def get_configuration(self, params):
+        '''
+        Get configuration for a specific file
+        Figuring out how to get result from request future
+        '''
+        # rf = self._endpoint.request(lsp.CONFIGURATION, params)
+        # return rf.result()
+        pass
