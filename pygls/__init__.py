@@ -1,7 +1,6 @@
 # Copyright 2017 Palantir Technologies, Inc.
 import os
 from future.standard_library import install_aliases
-import pluggy
 from ._version import get_versions
 
 install_aliases()

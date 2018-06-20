@@ -63,13 +63,12 @@ def main():
         }
 
     @ls.register('textDocument/codeLens')
-    def code_lens(textDocument=None, doc_uri=None, **_kwargs):
-        # try:
-        #     res = ls.get_configuration({'items': [
-        #         {'scopeUri': textDocument['uri']}]})
-        # except Exception as e:
-        #     pass
-        pass
+    def code_lens(ls, textDocument=None, doc_uri=None, **_kwargs):
+        def callback(configuration):
+            pass
+
+        ls.get_configuration({'items': [{'scopeUri': textDocument['uri']}]},
+                             callback)
 
     @ls.register(lsp.TEXT_DOC_DID_OPEN)
     def tx_doc_did_open(ls, textDocument=None, **_kwargs):
