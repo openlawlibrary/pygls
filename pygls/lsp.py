@@ -212,7 +212,7 @@ class ServerCapabilities(object):
 
         if COMPLETION in features:
             self.completionProvider = CompletionOptions(
-                resolveProvider=COMPLETION_RESOLVE in features,
+                resolveProvider=COMPLETION_ITEM_RESOLVE in features,
                 triggerCharacters=feature_options.get(
                     COMPLETION, {}).get('triggerCharacters', [])
             )
