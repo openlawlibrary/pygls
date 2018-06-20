@@ -62,7 +62,7 @@ def main():
             'items': [{'label': 'AAA'}, {'label': 'BBB'}]
         }
 
-    @ls.register('textDocument/codeLens')
+    @ls.register(lsp.CODE_LENS)
     def code_lens(ls, textDocument=None, doc_uri=None, **_kwargs):
         def callback(configuration):
             pass
@@ -70,7 +70,7 @@ def main():
         ls.get_configuration({'items': [{'scopeUri': textDocument['uri']}]},
                              callback)
 
-    @ls.register(lsp.TEXT_DOC_DID_OPEN)
+    @ls.register(lsp.TEXT_DOCUMENT_DID_OPEN)
     def tx_doc_did_open(ls, textDocument=None, **_kwargs):
         # This will be called after generic textDocument/didOpen method
         # NOTE: Not implemented yet

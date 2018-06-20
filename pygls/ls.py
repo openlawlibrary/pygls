@@ -24,7 +24,7 @@ class LSMeta(type):
     A metaclass to dynamically add decorators to generic LSP features.
 
     EXAMPLE:
-    If `lsp.TEXT_DOC_DID_OPEN` is registered, it will be called after the
+    If `lsp.TEXT_DOCUMENT_DID_OPEN` is registered, it will be called after the
     same method from base_features
     """
 
@@ -128,7 +128,7 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         # Workspace
         self._base_features[lsp.WORKSPACE_EXECUTE_COMMAND] = self.execute_command
         self._base_features[lsp.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_workspace_folders
-        self._base_features[lsp.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_configuration
+        self._base_features[lsp.WORKSPACE_DID_CHANGE_CONFIGURATION] = self.workspace__did_change_configuration
 
         # Text Synchronization
         self._base_features[lsp.TEXT_DOCUMENT_DID_OPEN] = self.text_document__did_open
@@ -162,7 +162,7 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
 
         self.workspace = Workspace(rootUri, self._endpoint)
 
-        workspace_folders = _kwargs.get('workspaceFolders', [])
+        workspace_folders = _kwargs.get('workspaceFolders') or []
         for folder in workspace_folders:
             self.workspace_folders[folder['uri']] = folder
 
@@ -235,8 +235,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         def configuration(future):
             return callback(future.result())
 
-        result = self._endpoint.request(
-            lsp.CONFIGURATION, params).result(timeout=5)
+        future = self._endpoint.request(
+            lsp.WORKSPACE_CONFIGURATION, params)
         future.add_done_callback(configuration)
-
-        return

@@ -44,7 +44,7 @@ def custom_command(ls, params):
     ls.workspace.show_message('Command `custom.Command` executed')
 
 
-@ls.register(lsp.TEXT_DOC_DID_OPEN)
+@ls.register(lsp.TEXT_DOCUMENT_DID_OPEN)
 def doc_did_open(ls, textDocument):
     '''
         Do additional stuff here... EG: Lint document
