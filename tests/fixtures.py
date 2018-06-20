@@ -6,6 +6,7 @@ import pytest
 from pygls import uris
 from pygls.ls import LanguageServer
 from pygls.workspace import Workspace, Document
+from pygls.feature_manager import FeatureManager
 from io import StringIO
 
 
@@ -30,6 +31,12 @@ def pygls(tmpdir):
     )
 
     return ls
+
+
+@pytest.fixture
+def feature_manager():
+    """ Return a feature manager """
+    return FeatureManager()
 
 
 @pytest.fixture

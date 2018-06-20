@@ -63,7 +63,7 @@ class Workspace(object):
                               'uri': doc_uri, 'diagnostics': diagnostics})
 
     def show_message(self, message, msg_type=lsp.MessageType.Info):
-        self._endpoint.notify(lsp.SHOW_MESSAGE, params={
+        self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
                               'type': msg_type, 'message': message})
 
     def source_roots(self, document_path):
