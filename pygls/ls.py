@@ -93,10 +93,10 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
 
     def __getitem__(self, item):
         try:
-            if self._shutdown and item != 'exit':
-                # exit is the only allowed method during shutdown
-                log.debug("Ignoring non-exit method during shutdown: %s", item)
-                raise KeyError
+            # if self._shutdown and item != 'exit':
+            #     # exit is the only allowed method during shutdown
+            #     log.debug("Ignoring non-exit method during shutdown: %s", item)
+            #     raise KeyError
 
             try:
                 # Look at base features
@@ -146,15 +146,15 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         # Convert to dict for json serialization
         sc_dict = _utils.to_dict(server_capabilities)
 
-        log.info('Server capabilities: %s', sc_dict)
+        log.info(f'Server capabilities: {sc_dict}')
 
         return sc_dict
 
     def initialize(self, processId=None, rootUri=None, rootPath=None,
                    initializationOptions=None, **_kwargs):
 
-        log.debug('Language server initialized with %s %s %s %s',
-                  processId, rootUri, rootPath, initializationOptions)
+        log.debug(
+            f'Language server initialized with {processId} {rootUri} {rootPath} {initializationOptions}')
 
         if rootUri is None:
             rootUri = uris.from_fs_path(
@@ -162,11 +162,11 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
 
         self.workspace = Workspace(rootUri, self._endpoint)
 
-        workspace_folders = _kwargs['workspaceFolders'] or []
+        workspace_folders = _kwargs.get('workspaceFolders', [])
         for folder in workspace_folders:
             self.workspace_folders[folder['uri']] = folder
 
-        client_capabilities = _kwargs['capabilities']
+        client_capabilities = _kwargs.get('capabilities', {})
 
         return {'capabilities': self._capabilities(client_capabilities)}
 
@@ -231,11 +231,12 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
             except:
                 pass
 
-    def get_configuration(self, params):
-        '''
-        Get configuration for a specific file
-        Figuring out how to get result from request future
-        '''
-        # rf = self._endpoint.request(lsp.CONFIGURATION, params)
-        # return rf.result()
-        pass
+    def get_configuration(self, params, callback):
+        def configuration(future):
+            return callback(future.result())
+
+        result = self._endpoint.request(
+            lsp.CONFIGURATION, params).result(timeout=5)
+        future.add_done_callback(configuration)
+
+        return

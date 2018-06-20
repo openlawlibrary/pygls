@@ -52,7 +52,7 @@ def find_parents(root, path, names):
         return []
 
     if not os.path.commonprefix((root, path)):
-        log.warning("Path %s not in %s", path, root)
+        log.warning(f"Path {path} not in {root}")
         return []
 
     # Split the relative by directory, generate all the parent directories, then check each of them.

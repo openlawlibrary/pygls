@@ -4,15 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
-
 import * as net from 'net';
 
 
 import { workspace, ExtensionContext, WorkspaceConfiguration, Disposable } from 'vscode';
 import {
-  LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, CancellationToken, Middleware,
-  DidChangeConfigurationNotification, ConfigurationParams, DidChangeWorkspaceFoldersNotification, DidChangeWorkspaceFoldersParams
+  LanguageClient, LanguageClientOptions, ServerOptions, CancellationToken, Middleware,
+  DidChangeConfigurationNotification, ConfigurationParams
 } from 'vscode-languageclient';
 
 // The example settings
@@ -70,15 +68,11 @@ namespace Configuration {
   }
 }
 
-
-export function activate(context: ExtensionContext) {
-
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
+function startLangServerTCP(addr: number, documentSelector: string[]): LanguageClient {
   const serverOptions: ServerOptions = function () {
     return new Promise((resolve, reject) => {
       var client = new net.Socket();
-      client.connect(2087, "127.0.0.1", function () {
+      client.connect(addr, "127.0.0.1", function () {
         resolve({
           reader: client,
           writer: client
@@ -94,25 +88,66 @@ export function activate(context: ExtensionContext) {
   };
 
   // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
+  const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'plaintext' }],
+    documentSelector: documentSelector,
     synchronize: {
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
       // In the past this told the client to actively synchronize settings. Since the
       // client now supports 'getConfiguration' requests this active synchronization is not
       // necessary anymore.
-      // configurationSection: [ 'lspMultiRootSample' ]
+      configurationSection: ['pygls']
     },
     middleware: middleware
   }
 
-  // Create the language client and start the client.
-  client = new LanguageClient('languageServerExample', 'Language Server Example', serverOptions, clientOptions);
+  return new LanguageClient(`tcp lang server (port ${addr})`, serverOptions, clientOptions);
+}
 
-  // Start the client. This will also launch the server
-  client.start();
+function startLangServer(command: string, args: string[], cwd: string, documentSelector: string[]): LanguageClient {
+  const serverOptions: ServerOptions = {
+    command,
+    args,
+    options: {
+      cwd: cwd
+    }
+  };
+
+  let middleware: Middleware = {
+    workspace: {
+      configuration: Configuration.computeConfiguration
+    }
+  };
+
+  // Options to control the language client
+  const clientOptions: LanguageClientOptions = {
+    // Register the server for plain text documents
+    documentSelector: documentSelector,
+    synchronize: {
+      // Notify the server about file changes to '.clientrc files contain in the workspace
+      fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
+      // In the past this told the client to actively synchronize settings. Since the
+      // client now supports 'getConfiguration' requests this active synchronization is not
+      // necessary anymore.
+      configurationSection: ['pygls']
+    },
+    middleware: middleware
+  }
+
+  return new LanguageClient(command, serverOptions, clientOptions);
+}
+
+
+export function activate(context: ExtensionContext) {
+  // let python = "C:\\Users\\Daniel Elero\\Envs\\pygls\\Scripts\\python.exe";
+
+  // client = startLangServer(python, ["-m", "pygls"], "C:\\code\\openlawlibrary\\pygls", ["plaintext"]);
+  // context.subscriptions.push(client.start());
+  // For TCP server needs to be started seperately
+
+  client = startLangServerTCP(2087, ["plaintext"])
+  context.subscriptions.push(client.start());
 }
 
 export function deactivate(): Thenable<void> {

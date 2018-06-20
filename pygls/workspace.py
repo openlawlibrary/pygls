@@ -170,3 +170,7 @@ class Document(object):
         m_end = RE_END_WORD.findall(end)
 
         return m_start[0] + m_end[-1]
+
+    def sys_path(self):
+        # Copy our extra sys path
+        return list(self._extra_sys_path)

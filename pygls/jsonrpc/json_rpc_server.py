@@ -53,9 +53,10 @@ class JsonRPCServer(object):
             log.info('Shutting down')
             server.server_close()
 
-    def start_io(self):
-        log.info('Starting %s IO language server', handler_class.__name__)
-        self.setup_streams(sys.stdin.buffer, sys.stdout.buffer)
+    def start_io(self, stdin=None, stdout=None):
+        log.info('Starting %s IO language server', JsonRPCServer.__name__)
+        self.setup_streams(stdin or sys.stdin.buffer,
+                           stdout or sys.stdout.buffer)
         self.start()
 
     def start(self):
