@@ -11,43 +11,43 @@ SHUTDOWN = 'shutdown'
 EXIT = 'exit'
 
 # Window
-SHOW_MESSAGE = 'window/showMessage'
-SHOW_MESSAGE_REQUEST = 'window/showMessageRequest'
-LOG_MESSAGE = 'window/logMessage'
+WINDOW_SHOW_MESSAGE = 'window/showMessage'
+WINDOW_SHOW_MESSAGE_REQUEST = 'window/showMessageRequest'
+WINDOW_LOG_MESSAGE = 'window/logMessage'
 
 # Telemetry
 TELEMETRY_EVENT = 'telemetry/event'
 
 # Client
-REGISTER_CAPABILITY = 'client/registerCapability'
-UNREGISTER_CAPABILITY = 'client/unregisterCapability'
+CLIENT_REGISTER_CAPABILITY = 'client/registerCapability'
+CLIENT_UNREGISTER_CAPABILITY = 'client/unregisterCapability'
 
 # Workspace
 WORKSPACE_FOLDERS = 'workspace/folders'
-DID_CHANGE_WORKSPACE_FOLDERS = 'workspace/didChangeWorkspaceFolders'
-DID_CHANGE_CONFIGURATION = 'workspace/didChangeConfiguration'
-CONFIGURATION = 'workspace/configuration'
-DID_CHANGE_WATCHED_FILES = 'workspace/didChangeWatchedFiles'
-SYMBOL = 'workspace/symbol'
-EXECUTE_COMMAND = 'workspace/executeCommand'
-APPLY_EDIT = 'workspace/applyEdit'
+WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS = 'workspace/didChangeWorkspaceFolders'
+WORKSPACE_DID_CHANGE_CONFIGURATION = 'workspace/didChangeConfiguration'
+WORKSPACE_CONFIGURATION = 'workspace/configuration'
+WORKSPACE_DID_CHANGE_WATCHED_FILES = 'workspace/didChangeWatchedFiles'
+WORKSPACE_SYMBOL = 'workspace/symbol'
+WORKSPACE_EXECUTE_COMMAND = 'workspace/executeCommand'
+WORKSPACE_APPLY_EDIT = 'workspace/applyEdit'
 
 REGISTER_COMMAND = 'registerCommand'
 
 # Text Synchronization
-TEXT_DOC_DID_OPEN = 'textDocument/didOpen'
-TEXT_DOC_DID_CHANGE = 'textDocument/didChange'
-TEXT_DOC_WILL_SAVE = 'textDocument/willSave'
-TEXT_DOC_WILL_SAVE_WAIT_UNTIL = 'textDocument/willSaveWaitUntil'
-TEXT_DOC_DID_SAVE = 'textDocument/didSave'
-TEXT_DOC_DID_CLOSE = 'textDocument/didClose'
+TEXT_DOCUMENT_DID_OPEN = 'textDocument/didOpen'
+TEXT_DOCUMENT_DID_CHANGE = 'textDocument/didChange'
+TEXT_DOCUMENT_WILL_SAVE = 'textDocument/willSave'
+TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL = 'textDocument/willSaveWaitUntil'
+TEXT_DOCUMENT_DID_SAVE = 'textDocument/didSave'
+TEXT_DOCUMENT_DID_CLOSE = 'textDocument/didClose'
 
 # Diagnostics
-TEXT_DOC_PUBLISH_DIAGNOSTICS = 'textDocument/publishDiagnostics'
+TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS = 'textDocument/publishDiagnostics'
 
 # Language Features
 COMPLETION = 'textDocument/completion'
-COMPLETION_RESOLVE = 'completionItem/resolve'
+COMPLETION_ITEM_RESOLVE = 'completionItem/resolve'
 HOVER = 'textDocument/hover'
 SIGNATURE_HELP = 'textDocument/signatureHelp'
 DEFINITION = 'textDocument/definition'
@@ -232,7 +232,7 @@ class ServerCapabilities(object):
         self.referencesProvider = REFERENCES in features
         self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
         self.documentSymbolProvider = DOCUMENT_SYMBOL in features
-        self.workspaceSymbolProvider = SYMBOL in features
+        self.workspaceSymbolProvider = WORKSPACE_SYMBOL in features
         self.codeActionProvider = CODE_ACTION in features
 
         if CODE_LENS in features:

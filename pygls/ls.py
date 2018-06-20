@@ -126,15 +126,15 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         self._base_features[lsp.EXIT] = self.exit
 
         # Workspace
-        self._base_features[lsp.EXECUTE_COMMAND] = self.execute_command
-        self._base_features[lsp.DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_workspace_folders
-        self._base_features[lsp.DID_CHANGE_CONFIGURATION] = self.workspace__did_change_configuration
+        self._base_features[lsp.WORKSPACE_EXECUTE_COMMAND] = self.execute_command
+        self._base_features[lsp.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_workspace_folders
+        self._base_features[lsp.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS] = self.workspace__did_change_configuration
 
         # Text Synchronization
-        self._base_features[lsp.TEXT_DOC_DID_OPEN] = self.text_document__did_open
-        self._base_features[lsp.TEXT_DOC_DID_CHANGE] = self.text_document__did_change
-        self._base_features[lsp.TEXT_DOC_DID_CLOSE] = self.text_document__did_close
-        self._base_features[lsp.TEXT_DOC_DID_SAVE] = self.text_document__did_save
+        self._base_features[lsp.TEXT_DOCUMENT_DID_OPEN] = self.text_document__did_open
+        self._base_features[lsp.TEXT_DOCUMENT_DID_CHANGE] = self.text_document__did_change
+        self._base_features[lsp.TEXT_DOCUMENT_DID_CLOSE] = self.text_document__did_close
+        self._base_features[lsp.TEXT_DOCUMENT_DID_SAVE] = self.text_document__did_save
 
     def _capabilities(self, client_capabilities):
         '''

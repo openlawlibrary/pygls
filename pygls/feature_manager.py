@@ -1,6 +1,23 @@
 from . import lsp
 
 
+class CommandAlreadyRegisteredError(Exception):
+    pass
+
+
+class FeatureAlreadyRegisteredError(Exception):
+    pass
+
+
+class OptionsValidationError(Exception):
+    def __init__(self, errors=None):
+        self.errors = errors or []
+
+    def __repr__(self):
+        opt_errs = '\n-'.join([e for e in self.errors])
+        return f"Missing options: {opt_errs}"
+
+
 class FeatureManager(object):
     '''
     Class for registering user defined features
@@ -46,10 +63,26 @@ class FeatureManager(object):
                            EG: triggerCharacters=['.']
         '''
         def decorator(f):
-            # Register commands separately
+            # Validate options
+            errors = self._validate_options(feature_name, options)
+
+            if len(errors) > 0:
+                raise OptionsValidationError(errors=errors)
+
+            # Register
             if feature_name is lsp.REGISTER_COMMAND:
-                self._commands[options['name']] = f
+                # commands
+                cmd_name = options['name']
+
+                if cmd_name in self._commands:
+                    raise CommandAlreadyRegisteredError()
+
+                self._commands[cmd_name] = f
             else:
+                # lsp features
+                if feature_name in self._features:
+                    raise FeatureAlreadyRegisteredError()
+
                 self._features[feature_name] = f
 
             if options:
@@ -57,3 +90,11 @@ class FeatureManager(object):
 
             return f
         return decorator
+
+    def _validate_options(self, f_name, opts):
+        errors = []
+        if f_name is lsp.REGISTER_COMMAND:
+            if 'name' not in opts:
+                errors.append('name')
+
+        return errors
