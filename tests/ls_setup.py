@@ -1,93 +1,108 @@
 from pygls import lsp
 
+from tests import TRIGGER_CHARS, COMMANDS
+
 
 def setup_ls_features(ls):
 
+    # Workspace
+    @ls.register(lsp.WORKSPACE_SYMBOL)
+    def workspace_symbol():
+        return True
+
     # Language Features
-    @ls.register(lsp.COMPLETION)
+    @ls.register(lsp.COMPLETION, triggerCharacters=TRIGGER_CHARS)
     def completions(ls, textDocument=None, position=None, **_kwargs):
-        return {
-            'textDocument': textDocument,
-            'position': position
-        }
+        return True
 
     @ls.register(lsp.COMPLETION_ITEM_RESOLVE)
     def completion_item_resolve(ls, completionItem=None, **_kwargs):
-        return {
-            'completionItem': completionItem
-        }
+        return True
 
     @ls.register(lsp.HOVER)
     def hover(ls, textDocument=None, position=None, **_kwargs):
-        return {
-            'textDocument': textDocument,
-            'position': position
-        }
+        return True
 
-    @ls.register(lsp.SIGNATURE_HELP)
+    @ls.register(lsp.SIGNATURE_HELP, triggerCharacters=TRIGGER_CHARS)
     def signature_help():
-        pass
+        return True
 
     @ls.register(lsp.DEFINITION)
     def definition():
-        pass
+        return True
 
     @ls.register(lsp.TYPE_DEFINITION)
     def type_definition():
-        pass
+        return True
 
     @ls.register(lsp.IMPLEMENTATION)
     def implementation():
-        pass
+        return True
 
     @ls.register(lsp.REFERENCES)
     def references():
-        pass
+        return True
 
     @ls.register(lsp.DOCUMENT_HIGHLIGHT)
     def document_highlight():
-        pass
+        return True
 
     @ls.register(lsp.DOCUMENT_SYMBOL)
     def document_symbol():
-        pass
+        return True
 
     @ls.register(lsp.CODE_ACTION)
     def code_action():
-        pass
+        return True
 
     @ls.register(lsp.CODE_LENS)
     def code_lens():
-        pass
+        return True
 
     @ls.register(lsp.CODE_LENS_RESOLVE)
     def code_lens_resolve():
-        pass
+        return True
 
     @ls.register(lsp.DOCUMENT_LINK)
     def document_link():
-        pass
+        return True
 
     @ls.register(lsp.DOCUMENT_LINK_RESOLVE)
     def document_link_resolve():
-        pass
+        return True
 
     @ls.register(lsp.COLOR_PRESENTATION)
     def color_presentation():
-        pass
+        return True
 
     @ls.register(lsp.FORMATTING)
     def formatting():
-        pass
+        return True
 
     @ls.register(lsp.RANGE_FORMATTING)
     def range_formatting():
-        pass
+        return True
 
     @ls.register(lsp.ON_TYPE_FORMATTING)
     def on_type_formatting():
-        pass
+        return True
 
     @ls.register(lsp.RENAME)
     def rename():
-        pass
+        return True
+
+    # Commands
+
+    @ls.register(lsp.REGISTER_COMMAND, name=COMMANDS[0])
+    def command1(ls, args):
+        try:
+            x = args[0]
+            y = args[1]
+
+            return x + y
+        except:
+            raise Exception("Invalid arguments")
+
+    @ls.register(lsp.REGISTER_COMMAND, name=COMMANDS[1])
+    def command2(ls):
+        return True
