@@ -265,6 +265,8 @@ class ServerCapabilities(object):
         )
 
         self.workspace = {
-            'workspaceFolders': True,
-            'changeNotifications': True
+            'workspaceFolders': {
+                'supported': True,
+                'changeNotifications': True
+            }
         }
