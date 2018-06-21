@@ -41,6 +41,11 @@
           "scope": "application",
           "type": "string",
           "description": "Custom configApp"
+        },
+        "pygls.firstCapital": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": "True"
         }
       }
     }

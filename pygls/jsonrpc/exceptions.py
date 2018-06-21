@@ -5,7 +5,7 @@ import traceback
 class JsonRpcException(Exception):
 
     def __init__(self, message=None, code=None, data=None):
-        super(JsonRpcException, self).__init__()
+        super().__init__()
         self.message = message or getattr(self.__class__, 'MESSAGE')
         self.code = code or getattr(self.__class__, 'CODE')
         self.data = data
@@ -74,7 +74,8 @@ class JsonRpcInternalError(JsonRpcException):
     def of(cls, exc_info):
         exc_type, exc_value, exc_tb = exc_info
         return cls(
-            message=''.join(traceback.format_exception_only(exc_type, exc_value)).strip(),
+            message=''.join(traceback.format_exception_only(
+                exc_type, exc_value)).strip(),
             data={'traceback': traceback.format_tb(exc_tb)}
         )
 
@@ -88,7 +89,8 @@ class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
         assert _is_server_error_code(code)
-        super(JsonRpcServerError, self).__init__(message=message, code=code, data=data)
+        super().__init__(
+            message=message, code=code, data=data)
 
     @classmethod
     def supports_code(cls, code):

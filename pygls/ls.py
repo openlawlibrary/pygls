@@ -42,7 +42,7 @@ class LSMeta(type):
                     method_name = _utils.to_lsp_name(attr_name)
                     cls[attr_name] = call_user_features(attr_val, method_name)
 
-        return super(LSMeta, self).__new__(
+        return super().__new__(
             self, cls_name, cls_bases, cls)
 
 
@@ -59,7 +59,7 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
     '''
 
     def __init__(self):
-        super(LanguageServer, self).__init__()
+        super().__init__()
 
         self.fm = FeatureManager()
 
