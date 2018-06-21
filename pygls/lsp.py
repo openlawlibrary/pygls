@@ -226,8 +226,8 @@ class ServerCapabilities(object):
         self.definitionProvider = DEFINITION in features
 
         # Additional options
-        self.typeDefinitionProvider = False
-        self.implementationProvider = False
+        # self.typeDefinitionProvider = False
+        # self.implementationProvider = False
 
         self.referencesProvider = REFERENCES in features
         self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
@@ -258,7 +258,7 @@ class ServerCapabilities(object):
                 resolveProvider=DOCUMENT_LINK_RESOLVE in features
             )
 
-        self.colorProvider = False
+        # self.colorProvider = False
 
         self.executeCommandProvider = ExecuteCommandOptions(
             commands=list(commands.keys())
