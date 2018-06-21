@@ -98,8 +98,9 @@ def test_server_capabilities(client_server):
     assert sc.get('documentLinkProvider').get('resolveProvider') is True
     # assert sc.get('colorProvider') is True
     assert sc.get('executeCommandProvider').get('commands') == COMMANDS
-    assert sc.get('workspace').get('changeNotifications') is True
-    assert sc.get('workspace').get('workspaceFolders') is True
+    assert sc.get('workspace').get('workspaceFolders').get('supported') is True
+    assert sc.get('workspace').get('workspaceFolders').get(
+        'changeNotifications') is True
 
 
 def test_feature_is_called(client_server):
