@@ -22,7 +22,7 @@ class _StreamHandlerWrapper(socketserver.StreamRequestHandler, object):
     delegate = None
 
     def setup(self):
-        super(_StreamHandlerWrapper, self).setup()
+        super().setup()
         self.delegate.setup_streams(self.rfile, self.wfile)
 
     def handle(self):

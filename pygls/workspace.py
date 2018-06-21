@@ -59,7 +59,7 @@ class Workspace(object):
         return self._endpoint.request(lsp.M_APPLY_EDIT, {'edit': edit})
 
     def publish_diagnostics(self, doc_uri, diagnostics):
-        self._endpoint.notify(lsp.TEXT_DOC_PUBLISH_DIAGNOSTICS, params={
+        self._endpoint.notify(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params={
                               'uri': doc_uri, 'diagnostics': diagnostics})
 
     def show_message(self, message, msg_type=lsp.MessageType.Info):

@@ -16,6 +16,7 @@ import {
 // The example settings
 interface MultiRootExampleSettings {
   maxNumberOfProblems: number;
+  firstCapital: boolean;
 }
 
 let client: LanguageClient;
@@ -46,7 +47,8 @@ namespace Configuration {
         config = workspace.getConfiguration('pygls');
       }
       result.push({
-        maxNumberOfProblems: config.get('maxNumberOfProblems')
+        maxNumberOfProblems: config.get('maxNumberOfProblems'),
+        firstCapital: config.get('firstCapital')
       });
     }
     return result;
