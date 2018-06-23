@@ -18,7 +18,8 @@ class JsonRpcStreamReader(object):
         """Blocking call to listen for messages on the rfile.
 
         Args:
-            message_consumer (fn): function that is passed each message as it is read off the socket.
+            message_consumer (fn): function that is passed each message
+                as it is read off the socket.
         """
         while not self._rfile.closed:
             request_str = self._read_message()
@@ -29,7 +30,7 @@ class JsonRpcStreamReader(object):
             try:
                 message_consumer(json.loads(request_str.decode('utf-8')))
             except ValueError:
-                log.exception("Failed to parse JSON message %s", request_str)
+                log.exception(f"Failed to parse JSON message {request_str}")
                 continue
 
     def _read_message(self):
@@ -64,7 +65,8 @@ class JsonRpcStreamReader(object):
             try:
                 return int(value)
             except ValueError:
-                raise ValueError("Invalid Content-Length header: {}".format(value))
+                raise ValueError(
+                    "Invalid Content-Length header: {}".format(value))
 
         return None
 
@@ -88,7 +90,8 @@ class JsonRpcStreamWriter(object):
                 body = json.dumps(message, **self._json_dumps_args)
 
                 # Ensure we get the byte length, not the character length
-                content_length = len(body) if isinstance(body, bytes) else len(body.encode('utf-8'))
+                content_length = len(body) if isinstance(
+                    body, bytes) else len(body.encode('utf-8'))
 
                 response = (
                     "Content-Length: {}\r\n"
@@ -99,4 +102,5 @@ class JsonRpcStreamWriter(object):
                 self._wfile.write(response.encode('utf-8'))
                 self._wfile.flush()
             except Exception:  # pylint: disable=broad-except
-                log.exception("Failed to write message to output file %s", message)
+                log.exception(
+                    f"Failed to write message to output file {message}")

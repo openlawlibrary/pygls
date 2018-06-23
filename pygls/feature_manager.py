@@ -1,4 +1,7 @@
+import logging
 from . import lsp
+
+log = logging.getLogger(__name__)
 
 
 class CommandAlreadyRegisteredError(Exception):
@@ -20,7 +23,7 @@ class OptionsValidationError(Exception):
 
 class FeatureManager(object):
     '''
-    Class for registering user defined features
+    Class for registering user defined features.
 
     Attributes:
         _features(dict): Registered features
@@ -62,11 +65,14 @@ class FeatureManager(object):
             options(dict): Options for feature or command
                            EG: triggerCharacters=['.']
         '''
+        log.info(f'Registering {feature_name} with options {options}')
+
         def decorator(f):
             # Validate options
             errors = self._validate_options(feature_name, options)
 
             if len(errors) > 0:
+                log.error(f'Validation errors: {errors}')
                 raise OptionsValidationError(errors=errors)
 
             # Register
@@ -75,12 +81,14 @@ class FeatureManager(object):
                 cmd_name = options['name']
 
                 if cmd_name in self._commands:
+                    log.error(f'Command {cmd_name} already exists.')
                     raise CommandAlreadyRegisteredError()
 
                 self._commands[cmd_name] = f
             else:
                 # lsp features
                 if feature_name in self._features:
+                    log.error(f'Feature {feature_name} already exists.')
                     raise FeatureAlreadyRegisteredError()
 
                 self._features[feature_name] = f

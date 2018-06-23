@@ -2,7 +2,11 @@ import functools
 import inspect
 
 
-def call_user_features(base_func, method_name):
+def call_user_feature(base_func, method_name):
+    '''
+    Wraps generic LSP features and calls user registered
+    feature immediately after it.
+    '''
     @functools.wraps(base_func)
     def decorator(self, *args, **kwargs):
         ret_val = base_func(self, *args, **kwargs)
