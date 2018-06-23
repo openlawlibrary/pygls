@@ -174,10 +174,13 @@ class Document(object):
 
     def offset_at_position(self, position):
         """Return the byte-offset pointed at by the given position."""
-        return position['character'] + len(''.join(self.lines[:position['line']]))
+        return position['character'] + \
+            len(''.join(self.lines[:position['line']]))
 
     def word_at_position(self, position):
-        """Get the word under the cursor returning the start and end positions."""
+        """
+        Get the word under the cursor returning the start and end positions.
+        """
         if position['line'] >= len(self.lines):
             return ''
 
