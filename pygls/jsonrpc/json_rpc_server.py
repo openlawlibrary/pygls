@@ -46,15 +46,15 @@ class JsonRPCServer(object):
 
         server = socketserver.TCPServer((bind_addr, port), wrapper_class)
         try:
-            log.info('Serving %s on (%s, %s)',
-                     JsonRPCServer.__name__, bind_addr, port)
+            log.info(
+                'Serving {JsonRPCServer.__name__} on ({bind_addr}, {port})')
             server.serve_forever()
         finally:
             log.info('Shutting down')
             server.server_close()
 
     def start_io(self, stdin=None, stdout=None):
-        log.info('Starting %s IO language server', JsonRPCServer.__name__)
+        log.info(f'Starting {JsonRPCServer.__name__} IO language server')
         self.setup_streams(stdin or sys.stdin.buffer,
                            stdout or sys.stdout.buffer)
         self.start()

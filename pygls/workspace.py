@@ -20,6 +20,7 @@ class Workspace(object):
         self._endpoint = endpoint
         self._root_uri_scheme = uris.urlparse(self._root_uri)[0]
         self._root_path = uris.to_fs_path(self._root_uri)
+        self._folders = {}
         self._docs = {}
 
     @property
@@ -34,8 +35,23 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
+    @property
+    def folders(self):
+        return self._folders.items()
+
+    def add_folder(self, folder):
+        self._folders[folder.get('uri')] = folder
+
+    def remove_folder(self, folder):
+        try:
+            del self._folders[folder.get('uri')]
+        except:
+            pass
+
     def is_local(self):
-        return (self._root_uri_scheme == '' or self._root_uri_scheme == 'file') and os.path.exists(self._root_path)
+        return (self._root_uri_scheme == '' or
+                self._root_uri_scheme == 'file') and \
+            os.path.exists(self._root_path)
 
     def get_document(self, doc_uri):
         """Return a managed document if-present, else create one pointing at disk.
@@ -82,7 +98,14 @@ class Workspace(object):
 
 class Document(object):
 
-    def __init__(self, uri, source=None, version=None, local=True, extra_sys_path=None):
+    def __init__(
+        self,
+        uri,
+        source=None,
+        version=None,
+        local=True,
+        extra_sys_path=None
+    ):
         self.uri = uri
         self.version = version
         self.path = uris.to_fs_path(uri)

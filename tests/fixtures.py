@@ -24,7 +24,7 @@ def pygls(tmpdir):
     ls = LanguageServer()
     ls.setup_streams(StringIO, StringIO)
 
-    ls.initialize(
+    ls.gf_initialize(
         processId=1,
         rootUri=uris.from_fs_path(str(tmpdir)),
         initializationOptions={}

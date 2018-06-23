@@ -312,7 +312,7 @@ def assert_consumer_error(consumer_mock, exception):
 def await_assertion(condition, timeout=3.0, interval=0.1, exc=None):
     if timeout <= 0:
         raise exc if exc else AssertionError(
-            "Failed to wait for condition %s" % condition)
+            f"Failed to wait for condition {condition}")
     try:
         condition()
     except AssertionError as e:

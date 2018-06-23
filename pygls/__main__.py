@@ -72,12 +72,6 @@ def main():
 
     @ls.register(lsp.TEXT_DOCUMENT_DID_OPEN)
     def tx_doc_did_open(ls, textDocument=None, **_kwargs):
-        # This will be called after generic textDocument/didOpen method
-        # NOTE: Not implemented yet
-        # NOTE: * For easier testing
-        # All registered features should have LS instance as first param,
-        # rather then using LS instance from outside the function
-        #
         pass
 
     @ls.register(lsp.REGISTER_COMMAND, name='custom.Command')
