@@ -55,14 +55,14 @@ def main():
 
     ls = LanguageServer()
 
-    @ls.register(lsp.COMPLETION, triggerCharacters=['.'])
+    @ls.feature(lsp.COMPLETION, triggerCharacters=['.'])
     def completions(ls, textDocument=None, position=None, **_kwargs):
         return {
             'isIncomplete': False,
             'items': [{'label': 'AAA'}, {'label': 'BBB'}]
         }
 
-    @ls.register(lsp.CODE_LENS)
+    @ls.feature(lsp.CODE_LENS)
     def code_lens(ls, textDocument=None, doc_uri=None, **_kwargs):
         def callback(configuration):
             pass
@@ -70,11 +70,11 @@ def main():
         ls.get_configuration({'items': [{'scopeUri': textDocument['uri']}]},
                              callback)
 
-    @ls.register(lsp.TEXT_DOCUMENT_DID_OPEN)
+    @ls.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
     def tx_doc_did_open(ls, textDocument=None, **_kwargs):
         pass
 
-    @ls.register(lsp.REGISTER_COMMAND, name='custom.Command')
+    @ls.command('custom.Command')
     def custom_command(ls, params):
         # Commands are registered with required 'name' argument
         ls.workspace.show_message('Command `custom.Command` executed')

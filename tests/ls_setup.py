@@ -6,94 +6,94 @@ from tests import TRIGGER_CHARS, COMMANDS
 def setup_ls_features(ls):
 
     # Workspace
-    @ls.register(lsp.WORKSPACE_SYMBOL)
+    @ls.feature(lsp.WORKSPACE_SYMBOL)
     def workspace_symbol():
         return True
 
     # Language Features
-    @ls.register(lsp.COMPLETION, triggerCharacters=TRIGGER_CHARS)
+    @ls.feature(lsp.COMPLETION, triggerCharacters=TRIGGER_CHARS)
     def completions(ls, textDocument=None, position=None, **_kwargs):
         return True
 
-    @ls.register(lsp.COMPLETION_ITEM_RESOLVE)
+    @ls.feature(lsp.COMPLETION_ITEM_RESOLVE)
     def completion_item_resolve(ls, completionItem=None, **_kwargs):
         return True
 
-    @ls.register(lsp.HOVER)
+    @ls.feature(lsp.HOVER)
     def hover(ls, textDocument=None, position=None, **_kwargs):
         return True
 
-    @ls.register(lsp.SIGNATURE_HELP, triggerCharacters=TRIGGER_CHARS)
+    @ls.feature(lsp.SIGNATURE_HELP, triggerCharacters=TRIGGER_CHARS)
     def signature_help():
         return True
 
-    @ls.register(lsp.DEFINITION)
+    @ls.feature(lsp.DEFINITION)
     def definition():
         return True
 
-    @ls.register(lsp.TYPE_DEFINITION)
+    @ls.feature(lsp.TYPE_DEFINITION)
     def type_definition():
         return True
 
-    @ls.register(lsp.IMPLEMENTATION)
+    @ls.feature(lsp.IMPLEMENTATION)
     def implementation():
         return True
 
-    @ls.register(lsp.REFERENCES)
+    @ls.feature(lsp.REFERENCES)
     def references():
         return True
 
-    @ls.register(lsp.DOCUMENT_HIGHLIGHT)
+    @ls.feature(lsp.DOCUMENT_HIGHLIGHT)
     def document_highlight():
         return True
 
-    @ls.register(lsp.DOCUMENT_SYMBOL)
+    @ls.feature(lsp.DOCUMENT_SYMBOL)
     def document_symbol():
         return True
 
-    @ls.register(lsp.CODE_ACTION)
+    @ls.feature(lsp.CODE_ACTION)
     def code_action():
         return True
 
-    @ls.register(lsp.CODE_LENS)
+    @ls.feature(lsp.CODE_LENS)
     def code_lens():
         return True
 
-    @ls.register(lsp.CODE_LENS_RESOLVE)
+    @ls.feature(lsp.CODE_LENS_RESOLVE)
     def code_lens_resolve():
         return True
 
-    @ls.register(lsp.DOCUMENT_LINK)
+    @ls.feature(lsp.DOCUMENT_LINK)
     def document_link():
         return True
 
-    @ls.register(lsp.DOCUMENT_LINK_RESOLVE)
+    @ls.feature(lsp.DOCUMENT_LINK_RESOLVE)
     def document_link_resolve():
         return True
 
-    @ls.register(lsp.COLOR_PRESENTATION)
+    @ls.feature(lsp.COLOR_PRESENTATION)
     def color_presentation():
         return True
 
-    @ls.register(lsp.FORMATTING)
+    @ls.feature(lsp.FORMATTING)
     def formatting():
         return True
 
-    @ls.register(lsp.RANGE_FORMATTING)
+    @ls.feature(lsp.RANGE_FORMATTING)
     def range_formatting():
         return True
 
-    @ls.register(lsp.ON_TYPE_FORMATTING)
+    @ls.feature(lsp.ON_TYPE_FORMATTING)
     def on_type_formatting():
         return True
 
-    @ls.register(lsp.RENAME)
+    @ls.feature(lsp.RENAME)
     def rename():
         return True
 
     # Commands
 
-    @ls.register(lsp.REGISTER_COMMAND, name=COMMANDS[0])
+    @ls.command(COMMANDS[0])
     def command1(ls, args):
         try:
             x = args[0]
@@ -103,6 +103,6 @@ def setup_ls_features(ls):
         except:
             raise Exception("Invalid arguments")
 
-    @ls.register(lsp.REGISTER_COMMAND, name=COMMANDS[1])
+    @ls.command(COMMANDS[1])
     def command2(ls):
         return True

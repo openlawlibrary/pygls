@@ -116,7 +116,7 @@ def test_feature_params(client_server):
     client, server = client_server
 
     # Add dummy feature just to test this case
-    @server.register(DUMMY_FEATURE)
+    @server.feature(DUMMY_FEATURE)
     def dummy_feature(param1=None, param2=None, **_kwargs):
         return {
             'param1': param1,
@@ -138,7 +138,7 @@ def test_ls_instance_is_passed_to_user_defined_features(client_server):
     client, server = client_server
 
     # Add dummy feature just to test this case
-    @server.register(DUMMY_FEATURE)
+    @server.feature(DUMMY_FEATURE)
     def dummy_feature(ls, param1=None, param2=None, **_kwargs):
         return id(ls)
 
@@ -153,7 +153,7 @@ def test_users_feature_called_after_same_default_feature(client_server):
 
     is_called = [False]
 
-    @server.register(lsp.TEXT_DOCUMENT_DID_OPEN)
+    @server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
     def tx_doc_did_open(ls, textDocument=None, **_kwargs):
         '''
             Since this is notification, there is no response

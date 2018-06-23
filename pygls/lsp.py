@@ -32,8 +32,6 @@ WORKSPACE_SYMBOL = 'workspace/symbol'
 WORKSPACE_EXECUTE_COMMAND = 'workspace/executeCommand'
 WORKSPACE_APPLY_EDIT = 'workspace/applyEdit'
 
-REGISTER_COMMAND = 'registerCommand'
-
 # Text Synchronization
 TEXT_DOCUMENT_DID_OPEN = 'textDocument/didOpen'
 TEXT_DOCUMENT_DID_CHANGE = 'textDocument/didChange'
