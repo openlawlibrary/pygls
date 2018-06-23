@@ -55,7 +55,8 @@ def find_parents(root, path, names):
         log.warning(f"Path {path} not in {root}")
         return []
 
-    # Split the relative by directory, generate all the parent directories, then check each of them.
+    # Split the relative by directory, generate all the parent directories,
+    # then check each of them.
     # This avoids running a loop that has different base-cases for unix/windows
     # e.g. /a/b and /a/b/c/d/e.py -> ['/a/b', 'c', 'd']
     dirs = [root] + \
@@ -65,7 +66,8 @@ def find_parents(root, path, names):
     while dirs:
         search_dir = os.path.join(*dirs)
         existing = list(
-            filter(os.path.exists, [os.path.join(search_dir, n) for n in names]))
+            filter(os.path.exists,
+                   [os.path.join(search_dir, n) for n in names]))
         if existing:
             return existing
         dirs.pop()
@@ -112,7 +114,8 @@ def format_docstring(contents):
 
 
 def clip_column(column, lines, line_number):
-    # Normalise the position as per the LSP that accepts character positions > line length
+    # Normalise the position as per the LSP
+    # that accepts character positions >line length
     # https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#position
     max_column = len(lines[line_number].rstrip('\r\n')
                      ) if len(lines) > line_number else 0

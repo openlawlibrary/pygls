@@ -1,3 +1,0 @@
-configparser
-future
-json-rpc

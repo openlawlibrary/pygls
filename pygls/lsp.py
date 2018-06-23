@@ -244,12 +244,16 @@ class ServerCapabilities(object):
         self.documentRangeFormattingProvider = RANGE_FORMATTING in features
 
         if FORMATTING in features:
-            self.documentOnTypeFormattingProvider = DocumentOnTypeFormattingOptions(
-                firstTriggerCharacter=feature_options.get(
-                    ON_TYPE_FORMATTING, {}).get('firstTriggerCharacter', ''),
-                moreTriggerCharacter=feature_options.get(
-                    ON_TYPE_FORMATTING, {}).get('moreTriggerCharacter', [])
-            )
+            self.documentOnTypeFormattingProvider = \
+                DocumentOnTypeFormattingOptions(
+                    firstTriggerCharacter=feature_options.get(
+                        ON_TYPE_FORMATTING, {})
+                    .get('firstTriggerCharacter', ''),
+
+                    moreTriggerCharacter=feature_options.get(
+                        ON_TYPE_FORMATTING, {})
+                    .get('moreTriggerCharacter', [])
+                )
 
         self.renameProvider = RENAME in features
 
