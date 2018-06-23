@@ -41,7 +41,7 @@ class MultiRootServer(LanguageServer):
 ls = MultiRootServer()
 
 
-@ls.register(lsp.REGISTER_COMMAND, name='custom.Command')
+@ls.command('custom.Command')
 def custom_command(ls, params):
     '''
         Commands are registered with required `name` argument
@@ -49,7 +49,7 @@ def custom_command(ls, params):
     ls.workspace.show_message('Command `custom.Command` executed')
 
 
-@ls.register(lsp.TEXT_DOCUMENT_DID_OPEN)
+@ls.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
 def doc_did_open(ls, textDocument):
     '''
         Validate document

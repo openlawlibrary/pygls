@@ -4,7 +4,7 @@ from pygls import lsp
 ls = LanguageServer()
 
 
-@ls.register(lsp.COMPLETION, triggerCharacters=['.'])
+@ls.feature(lsp.COMPLETION, triggerCharacters=['.'])
 def completions(textDocument=None, position=None, **_kwargs):
     return {
         'isIncomplete': False,
@@ -12,7 +12,7 @@ def completions(textDocument=None, position=None, **_kwargs):
     }
 
 
-@ls.register(lsp.CODE_LENS)
+@ls.feature(lsp.CODE_LENS)
 def lens(doc_uri=None, **_kwargs):
     pass
 

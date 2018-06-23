@@ -93,17 +93,26 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         '''
         return self._generic_features
 
-    def register(self, feature_name, **options):
+    def feature(self, feature_name, **options):
         '''
-        Registers new LSP feature (delegating to FeatureManager).
+        Registers a LSP feature (delegating to FeatureManager).
 
         Args:
             feature_name(str): Name of the feature to register
-                NOTE: All possible features are listed in lsp module
+                NOTE: All possible LSP features are listed in lsp module
             options(dict): Options for registered feature
                 E.G. triggerCharacters=['.']
         '''
-        return self.fm.register(feature_name, **options)
+        return self.fm.feature(feature_name, **options)
+
+    def command(self, command_name):
+        '''
+        Registers new command (delegating to FeatureManager).
+
+        Args:
+            command_name(str): Name of the command to register
+        '''
+        return self.fm.command(command_name)
 
     def __getitem__(self, item):
         '''
@@ -132,7 +141,7 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
                 '''
                 If registered feature contains `ls` (LanguageServer) instance
                 as first parameter, it will be passed.
-                Although `ls` instance exists in outer scope (@ls.register),
+                Although `ls` instance exists in outer scope (@ls.feature),
                 this will allow easier unit testing.
                 '''
                 args = inspect.getargspec(method)[0]

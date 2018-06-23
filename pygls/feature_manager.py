@@ -56,53 +56,51 @@ class FeatureManager(object):
     def commands(self):
         return self._commands
 
-    def register(self, feature_name, **options):
+    def feature(self, feature_name, **options):
         '''
-        Decorator used to register user defined features
+        Decorator used to register LSP features
         Params:
-            feature_name(str): Name of the LSP feature or command
-                               EG: 'textDocument/completions'
-            options(dict): Options for feature or command
-                           EG: triggerCharacters=['.']
+            feature_name(str): Name of the LSP feature
+            options(dict): Feature options
+                           E.G. triggerCharacters=['.']
         '''
-        log.info(f'Registering {feature_name} with options {options}')
-
         def decorator(f):
-            # Validate options
-            errors = self._validate_options(feature_name, options)
+            # Add feature if not exists
+            if feature_name in self._features:
+                log.error(f'Feature {feature_name} already exists.')
+                raise FeatureAlreadyRegisteredError()
 
-            if len(errors) > 0:
-                log.error(f'Validation errors: {errors}')
-                raise OptionsValidationError(errors=errors)
-
-            # Register
-            if feature_name is lsp.REGISTER_COMMAND:
-                # commands
-                cmd_name = options['name']
-
-                if cmd_name in self._commands:
-                    log.error(f'Command {cmd_name} already exists.')
-                    raise CommandAlreadyRegisteredError()
-
-                self._commands[cmd_name] = f
-            else:
-                # lsp features
-                if feature_name in self._features:
-                    log.error(f'Feature {feature_name} already exists.')
-                    raise FeatureAlreadyRegisteredError()
-
-                self._features[feature_name] = f
+            self._features[feature_name] = f
 
             if options:
                 self._feature_options[feature_name] = options
 
+            log.info(f'Registered {feature_name} with options {options}')
+
             return f
         return decorator
 
-    def _validate_options(self, f_name, opts):
-        errors = []
-        if f_name is lsp.REGISTER_COMMAND:
-            if 'name' not in opts:
-                errors.append('name')
+    def command(self, command_name):
+        '''
+        Decorator used to register commands
+        Params:
+            command_name(str): Name of the command
+        '''
+        def decorator(f):
+            # Validate
+            if command_name.isspace():
+                log.error(f'Missing command name.')
+                raise OptionsValidationError('Command name is required.')
 
-        return errors
+            # Add if not exists
+            if command_name in self._commands:
+                log.error(f'Command {command_name} already exists.')
+                raise CommandAlreadyRegisteredError()
+
+            self._commands[command_name] = f
+
+            log.info(f'Command {command_name} is successfully registered.')
+
+            return f
+
+        return decorator
