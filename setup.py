@@ -17,7 +17,8 @@ print('packages:', packages)
 package_root_dir = os.path.abspath(os.path.dirname(__file__))
 
 tests_require = [
-    "pytest==3.5.0",
+    "pytest==3.6.1",
+    "mock==2.0.0"
 ]
 
 # pip install pygls
@@ -35,12 +36,10 @@ setup(
     packages=packages,
     include_package_data=True,
     data_files=[
-        ('Lib/site-packages/pygls', ['./CHANGELOG.md', './README.md', ])
+        ('lib/site-packages/pygls', ['./CHANGELOG.md', './README.md', ])
     ],
     zip_safe=False,
-    install_requires=[
-        "semver==2.8.0",
-    ],
+    install_requires=[],
     extras_require={
         'test': tests_require,
     },
