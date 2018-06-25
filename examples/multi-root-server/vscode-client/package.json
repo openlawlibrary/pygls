@@ -1,11 +1,11 @@
 {
-  "name": "vscode-client",
-  "description": "VSCode extension for running multiple language servers",
-  "author": "Sourcegraph",
-  "repository": "https://github.com/Microsoft/vscode-languageserver-node",
+  "name": "multi-root-client",
+  "description": "Multi root extension client",
+  "author": "Open Law Library",
+  "repository": "https://github.com/openlawlibrary/pygls",
   "license": "MIT",
   "version": "0.0.1",
-  "publisher": "sqs",
+  "publisher": "open-law-library",
   "engines": {
     "vscode": "^1.23.0"
   },
@@ -23,7 +23,7 @@
       }
     ],
     "configuration": {
-      "title": "Python Language Server Configuration",
+      "title": "pygls configuration",
       "type": "object",
       "properties": {
         "pygls.maxNumberOfProblems": {
