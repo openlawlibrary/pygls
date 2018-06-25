@@ -82,6 +82,10 @@ class Workspace(object):
         self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
                               'type': msg_type, 'message': message})
 
+    def show_message_log(self, message, msg_type=lsp.MessageType.Log):
+        self._endpoint.notify(lsp.WINDOW_LOG_MESSAGE, params={
+                              'type': msg_type, 'message': message})
+
     def source_roots(self, document_path):
         """Return the source roots for the given document."""
         files = _utils.find_parents(
