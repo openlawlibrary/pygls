@@ -2,30 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PYGLS",
-            "module": "pygls",
+            "name": "SimpleJsonServer",
             "type": "python",
             "pythonPath": "${config:python.pythonPath}",
             "request": "launch",
             "stopOnEntry": false,
             "console": "none",
-            "program": "${workspaceFolder}",
-            "args": [
-                "--tcp"
-            ],
-            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/examples/simple-json-server/server.py",
             "debugOptions": [
                 "RedirectOutput"
             ]
         },
         {
-            "name": "RunExample",
+            "name": "MultiRootServer",
             "type": "python",
             "pythonPath": "${config:python.pythonPath}",
             "request": "launch",
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "console": "none",
-            "program": "${file}"
+            "program": "${workspaceFolder}/examples/multi-root-server/server.py",
+            "debugOptions": [
+                "RedirectOutput"
+            ]
         }
     ]
 }

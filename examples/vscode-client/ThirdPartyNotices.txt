@@ -1,1 +1,0 @@
-Please see ThirdPartyNotices.txt (https://github.com/openlawlibrary/pygls/blob/danixeee/laying-the-foundation/ThirdPartyNotices.txt) at the project root.
