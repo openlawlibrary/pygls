@@ -37,7 +37,10 @@ setup(
     include_package_data=True,
     data_files=[
         ('lib/site-packages/pygls', [
-            './CHANGELOG.md', './LICENSE.txt', './README.md', 'ThirdPartyNotices.txt'
+            './CHANGELOG.md',
+            './LICENSE.txt',
+            './README.md',
+            'ThirdPartyNotices.txt'
         ])
     ],
     zip_safe=False,
