@@ -10,7 +10,7 @@ This folder contains various examples of pygls language server:
 ## Debug examples
 
 1. Add `python.pythonPath` to your workspace settings file
-2. From this directory, run `python install_pygls.py`
+2. From `examples` directory, run `python install_pygls.py`
 3. Open debug view (`ctrl + shift + D`), choose example from dropdown and press F5
 4. Run `npm install` in vscode-client directory
 5. Open vscode-client in new vs code instance

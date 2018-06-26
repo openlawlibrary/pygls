@@ -7,16 +7,13 @@ class MultiRootServer(LanguageServer):
     def __init__(self):
         super().__init__()
 
-    def text_is_valid(self, text='', first_capital=True):
+    def text_is_valid(self, text='', max_text_len=10):
         '''
-            Checks if first letter is capital or not
+            Checks length of the text. Default is 10.
         '''
-        if len(text) > 0 and first_capital:
-            if text[0].isupper():
-                return True
+        diagnostics = []
 
-            diagnostics = []
-
+        if len(text) > max_text_len:
             diagnostics.append({
                 'range':
                     {
@@ -26,16 +23,14 @@ class MultiRootServer(LanguageServer):
                         },
                         'end': {
                             'line': 0,
-                            'character': 1
+                            'character': max_text_len
                         }
                     },
-                'message': "First letter must be capital",
+                'message': f"Max number of characters is {max_text_len}",
                 'severity': lsp.DiagnosticSeverity.Error
             })
 
-            return False, diagnostics
-        else:
-            return True, None
+        return diagnostics
 
 
 ls = MultiRootServer()
@@ -49,8 +44,8 @@ def custom_command(ls, params):
     ls.workspace.show_message('Command `custom.Command` executed')
 
 
-@ls.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
-def doc_did_open(ls, textDocument):
+@ls.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
+def doc_did_change(ls, contentChanges=None, textDocument=None, **_kwargs):
     '''
         Validate document
     '''
@@ -58,13 +53,12 @@ def doc_did_open(ls, textDocument):
     doc = ls.workspace.get_document(textDocument['uri'])
 
     def callback(config):
-        first_capital = config[0].get('firstCapital', True)
+        max_text_len = config[0].get('maxTextLength', 10)
 
-        is_valid, diagnostics = ls.text_is_valid(doc.source, first_capital)
+        diagnostics = ls.text_is_valid(doc.source, max_text_len)
 
-        if not is_valid:
-            ls.workspace.publish_diagnostics(
-                doc.uri, diagnostics)
+        ls.workspace.publish_diagnostics(
+            doc.uri, diagnostics)
 
     ls.get_configuration({'items': [{'scopeUri': doc.uri}]},
                          callback)

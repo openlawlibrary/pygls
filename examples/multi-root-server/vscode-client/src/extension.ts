@@ -16,7 +16,7 @@ import {
 // The example settings
 interface MultiRootExampleSettings {
   maxNumberOfProblems: number;
-  firstCapital: boolean;
+  maxTextLength: boolean;
 }
 
 let client: LanguageClient;
@@ -48,7 +48,7 @@ namespace Configuration {
       }
       result.push({
         maxNumberOfProblems: config.get('maxNumberOfProblems'),
-        firstCapital: config.get('firstCapital')
+        maxTextLength: config.get('maxTextLength')
       });
     }
     return result;
@@ -146,7 +146,7 @@ export function activate(context: ExtensionContext) {
 
   // client = startLangServer(python, ["-m", "pygls"], "C:\\code\\openlawlibrary\\pygls", ["plaintext"]);
   // context.subscriptions.push(client.start());
-  // For TCP server needs to be started seperately
+  // For TCP server needs to be started separately
 
   client = startLangServerTCP(2087, ["plaintext"])
   context.subscriptions.push(client.start());
