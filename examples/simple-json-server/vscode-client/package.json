@@ -3,7 +3,7 @@
   "description": "Simple json extension client",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
-  "license": "MIT",
+  "license": "All rights reserved",
   "version": "0.0.1",
   "publisher": "open-law-library",
   "engines": {

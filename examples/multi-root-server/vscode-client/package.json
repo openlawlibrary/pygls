@@ -3,7 +3,7 @@
   "description": "Multi root extension client",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
-  "license": "MIT",
+  "license": "All rights reserved",
   "version": "0.0.1",
   "publisher": "open-law-library",
   "engines": {
@@ -42,10 +42,10 @@
           "type": "string",
           "description": "Custom configApp"
         },
-        "pygls.firstCapital": {
+        "pygls.maxTextLength": {
           "scope": "resource",
-          "type": "boolean",
-          "default": "True"
+          "type": "integer",
+          "default": 10
         }
       }
     }
