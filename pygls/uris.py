@@ -1,4 +1,8 @@
-# Copyright 2017 Palantir Technologies, Inc.
+##########################################################################
+# Original work Copyright 2017 Palantir Technologies, Inc.               #
+# Original work licensed under the MIT License.                          #
+# See ThirdPartyNotices.txt in the project root for license information. #
+##########################################################################
 """A collection of URI utilities with logic built on the VSCode URI library.
 
 https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef13bb9/lib/index.ts
@@ -111,7 +115,7 @@ def _normalize_win_path(path):
     netloc = ''
 
     # normalize to fwd-slashes on windows,
-    # on other systems bwd-slaches are valid
+    # on other systems bwd-slashes are valid
     # filename character, eg /f\oo/ba\r.txt
     if IS_WIN:
         path = path.replace('\\', '/')

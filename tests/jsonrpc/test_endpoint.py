@@ -1,5 +1,8 @@
-# Copyright 2018 Palantir Technologies, Inc.
-# pylint: disable=redefined-outer-name
+##########################################################################
+# Original work Copyright 2018 Palantir Technologies, Inc.               #
+# Original work licensed under the MIT License.                          #
+# See ThirdPartyNotices.txt in the project root for license information. #
+##########################################################################
 import time
 import mock
 import pytest

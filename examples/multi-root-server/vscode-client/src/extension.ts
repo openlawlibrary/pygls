@@ -1,7 +1,9 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
+/* -------------------------------------------------------------------------
+ * Original work Copyright (c) Microsoft Corporation. All rights reserved.
+ * Original work licensed under the MIT License.
+ * See ThirdPartyNotices.txt in the project root for license information.
+ * All modifications Copyright (c) Open Law Library. All rights reserved.
+ * ----------------------------------------------------------------------- */
 'use strict';
 
 import * as net from 'net';

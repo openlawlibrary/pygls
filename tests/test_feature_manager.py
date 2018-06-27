@@ -1,3 +1,7 @@
+##########################################################################
+# Copyright (c) Open Law Library. All rights reserved.                   #
+# See ThirdPartyNotices.txt in the project root for license information. #
+##########################################################################
 import pytest
 from pygls import lsp
 from pygls.feature_manager import OptionsValidationError, \
