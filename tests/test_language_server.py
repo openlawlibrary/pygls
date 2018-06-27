@@ -1,4 +1,7 @@
-# Copyright 2017 Palantir Technologies, Inc.
+##########################################################################
+# Copyright (c) Open Law Library. All rights reserved.                   #
+# See ThirdPartyNotices.txt in the project root for license information. #
+##########################################################################
 import os
 from threading import Thread
 import pytest

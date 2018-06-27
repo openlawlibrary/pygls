@@ -1,4 +1,9 @@
-# Copyright 2017 Palantir Technologies, Inc.
+##########################################################################
+# Original work Copyright 2018 Palantir Technologies, Inc.               #
+# Original work licensed under the MIT License.                          #
+# See ThirdPartyNotices.txt in the project root for license information. #
+# All modifications Copyright (c) Open Law Library. All rights reserved. #
+##########################################################################
 from tests.fixtures import DOC_URI, DOC, doc
 from pygls.workspace import Document
 
@@ -28,7 +33,9 @@ def test_offset_at_position(doc):
 
 
 def test_word_at_position(doc):
-    """ Return the position under the cursor (or last in line if past the end) """
+    """
+    Return the position under the cursor (or last in line if past the end)
+    """
     # import sys
     assert doc.word_at_position({'line': 0, 'character': 8}) == 'sys'
     # Past end of import sys
