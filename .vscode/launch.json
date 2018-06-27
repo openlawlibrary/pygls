@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SimpleJsonServer",
+            "type": "python",
+            "pythonPath": "${config:python.pythonPath}",
+            "request": "launch",
+            "stopOnEntry": false,
+            "console": "none",
+            "program": "${workspaceFolder}/examples/simple-json-server/server.py",
+            "debugOptions": [
+                "RedirectOutput"
+            ]
+        },
+        {
+            "name": "MultiRootServer",
+            "type": "python",
+            "pythonPath": "${config:python.pythonPath}",
+            "request": "launch",
+            "stopOnEntry": false,
+            "console": "none",
+            "program": "${workspaceFolder}/examples/multi-root-server/server.py",
+            "debugOptions": [
+                "RedirectOutput"
+            ]
+        }
+    ]
+}

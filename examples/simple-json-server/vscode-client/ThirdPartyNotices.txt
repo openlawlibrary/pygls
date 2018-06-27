@@ -1,0 +1,1 @@
+Please see ThirdPartyNotices.txt (https://github.com/openlawlibrary/pygls/blob/master/ThirdPartyNotices.txt) at the project root.
