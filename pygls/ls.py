@@ -182,12 +182,9 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         '''
         server_capabilities = lsp.ServerCapabilities(self)
 
-        # Convert to dict for json serialization
-        sc_dict = _utils.to_dict(server_capabilities)
+        log.info(f'Server capabilities: {server_capabilities}')
 
-        log.info(f'Server capabilities: {sc_dict}')
-
-        return sc_dict
+        return server_capabilities
 
     def gf_initialize(
             self,
