@@ -277,3 +277,93 @@ class ServerCapabilities(object):
                 'changeNotifications': True
             }
         }
+
+    def __repr__(self):
+        return f'{type(self).__name__}( {self.__dict__} )'
+
+
+class Position:
+    """Zero-based line and character positions intended to work with VS Code.
+        See [1] for details.
+        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Position
+    """
+
+    def __init__(self, line=0, character=0):
+        self.line = line
+        self.character = character
+
+    def __eq__(self, other):
+        if self.line == other.line and self.character == other.character:
+            return True
+        return False
+
+    def __ge__(self, other):
+        line_gt = self.line > other.line
+
+        if line_gt:
+            return line_gt
+
+        if self.line == other.line:
+            return self.character >= other.character
+
+        return False
+
+    def __gt__(self, other):
+        line_gt = self.line > other.line
+
+        if line_gt:
+            return line_gt
+
+        if self.line == other.line:
+            return self.character > other.character
+
+        return False
+
+    def __le__(self, other):
+        line_lt = self.line < other.line
+
+        if line_lt:
+            return line_lt
+
+        if self.line == other.line:
+            return self.character <= other.character
+
+        return False
+
+    def __lt__(self, other):
+        line_lt = self.line < other.line
+
+        if line_lt:
+            return line_lt
+
+        if self.line == other.line:
+            return self.character < other.character
+
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        return '{}:{}'.format(self.line, self.character)
+
+
+class Range:
+    """Provides an object to be converted to a VS Code Range object for a given
+       document. See [1] for details.
+       [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Range
+    """
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+
+class TextEdit:
+    """Provides a VS Code compatible TextEdit object. See [1] for details.
+       [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#TextEdit
+    """
+
+    def __init__(self, range, newText):
+        self.range = range
+        self.newText = newText
