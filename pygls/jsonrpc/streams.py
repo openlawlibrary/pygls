@@ -83,6 +83,10 @@ class JsonRpcStreamWriter(object):
         self._wfile_lock = threading.Lock()
         self._json_dumps_args = json_dumps_args
 
+        #  Set default serializer for json.dumps if not passed
+        if 'default' not in self._json_dumps_args:
+            self._json_dumps_args['default'] = lambda o: o.__dict__
+
     def close(self):
         with self._wfile_lock:
             self._wfile.close()
