@@ -367,3 +367,51 @@ class TextEdit:
     def __init__(self, range, newText):
         self.range = range
         self.newText = newText
+
+
+class Location:
+    """Provides a VS Code compatible Diagnostic object. See [1] for details.
+        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Location
+    """
+
+    def __init__(self, uri, range):
+        self.uri = uri
+        self.range = range
+
+
+class DiagnosticRelatedInformation:
+    """Provides a VS Code compatible Diagnostic object. See [1] for details.
+        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#DiagnosticRelatedInformation
+    """
+
+    def __init__(self, location, message):
+        self.location = location
+        self.message = message
+
+
+class Diagnostic:
+    """Provides a VS Code compatible Diagnostic object. See [1] for details.
+        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Diagnostic
+    """
+
+    def __init__(
+        self,
+        range,
+        message,
+        severity=DiagnosticSeverity.Error,
+        code=None,
+        source=None,
+        relatedInformation=None
+    ):
+        self.range = range
+        self.message = message
+        self.severity = severity
+        self.code = code
+        self.source = source
+        self.relatedInformation = relatedInformation
+
+
+class PublishDiagnosticsParams():
+    def __init__(self, uri, diagnostics):
+        self.uri = uri
+        self.diagnostics = diagnostics
