@@ -97,17 +97,17 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         '''
         return self._generic_features
 
-    def feature(self, feature_name, **options):
+    def feature(self, *feature_names, **options):
         '''
-        Registers a LSP feature (delegating to FeatureManager).
+        Registers one or more LSP features (delegating to FeatureManager).
 
         Args:
-            feature_name(str): Name of the feature to register
+            feature_names(tuple): One or more features to register
                 NOTE: All possible LSP features are listed in lsp module
             options(dict): Options for registered feature
                 E.G. triggerCharacters=['.']
         '''
-        return self.fm.feature(feature_name, **options)
+        return self.fm.feature(*feature_names, **options)
 
     def command(self, command_name):
         '''

@@ -60,21 +60,22 @@ class FeatureManager(object):
     def commands(self):
         return self._commands
 
-    def feature(self, feature_name, **options):
+    def feature(self, *feature_names, **options):
         '''
         Decorator used to register LSP features
         Params:
-            feature_name(str): Name of the LSP feature
+            feature_name(tuple): Name of the LSP feature(s)
             options(dict): Feature options
                            E.G. triggerCharacters=['.']
         '''
         def decorator(f):
             # Add feature if not exists
-            if feature_name in self._features:
-                log.error(f'Feature {feature_name} already exists.')
-                raise FeatureAlreadyRegisteredError()
+            for feature_name in feature_names:
+                if feature_name in self._features:
+                    log.error(f'Feature {feature_name} already exists.')
+                    raise FeatureAlreadyRegisteredError()
 
-            self._features[feature_name] = f
+                self._features[feature_name] = f
 
             if options:
                 self._feature_options[feature_name] = options
