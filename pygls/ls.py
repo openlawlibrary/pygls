@@ -102,9 +102,9 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         Registers one or more LSP features (delegating to FeatureManager).
 
         Args:
-            feature_names(tuple): One or more features to register
+            *feature_names(tuple): One or more features to register
                 NOTE: All possible LSP features are listed in lsp module
-            options(dict): Options for registered feature
+            **options(dict): Options for registered feature
                 E.G. triggerCharacters=['.']
         '''
         return self.fm.feature(*feature_names, **options)

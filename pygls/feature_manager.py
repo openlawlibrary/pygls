@@ -64,9 +64,9 @@ class FeatureManager(object):
         '''
         Decorator used to register LSP features
         Params:
-            feature_name(tuple): Name of the LSP feature(s)
-            options(dict): Feature options
-                           E.G. triggerCharacters=['.']
+            *feature_names(tuple): Name of the LSP feature(s)
+            **options(dict): Feature options
+                E.G. triggerCharacters=['.']
         '''
         def decorator(f):
             # Add feature if not exists
