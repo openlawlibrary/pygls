@@ -43,22 +43,16 @@ def validate_json(ls, textDocument=None, **_kwargs):
         col = err.colno
         line = err.lineno
 
-        diagnostics.append({
-            'range':
-                {
-                    'start': {
-                        'line': line - 1,
-                        'character': col - 1
-                    },
-                    'end': {
-                        'line': line - 1,
-                        'character': col
-                    }
-                },
-            'message': msg,
-            'severity': lsp.DiagnosticSeverity.Error,
-            'source': type(ls).__name__
-        })
+        d = lsp.Diagnostic(
+            lsp.Range(
+                lsp.Position(line-1, col-1),
+                lsp.Range(line-1, col)
+            ),
+            msg,
+            source=type(ls).__name__
+        )
+
+        diagnostics.append(d)
 
     ls.workspace.publish_diagnostics(textDocument['uri'], diagnostics)
 

@@ -18,21 +18,16 @@ class MultiRootServer(LanguageServer):
         diagnostics = []
 
         if len(text) > max_text_len:
-            diagnostics.append({
-                'range':
-                    {
-                        'start': {
-                            'line': 0,
-                            'character': 0
-                        },
-                        'end': {
-                            'line': 0,
-                            'character': max_text_len
-                        }
-                    },
-                'message': f"Max number of characters is {max_text_len}",
-                'severity': lsp.DiagnosticSeverity.Error
-            })
+            diagnostics.append(
+                lsp.Diagnostic(
+                    lsp.Range(
+                        lsp.Position(0, 0),
+                        lsp.Range(0, max_text_len)
+                    ),
+                    f"Max number of characters is {max_text_len}",
+                    source=type(ls).__name__
+                )
+            )
 
         return diagnostics
 
