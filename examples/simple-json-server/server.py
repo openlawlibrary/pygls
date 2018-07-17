@@ -26,10 +26,11 @@ def completions(textDocument=None, position=None, **_kwargs):
     }
 
 
-@ls.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
-def text_doc_did_save(ls, textDocument=None, **_kwargs):
+@ls.feature(lsp.TEXT_DOCUMENT_DID_SAVE,
+            lsp.TEXT_DOCUMENT_DID_CHANGE)
+def validate_json(ls, textDocument=None, **_kwargs):
     '''
-    Validates json file on save
+    Validates json file on save and on change
     '''
     doc = ls.workspace.get_document(textDocument['uri'])
 
