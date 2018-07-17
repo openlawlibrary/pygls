@@ -28,6 +28,25 @@ def test_register_features(feature_manager):
     assert feature_manager.features[lsp.CODE_LENS] is code_lens
 
 
+def test_register_multiple_features_in_same_decorator(feature_manager):
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_DID_OPEN,
+                             lsp.TEXT_DOCUMENT_DID_CHANGE,
+                             lsp.TEXT_DOCUMENT_DID_CLOSE)
+    def validate():
+        pass
+
+    reg_features = feature_manager.features.keys()
+
+    assert lsp.TEXT_DOCUMENT_DID_OPEN in reg_features
+    assert lsp.TEXT_DOCUMENT_DID_CHANGE in reg_features
+    assert lsp.TEXT_DOCUMENT_DID_CLOSE in reg_features
+
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_OPEN] is validate
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_CHANGE] is validate
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_CLOSE] is validate
+
+
 def test_register_feature_with_options(feature_manager):
 
     options = {
