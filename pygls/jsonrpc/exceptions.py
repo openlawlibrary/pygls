@@ -15,15 +15,6 @@ class JsonRpcException(Exception):
         self.code = code or getattr(self.__class__, 'CODE')
         self.data = data
 
-    def to_dict(self):
-        exception_dict = {
-            'code': self.code,
-            'message': self.message,
-        }
-        if self.data is not None:
-            exception_dict['data'] = self.data
-        return exception_dict
-
     def __eq__(self, other):
         return (
             isinstance(other, self.__class__) and
@@ -46,29 +37,19 @@ class JsonRpcException(Exception):
         # Defaults to UnknownErrorCode
         return getattr(cls, 'CODE', -32001) == code
 
-
-class JsonRpcParseError(JsonRpcException):
-    CODE = -32700
-    MESSAGE = 'Parse Error'
-
-
-class JsonRpcInvalidRequest(JsonRpcException):
-    CODE = -32600
-    MESSAGE = 'Invalid Request'
-
-
-class JsonRpcMethodNotFound(JsonRpcException):
-    CODE = -32601
-    MESSAGE = 'Method Not Found'
-
-    @classmethod
-    def of(cls, method):
-        return cls(message=cls.MESSAGE + ': ' + method)
+    def to_dict(self):
+        exception_dict = {
+            'code': self.code,
+            'message': self.message,
+        }
+        if self.data is not None:
+            exception_dict['data'] = self.data
+        return exception_dict
 
 
-class JsonRpcInvalidParams(JsonRpcException):
-    CODE = -32602
-    MESSAGE = 'Invalid Params'
+class JsonRpcRequestCancelled(JsonRpcException):
+    CODE = -32800
+    MESSAGE = 'Request Cancelled'
 
 
 class JsonRpcInternalError(JsonRpcException):
@@ -85,9 +66,28 @@ class JsonRpcInternalError(JsonRpcException):
         )
 
 
-class JsonRpcRequestCancelled(JsonRpcException):
-    CODE = -32800
-    MESSAGE = 'Request Cancelled'
+class JsonRpcInvalidParams(JsonRpcException):
+    CODE = -32602
+    MESSAGE = 'Invalid Params'
+
+
+class JsonRpcInvalidRequest(JsonRpcException):
+    CODE = -32600
+    MESSAGE = 'Invalid Request'
+
+
+class JsonRpcMethodNotFound(JsonRpcException):
+    CODE = -32601
+    MESSAGE = 'Method Not Found'
+
+    @classmethod
+    def of(cls, method):
+        return cls(message=cls.MESSAGE + ': ' + method)
+
+
+class JsonRpcParseError(JsonRpcException):
+    CODE = -32700
+    MESSAGE = 'Parse Error'
 
 
 class JsonRpcServerError(JsonRpcException):

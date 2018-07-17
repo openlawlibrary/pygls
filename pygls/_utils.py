@@ -14,6 +14,15 @@ import json
 log = logging.getLogger(__name__)
 
 
+def clip_column(column, lines, line_number):
+    # Normalize the position as per the LSP
+    # that accepts character positions >line length
+    # https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#position
+    max_column = len(lines[line_number].rstrip('\r\n')
+                     ) if len(lines) > line_number else 0
+    return min(column, max_column)
+
+
 def debounce(interval_s, keyed_by=None):
     """Debounce calls to this function until interval_s seconds have passed."""
     def wrapper(func):
@@ -81,6 +90,18 @@ def find_parents(root, path, names):
     return []
 
 
+def format_docstring(contents):
+    """Python doc strings come in a number of formats, but LSP wants markdown.
+
+    Until we can find a fast enough way of discovering and parsing each format,
+    we can do a little better by at least preserving indentation.
+    """
+    contents = contents.replace('\t', u'\u00A0' * 4)
+    contents = contents.replace('  ', u'\u00A0' * 2)
+    contents = contents.replace('*', '\\*')
+    return contents
+
+
 def list_to_string(value):
     return ",".join(value) if isinstance(value, list) else value
 
@@ -106,25 +127,8 @@ def merge_dicts(dict_a, dict_b):
     return dict(_merge_dicts_(dict_a, dict_b))
 
 
-def format_docstring(contents):
-    """Python doc strings come in a number of formats, but LSP wants markdown.
-
-    Until we can find a fast enough way of discovering and parsing each format,
-    we can do a little better by at least preserving indentation.
-    """
-    contents = contents.replace('\t', u'\u00A0' * 4)
-    contents = contents.replace('  ', u'\u00A0' * 2)
-    contents = contents.replace('*', '\\*')
-    return contents
-
-
-def clip_column(column, lines, line_number):
-    # Normalise the position as per the LSP
-    # that accepts character positions >line length
-    # https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#position
-    max_column = len(lines[line_number].rstrip('\r\n')
-                     ) if len(lines) > line_number else 0
-    return min(column, max_column)
+def to_dict(obj):
+    return json.loads(json.dumps(obj, default=lambda o: o.__dict__))
 
 
 def to_lsp_name(method_name):
@@ -148,7 +152,3 @@ def to_lsp_name(method_name):
         m_replaced.append(ch)
 
     return ''.join(m_replaced)
-
-
-def to_dict(obj):
-    return json.loads(json.dumps(obj, default=lambda o: o.__dict__))
