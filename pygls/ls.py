@@ -69,55 +69,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
 
         self._register_generic_features()
 
-    @property
-    def features(self):
-        '''
-        Returns registered features.
-        '''
-        return self.fm.features
-
-    @property
-    def feature_options(self):
-        '''
-        Returns options for registered features.
-        '''
-        return self.fm.feature_options
-
-    @property
-    def commands(self):
-        '''
-        Returns registered commands.
-        '''
-        return self.fm.commands
-
-    @property
-    def generic_features(self):
-        '''
-        Returns generic LSP features.
-        '''
-        return self._generic_features
-
-    def feature(self, *feature_names, **options):
-        '''
-        Registers one or more LSP features (delegating to FeatureManager).
-
-        Args:
-            *feature_names(tuple): One or more features to register
-                NOTE: All possible LSP features are listed in lsp module
-            **options(dict): Options for registered feature
-                E.G. triggerCharacters=['.']
-        '''
-        return self.fm.feature(*feature_names, **options)
-
-    def command(self, command_name):
-        '''
-        Registers new command (delegating to FeatureManager).
-
-        Args:
-            command_name(str): Name of the command to register
-        '''
-        return self.fm.command(command_name)
-
     def __getitem__(self, item):
         '''
         Finds and returns either generic or user registered feature.
@@ -160,18 +111,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
             # log
             raise KeyError()
 
-    def _register_generic_features(self):
-        '''
-        Registers generic LSP features from this class.
-        Convention for feature names iss described in class doc.
-        '''
-        for name in dir(self):
-            attr = getattr(self, name)
-            if callable(attr) and name.startswith('gf_'):
-                lsp_name = _utils.to_lsp_name(name[3:])
-                self._generic_features[lsp_name] = attr
-                log.debug(f"Registered generic feature {name}")
-
     def _capabilities(self, client_capabilities):
         '''
             Server capabilities depends on registered features.
@@ -185,6 +124,95 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         log.info(f'Server capabilities: {server_capabilities}')
 
         return server_capabilities
+
+    def _register_generic_features(self):
+        '''
+        Registers generic LSP features from this class.
+        Convention for feature names iss described in class doc.
+        '''
+        for name in dir(self):
+            attr = getattr(self, name)
+            if callable(attr) and name.startswith('gf_'):
+                lsp_name = _utils.to_lsp_name(name[3:])
+                self._generic_features[lsp_name] = attr
+                log.debug(f"Registered generic feature {name}")
+
+    def command(self, command_name):
+        '''
+        Registers new command (delegating to FeatureManager).
+
+        Args:
+            command_name(str): Name of the command to register
+        '''
+        return self.fm.command(command_name)
+
+    @property
+    def commands(self):
+        '''
+        Returns registered commands.
+        '''
+        return self.fm.commands
+
+    def feature(self, *feature_names, **options):
+        '''
+        Registers one or more LSP features (delegating to FeatureManager).
+
+        Args:
+            *feature_names(tuple): One or more features to register
+                NOTE: All possible LSP features are listed in lsp module
+            **options(dict): Options for registered feature
+                E.G. triggerCharacters=['.']
+        '''
+        return self.fm.feature(*feature_names, **options)
+
+    @property
+    def feature_options(self):
+        '''
+        Returns options for registered features.
+        '''
+        return self.fm.feature_options
+
+    @property
+    def features(self):
+        '''
+        Returns registered features.
+        '''
+        return self.fm.features
+
+    @property
+    def generic_features(self):
+        '''
+        Returns generic LSP features.
+        '''
+        return self._generic_features
+
+    def get_configuration(self, config_params, callback):
+        '''
+        Gets the configuration settings from the client.
+        This method is asynchronous and the callback function
+        will be called after the response is received.
+
+        Args:
+            config_params(dict): ConfigurationParams from lsp specs
+            callback(callable): Callabe which will be called after
+                response from the client is received
+        '''
+        def configuration(future):
+            result = future.result()
+            log.info(f'Configuration for {config_params} received: {result}')
+            return callback(result)
+
+        future = self._endpoint.request(
+            lsp.WORKSPACE_CONFIGURATION, config_params)
+        future.add_done_callback(configuration)
+
+    def gf_exit(self, **_kwargs):
+        '''
+        Stops the server process. Should only work if _shutdown flag is True
+        '''
+        self._endpoint.shutdown()
+        self._jsonrpc_stream_reader.close()
+        self._jsonrpc_stream_writer.close()
 
     def gf_initialize(
             self,
@@ -232,28 +260,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         '''
         self._shutdown = True
 
-    def gf_exit(self, **_kwargs):
-        '''
-        Stops the server process. Should only work if _shutdown flag is True
-        '''
-        self._endpoint.shutdown()
-        self._jsonrpc_stream_reader.close()
-        self._jsonrpc_stream_writer.close()
-
-    def gf_text_document__did_open(self, textDocument=None, **_kwargs):
-        '''
-        Puts document to workspace.
-        '''
-        self.workspace.put_document(doc_uri=textDocument['uri'],
-                                    source=textDocument['text'],
-                                    version=textDocument.get('version'))
-
-    def gf_text_document__did_close(self, textDocument=None, **_kwargs):
-        '''
-        Removes document from workspace.
-        '''
-        self.workspace.rm_document(textDocument['uri'])
-
     def gf_text_document__did_change(self, contentChanges=None,
                                      textDocument=None, **_kwargs):
         '''
@@ -266,6 +272,20 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
                 change,
                 version=textDocument.get('version')
             )
+
+    def gf_text_document__did_close(self, textDocument=None, **_kwargs):
+        '''
+        Removes document from workspace.
+        '''
+        self.workspace.rm_document(textDocument['uri'])
+
+    def gf_text_document__did_open(self, textDocument=None, **_kwargs):
+        '''
+        Puts document to workspace.
+        '''
+        self.workspace.put_document(doc_uri=textDocument['uri'],
+                                    source=textDocument['text'],
+                                    version=textDocument.get('version'))
 
     def gf_text_document__did_save(self, textDocument=None, **_kwargs):
         '''
@@ -285,18 +305,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
         '''
         return self.rename(textDocument['uri'], position, newName)
 
-    def gf_workspace__execute_command(self, command=None, arguments=None):
-        '''
-        Executes commands with passed arguments and returns a value.
-        '''
-        try:
-            return self.commands[command](self, arguments)
-        except Exception as ex:
-            ex_msg = repr(ex)
-            log.error(f"Error while executing command '{command}': {ex_msg}")
-            self.workspace.show_message(
-                f"Error while executing command: {ex_msg}")
-
     def gf_workspace__did_change_workspace_folders(self, event=None):
         '''
         Adds/Removes folders from the workspace
@@ -312,22 +320,14 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
             if f_remove:
                 self.workspace.remove_folder(f_remove)
 
-    def get_configuration(self, config_params, callback):
+    def gf_workspace__execute_command(self, command=None, arguments=None):
         '''
-        Gets the configuration settings from the client.
-        This method is asynchronous and the callback function
-        will be called after the response is received.
-
-        Args:
-            config_params(dict): ConfigurationParams from lsp specs
-            callback(callable): Callabe which will be called after
-                response from the client is received
+        Executes commands with passed arguments and returns a value.
         '''
-        def configuration(future):
-            result = future.result()
-            log.info(f'Configuration for {config_params} received: {result}')
-            return callback(result)
-
-        future = self._endpoint.request(
-            lsp.WORKSPACE_CONFIGURATION, config_params)
-        future.add_done_callback(configuration)
+        try:
+            return self.commands[command](self, arguments)
+        except Exception as ex:
+            ex_msg = repr(ex)
+            log.error(f"Error while executing command '{command}': {ex_msg}")
+            self.workspace.show_message(
+                f"Error while executing command: {ex_msg}")

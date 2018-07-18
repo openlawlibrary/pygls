@@ -9,6 +9,18 @@ import mock
 from pygls import _utils
 
 
+def test_clip_column():
+    assert _utils.clip_column(0, [], 0) == 0
+    assert _utils.clip_column(2, ['123'], 0) == 2
+    assert _utils.clip_column(3, ['123'], 0) == 3
+    assert _utils.clip_column(5, ['123'], 0) == 3
+    assert _utils.clip_column(0, ['\n', '123'], 0) == 0
+    assert _utils.clip_column(1, ['\n', '123'], 0) == 0
+    assert _utils.clip_column(2, ['123\n', '123'], 0) == 2
+    assert _utils.clip_column(3, ['123\n', '123'], 0) == 3
+    assert _utils.clip_column(4, ['123\n', '123'], 1) == 3
+
+
 def test_debounce():
     interval = 0.1
     obj = mock.Mock()
@@ -62,11 +74,6 @@ def test_debounce_keyed_by():
     assert len(obj.mock_calls) == 4
 
 
-def test_list_to_string():
-    assert _utils.list_to_string("string") == "string"
-    assert _utils.list_to_string(["a", "r", "r", "a", "y"]) == "a,r,r,a,y"
-
-
 def test_find_parents(tmpdir):
     subsubdir = tmpdir.ensure_dir("subdir", "subsubdir")
     path = subsubdir.ensure("path.py")
@@ -76,20 +83,13 @@ def test_find_parents(tmpdir):
                                "test.cfg"]) == [test_cfg.strpath]
 
 
+def test_list_to_string():
+    assert _utils.list_to_string("string") == "string"
+    assert _utils.list_to_string(["a", "r", "r", "a", "y"]) == "a,r,r,a,y"
+
+
 def test_merge_dicts():
     assert _utils.merge_dicts(
         {'a': True, 'b': {'x': 123, 'y': {'hello': 'world'}}},
         {'a': False, 'b': {'y': [], 'z': 987}}
     ) == {'a': False, 'b': {'x': 123, 'y': [], 'z': 987}}
-
-
-def test_clip_column():
-    assert _utils.clip_column(0, [], 0) == 0
-    assert _utils.clip_column(2, ['123'], 0) == 2
-    assert _utils.clip_column(3, ['123'], 0) == 3
-    assert _utils.clip_column(5, ['123'], 0) == 3
-    assert _utils.clip_column(0, ['\n', '123'], 0) == 0
-    assert _utils.clip_column(1, ['\n', '123'], 0) == 0
-    assert _utils.clip_column(2, ['123\n', '123'], 0) == 2
-    assert _utils.clip_column(3, ['123\n', '123'], 0) == 3
-    assert _utils.clip_column(4, ['123\n', '123'], 1) == 3

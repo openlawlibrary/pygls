@@ -16,27 +16,19 @@ class JsonRpcStreamReader(object):
     def __init__(self, rfile):
         self._rfile = rfile
 
-    def close(self):
-        self._rfile.close()
-
-    def listen(self, message_consumer):
-        """Blocking call to listen for messages on the rfile.
-
-        Args:
-            message_consumer (fn): function that is passed each message
-                as it is read off the socket.
-        """
-        while not self._rfile.closed:
-            request_str = self._read_message()
-
-            if request_str is None:
-                break
-
+    @staticmethod
+    def _content_length(line):
+        """Extract the content length from an input line."""
+        if line.startswith(b'Content-Length: '):
+            _, value = line.split(b'Content-Length: ')
+            value = value.strip()
             try:
-                message_consumer(json.loads(request_str.decode('utf-8')))
+                return int(value)
             except ValueError:
-                log.exception(f"Failed to parse JSON message {request_str}")
-                continue
+                raise ValueError(
+                    "Invalid Content-Length header: {}".format(value))
+
+        return None
 
     def _read_message(self):
         """Reads the contents of a message.
@@ -61,19 +53,27 @@ class JsonRpcStreamReader(object):
         # Grab the body
         return self._rfile.read(content_length)
 
-    @staticmethod
-    def _content_length(line):
-        """Extract the content length from an input line."""
-        if line.startswith(b'Content-Length: '):
-            _, value = line.split(b'Content-Length: ')
-            value = value.strip()
-            try:
-                return int(value)
-            except ValueError:
-                raise ValueError(
-                    "Invalid Content-Length header: {}".format(value))
+    def close(self):
+        self._rfile.close()
 
-        return None
+    def listen(self, message_consumer):
+        """Blocking call to listen for messages on the rfile.
+
+        Args:
+            message_consumer (fn): function that is passed each message
+                as it is read off the socket.
+        """
+        while not self._rfile.closed:
+            request_str = self._read_message()
+
+            if request_str is None:
+                break
+
+            try:
+                message_consumer(json.loads(request_str.decode('utf-8')))
+            except ValueError:
+                log.exception(f"Failed to parse JSON message {request_str}")
+                continue
 
 
 class JsonRpcStreamWriter(object):

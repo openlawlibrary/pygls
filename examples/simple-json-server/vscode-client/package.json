@@ -24,11 +24,11 @@
     "vscode": "npm run vscode:prepublish && VSCODE=$(which code-insiders || which code || echo echo ERROR: neither the code nor code-insiders vscode executable is installed); USER=dummy-dont-share-vscode-instance $VSCODE --user-data-dir=$PWD/.vscode-dev/user-data --extensionHomePath=$PWD/.vscode-dev/extensions --extensionDevelopmentPath=$PWD $*"
   },
   "devDependencies": {
-    "typescript": "^2.3.4",
-    "vscode": "^1.1.17",
-    "mocha": "^2.3.3",
-    "@types/node": "^6.0.40",
-    "@types/mocha": "^2.2.32"
+    "@types/node": "^8.0.0",
+    "tslint": "^5.10.0",
+    "tslint-microsoft-contrib": "^5.0.3",
+    "tsutils": "^2.27.1",
+    "typescript": "^2.9.1"
   },
   "dependencies": {
     "vscode": "^1.1.18",

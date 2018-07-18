@@ -11,16 +11,6 @@ from .fixtures import pygls
 DOC_URI = uris.from_fs_path(__file__)
 
 
-def test_local(pygls):
-    """ Since the workspace points to the test directory """
-    assert pygls.workspace.is_local()
-
-
-def test_put_document(pygls):
-    pygls.workspace.put_document(DOC_URI, 'content')
-    assert DOC_URI in pygls.workspace._docs
-
-
 def test_get_document(pygls):
     pygls.workspace.put_document(DOC_URI, 'TEXT')
     assert pygls.workspace.get_document(DOC_URI).source == 'TEXT'
@@ -34,11 +24,9 @@ def test_get_missing_document(tmpdir, pygls):
     assert pygls.workspace.get_document(doc_uri).source == 'TEXT'
 
 
-def test_rm_document(pygls):
-    pygls.workspace.put_document(DOC_URI, 'TEXT')
-    assert pygls.workspace.get_document(DOC_URI).source == 'TEXT'
-    pygls.workspace.rm_document(DOC_URI)
-    assert pygls.workspace.get_document(DOC_URI)._source is None
+def test_local(pygls):
+    """ Since the workspace points to the test directory """
+    assert pygls.workspace.is_local()
 
 
 def test_non_root_project(pygls):
@@ -54,3 +42,15 @@ def test_non_root_project(pygls):
     pygls.workspace.put_document(test_uri, 'assert True')
     test_doc = pygls.workspace.get_document(test_uri)
     assert project_root in test_doc.sys_path()
+
+
+def test_put_document(pygls):
+    pygls.workspace.put_document(DOC_URI, 'content')
+    assert DOC_URI in pygls.workspace._docs
+
+
+def test_rm_document(pygls):
+    pygls.workspace.put_document(DOC_URI, 'TEXT')
+    assert pygls.workspace.get_document(DOC_URI).source == 'TEXT'
+    pygls.workspace.rm_document(DOC_URI)
+    assert pygls.workspace.get_document(DOC_URI)._source is None

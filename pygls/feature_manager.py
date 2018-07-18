@@ -16,15 +16,6 @@ class FeatureAlreadyRegisteredError(Exception):
     pass
 
 
-class OptionsValidationError(Exception):
-    def __init__(self, errors=None):
-        self.errors = errors or []
-
-    def __repr__(self):
-        opt_errs = '\n-'.join([e for e in self.errors])
-        return f"Missing options: {opt_errs}"
-
-
 class FeatureManager(object):
     '''
     Class for registering user defined features.
@@ -48,13 +39,30 @@ class FeatureManager(object):
         # Value(func): Command
         self._commands = {}
 
-    @property
-    def features(self):
-        return self._features
+    def command(self, command_name):
+        '''
+        Decorator used to register commands
+        Params:
+            command_name(str): Name of the command
+        '''
+        def decorator(f):
+            # Validate
+            if command_name.isspace():
+                log.error(f'Missing command name.')
+                raise OptionsValidationError('Command name is required.')
 
-    @property
-    def feature_options(self):
-        return self._feature_options
+            # Add if not exists
+            if command_name in self._commands:
+                log.error(f'Command {command_name} already exists.')
+                raise CommandAlreadyRegisteredError()
+
+            self._commands[command_name] = f
+
+            log.info(f'Command {command_name} is successfully registered.')
+
+            return f
+
+        return decorator
 
     @property
     def commands(self):
@@ -85,27 +93,20 @@ class FeatureManager(object):
             return f
         return decorator
 
-    def command(self, command_name):
-        '''
-        Decorator used to register commands
-        Params:
-            command_name(str): Name of the command
-        '''
-        def decorator(f):
-            # Validate
-            if command_name.isspace():
-                log.error(f'Missing command name.')
-                raise OptionsValidationError('Command name is required.')
+    @property
+    def feature_options(self):
+        return self._feature_options
 
-            # Add if not exists
-            if command_name in self._commands:
-                log.error(f'Command {command_name} already exists.')
-                raise CommandAlreadyRegisteredError()
+    @property
+    def features(self):
+        return self._features
 
-            self._commands[command_name] = f
 
-            log.info(f'Command {command_name} is successfully registered.')
+class OptionsValidationError(Exception):
 
-            return f
+    def __init__(self, errors=None):
+        self.errors = errors or []
 
-        return decorator
+    def __repr__(self):
+        opt_errs = '\n-'.join([e for e in self.errors])
+        return f"Missing options: {opt_errs}"
