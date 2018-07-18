@@ -2,8 +2,8 @@
 # Copyright (c) Open Law Library. All rights reserved.                   #
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
-from pygls.ls import LanguageServer
 from pygls import lsp
+from pygls.ls import LanguageServer
 
 
 class MultiRootServer(LanguageServer):
@@ -59,8 +59,9 @@ def doc_did_change(ls, contentChanges=None, textDocument=None, **_kwargs):
         ls.workspace.publish_diagnostics(
             doc.uri, diagnostics)
 
-    ls.get_configuration({'items': [{'scopeUri': doc.uri}]},
-                         callback)
+    ls.get_configuration({
+        'items': [{'scopeUri': doc.uri}]
+    }, callback)
 
 
 ls.start_tcp("127.0.0.1", 2087)

@@ -5,12 +5,12 @@
 import os
 from threading import Thread
 import pytest
-from pygls.ls import LanguageServer
-from pygls.jsonrpc.exceptions import JsonRpcMethodNotFound
-from pygls import lsp
 
-from tests.ls_setup import setup_ls_features
+from pygls import lsp
+from pygls.jsonrpc.exceptions import JsonRpcMethodNotFound
+from pygls.ls import LanguageServer
 from tests import DUMMY_FEATURE, TRIGGER_CHARS, COMMANDS
+from tests.ls_setup import setup_ls_features
 
 CALL_TIMEOUT = 2
 
@@ -62,50 +62,6 @@ def test_initialize(client_server):
     assert 'capabilities' in response
 
 
-def test_missing_message(client_server):
-    client, server = client_server
-    with pytest.raises(JsonRpcMethodNotFound):
-        client._endpoint.request(
-            'unknown_method').result(timeout=CALL_TIMEOUT)
-
-
-def test_server_capabilities(client_server):
-    client, server = client_server
-    response = client._endpoint.request('initialize', {
-        'processId': 1234,
-        'rootPath': os.path.dirname(__file__),
-        'initializationOptions': {}
-    }).result(timeout=CALL_TIMEOUT)
-
-    sc = response.get('capabilities', {})
-
-    assert sc.get('hoverProvider') is True
-    assert sc.get('completionProvider').get('resolveProvider') is True
-    assert sc.get('completionProvider').get(
-        'triggerCharacters') == TRIGGER_CHARS
-    assert sc.get('signatureHelpProvider').get(
-        'triggerCharacters') == TRIGGER_CHARS
-    assert sc.get('definitionProvider') is True
-    # assert sc.get('typeDefinitionProvider') is True
-    # assert sc.get('implementationProvider') is True
-    assert sc.get('referencesProvider') is True
-    assert sc.get('documentHighlightProvider') is True
-    assert sc.get('documentSymbolProvider') is True
-    assert sc.get('workspaceSymbolProvider') is True
-    assert sc.get('codeActionProvider') is True
-    assert sc.get('codeLensProvider').get('resolveProvider') is True
-    assert sc.get('documentFormattingProvider') is True
-    assert sc.get('documentRangeFormattingProvider') is True
-    # assert sc.get('documentOnTypeFormattingProvider') is True
-    assert sc.get('renameProvider') is True
-    assert sc.get('documentLinkProvider').get('resolveProvider') is True
-    # assert sc.get('colorProvider') is True
-    assert sc.get('executeCommandProvider').get('commands') == COMMANDS
-    assert sc.get('workspace').get('workspaceFolders').get('supported') is True
-    assert sc.get('workspace').get('workspaceFolders').get(
-        'changeNotifications') is True
-
-
 def test_feature_is_called(client_server):
     client, server = client_server
 
@@ -151,6 +107,68 @@ def test_ls_instance_is_passed_to_user_defined_features(client_server):
     assert response == id(server)
 
 
+def test_missing_message(client_server):
+    client, server = client_server
+    with pytest.raises(JsonRpcMethodNotFound):
+        client._endpoint.request(
+            'unknown_method').result(timeout=CALL_TIMEOUT)
+
+
+def test_registered_commands(client_server):
+    client, server = client_server
+
+    assert list(server.commands.keys()) == COMMANDS
+
+    add_cmd = COMMANDS[0]
+
+    kwargs = {
+        'command': add_cmd,
+        'arguments': [1, 2]
+    }
+
+    response = client._endpoint.request(
+        lsp.WORKSPACE_EXECUTE_COMMAND, kwargs).result(timeout=CALL_TIMEOUT)
+
+    assert response == 3
+
+
+def test_server_capabilities(client_server):
+    client, server = client_server
+    response = client._endpoint.request('initialize', {
+        'processId': 1234,
+        'rootPath': os.path.dirname(__file__),
+        'initializationOptions': {}
+    }).result(timeout=CALL_TIMEOUT)
+
+    sc = response.get('capabilities', {})
+
+    assert sc.get('hoverProvider') is True
+    assert sc.get('completionProvider').get('resolveProvider') is True
+    assert sc.get('completionProvider').get(
+        'triggerCharacters') == TRIGGER_CHARS
+    assert sc.get('signatureHelpProvider').get(
+        'triggerCharacters') == TRIGGER_CHARS
+    assert sc.get('definitionProvider') is True
+    # assert sc.get('typeDefinitionProvider') is True
+    # assert sc.get('implementationProvider') is True
+    assert sc.get('referencesProvider') is True
+    assert sc.get('documentHighlightProvider') is True
+    assert sc.get('documentSymbolProvider') is True
+    assert sc.get('workspaceSymbolProvider') is True
+    assert sc.get('codeActionProvider') is True
+    assert sc.get('codeLensProvider').get('resolveProvider') is True
+    assert sc.get('documentFormattingProvider') is True
+    assert sc.get('documentRangeFormattingProvider') is True
+    # assert sc.get('documentOnTypeFormattingProvider') is True
+    assert sc.get('renameProvider') is True
+    assert sc.get('documentLinkProvider').get('resolveProvider') is True
+    # assert sc.get('colorProvider') is True
+    assert sc.get('executeCommandProvider').get('commands') == COMMANDS
+    assert sc.get('workspace').get('workspaceFolders').get('supported') is True
+    assert sc.get('workspace').get('workspaceFolders').get(
+        'changeNotifications') is True
+
+
 def test_users_feature_called_after_same_default_feature(client_server):
     client, server = client_server
 
@@ -180,21 +198,3 @@ def test_users_feature_called_after_same_default_feature(client_server):
         lsp.TEXT_DOCUMENT_DID_OPEN, kwargs).result(timeout=CALL_TIMEOUT)
 
     assert is_called[0] is True
-
-
-def test_registered_commands(client_server):
-    client, server = client_server
-
-    assert list(server.commands.keys()) == COMMANDS
-
-    add_cmd = COMMANDS[0]
-
-    kwargs = {
-        'command': add_cmd,
-        'arguments': [1, 2]
-    }
-
-    response = client._endpoint.request(
-        lsp.WORKSPACE_EXECUTE_COMMAND, kwargs).result(timeout=CALL_TIMEOUT)
-
-    assert response == 3

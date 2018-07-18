@@ -11,98 +11,11 @@ import re
 
 from . import lsp, uris, _utils
 
-log = logging.getLogger(__name__)
-
 # TODO: this is not the best e.g. we capture numbers
-RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
+RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
 
-
-class Workspace(object):
-
-    def __init__(self, root_uri, endpoint):
-        self._root_uri = root_uri
-        self._endpoint = endpoint
-        self._root_uri_scheme = uris.urlparse(self._root_uri)[0]
-        self._root_path = uris.to_fs_path(self._root_uri)
-        self._folders = {}
-        self._docs = {}
-
-    @property
-    def documents(self):
-        return self._docs
-
-    @property
-    def root_path(self):
-        return self._root_path
-
-    @property
-    def root_uri(self):
-        return self._root_uri
-
-    @property
-    def folders(self):
-        return self._folders.items()
-
-    def add_folder(self, folder):
-        self._folders[folder.get('uri')] = folder
-
-    def remove_folder(self, folder):
-        try:
-            del self._folders[folder.get('uri')]
-        except:
-            pass
-
-    def is_local(self):
-        return (self._root_uri_scheme == '' or
-                self._root_uri_scheme == 'file') and \
-            os.path.exists(self._root_path)
-
-    def get_document(self, doc_uri):
-        """Return a managed document if-present, else create one pointing at disk.
-
-        See https://github.com/Microsoft/language-server-protocol/issues/177
-        """
-        return self._docs.get(doc_uri) or self._create_document(doc_uri)
-
-    def put_document(self, doc_uri, source, version=None):
-        self._docs[doc_uri] = self._create_document(
-            doc_uri, source=source, version=version)
-
-    def rm_document(self, doc_uri):
-        self._docs.pop(doc_uri)
-
-    def update_document(self, doc_uri, change, version=None):
-        self._docs[doc_uri].apply_change(change)
-        self._docs[doc_uri].version = version
-
-    def apply_edit(self, edit):
-        return self._endpoint.request(lsp.M_APPLY_EDIT, {'edit': edit})
-
-    def publish_diagnostics(self, doc_uri, diagnostics):
-        self._endpoint.notify(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params={
-                              'uri': doc_uri, 'diagnostics': diagnostics})
-
-    def show_message(self, message, msg_type=lsp.MessageType.Info):
-        self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
-                              'type': msg_type, 'message': message})
-
-    def show_message_log(self, message, msg_type=lsp.MessageType.Log):
-        self._endpoint.notify(lsp.WINDOW_LOG_MESSAGE, params={
-                              'type': msg_type, 'message': message})
-
-    def source_roots(self, document_path):
-        """Return the source roots for the given document."""
-        files = _utils.find_parents(
-            self._root_path, document_path, ['setup.py']) or []
-        return [os.path.dirname(setup_py) for setup_py in files]
-
-    def _create_document(self, doc_uri, source=None, version=None):
-        path = uris.to_fs_path(doc_uri)
-        return Document(
-            doc_uri, source=source, version=version,
-            extra_sys_path=self.source_roots(path)
-        )
+log = logging.getLogger(__name__)
 
 
 class Document(object):
@@ -126,17 +39,6 @@ class Document(object):
 
     def __str__(self):
         return str(self.uri)
-
-    @property
-    def lines(self):
-        return self.source.splitlines(True)
-
-    @property
-    def source(self):
-        if self._source is None:
-            with io.open(self.path, 'r', encoding='utf-8') as f:
-                return f.read()
-        return self._source
 
     def apply_change(self, change):
         """Apply a change to the document."""
@@ -181,10 +83,25 @@ class Document(object):
 
         self._source = new.getvalue()
 
+    @property
+    def lines(self):
+        return self.source.splitlines(True)
+
     def offset_at_position(self, position):
         """Return the byte-offset pointed at by the given position."""
         return position['character'] + \
             len(''.join(self.lines[:position['line']]))
+
+    @property
+    def source(self):
+        if self._source is None:
+            with io.open(self.path, 'r', encoding='utf-8') as f:
+                return f.read()
+        return self._source
+
+    def sys_path(self):
+        # Copy our extra sys path
+        return list(self._extra_sys_path)
 
     def word_at_position(self, position):
         """
@@ -206,6 +123,89 @@ class Document(object):
 
         return m_start[0] + m_end[-1]
 
-    def sys_path(self):
-        # Copy our extra sys path
-        return list(self._extra_sys_path)
+
+class Workspace(object):
+
+    def __init__(self, root_uri, endpoint):
+        self._root_uri = root_uri
+        self._endpoint = endpoint
+        self._root_uri_scheme = uris.urlparse(self._root_uri)[0]
+        self._root_path = uris.to_fs_path(self._root_uri)
+        self._folders = {}
+        self._docs = {}
+
+    def _create_document(self, doc_uri, source=None, version=None):
+        path = uris.to_fs_path(doc_uri)
+        return Document(
+            doc_uri, source=source, version=version,
+            extra_sys_path=self.source_roots(path)
+        )
+
+    def add_folder(self, folder):
+        self._folders[folder.get('uri')] = folder
+
+    def apply_edit(self, edit):
+        return self._endpoint.request(lsp.M_APPLY_EDIT, {'edit': edit})
+
+    @property
+    def documents(self):
+        return self._docs
+
+    @property
+    def folders(self):
+        return self._folders.items()
+
+    def get_document(self, doc_uri):
+        """Return a managed document if-present, else create one pointing at disk.
+
+        See https://github.com/Microsoft/language-server-protocol/issues/177
+        """
+        return self._docs.get(doc_uri) or self._create_document(doc_uri)
+
+    def is_local(self):
+        return (self._root_uri_scheme == '' or
+                self._root_uri_scheme == 'file') and \
+            os.path.exists(self._root_path)
+
+    def publish_diagnostics(self, doc_uri, diagnostics):
+        self._endpoint.notify(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params={
+                              'uri': doc_uri, 'diagnostics': diagnostics})
+
+    def put_document(self, doc_uri, source, version=None):
+        self._docs[doc_uri] = self._create_document(
+            doc_uri, source=source, version=version)
+
+    def remove_folder(self, folder):
+        try:
+            del self._folders[folder.get('uri')]
+        except:
+            pass
+
+    def rm_document(self, doc_uri):
+        self._docs.pop(doc_uri)
+
+    @property
+    def root_path(self):
+        return self._root_path
+
+    @property
+    def root_uri(self):
+        return self._root_uri
+
+    def show_message(self, message, msg_type=lsp.MessageType.Info):
+        self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
+                              'type': msg_type, 'message': message})
+
+    def show_message_log(self, message, msg_type=lsp.MessageType.Log):
+        self._endpoint.notify(lsp.WINDOW_LOG_MESSAGE, params={
+                              'type': msg_type, 'message': message})
+
+    def source_roots(self, document_path):
+        """Return the source roots for the given document."""
+        files = _utils.find_parents(
+            self._root_path, document_path, ['setup.py']) or []
+        return [os.path.dirname(setup_py) for setup_py in files]
+
+    def update_document(self, doc_uri, change, version=None):
+        self._docs[doc_uri].apply_change(change)
+        self._docs[doc_uri].version = version

@@ -19,12 +19,12 @@ class _StreamHandlerWrapper(socketserver.StreamRequestHandler, object):
 
     delegate = None
 
+    def handle(self):
+        self.delegate.start()
+
     def setup(self):
         super().setup()
         self.delegate.setup_streams(self.rfile, self.wfile)
-
-    def handle(self):
-        self.delegate.start()
 
 
 class JsonRPCServer(object):
@@ -33,6 +33,16 @@ class JsonRPCServer(object):
         self._jsonrpc_stream_reader = JsonRpcStreamReader(rx)
         self._jsonrpc_stream_writer = JsonRpcStreamWriter(tx)
         self._endpoint = Endpoint(self, self._jsonrpc_stream_writer.write)
+
+    def start(self):
+        """Entry point for the server."""
+        self._jsonrpc_stream_reader.listen(self._endpoint.consume)
+
+    def start_io(self, stdin=None, stdout=None):
+        log.info(f'Starting {JsonRPCServer.__name__} IO language server')
+        self.setup_streams(stdin or sys.stdin.buffer,
+                           stdout or sys.stdout.buffer)
+        self.start()
 
     def start_tcp(self, bind_addr, port):
         # Construct a custom wrapper class around the user's handler_class
@@ -50,13 +60,3 @@ class JsonRPCServer(object):
         finally:
             log.info('Shutting down')
             server.server_close()
-
-    def start_io(self, stdin=None, stdout=None):
-        log.info(f'Starting {JsonRPCServer.__name__} IO language server')
-        self.setup_streams(stdin or sys.stdin.buffer,
-                           stdout or sys.stdout.buffer)
-        self.start()
-
-    def start(self):
-        """Entry point for the server."""
-        self._jsonrpc_stream_reader.listen(self._endpoint.consume)

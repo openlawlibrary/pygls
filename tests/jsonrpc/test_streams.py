@@ -11,6 +11,11 @@ from pygls.jsonrpc.streams import JsonRpcStreamReader, JsonRpcStreamWriter
 
 
 @pytest.fixture()
+def reader(rfile):
+    return JsonRpcStreamReader(rfile)
+
+
+@pytest.fixture()
 def rfile():
     return BytesIO()
 
@@ -18,11 +23,6 @@ def rfile():
 @pytest.fixture()
 def wfile():
     return BytesIO()
-
-
-@pytest.fixture()
-def reader(rfile):
-    return JsonRpcStreamReader(rfile)
 
 
 @pytest.fixture()
@@ -49,8 +49,13 @@ def test_reader(rfile, reader):
     })
 
 
-def test_reader_bad_message(rfile, reader):
-    rfile.write(b'Hello world')
+def test_reader_bad_json(rfile, reader):
+    rfile.write(
+        b'Content-Length: 8\r\n'
+        b'Content-Type: application/vscode-jsonrpc; charset=utf8\r\n'
+        b'\r\n'
+        b'{hello}}'
+    )
     rfile.seek(0)
 
     # Ensure the listener doesn't throw
@@ -59,13 +64,8 @@ def test_reader_bad_message(rfile, reader):
     consumer.assert_not_called()
 
 
-def test_reader_bad_json(rfile, reader):
-    rfile.write(
-        b'Content-Length: 8\r\n'
-        b'Content-Type: application/vscode-jsonrpc; charset=utf8\r\n'
-        b'\r\n'
-        b'{hello}}'
-    )
+def test_reader_bad_message(rfile, reader):
+    rfile.write(b'Hello world')
     rfile.seek(0)
 
     # Ensure the listener doesn't throw
