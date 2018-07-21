@@ -198,3 +198,42 @@ def test_users_feature_called_after_same_default_feature(client_server):
         lsp.TEXT_DOCUMENT_DID_OPEN, kwargs).result(timeout=CALL_TIMEOUT)
 
     assert is_called[0] is True
+
+
+def test_server_send_notification(client_server):
+    client, server = client_server
+
+    notification_name = "pygls/testNotification"
+    notification_data = {"message": "Test message"}
+
+    result = [False]
+
+    # Client subscription for notification
+    @client.feature(notification_name)
+    def get_notification(**kwargs):
+        result[0] = kwargs == notification_data
+
+    @server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
+    def tx_doc_did_open(ls, textDocument=None, **_kwargs):
+        '''
+            On did open -> send notification to client
+        '''
+        ls.send_notification(notification_name, notification_data)
+
+    # Initialize server's workspace
+    response = client._endpoint.request('initialize', {
+        'processId': 1234,
+        'rootPath': os.path.dirname(__file__),
+        'initializationOptions': {}
+    }).result(timeout=CALL_TIMEOUT)
+
+    kwargs = {
+        'textDocument': {
+            'uri': 'C:\\test',
+            'text': 'test'
+        }
+    }
+    client._endpoint.request(
+        lsp.TEXT_DOCUMENT_DID_OPEN, kwargs).result(timeout=CALL_TIMEOUT)
+
+    assert result[0]
