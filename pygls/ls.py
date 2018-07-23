@@ -331,3 +331,6 @@ class LanguageServer(JsonRPCServer, metaclass=LSMeta):
             log.error(f"Error while executing command '{command}': {ex_msg}")
             self.workspace.show_message(
                 f"Error while executing command: {ex_msg}")
+
+    def send_notification(self, notification_name, params):
+        self._endpoint.notify(notification_name, params)
