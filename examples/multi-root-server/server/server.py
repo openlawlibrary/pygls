@@ -8,9 +8,6 @@ from pygls.ls import LanguageServer
 
 class MultiRootServer(LanguageServer):
 
-    def __init__(self):
-        super().__init__()
-
     def text_is_valid(self, text='', max_text_len=10):
         '''
             Checks length of the text. Default is 10.
@@ -62,6 +59,3 @@ def doc_did_change(ls, contentChanges=None, textDocument=None, **_kwargs):
     ls.get_configuration({
         'items': [{'scopeUri': doc.uri}]
     }, callback)
-
-
-ls.start_tcp("127.0.0.1", 2087)
