@@ -7,20 +7,20 @@
 "use strict";
 
 import * as net from "net";
-
-import { Disposable, ExtensionContext, workspace, WorkspaceConfiguration } from "vscode";
-import {
-  CancellationToken, ConfigurationParams, DidChangeConfigurationNotification, LanguageClient,
-  LanguageClientOptions, Middleware, ServerOptions,
-} from "vscode-languageclient";
-
-// The example settings
-interface IMultiRootExampleSettings {
-  maxNumberOfProblems: number;
-  maxTextLength: boolean;
-}
+import * as path from "path";
+import { ExtensionContext, workspace } from "vscode";
+import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient";
 
 let client: LanguageClient;
+
+function isStartedInDebugMode() {
+  // based on https://stackoverflow.com/a/43995223/6705061 as of 8/2/2018 9:26 AM
+  const args = process.execArgv;
+  if (args) {
+    return args.some((arg) => /^--inspect=?/.test(arg) || /^--inspect-brk=?/.test(arg));
+  }
+  return false;
+}
 
 function startLangServerTCP(addr: number, documentSelector: string[]): LanguageClient {
   const serverOptions: ServerOptions = () => {
@@ -78,8 +78,22 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext) {
-  // For TCP server needs to be started separately
-  client = startLangServerTCP(2087, ["plaintext"]);
+  if (isStartedInDebugMode()) {
+    // Development - Run the server manually
+    client = startLangServerTCP(2087, ["plaintext"]);
+  } else {
+    // Production - Client is going to run the server (for use within `.vsix` package;
+    // the `server` folder needs to be copied into `vscode-client/`).
+    const cwd = path.join(__dirname, "../");
+    const pythonPath = workspace.getConfiguration("python").get<string>("pythonPath");
+
+    if (!pythonPath) {
+      throw new Error("`python.pythonPath` is not set");
+    }
+
+    client = startLangServer(pythonPath, ["-m", "server"], cwd, ["plaintext"]);
+  }
+
   context.subscriptions.push(client.start());
 }
 

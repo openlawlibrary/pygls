@@ -1,0 +1,176 @@
+configuration: Release
+
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# # uncomment to RDP at end of build ...
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+on_failure:
+  # if we have an npm log, show it
+  - ps: >-
+      if (Test-Path C:\Users\appveyor\AppData\Roaming\npm-cache\_logs\) {
+        cd C:\Users\appveyor\AppData\Roaming\npm-cache\_logs\
+        $fileobj = Get-ChildItem -Filter *.log | Select-Object -First 1;
+        if ($fileobj) { cat $fileobj; };
+      }
+
+image:
+  - Visual Studio 2017
+
+# Configure the GitHub username and email for accessing the `pygls` release
+init:
+  - git config --global user.name %OLL_GIT_USER_NAME%
+  - git config --global user.email %OLL_GIT_EMAIL%
+
+# Install scripts. (runs after repo cloning)
+install:
+  - C:\Python36-x64\python.exe -m pip install --upgrade pip          # upgrade pip
+
+  - ps: Update-NodeJsInstallation 7.9.0;                             # match version used by VS Code
+  - ps: >-
+      $multi_root_client_json = (Get-Content -Raw -Path examples\multi-root-server\vscode-client\package.json | ConvertFrom-Json);
+      $simple_json_client_json = (Get-Content -Raw -Path examples\simple-json-server\vscode-client\package.json | ConvertFrom-Json);
+      $prefixed_version = "v" + $multi_root_client_json.version;
+
+      # if we are building a tag, then replace the package version with the tag name
+      # else append the build number to the package version and save
+
+      $env:production_build = $True;
+      If ($env:APPVEYOR_REPO_TAG -eq "false") {
+        # append the build number to the client and server package versions
+
+        $env:production_build = $False;
+        $multi_root_client_json.version = $multi_root_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
+        $simple_json_client_json.version = $simple_json_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
+        $prefixed_version = $prefixed_version + "+" + $env:APPVEYOR_BUILD_NUMBER;
+
+      } ElseIf ($env:APPVEYOR_REPO_TAG_NAME -ne $prefixed_version) {
+        # tag is present and tag name does not match package version, so exit
+
+        echo "Multi-root client version is $($multi_root_client_json.version) and simple-json client version is $($simple_json_client_json.version), but tag is $env:APPVEYOR_REPO_TAG_NAME";
+        echo "You must update the multi-root client and/or simple json client version, or change tag to $prefixed_version";
+        Exit-AppveyorBuild;
+        exit;
+      }
+
+      # update the package files so that vsce will pick up the altered version number
+
+      $multi_root_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\multi-root-server\vscode-client\package.json;
+      $simple_json_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\simple-json-server\vscode-client\package.json;
+
+      # update it with Appveyor
+      # from this point on, version numbers should always include the "v" prefix
+
+      try {
+        Update-AppveyorBuild -Version $prefixed_version;
+        Set-AppveyorBuildVariable unprefixed_version $multi_root_client_json.version
+      } catch {
+        echo $PSItem.ToString();
+        echo "Cannot set Appveyor build version to $prefixed_version"
+        Exit-AppveyorBuild;
+        exit;
+      }
+      echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
+
+  # point to tsc 2.9.1
+  - npm install -g typescript@2.9.1
+  - tsc --version
+
+  # install vsce module (for packaging our extension into a .vsix file)
+  - npm install -g vsce@1.42.0
+
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+
+  # install pygls and dev dependencies
+  - C:\Python36-x64\Scripts\pip.exe install -r requirements_dev.txt
+  - C:\Python36-x64\Scripts\pip.exe install -e .
+
+  - cd examples\multi-root-server\vscode-client
+  # install extension-wide js dependencies
+  - npm install --save-dev
+  # run tslint
+  - .\node_modules\.bin\tslint src\*.ts
+  # install our dependencies
+  - npm install                                                  # TODO: replace with `yarn install`
+  - tsc -p .
+
+  - cd ..\..\simple-json-server\vscode-client
+  # install extension-wide js dependencies
+  - npm install --save-dev
+  # run tslint
+  - .\node_modules\.bin\tslint src\*.ts
+  # install our dependencies
+  - npm install                                                  # TODO: replace with `yarn install`
+  - tsc -p .
+
+  - cd ..\..\..\
+
+# Create a Visual Studio Code Extension
+build_script:
+  # check function
+  - ps: >-
+      Function CheckInVsixPackage([string]$stringToCheck)
+      {
+        type packages.txt | findstr /R /C:$stringToCheck > results.txt
+        If ((Get-Content results.txt) -eq $Null) {
+          throw "'$stringToCheck' is missing from package to be built."
+        }
+      }
+
+  # package up the multi-root client example VS Code extension
+  - ps: cd examples/multi-root-server/
+  # copy server.py into client for distribution
+  - ps: cp -r server/ vscode-client/server
+  - ps: cd vscode-client/
+  # check to see if key files will be in the `.vsix` package to be built
+  - vsce ls > packages.txt               rem list files to be packaged
+  # files/folders to be checked
+  - ps: CheckInVsixPackage "CHANGELOG.md"
+  - ps: CheckInVsixPackage "package.json"
+  - ps: CheckInVsixPackage "out/extension.js"
+  - ps: CheckInVsixPackage "server/__init__.py"
+  - ps: CheckInVsixPackage "server/__main__.py"
+  - ps: CheckInVsixPackage "server/server.py"
+  # clean-up after ourselves (so these files don't end up in our `.vsix` package)
+  - rm packages.txt
+  - rm results.txt
+  # passed the basic checks, should be good-to-go
+  - vsce package                         rem "normal" command line is on purpose
+
+  # package up the simple-json client example VS Code extension
+  - ps: cd ../../simple-json-server/
+  # copy server.py into client for distribution
+  - ps: cp -r server/ vscode-client/server
+  - ps: cd vscode-client/
+  # check to see if key files will be in the `.vsix` package to be built
+  - vsce ls > packages.txt               rem list files to be packaged
+  # files/folders to be checked
+  - ps: CheckInVsixPackage "CHANGELOG.md"
+  - ps: CheckInVsixPackage "package.json"
+  - ps: CheckInVsixPackage "out/extension.js"
+  - ps: CheckInVsixPackage "server/__init__.py"
+  - ps: CheckInVsixPackage "server/__main__.py"
+  - ps: CheckInVsixPackage "server/server.py"
+  # clean-up after ourselves (so these files don't end up in our `.vsix` package)
+  - rm packages.txt
+  - rm results.txt
+  # passed the basic checks, should be good-to-go
+  - vsce package                         rem "normal" command line is on purpose
+
+  - ps: cd ../../../
+
+test_script:
+  - C:\Python36-x64\Scripts\pytest.exe
+
+# Create extensions artifacts
+artifacts:
+  - path: examples/multi-root-server/vscode-client/multi-root-example-$(unprefixed_version).vsix
+    name: multi-root-example-$(unprefixed_version).vsix
+    type: file
+  - path: examples/simple-json-server/vscode-client/simple-json-example-$(unprefixed_version).vsix
+    name: simple-json-example-$(unprefixed_version).vsix
+    type: file
