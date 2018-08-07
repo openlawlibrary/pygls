@@ -1,5 +1,5 @@
 {
-  "name": "multi-root-example",
+  "name": "multi-root",
   "description": "Multi root extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",

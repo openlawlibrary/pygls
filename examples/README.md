@@ -2,9 +2,9 @@
 
 This folder contains various examples of pygls language server:
 
-- `simple-json-server` - Language server which validates json after document is saved.
+- `simple-json` - Language server which validates json after document is saved.
 
-- `multi-root-server` - Language server which reads the configuration from the client before validating document.
+- `multi-root` - Language server which reads the configuration from the client before validating document.
     Example shows how the pygls `LanguageServer` can be inherited and started.
 
 ## Debug examples

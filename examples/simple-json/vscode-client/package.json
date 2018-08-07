@@ -1,5 +1,5 @@
 {
-  "name": "simple-json-example",
+  "name": "simple-json",
   "description": "Simple json extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",

@@ -30,8 +30,8 @@ install:
 
   - ps: Update-NodeJsInstallation 7.9.0;                             # match version used by VS Code
   - ps: >-
-      $multi_root_client_json = (Get-Content -Raw -Path examples\multi-root-server\vscode-client\package.json | ConvertFrom-Json);
-      $simple_json_client_json = (Get-Content -Raw -Path examples\simple-json-server\vscode-client\package.json | ConvertFrom-Json);
+      $multi_root_client_json = (Get-Content -Raw -Path examples\multi-root\vscode-client\package.json | ConvertFrom-Json);
+      $simple_json_client_json = (Get-Content -Raw -Path examples\simple-json\vscode-client\package.json | ConvertFrom-Json);
       $prefixed_version = "v" + $multi_root_client_json.version;
 
       # if we are building a tag, then replace the package version with the tag name
@@ -57,8 +57,8 @@ install:
 
       # update the package files so that vsce will pick up the altered version number
 
-      $multi_root_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\multi-root-server\vscode-client\package.json;
-      $simple_json_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\simple-json-server\vscode-client\package.json;
+      $multi_root_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\multi-root\vscode-client\package.json;
+      $simple_json_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\simple-json\vscode-client\package.json;
 
       # update it with Appveyor
       # from this point on, version numbers should always include the "v" prefix
@@ -89,7 +89,7 @@ install:
   - C:\Python36-x64\Scripts\pip.exe install -r requirements_dev.txt
   - C:\Python36-x64\Scripts\pip.exe install -e .
 
-  - cd examples\multi-root-server\vscode-client
+  - cd examples\multi-root\vscode-client
   # install extension-wide js dependencies
   - npm install --save-dev
   # run tslint
@@ -98,7 +98,7 @@ install:
   - npm install                                                  # TODO: replace with `yarn install`
   - tsc -p .
 
-  - cd ..\..\simple-json-server\vscode-client
+  - cd ..\..\simple-json\vscode-client
   # install extension-wide js dependencies
   - npm install --save-dev
   # run tslint
@@ -122,7 +122,7 @@ build_script:
       }
 
   # package up the multi-root client example VS Code extension
-  - ps: cd examples/multi-root-server/
+  - ps: cd examples/multi-root/
   # copy server.py into client for distribution
   - ps: cp -r server/ vscode-client/server
   - ps: cd vscode-client/
@@ -142,7 +142,7 @@ build_script:
   - vsce package                         rem "normal" command line is on purpose
 
   # package up the simple-json client example VS Code extension
-  - ps: cd ../../simple-json-server/
+  - ps: cd ../../simple-json/
   # copy server.py into client for distribution
   - ps: cp -r server/ vscode-client/server
   - ps: cd vscode-client/
@@ -168,9 +168,9 @@ test_script:
 
 # Create extensions artifacts
 artifacts:
-  - path: examples/multi-root-server/vscode-client/multi-root-example-$(unprefixed_version).vsix
+  - path: examples/multi-root/vscode-client/multi-root-$(unprefixed_version).vsix
     name: multi-root-example-$(unprefixed_version).vsix
     type: file
-  - path: examples/simple-json-server/vscode-client/simple-json-example-$(unprefixed_version).vsix
+  - path: examples/simple-json/vscode-client/simple-json-$(unprefixed_version).vsix
     name: simple-json-example-$(unprefixed_version).vsix
     type: file

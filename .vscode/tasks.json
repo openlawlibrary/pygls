@@ -6,7 +6,7 @@
         {
             "label": "multi-root-watch:client",
             "type": "typescript",
-            "tsconfig": "examples\\multi-root-server\\vscode-client\\tsconfig.json",
+            "tsconfig": "examples\\multi-root\\vscode-client\\tsconfig.json",
             "option": "watch",
             "problemMatcher": [
                 "$tsc-watch"
@@ -15,7 +15,7 @@
         {
             "label": "simple-json-watch:client",
             "type": "typescript",
-            "tsconfig": "examples\\simple-json-server\\vscode-client\\tsconfig.json",
+            "tsconfig": "examples\\simple-json\\vscode-client\\tsconfig.json",
             "option": "watch",
             "problemMatcher": [
                 "$tsc-watch"
