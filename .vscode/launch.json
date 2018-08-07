@@ -7,12 +7,12 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}/examples/multi-root-server/vscode-client"
+                "--extensionDevelopmentPath=${workspaceRoot}/examples/multi-root/vscode-client"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/examples/multi-root-server/vscode-client/out/src/**/*.js"
+                "${workspaceRoot}/examples/multi-root/vscode-client/out/src/**/*.js"
             ],
             "preLaunchTask": "multi-root-watch:client"
         },
@@ -28,7 +28,7 @@
             "args": [
                 "--tcp"
             ],
-            "cwd": "${workspaceFolder}/examples/multi-root-server/",
+            "cwd": "${workspaceFolder}/examples/multi-root/",
             "debugOptions": [
                 "RedirectOutput"
             ]
@@ -39,12 +39,12 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}/examples/simple-json-server/vscode-client"
+                "--extensionDevelopmentPath=${workspaceRoot}/examples/simple-json/vscode-client"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/examples/simple-json-server/vscode-client/out/src/**/*.js"
+                "${workspaceRoot}/examples/simple-json/vscode-client/out/src/**/*.js"
             ],
             "preLaunchTask": "simple-json-watch:client"
         },
@@ -60,7 +60,7 @@
             "args": [
                 "--tcp"
             ],
-            "cwd": "${workspaceFolder}/examples/simple-json-server/",
+            "cwd": "${workspaceFolder}/examples/simple-json/",
             "debugOptions": [
                 "RedirectOutput"
             ]

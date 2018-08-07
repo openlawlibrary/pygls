@@ -8,7 +8,7 @@ from .server import ls
 
 
 def add_arguments(parser):
-    parser.description = "multi-root server example"
+    parser.description = "multi-root example"
 
     parser.add_argument(
         "--tcp", action="store_true",
