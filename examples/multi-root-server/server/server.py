@@ -57,5 +57,5 @@ def doc_did_change(ls, contentChanges=None, textDocument=None, **_kwargs):
             doc.uri, diagnostics)
 
     ls.get_configuration({
-        'items': [{'scopeUri': doc.uri}]
+        'items': [{'scopeUri': doc.uri, 'section': 'pygls'}]
     }, callback)
