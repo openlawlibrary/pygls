@@ -2,25 +2,65 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "SimpleJsonServer",
+            "name": "Launch Multi-root Client",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}/examples/multi-root/vscode-client"
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/examples/multi-root/vscode-client/out/src/**/*.js"
+            ],
+            "preLaunchTask": "multi-root-watch:client"
+        },
+        {
+            "name": "Launch Multi-root Server",
+            "module": "server",
             "type": "python",
             "pythonPath": "${config:python.pythonPath}",
             "request": "launch",
             "stopOnEntry": false,
             "console": "none",
-            "program": "${workspaceFolder}/examples/simple-json-server/server.py",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--tcp"
+            ],
+            "cwd": "${workspaceFolder}/examples/multi-root/",
             "debugOptions": [
                 "RedirectOutput"
             ]
         },
         {
-            "name": "MultiRootServer",
+            "name": "Launch Simple-JSON Client",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}/examples/simple-json/vscode-client"
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/examples/simple-json/vscode-client/out/src/**/*.js"
+            ],
+            "preLaunchTask": "simple-json-watch:client"
+        },
+        {
+            "name": "Launch Simple-JSON Server",
+            "module": "server",
             "type": "python",
             "pythonPath": "${config:python.pythonPath}",
             "request": "launch",
             "stopOnEntry": false,
             "console": "none",
-            "program": "${workspaceFolder}/examples/multi-root-server/server.py",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--tcp"
+            ],
+            "cwd": "${workspaceFolder}/examples/simple-json/",
             "debugOptions": [
                 "RedirectOutput"
             ]
