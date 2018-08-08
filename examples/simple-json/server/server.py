@@ -71,6 +71,3 @@ def validate_json(ls, textDocument=None, **_kwargs):
         diagnostics.append(d)
 
     ls.workspace.publish_diagnostics(textDocument['uri'], diagnostics)
-
-
-ls.start_tcp("127.0.0.1", 2087)
