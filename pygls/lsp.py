@@ -71,17 +71,23 @@ WORKSPACE_FOLDERS = 'workspace/folders'
 WORKSPACE_SYMBOL = 'workspace/symbol'
 
 
-class CodeLensOptions(object):
+class CodeLensOptions:
+    def __init__(self, resolve_provider):
+        self.resolveProvider = resolve_provider
 
-    def __init__(self, resolveProvider):
-        self.resolveProvider = resolveProvider
 
-
-class ColorProviderOptions(object):
+class ColorProviderOptions:
     pass
 
 
-class CompletionItemKind(object):
+class Command:
+    def __init__(self, title, command, arguments=None):
+        self.title = title
+        self.command = command
+        self.arguments = arguments
+
+
+class CompletionItemKind:
     Text = 1
     Method = 2
     Function = 3
@@ -102,14 +108,47 @@ class CompletionItemKind(object):
     Reference = 18
 
 
-class CompletionOptions(object):
+class CompletionList:
+    def __init__(self, is_incomplete, items=None):
+        self.isIncomplete = is_incomplete
+        self.items = items if items else []
 
-    def __init__(self, resolveProvider=None, triggerCharacters=None):
-        self.resolveProvider = resolveProvider
-        self.triggerCharacters = triggerCharacters
+    def add_item(self, completion_item):
+        self.items.append(completion_item)
+
+    def add_items(self, completion_items):
+        self.items.extend(completion_items)
 
 
-class DiagnosticSeverity(object):
+class CompletionItem:
+    def __init__(self, label, kind=None, detail=None, documentation=None, deprecated=None,
+                 preselect=None, sort_text=None, filter_text=None, insert_text=None,
+                 insert_text_format=None, text_edit=None, additional_text_edits=None,
+                 commit_characters=None, command=None, data=None):
+        self.label = label
+        self.kind = kind
+        self.detail = detail
+        self.documentation = documentation
+        self.deprecated = deprecated
+        self.preselect = preselect
+        self.sortText = sort_text
+        self.filterText = filter_text
+        self.insertText = insert_text
+        self.insertTextFormat = insert_text_format
+        self.textEdit = text_edit
+        self.additionalTextEdits = additional_text_edits
+        self.commitCharacters = commit_characters
+        self.command = command
+        self.data = data
+
+
+class CompletionOptions:
+    def __init__(self, resolve_provider=None, trigger_characters=None):
+        self.resolveProvider = resolve_provider
+        self.triggerCharacters = trigger_characters
+
+
+class DiagnosticSeverity:
     Error = 1
     Warning = 2
     Information = 3
@@ -117,10 +156,6 @@ class DiagnosticSeverity(object):
 
 
 class Diagnostic:
-    """Provides a VS Code compatible Diagnostic object. See [1] for details.
-        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Diagnostic
-    """
-
     def __init__(
         self,
         range,
@@ -128,62 +163,56 @@ class Diagnostic:
         severity=DiagnosticSeverity.Error,
         code=None,
         source=None,
-        relatedInformation=None
+        related_information=None
     ):
         self.range = range
         self.message = message
         self.severity = severity
         self.code = code
         self.source = source
-        self.relatedInformation = relatedInformation
+        self.relatedInformation = related_information
 
 
 class DiagnosticRelatedInformation:
-    """Provides a VS Code compatible Diagnostic object. See [1] for details.
-        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#DiagnosticRelatedInformation
-    """
-
     def __init__(self, location, message):
         self.location = location
         self.message = message
 
 
-class DocumentHighlightKind(object):
+class DocumentHighlightKind:
     Text = 1
     Read = 2
     Write = 3
 
 
-class DocumentLinkOptions(object):
-
-    def __init__(self, resolveProvider):
-        self.resolveProvider = resolveProvider
-
-
-class DocumentOnTypeFormattingOptions(object):
-
-    def __init__(self, firstTriggerCharacter, moreTriggerCharacter):
-        self.firstTriggerCharacter = firstTriggerCharacter
-        self.moreTriggerCharacter = moreTriggerCharacter
+class DocumentLinkOptions:
+    def __init__(self, resolve_provider):
+        self.resolveProvider = resolve_provider
 
 
-class ExecuteCommandOptions(object):
+class DocumentOnTypeFormattingOptions:
+    def __init__(self, first_trigger_character, more_trigger_character):
+        self.firstTriggerCharacter = first_trigger_character
+        self.moreTriggerCharacter = more_trigger_character
 
+
+class ExecuteCommandOptions:
     def __init__(self, commands):
         self.commands = commands
 
 
-class Location:
-    """Provides a VS Code compatible Diagnostic object. See [1] for details.
-        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Location
-    """
+class InsertTextFormat:
+    PlainText = 1
+    Snippet = 2
 
+
+class Location:
     def __init__(self, uri, range):
         self.uri = uri
         self.range = range
 
 
-class MessageType(object):
+class MessageType:
     Error = 1
     Warning = 2
     Info = 3
@@ -191,11 +220,6 @@ class MessageType(object):
 
 
 class Position:
-    """Zero-based line and character positions intended to work with VS Code.
-        See [1] for details.
-        [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Position
-    """
-
     def __init__(self, line=0, character=0):
         self.line = line
         self.character = character
@@ -256,31 +280,24 @@ class Position:
         return '{}:{}'.format(self.line, self.character)
 
 
-class PublishDiagnosticsParams():
+class PublishDiagnosticsParams:
     def __init__(self, uri, diagnostics):
         self.uri = uri
         self.diagnostics = diagnostics
 
 
 class Range:
-    """Provides an object to be converted to a VS Code Range object for a given
-       document. See [1] for details.
-       [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#Range
-    """
-
     def __init__(self, start, end):
         self.start = start
         self.end = end
 
 
-class SaveOptions(object):
+class SaveOptions:
+    def __init__(self, include_text):
+        self.includeText = include_text
 
-    def __init__(self, includeText):
-        self.includeText = includeText
 
-
-class ServerCapabilities(object):
-
+class ServerCapabilities:
     def __init__(self, ls):
         features = ls.features.keys()
         feature_options = ls.feature_options
@@ -291,14 +308,14 @@ class ServerCapabilities(object):
 
         if COMPLETION in features:
             self.completionProvider = CompletionOptions(
-                resolveProvider=COMPLETION_ITEM_RESOLVE in features,
-                triggerCharacters=feature_options.get(
+                resolve_provider=COMPLETION_ITEM_RESOLVE in features,
+                trigger_characters=feature_options.get(
                     COMPLETION, {}).get('triggerCharacters', [])
             )
 
         if SIGNATURE_HELP in features:
             self.signatureHelpProvider = SignatureHelpOptions(
-                triggerCharacters=feature_options.get(
+                trigger_characters=feature_options.get(
                     SIGNATURE_HELP, {}).get('triggerCharacters', [])
             )
 
@@ -316,7 +333,7 @@ class ServerCapabilities(object):
 
         if CODE_LENS in features:
             self.codeLensProvider = CodeLensOptions(
-                resolveProvider=CODE_LENS_RESOLVE in features
+                resolve_provider=CODE_LENS_RESOLVE in features
             )
 
         self.documentFormattingProvider = FORMATTING in features
@@ -325,11 +342,11 @@ class ServerCapabilities(object):
         if FORMATTING in features:
             self.documentOnTypeFormattingProvider = \
                 DocumentOnTypeFormattingOptions(
-                    firstTriggerCharacter=feature_options.get(
+                    first_trigger_character=feature_options.get(
                         ON_TYPE_FORMATTING, {})
                     .get('firstTriggerCharacter', ''),
 
-                    moreTriggerCharacter=feature_options.get(
+                    more_trigger_character=feature_options.get(
                         ON_TYPE_FORMATTING, {})
                     .get('moreTriggerCharacter', [])
                 )
@@ -338,7 +355,7 @@ class ServerCapabilities(object):
 
         if DOCUMENT_LINK in features:
             self.documentLinkProvider = DocumentLinkOptions(
-                resolveProvider=DOCUMENT_LINK_RESOLVE in features
+                resolve_provider=DOCUMENT_LINK_RESOLVE in features
             )
 
         # self.colorProvider = False
@@ -358,19 +375,17 @@ class ServerCapabilities(object):
         return f'{type(self).__name__}( {self.__dict__} )'
 
 
-class SignatureHelpOptions(object):
+class SignatureHelpOptions:
+    def __init__(self, trigger_characters):
+        self.triggerCharacters = trigger_characters
 
-    def __init__(self, triggerCharacters):
-        self.triggerCharacters = triggerCharacters
 
-
-class StaticRegistrationOptions(object):
-
+class StaticRegistrationOptions:
     def __init__(self, id):
         self.id = id
 
 
-class SymbolKind(object):
+class SymbolKind:
     File = 1
     Module = 2
     Namespace = 3
@@ -391,27 +406,22 @@ class SymbolKind(object):
     Array = 18
 
 
-class TextDocumentSyncKind(object):
+class TextDocumentSyncKind:
     NONE = 0
     FULL = 1
     INCREMENTAL = 2
 
 
-class TextDocumentSyncOptions(object):
-
-    def __init__(self, openClose, change, willSave, willSaveWaitUntil, save):
-        self.openClose = openClose
+class TextDocumentSyncOptions:
+    def __init__(self, open_close, change, will_save, will_save_wait_until, save):
+        self.openClose = open_close
         self.change = change
-        self.willSave = willSave
-        self.willSaveWaitUntil = willSaveWaitUntil
+        self.willSave = will_save
+        self.willSaveWaitUntil = will_save_wait_until
         self.save = save
 
 
 class TextEdit:
-    """Provides a VS Code compatible TextEdit object. See [1] for details.
-       [1]: https://code.visualstudio.com/docs/extensionAPI/vscode-api#TextEdit
-    """
-
-    def __init__(self, range, newText):
+    def __init__(self, range, new_text):
         self.range = range
-        self.newText = newText
+        self.newText = new_text
