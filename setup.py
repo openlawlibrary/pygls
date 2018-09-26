@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'pygls'
-VERSION = '0.1.0'
+VERSION = '0.2.0'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
 DESCRIPTION = 'Python Generic Language Server (pronounced like "spy glass").'
