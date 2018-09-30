@@ -10,6 +10,21 @@ class ProcedureAlreadyRegisteredError(Exception):
     pass
 
 
+class JsonRPCRequestMessage:
+    def __init__(self, id=None, jsonrpc=None, method=None, params=None):
+        self.id = id
+        self.version = jsonrpc
+        self.method = method
+        self.params = params
+
+    @classmethod
+    def from_dict(cls, data):
+        if 'jsonrpc' not in data:
+            return data
+
+        return cls(**data)
+
+
 class JsonRPCProtocol(asyncio.Protocol):
     DEFAULT_CHARSET = "utf-8"
     DEFAULT_CONTENT_TYPE = "application/jsonrpc"
@@ -20,10 +35,6 @@ class JsonRPCProtocol(asyncio.Protocol):
                                   self.DEFAULT_CHARSET)
         self.content_type = kwargs.get("content_type",
                                        self.DEFAULT_CONTENT_TYPE)
-        self.deserializer = kwargs.get("deserializer",
-                                       self.DEFAULT_CONTENT_TYPE)
-        self.serializer = kwargs.get("serializer",
-                                     self.DEFAULT_CONTENT_TYPE)
 
         self.procedure_options = {}
         self.procedures = {}
@@ -32,25 +43,14 @@ class JsonRPCProtocol(asyncio.Protocol):
     def __call__(self):
         return self
 
-    @staticmethod
-    def extract_body(body):
-        id = body.get("id", None)
-        json_rpc_version = body.get("jsonrpc", None)
-        method = body.get("method", None)
-        params = body.get("params", None)
-
-        return id, json_rpc_version, method, params
-
-    def _procedure_handler(self, body):
-        id, version, method, params = JsonRPCProtocol.extract_body(body)
-
-        if version is not JsonRPCProtocol.VERSION:
-            logger.warn("Unknown message {}".format(body))
+    def _procedure_handler(self, message: JsonRPCRequestMessage):
+        if message.version != JsonRPCProtocol.VERSION:
+            logger.warn("Unknown message {}".format(message))
             return
 
-        if not id:
+        if message.id is None:
             logger.debug("Notification message received.")
-        elif not method:
+        elif message.method is None:
             logger.debug("Response message received.")
         else:
             logger.debug("Request message received.")
@@ -67,7 +67,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         _, body = data.decode(self.charset).split("\r\n\r\n")
 
         try:
-            self._procedure_handler(json.loads(body))
+            self._procedure_handler(json.loads(body, object_hook=JsonRPCRequestMessage.from_dict))
         except:
             pass
 
@@ -94,7 +94,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     def send_data(self, data):
         try:
             content_length = len(data.encode("utf-8")) if data else 0
-            body = json.dumps(data)  # add serializer
+            body = json.dumps(data, default=lambda o: o.__dict__)
 
             response = (
                 "Content-Length: {}\r\n"
