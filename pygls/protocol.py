@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import traceback
+from collections import namedtuple
 from multiprocessing.pool import ThreadPool
 
 from .feature_manager import FeatureManager
@@ -27,16 +28,14 @@ class JsonRPCRequestMessage:
 
     def __init__(self, id=None, jsonrpc=None, method=None, params=None):
         self.id = id
-        self.version = jsonrpc
+        self.jsonrpc = jsonrpc
         self.method = method
         self.params = params
 
-    @classmethod
-    def from_dict(cls, data):
-        if 'jsonrpc' not in data:
-            return data
-
-        return cls(**data)
+    @staticmethod
+    def from_dict(data):
+        return namedtuple('Object',
+                          data.keys())(*data.values())
 
 
 class JsonRPCResponseMessage:
@@ -72,6 +71,9 @@ class JsonRPCProtocol(asyncio.Protocol):
     VERSION = '2.0'
 
     def __init__(self, **kwargs):
+        self._client_request_futures = {}
+        self._server_request_futures = {}
+
         self.charset = kwargs.get('charset',
                                   self.DEFAULT_CHARSET)
         self.content_type = kwargs.get('content_type',
@@ -80,10 +82,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.fm = FeatureManager()
         self.transport = None
 
-        self._client_request_futures = {}
-        self._server_request_futures = {}
-
-        self._thread_pool = ThreadPool()
+        if self.fm.contains_thread_option:
+            self._pool = ThreadPool()
 
     def __call__(self):
         return self
@@ -113,7 +113,8 @@ class JsonRPCProtocol(asyncio.Protocol):
             if asyncio.iscoroutinefunction(handler):
                 asyncio.ensure_future(handler(params))
             else:
-                self._thread_pool.apply_async(handler, (params, ))
+                # self._pool.apply_async(handler, (params, ))
+                handler(params)
 
         except KeyError:
             logger.warn('Ignoring notification for unknown method {}'
@@ -133,20 +134,22 @@ class JsonRPCProtocol(asyncio.Protocol):
                 future.add_done_callback(
                     lambda res: self.send_data(res.result()))
             else:
-                # Can't be canceled
-                self._thread_pool.apply_async(
-                    handler,
-                    callback=lambda res: self.send_data(
-                        JsonRPCResponseMessage(msg_id,
-                                               JsonRPCProtocol.VERSION,
-                                               res,
-                                               None)))
+                # # Can't be canceled
+                # self._pool.apply_async(
+                #     handler,
+                #     callback=lambda res: self.send_data(
+                #         JsonRPCResponseMessage(msg_id,
+                #                                JsonRPCProtocol.VERSION,
+                #                                res,
+                #                                None)))
+                self.send_data(handler(params))
+
         except Exception:
             logger.exception('Failed to handle request {} {} {}'
                              .format(msg_id, method_name, params))
 
     def _procedure_handler(self, message: JsonRPCRequestMessage):
-        if message.version != JsonRPCProtocol.VERSION:
+        if message.jsonrpc != JsonRPCProtocol.VERSION:
             logger.warn('Unknown message {}'.format(message))
             return
 
@@ -204,3 +207,181 @@ class LanguageServerProtocol(JsonRPCProtocol):
         super().__init__(content_type=LanguageServerProtocol.CONTENT_TYPE)
 
         self.workspace = None
+
+        self._shutdown = False
+        # self._register_builtin_features()
+
+    # def _capabilities(self, client_capabilities):
+    #     '''
+    #         Server capabilities depends on registered features.
+    #         TODO: It should depend on a client capabilities as well.
+
+    #         Args:
+    #             client_capabilities(dict): Capabilities that client supports
+    #     '''
+    #     server_capabilities = lsp.ServerCapabilities(self)
+
+    #     logger.info(f'Server capabilities: {server_capabilities}')
+
+    #     return server_capabilities
+
+    # def _register_builtin_features(self):
+    #     '''
+    #     Registers generic LSP features from this class.
+    #     Convention for feature names iss described in class doc.
+    #     '''
+    #     for name in dir(self):
+    #         attr = getattr(self, name)
+    #         if callable(attr) and name.startswith('gf_'):
+    #             lsp_name = _utils.to_lsp_name(name[3:])
+    #             self._generic_features[lsp_name] = attr
+    #             logger.debug(f"Registered generic feature {name}")
+
+    # def get_configuration(self, config_params, callback):
+    #     '''
+    #     Gets the configuration settings from the client.
+    #     This method is asynchronous and the callback function
+    #     will be called after the response is received.
+
+    #     Args:
+    #         config_params(dict): ConfigurationParams from lsp specs
+    #         callback(callable): Callabe which will be called after
+    #             response from the client is received
+    #     '''
+    #     def configuration(future):
+    #         result = future.result()
+    # logger.info(f'Configuration for {config_params} received: {result}')
+    #         return callback(result)
+
+    #     future = self._endpoint.request(
+    #         lsp.WORKSPACE_CONFIGURATION, config_params)
+    #     future.add_done_callback(configuration)
+
+    # def gf_exit(self, **_kwargs):
+    #     '''
+    #     Stops the server process. Should only work if _shutdown flag is True
+    #     '''
+    #     self._endpoint.shutdown()
+    #     self._jsonrpc_stream_reader.close()
+    #     self._jsonrpc_stream_writer.close()
+
+    # def gf_initialize(
+    #         self,
+    #         processId=None,
+    #         rootUri=None,
+    #         rootPath=None,
+    #         initializationOptions=None,
+    #         **_kwargs
+    # ):
+    #     '''
+    #     This method is called once, after the client activates server.
+    #     It will compute and return server capabilities based on
+    #     registered features.
+    #     '''
+
+    #     logger.debug(
+    #         f'Language server initialized with {processId} \
+    #                                            {rootUri} \
+    #                                            {rootPath} \
+    #                                            {initializationOptions}')
+
+    #     if rootUri is None:
+    #         rootUri = uris.from_fs_path(
+    #             rootPath) if rootPath is not None else ''
+
+    #     self.workspace = Workspace(rootUri, self._endpoint)
+
+    #     workspace_folders = _kwargs.get('workspaceFolders') or []
+    #     for folder in workspace_folders:
+    #         self.workspace.add_folder(folder)
+
+    #     client_capabilities = _kwargs.get('capabilities', {})
+
+    #     return {'capabilities': self._capabilities(client_capabilities)}
+
+    # def gf_initialized(self):
+    #     '''
+    #     Notification that everything works well.
+    #     '''
+    #     pass
+
+    # def gf_shutdown(self, **_kwargs):
+    #     '''
+    #     Request from client which asks server to shutdown.
+    #     '''
+    #     self._shutdown = True
+
+    # def gf_text_document__did_change(self, contentChanges=None,
+    #                                  textDocument=None, **_kwargs):
+    #     '''
+    #     Updates document's content.
+    #     (Incremental (from server capabilities); not configurable for now)
+    #     '''
+    #     for change in contentChanges:
+    #         self.workspace.update_document(
+    #             textDocument['uri'],
+    #             change,
+    #             version=textDocument.get('version')
+    #         )
+
+    # def gf_text_document__did_close(self, textDocument=None, **_kwargs):
+    #     '''
+    #     Removes document from workspace.
+    #     '''
+    #     self.workspace.rm_document(textDocument['uri'])
+
+    # def gf_text_document__did_open(self, textDocument=None, **_kwargs):
+    #     '''
+    #     Puts document to workspace.
+    #     '''
+    #     self.workspace.put_document(doc_uri=textDocument['uri'],
+    #                                 source=textDocument['text'],
+    #                                 version=textDocument.get('version'))
+
+    # def gf_text_document__did_save(self, textDocument=None, **_kwargs):
+    #     '''
+    #     Does nothing.
+    #     '''
+    #     pass
+
+    # def gf_text_document__rename(
+    #     self,
+    #     textDocument=None,
+    #     position=None,
+    #     newName=None,
+    #     **_kwargs
+    # ):
+    #     '''
+    #     Changes document name in the workspace
+    #     '''
+    #     return self.rename(textDocument['uri'], position, newName)
+
+    # def gf_workspace__did_change_workspace_folders(self, event=None):
+    #     '''
+    #     Adds/Removes folders from the workspace
+    #     '''
+    #     logger.info(f'Workspace folders changed: {event}')
+
+    #     added_folders = event['added'] or []
+    #     removed_folders = event['removed'] or []
+
+    #     for f_add, f_remove in zip_longest(added_folders, removed_folders):
+    #         if f_add:
+    #             self.workspace.add_folder(f_add)
+    #         if f_remove:
+    #             self.workspace.remove_folder(f_remove)
+
+    # def gf_workspace__execute_command(self, command=None, arguments=None):
+    #     '''
+    #     Executes commands with passed arguments and returns a value.
+    #     '''
+    #     try:
+    #         return self.commands[command](self, arguments)
+    #     except Exception as ex:
+    #         ex_msg = repr(ex)
+    # logger.error(f"Error while executing command '{command}': {ex_msg}")
+    #         self.workspace.show_message(
+    #             f"Error while executing command: {ex_msg}")
+
+    # def send_notification(self, notification_name, params):
+    #     self._endpoint.notify(notification_name, params)
