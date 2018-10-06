@@ -3,17 +3,10 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import logging
-from . import lsp
+from .exceptions import CommandAlreadyRegisteredError, \
+    FeatureAlreadyRegisteredError, ValidationError
 
-log = logging.getLogger(__name__)
-
-
-class CommandAlreadyRegisteredError(Exception):
-    pass
-
-
-class FeatureAlreadyRegisteredError(Exception):
-    pass
+logger = logging.getLogger(__name__)
 
 
 class FeatureManager(object):
@@ -48,17 +41,19 @@ class FeatureManager(object):
         def decorator(f):
             # Validate
             if command_name.isspace():
-                log.error(f'Missing command name.')
-                raise OptionsValidationError('Command name is required.')
+                logger.error('Missing command name.')
+                raise ValidationError('Command name is required.')
 
             # Add if not exists
             if command_name in self._commands:
-                log.error(f'Command {command_name} already exists.')
+                logger.error('Command {} already exists.'
+                             .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
             self._commands[command_name] = f
 
-            log.info(f'Command {command_name} is successfully registered.')
+            logger.info('Command {} is successfully registered.'
+                        .format(command_name))
 
             return f
 
@@ -80,7 +75,8 @@ class FeatureManager(object):
             # Add feature if not exists
             for feature_name in feature_names:
                 if feature_name in self._features:
-                    log.error(f'Feature {feature_name} already exists.')
+                    logger.error('Feature {} already exists.'
+                                 .format(feature_name))
                     raise FeatureAlreadyRegisteredError()
 
                 self._features[feature_name] = f
@@ -88,7 +84,8 @@ class FeatureManager(object):
             if options:
                 self._feature_options[feature_name] = options
 
-            log.info(f'Registered {feature_name} with options {options}')
+            logger.info('Registered {} with options {}'
+                        .format(feature_name, options))
 
             return f
         return decorator
@@ -100,13 +97,3 @@ class FeatureManager(object):
     @property
     def features(self):
         return self._features
-
-
-class OptionsValidationError(Exception):
-
-    def __init__(self, errors=None):
-        self.errors = errors or []
-
-    def __repr__(self):
-        opt_errs = '\n-'.join([e for e in self.errors])
-        return f"Missing options: {opt_errs}"
