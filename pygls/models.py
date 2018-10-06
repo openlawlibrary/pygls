@@ -4,9 +4,134 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+from typing import List, Union
 '''
 Some Language Server Protocol constants
 https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
+'''
+
+'''
+Classes used for type hints.
+'''
+Num = Union[int, float]
+
+
+class _CodeAction:
+    def __init(self, dynamic_registration: bool,
+               code_action_literal_support: '_CodeActionLiteralSupport'):
+        self.dynamicRegistration = dynamic_registration
+        self.codeActionLiteralSupport = code_action_literal_support
+
+
+class _CodeActionKind:
+    def __init__(self, value_set: List['CodeActionKind']):
+        self.valueSet = value_set
+
+
+class _CodeActionLiteralSupport:
+    def __init__(self, code_action_kind: _CodeActionKind):
+        self.codeActionKind = code_action_kind
+
+
+class _Rename:
+    def __init(self, dynamic_registration: bool, prepare_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.prepareSupport = prepare_support
+
+
+class _PublishDiagnostics:
+    def __init(self, related_information: bool):
+        self.relatedInformation = related_information
+
+
+class FoldingRange:
+    def __init(self, dynamic_registration: bool, range_limit: Num,
+               line_folding_only: bool):
+        self.lineFoldingOnly = line_folding_only
+
+
+class _Completion:
+    def __init__(self, dynamic_registration: bool,
+                 completion_item: '_CompletionItem',
+                 completion_item_kind: '_CompletionItemKind',
+                 context_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.completionItem = completion_item
+        self.completionItemKind = completion_item_kind
+        self.contextSupport = context_support
+
+
+class _CompletionItem:
+    def __init__(self, snippet_support: bool, commit_character_support: bool,
+                 documentation_format: List[MarkupKind],
+                 deprecated_support: bool, preselected_support):
+        self.snippetSupport = snippet_support
+        self.commitCharacterSupport = commit_character_support
+        self.documentationFormat = documentation_format
+        self.deprecatedSupport = deprecated_support
+        self.preselectedSupport = preselected_support
+
+
+class _CompletionItemKind:
+    def __init__(self, value_set: List[CompletionItemKind]):
+        self.valueSet = value_set
+
+
+class DocumentSymbol:
+    def __init__(self, dynamic_registration: bool, symbol_kind: '_SymbolKind',
+                 hierarchical_document_symbol_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.symbolKind = symbol_kind
+        self.hierarchicalDocumentSymbolSupport = \
+            hierarchical_document_symbol_support
+
+
+class _DynamicRegistration:
+    def __init__(self, dynamic_registration: bool):
+        self.dynamicRegistration = dynamic_registration
+
+
+class _Hover:
+    def __init__(self, dynamic_registration,
+                 content_format: List[MarkupKind]):
+        self.dynamicRegistration = dynamic_registration
+        self.contentFormat = content_format
+
+
+class _SignatureHelp:
+    def __init__(self, dynamic_registration,
+                 signature_information: List[MarkupKind]):
+        self.dynamicRegistration = dynamic_registration
+        self.signatureInformation = signature_information
+
+
+class _SignatureInformation:
+    def __init__(self, documentation_format: List[MarkupKind]):
+        self.documentationFormat = documentation_format
+
+
+class _SymbolKind:
+    def __init__(self, value_set: 'SymbolKind'):
+        self.valueSet = value_set
+
+
+class _Symbol:
+    def __init__(self, dynamic_registration: bool, symbol_kind: _SymbolKind):
+        self.dynamicRegistration = dynamic_registration
+        self.symbolKind = symbol_kind
+
+
+class _Synchronization:
+    def __init__(self, dynamic_registration: bool, will_save: bool,
+                 will_save_wait_until: bool, did_save: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.willSave = will_save
+        self.willSaveWaitUntil = will_save_wait_until
+        self.didSave = did_save
+
+
+'''
+Methods
 '''
 
 # Client
@@ -69,6 +194,19 @@ WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS = 'workspace/didChangeWorkspaceFolders'
 WORKSPACE_EXECUTE_COMMAND = 'workspace/executeCommand'
 WORKSPACE_FOLDERS = 'workspace/folders'
 WORKSPACE_SYMBOL = 'workspace/symbol'
+
+'''
+Language Server Protocol classes
+'''
+
+
+class ClientCapabilities:
+    def __init__(self, workspace: 'WorkspaceClientCapabilities',
+                 text_document: 'TextDocumentClientCapabilities',
+                 experimental: object):
+        self.workspace = workspace
+        self.textDocument = text_document
+        self.experimental = experimental
 
 
 class CodeLensOptions:
@@ -202,6 +340,26 @@ class ExecuteCommandOptions:
         self.commands = commands
 
 
+class FailureHandlingKind:
+    Abort = 'abort'
+    Transactional = 'transactional'
+    TextOnlyTransactional = 'textOnlyTransactional'
+    FailureHandlingKind = 'undo'
+
+
+class InitializeParams:
+    def __init__(self, process_id: int, root_path: str, root_uri: str,
+                 initialization_options: object,
+                 capabilities: ClientCapabilities):
+        self.processId = None
+        self.rootPath = None
+        self.rootUri = None
+        self.initializationOptions = {}
+        self.capabilities = None
+        self.trace = None
+        self.workspaceFolders = None
+
+
 class InsertTextFormat:
     PlainText = 1
     Snippet = 2
@@ -211,6 +369,11 @@ class Location:
     def __init__(self, uri, range):
         self.uri = uri
         self.range = range
+
+
+class MarkupKind:
+    PlainText = 'plaintext'
+    Markdown = 'markdown'
 
 
 class MessageType:
@@ -291,6 +454,12 @@ class Range:
     def __init__(self, start, end):
         self.start = start
         self.end = end
+
+
+class ResourceOperationKind:
+    Create = 'create'
+    Rename = 'rename'
+    Delete = 'delete'
 
 
 class SaveOptions:
@@ -407,6 +576,13 @@ class SymbolKind:
     Array = 18
 
 
+class TextDocumentClientCapabilities:
+
+    def __init__(self, synchronization: '_Synchronization',
+                 completion: '_Completion', hover: '_Hover'):
+        pass
+
+
 class TextDocumentSyncKind:
     NONE = 0
     FULL = 1
@@ -427,3 +603,28 @@ class TextEdit:
     def __init__(self, range, new_text):
         self.range = range
         self.newText = new_text
+
+
+class WorkspaceClientCapabilities:
+    def __init__(self, apply_edit: bool, workspace_edit: 'WorkspaceEdit',
+                 did_change_configuration: _DynamicRegistration,
+                 did_change_watched_files: _DynamicRegistration,
+                 symbol: _Symbol, execute_command: _DynamicRegistration,
+                 workspace_folders: bool, configuration: bool):
+        self.applyEdit = apply_edit
+        self.workspaceEdit = workspace_edit
+        self.didChangeConfiguration = did_change_configuration
+        self.didChangeWatched = did_change_watched_files
+        self.symbol = symbol
+        self.executeCommand = execute_command
+        self.workspace_folders = workspace_folders
+        self.configuration = configuration
+
+
+class WorkspaceEdit:
+    def __init__(self, document_changes: bool,
+                 resource_operations: List[ResourceOperationKind],
+                 failure_handling: FailureHandlingKind):
+        self.documentChanges = document_changes
+        self.resourceOperations = resource_operations
+        self.failureHandling = failure_handling

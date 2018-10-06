@@ -20,19 +20,23 @@ class FeatureManager(object):
     '''
 
     def __init__(self):
-        # Key(str): LSP feature name
-        # Value(func): Feature
-        self._features = {}
-
-        # Key(str): LSP feature name
-        # Value(dict): Feature options
+        self._builtin_features = {}
         self._feature_options = {}
-
-        # Key(string): Command name
-        # Value(func): Command
+        self._features = {}
+        self._command_options = {}
         self._commands = {}
 
-    def command(self, command_name):
+    def add_builtin_feature(self, feature_name: str, func):
+        '''
+        Register builtin (predefined) features
+        '''
+        self._builtin_features[feature_name] = func
+
+    @property
+    def builtin_features(self):
+        return self._builtin_features
+
+    def command(self, command_name, **options):
         '''
         Decorator used to register commands
         Params:
@@ -52,6 +56,9 @@ class FeatureManager(object):
 
             self._commands[command_name] = f
 
+            if options:
+                self._command_options[command_name] = options
+
             logger.info('Command {} is successfully registered.'
                         .format(command_name))
 
@@ -60,8 +67,23 @@ class FeatureManager(object):
         return decorator
 
     @property
+    def command_options(self):
+        return self._command_options
+
+    @property
     def commands(self):
         return self._commands
+
+    @property
+    def contains_thread_option(self):
+        '''
+        Returns true if at least one command/features is registered with
+        `thread` flag
+        '''
+        all_options = list(dict(**self._command_options,
+                                **self._feature_options)
+                           .values())
+        return 'thread' in all_options
 
     def feature(self, *feature_names, **options):
         '''
