@@ -24,7 +24,7 @@ def clip_column(column, lines, line_number):
 
 
 def debounce(interval_s, keyed_by=None):
-    """Debounce calls to this function until interval_s seconds have passed."""
+    '''Debounce calls to this function until interval_s seconds have passed.'''
     def wrapper(func):
         timers = {}
         lock = threading.Lock()
@@ -52,7 +52,7 @@ def debounce(interval_s, keyed_by=None):
 
 
 def find_parents(root, path, names):
-    """Find files matching the given names relative to the given path.
+    '''Find files matching the given names relative to the given path.
 
     Args:
         path (str): The file path to start searching up from.
@@ -61,12 +61,12 @@ def find_parents(root, path, names):
 
     Note:
         The path MUST be within the root.
-    """
+    '''
     if not root:
         return []
 
     if not os.path.commonprefix((root, path)):
-        log.warning(f"Path {path} not in {root}")
+        log.warning('Path {} not in {}'.format(path, root))
         return []
 
     # Split the relative by directory, generate all the parent directories,
@@ -91,11 +91,11 @@ def find_parents(root, path, names):
 
 
 def format_docstring(contents):
-    """Python doc strings come in a number of formats, but LSP wants markdown.
+    '''Python doc strings come in a number of formats, but LSP wants markdown.
 
     Until we can find a fast enough way of discovering and parsing each format,
     we can do a little better by at least preserving indentation.
-    """
+    '''
     contents = contents.replace('\t', u'\u00A0' * 4)
     contents = contents.replace('  ', u'\u00A0' * 2)
     contents = contents.replace('*', '\\*')
@@ -103,14 +103,14 @@ def format_docstring(contents):
 
 
 def list_to_string(value):
-    return ",".join(value) if isinstance(value, list) else value
+    return ','.join(value) if isinstance(value, list) else value
 
 
 def merge_dicts(dict_a, dict_b):
-    """Recursively merge dictionary b into dictionary a.
+    '''Recursively merge dictionary b into dictionary a.
 
     If override_nones is True, then
-    """
+    '''
     def _merge_dicts_(a, b):
         for key in set(a.keys()).union(b.keys()):
             if key in a and key in b:

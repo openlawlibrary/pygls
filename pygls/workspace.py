@@ -9,7 +9,10 @@ import logging
 import os
 import re
 
-from . import lsp, uris, _utils
+from .models import MessageType, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
+    WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE
+from .uris import to_fs_path, urlparse
+from .utils import find_parents
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
@@ -30,7 +33,7 @@ class Document(object):
     ):
         self.uri = uri
         self.version = version
-        self.path = uris.to_fs_path(uri)
+        self.path = to_fs_path(uri)
         self.filename = os.path.basename(self.path)
 
         self._local = local
@@ -129,13 +132,13 @@ class Workspace(object):
     def __init__(self, root_uri, endpoint):
         self._root_uri = root_uri
         self._endpoint = endpoint
-        self._root_uri_scheme = uris.urlparse(self._root_uri)[0]
-        self._root_path = uris.to_fs_path(self._root_uri)
+        self._root_uri_scheme = urlparse(self._root_uri)[0]
+        self._root_path = to_fs_path(self._root_uri)
         self._folders = {}
         self._docs = {}
 
     def _create_document(self, doc_uri, source=None, version=None):
-        path = uris.to_fs_path(doc_uri)
+        path = to_fs_path(doc_uri)
         return Document(
             doc_uri, source=source, version=version,
             extra_sys_path=self.source_roots(path)
@@ -145,7 +148,8 @@ class Workspace(object):
         self._folders[folder.get('uri')] = folder
 
     def apply_edit(self, edit):
-        return self._endpoint.request(lsp.M_APPLY_EDIT, {'edit': edit})
+        return self._endpoint.request(WORKSPACE_APPLY_EDIT,
+                                      {'edit': edit})
 
     @property
     def documents(self):
@@ -156,7 +160,9 @@ class Workspace(object):
         return self._folders.items()
 
     def get_document(self, doc_uri):
-        """Return a managed document if-present, else create one pointing at disk.
+        """
+        Return a managed document if-present,
+        else create one pointing at disk.
 
         See https://github.com/Microsoft/language-server-protocol/issues/177
         """
@@ -168,8 +174,9 @@ class Workspace(object):
             os.path.exists(self._root_path)
 
     def publish_diagnostics(self, doc_uri, diagnostics):
-        self._endpoint.notify(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params={
-                              'uri': doc_uri, 'diagnostics': diagnostics})
+        self._endpoint.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                              params={'uri': doc_uri,
+                                      'diagnostics': diagnostics})
 
     def put_document(self, doc_uri, source, version=None):
         self._docs[doc_uri] = self._create_document(
@@ -192,17 +199,17 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    def show_message(self, message, msg_type=lsp.MessageType.Info):
-        self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
+    def show_message(self, message, msg_type=MessageType.Info):
+        self._endpoint.notify(WINDOW_SHOW_MESSAGE, params={
                               'type': msg_type, 'message': message})
 
-    def show_message_log(self, message, msg_type=lsp.MessageType.Log):
-        self._endpoint.notify(lsp.WINDOW_LOG_MESSAGE, params={
+    def show_message_log(self, message, msg_type=MessageType.Log):
+        self._endpoint.notify(WINDOW_LOG_MESSAGE, params={
                               'type': msg_type, 'message': message})
 
     def source_roots(self, document_path):
         """Return the source roots for the given document."""
-        files = _utils.find_parents(
+        files = find_parents(
             self._root_path, document_path, ['setup.py']) or []
         return [os.path.dirname(setup_py) for setup_py in files]
 
