@@ -468,10 +468,10 @@ class SaveOptions:
 
 
 class ServerCapabilities:
-    def __init__(self, ls):
-        features = ls.features.keys()
-        feature_options = ls.feature_options
-        commands = ls.commands
+    def __init__(self, lsp):
+        features = lsp.fm.features.keys()
+        feature_options = lsp.fm.feature_options
+        commands = lsp.fm.commands
 
         self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
         self.hoverProvider = HOVER in features

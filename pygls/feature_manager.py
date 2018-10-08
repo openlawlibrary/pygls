@@ -74,6 +74,16 @@ class FeatureManager(object):
     def commands(self):
         return self._commands
 
+    def get_feature_handler(self, feature_name):
+        '''
+        Returns builtin feature by name if exists. If not, user defined
+        feature will be returned.
+        '''
+        try:
+            return self._builtin_features[feature_name]
+        except:
+            return self._features[feature_name]
+
     def feature(self, *feature_names, **options):
         '''
         Decorator used to register LSP features
