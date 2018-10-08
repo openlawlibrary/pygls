@@ -74,17 +74,6 @@ class FeatureManager(object):
     def commands(self):
         return self._commands
 
-    @property
-    def contains_thread_option(self):
-        '''
-        Returns true if at least one command/features is registered with
-        `thread` flag
-        '''
-        all_options = list(dict(**self._command_options,
-                                **self._feature_options)
-                           .values())
-        return 'thread' in all_options
-
     def feature(self, *feature_names, **options):
         '''
         Decorator used to register LSP features

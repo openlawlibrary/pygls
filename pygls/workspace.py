@@ -9,7 +9,7 @@ import logging
 import os
 import re
 
-from .models import MessageType, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
+from .types import MessageType, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
     WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE
 from .uris import to_fs_path, urlparse
 from .utils import find_parents

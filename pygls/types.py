@@ -63,7 +63,7 @@ class _Completion:
 
 class _CompletionItem:
     def __init__(self, snippet_support: bool, commit_character_support: bool,
-                 documentation_format: List[MarkupKind],
+                 documentation_format: List['MarkupKind'],
                  deprecated_support: bool, preselected_support):
         self.snippetSupport = snippet_support
         self.commitCharacterSupport = commit_character_support
@@ -73,7 +73,7 @@ class _CompletionItem:
 
 
 class _CompletionItemKind:
-    def __init__(self, value_set: List[CompletionItemKind]):
+    def __init__(self, value_set: List['CompletionItemKind']):
         self.valueSet = value_set
 
 
@@ -93,20 +93,20 @@ class _DynamicRegistration:
 
 class _Hover:
     def __init__(self, dynamic_registration,
-                 content_format: List[MarkupKind]):
+                 content_format: List['MarkupKind']):
         self.dynamicRegistration = dynamic_registration
         self.contentFormat = content_format
 
 
 class _SignatureHelp:
     def __init__(self, dynamic_registration,
-                 signature_information: List[MarkupKind]):
+                 signature_information: List['MarkupKind']):
         self.dynamicRegistration = dynamic_registration
         self.signatureInformation = signature_information
 
 
 class _SignatureInformation:
-    def __init__(self, documentation_format: List[MarkupKind]):
+    def __init__(self, documentation_format: List['MarkupKind']):
         self.documentationFormat = documentation_format
 
 

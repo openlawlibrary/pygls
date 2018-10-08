@@ -9,6 +9,7 @@ import traceback
 from collections import namedtuple
 from multiprocessing.pool import ThreadPool
 
+from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
 from .workspace import Workspace
 
@@ -32,8 +33,11 @@ class JsonRPCRequestMessage:
         self.method = method
         self.params = params
 
-    @staticmethod
-    def from_dict(data):
+    @classmethod
+    def from_dict(cls, data):
+        if 'jsonrpc' in data:
+            return cls(**data)
+
         return namedtuple('Object',
                           data.keys())(*data.values())
 
@@ -82,8 +86,9 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.fm = FeatureManager()
         self.transport = None
 
-        if self.fm.contains_thread_option:
-            self._pool = ThreadPool()
+        # Lazy initialization if at least one function is decorated with
+        # ls.thread()
+        self._pool = None
 
     def __call__(self):
         return self
@@ -113,8 +118,10 @@ class JsonRPCProtocol(asyncio.Protocol):
             if asyncio.iscoroutinefunction(handler):
                 asyncio.ensure_future(handler(params))
             else:
-                # self._pool.apply_async(handler, (params, ))
-                handler(params)
+                if getattr(handler, "execute_in_thread", False):
+                    self.thread_pool.apply_async(handler, (params, ))
+                else:
+                    handler(params)
 
         except KeyError:
             logger.warn('Ignoring notification for unknown method {}'
@@ -134,19 +141,26 @@ class JsonRPCProtocol(asyncio.Protocol):
                 future.add_done_callback(
                     lambda res: self.send_data(res.result()))
             else:
-                # # Can't be canceled
-                # self._pool.apply_async(
-                #     handler,
-                #     callback=lambda res: self.send_data(
-                #         JsonRPCResponseMessage(msg_id,
-                #                                JsonRPCProtocol.VERSION,
-                #                                res,
-                #                                None)))
-                self.send_data(handler(params))
+                # Can't be canceled
+                if getattr(handler, "execute_in_thread", False):
+                    self.thread_pool.apply_async(
+                        handler, (params, ),
+                        callback=lambda res: self.send_data(
+                            JsonRPCResponseMessage(msg_id,
+                                                   JsonRPCProtocol.VERSION,
+                                                   res,
+                                                   None)))
+                else:
+                    self.send_data(
+                        JsonRPCResponseMessage(msg_id,
+                                               JsonRPCProtocol.VERSION,
+                                               handler(params),
+                                               None))
 
         except Exception:
             logger.exception('Failed to handle request {} {} {}'
                              .format(msg_id, method_name, params))
+            # TODO: Send errors to the client
 
     def _procedure_handler(self, message: JsonRPCRequestMessage):
         if message.jsonrpc != JsonRPCProtocol.VERSION:
@@ -179,10 +193,21 @@ class JsonRPCProtocol(asyncio.Protocol):
         except:
             pass
 
+    @property
+    def thread_pool(self):
+        '''
+        Returns thread pool instance
+        '''
+        # TODO: Specify number of processes
+        if not self._pool:
+            self._pool = ThreadPool()
+
+        return self._pool
+
     def send_data(self, data):
         try:
             body = json.dumps(data, default=lambda o: o.__dict__)
-            content_length = len(body.encode('utf-8')) if body else 0
+            content_length = len(body.encode(self.charset)) if body else 0
 
             response = (
                 'Content-Length: {}\r\n'
@@ -198,6 +223,20 @@ class JsonRPCProtocol(asyncio.Protocol):
             self.transport.write(response.encode(self.charset))
         except:
             logger.error(traceback.format_exc())
+
+    def thread(self):
+        '''
+        Mark function to execute it in a thread pool
+        '''
+        def decorator(f):
+            if asyncio.iscoroutinefunction(f):
+                raise ThreadDecoratorError(
+                    "Thread decorator can't be used with async function `{}`"
+                    .format(f.__name__))
+
+            f.execute_in_thread = True
+            return f
+        return decorator
 
 
 class LanguageServerProtocol(JsonRPCProtocol):
