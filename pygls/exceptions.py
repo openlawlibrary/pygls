@@ -12,6 +12,10 @@ class FeatureAlreadyRegisteredError(Exception):
     pass
 
 
+class ThreadDecoratorError(Exception):
+    pass
+
+
 class ValidationError(Exception):
 
     def __init__(self, errors=None):
