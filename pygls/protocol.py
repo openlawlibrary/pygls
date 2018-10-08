@@ -9,8 +9,11 @@ import traceback
 from collections import namedtuple
 from multiprocessing.pool import ThreadPool
 
+
 from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
+from .types import InitializeParams, ServerCapabilities
+from .uris import from_fs_path
 from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -86,8 +89,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.fm = FeatureManager()
         self.transport = None
 
-        # Lazy initialization if at least one function is decorated with
-        # ls.thread()
+        # Lazy initialized if at least one function is decorated with
+        # @ls.thread()
         self._pool = None
 
     def __call__(self):
@@ -113,12 +116,12 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            handler = self.fm.features[method_name]
+            handler = self.fm.get_feature_handler(method_name)
 
             if asyncio.iscoroutinefunction(handler):
                 asyncio.ensure_future(handler(params))
             else:
-                if getattr(handler, "execute_in_thread", False):
+                if getattr(handler, 'execute_in_thread', False):
                     self.thread_pool.apply_async(handler, (params, ))
                 else:
                     handler(params)
@@ -133,7 +136,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _handle_request(self, msg_id, method_name, params):
         '''Handles a request from the client.'''
         try:
-            handler = self.fm.features[method_name]
+            handler = self.fm.get_feature_handler(method_name)
 
             if asyncio.iscoroutinefunction(handler):
                 future = asyncio.ensure_future(handler(params))
@@ -142,7 +145,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                     lambda res: self.send_data(res.result()))
             else:
                 # Can't be canceled
-                if getattr(handler, "execute_in_thread", False):
+                if getattr(handler, 'execute_in_thread', False):
                     self.thread_pool.apply_async(
                         handler, (params, ),
                         callback=lambda res: self.send_data(
@@ -248,21 +251,10 @@ class LanguageServerProtocol(JsonRPCProtocol):
         self.workspace = None
 
         self._shutdown = False
+
+        self.fm.add_builtin_feature('initialize', self.gf_initialize)
+
         # self._register_builtin_features()
-
-    # def _capabilities(self, client_capabilities):
-    #     '''
-    #         Server capabilities depends on registered features.
-    #         TODO: It should depend on a client capabilities as well.
-
-    #         Args:
-    #             client_capabilities(dict): Capabilities that client supports
-    #     '''
-    #     server_capabilities = lsp.ServerCapabilities(self)
-
-    #     logger.info(f'Server capabilities: {server_capabilities}')
-
-    #     return server_capabilities
 
     # def _register_builtin_features(self):
     #     '''
@@ -304,39 +296,29 @@ class LanguageServerProtocol(JsonRPCProtocol):
     #     self._jsonrpc_stream_reader.close()
     #     self._jsonrpc_stream_writer.close()
 
-    # def gf_initialize(
-    #         self,
-    #         processId=None,
-    #         rootUri=None,
-    #         rootPath=None,
-    #         initializationOptions=None,
-    #         **_kwargs
-    # ):
-    #     '''
-    #     This method is called once, after the client activates server.
-    #     It will compute and return server capabilities based on
-    #     registered features.
-    #     '''
+    def gf_initialize(self, initialize_params: InitializeParams):
+        '''
+        This method is called once, after the client activates server.
+        It will compute and return server capabilities based on
+        registered features.
+        '''
+        logger.debug('Language server initialized {}'
+                     .format(initialize_params._asdict()))
 
-    #     logger.debug(
-    #         f'Language server initialized with {processId} \
-    #                                            {rootUri} \
-    #                                            {rootPath} \
-    #                                            {initializationOptions}')
+        client_capabilities = initialize_params.capabilities
+        root_uri = initialize_params.rootUri
+        root_path = initialize_params.rootPath
+        workspace_folders = initialize_params.workspaceFolders or []
 
-    #     if rootUri is None:
-    #         rootUri = uris.from_fs_path(
-    #             rootPath) if rootPath is not None else ''
+        if root_uri is None:
+            root_uri = from_fs_path(root_path) if root_path is not None else ''
 
-    #     self.workspace = Workspace(rootUri, self._endpoint)
+        self.workspace = Workspace(root_uri, self)
 
-    #     workspace_folders = _kwargs.get('workspaceFolders') or []
-    #     for folder in workspace_folders:
-    #         self.workspace.add_folder(folder)
+        for folder in workspace_folders:
+            self.workspace.add_folder(folder)
 
-    #     client_capabilities = _kwargs.get('capabilities', {})
-
-    #     return {'capabilities': self._capabilities(client_capabilities)}
+        return {'capabilities': ServerCapabilities(self)}
 
     # def gf_initialized(self):
     #     '''

@@ -129,9 +129,9 @@ class Document(object):
 
 class Workspace(object):
 
-    def __init__(self, root_uri, endpoint):
+    def __init__(self, root_uri, lsp):
         self._root_uri = root_uri
-        self._endpoint = endpoint
+        self._lsp = lsp
         self._root_uri_scheme = urlparse(self._root_uri)[0]
         self._root_path = to_fs_path(self._root_uri)
         self._folders = {}
@@ -145,11 +145,11 @@ class Workspace(object):
         )
 
     def add_folder(self, folder):
-        self._folders[folder.get('uri')] = folder
+        self._folders[folder.uri] = folder
 
-    def apply_edit(self, edit):
-        return self._endpoint.request(WORKSPACE_APPLY_EDIT,
-                                      {'edit': edit})
+    # def apply_edit(self, edit):
+    #     return self.request(WORKSPACE_APPLY_EDIT,
+    #                         {'edit': edit})
 
     @property
     def documents(self):
@@ -173,10 +173,10 @@ class Workspace(object):
                 self._root_uri_scheme == 'file') and \
             os.path.exists(self._root_path)
 
-    def publish_diagnostics(self, doc_uri, diagnostics):
-        self._endpoint.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                              params={'uri': doc_uri,
-                                      'diagnostics': diagnostics})
+    # def publish_diagnostics(self, doc_uri, diagnostics):
+    #     self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+    #                 params={'uri': doc_uri,
+    #                         'diagnostics': diagnostics})
 
     def put_document(self, doc_uri, source, version=None):
         self._docs[doc_uri] = self._create_document(
@@ -199,13 +199,13 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    def show_message(self, message, msg_type=MessageType.Info):
-        self._endpoint.notify(WINDOW_SHOW_MESSAGE, params={
-                              'type': msg_type, 'message': message})
+    # def show_message(self, message, msg_type=MessageType.Info):
+    #     self._endpoint.notify(WINDOW_SHOW_MESSAGE, params={
+    #                           'type': msg_type, 'message': message})
 
-    def show_message_log(self, message, msg_type=MessageType.Log):
-        self._endpoint.notify(WINDOW_LOG_MESSAGE, params={
-                              'type': msg_type, 'message': message})
+    # def show_message_log(self, message, msg_type=MessageType.Log):
+    #     self._endpoint.notify(WINDOW_LOG_MESSAGE, params={
+    #                           'type': msg_type, 'message': message})
 
     def source_roots(self, document_path):
         """Return the source roots for the given document."""
