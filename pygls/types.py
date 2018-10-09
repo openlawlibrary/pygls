@@ -33,20 +33,11 @@ class _CodeActionLiteralSupport:
         self.codeActionKind = code_action_kind
 
 
-class _Rename:
-    def __init(self, dynamic_registration: bool, prepare_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.prepareSupport = prepare_support
-
-
-class _PublishDiagnostics:
-    def __init(self, related_information: bool):
-        self.relatedInformation = related_information
-
-
-class FoldingRange:
+class _FoldingRange:
     def __init(self, dynamic_registration: bool, range_limit: Num,
                line_folding_only: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.rangeLimit = range_limit
         self.lineFoldingOnly = line_folding_only
 
 
@@ -98,6 +89,17 @@ class _Hover:
         self.contentFormat = content_format
 
 
+class _PublishDiagnostics:
+    def __init(self, related_information: bool):
+        self.relatedInformation = related_information
+
+
+class _Rename:
+    def __init(self, dynamic_registration: bool, prepare_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.prepareSupport = prepare_support
+
+
 class _SignatureHelp:
     def __init__(self, dynamic_registration,
                  signature_information: List['MarkupKind']):
@@ -110,15 +112,16 @@ class _SignatureInformation:
         self.documentationFormat = documentation_format
 
 
+class _Symbol:
+    def __init__(self, dynamic_registration: bool,
+                 symbol_kind: '_SymbolKind'):
+        self.dynamicRegistration = dynamic_registration
+        self.symbolKind = symbol_kind
+
+
 class _SymbolKind:
     def __init__(self, value_set: 'SymbolKind'):
         self.valueSet = value_set
-
-
-class _Symbol:
-    def __init__(self, dynamic_registration: bool, symbol_kind: _SymbolKind):
-        self.dynamicRegistration = dynamic_registration
-        self.symbolKind = symbol_kind
 
 
 class _Synchronization:
@@ -318,6 +321,11 @@ class DiagnosticRelatedInformation:
         self.message = message
 
 
+class DidOpenTextDocumentParams:
+    def __init__(self, text_document: 'TextDocumentItem'):
+        self.textDocument = text_document
+
+
 class DocumentHighlightKind:
     Text = 1
     Read = 2
@@ -358,6 +366,11 @@ class InitializeParams:
         self.capabilities = None
         self.trace = None
         self.workspaceFolders = None
+
+
+class InitializeResult:
+    def __init__(self, capabilities: 'ServerCapabilities'):
+        self.capabilities = capabilities
 
 
 class InsertTextFormat:
@@ -468,11 +481,13 @@ class SaveOptions:
 
 
 class ServerCapabilities:
-    def __init__(self, lsp):
-        features = lsp.fm.features.keys()
-        feature_options = lsp.fm.feature_options
-        commands = lsp.fm.commands
-
+    def __init__(
+        self,
+        features,
+        feature_options,
+        commands,
+        client_capabilities
+    ):
         self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
         self.hoverProvider = HOVER in features
 
@@ -480,13 +495,13 @@ class ServerCapabilities:
             self.completionProvider = CompletionOptions(
                 resolve_provider=COMPLETION_ITEM_RESOLVE in features,
                 trigger_characters=feature_options.get(
-                    COMPLETION, {}).get('triggerCharacters', [])
+                    COMPLETION, {}).get('trigger_characters', [])
             )
 
         if SIGNATURE_HELP in features:
             self.signatureHelpProvider = SignatureHelpOptions(
                 trigger_characters=feature_options.get(
-                    SIGNATURE_HELP, {}).get('triggerCharacters', [])
+                    SIGNATURE_HELP, {}).get('trigger_characters', [])
             )
 
         self.definitionProvider = DEFINITION in features
@@ -514,11 +529,11 @@ class ServerCapabilities:
                 DocumentOnTypeFormattingOptions(
                     first_trigger_character=feature_options.get(
                         ON_TYPE_FORMATTING, {})
-                    .get('firstTriggerCharacter', ''),
+                    .get('first_trigger_character', ''),
 
                     more_trigger_character=feature_options.get(
                         ON_TYPE_FORMATTING, {})
-                    .get('moreTriggerCharacter', [])
+                    .get('more_trigger_character', [])
                 )
 
         self.renameProvider = RENAME in features
@@ -578,9 +593,54 @@ class SymbolKind:
 
 class TextDocumentClientCapabilities:
 
-    def __init__(self, synchronization: '_Synchronization',
-                 completion: '_Completion', hover: '_Hover'):
-        pass
+    def __init__(self,
+                 synchronization: _Synchronization,
+                 completion: _Completion,
+                 hover: _Hover,
+                 signature_help: _SignatureHelp,
+                 references: _DynamicRegistration,
+                 document_highlight: _DynamicRegistration,
+                 document_symbol: DocumentSymbol,
+                 formatting: _DynamicRegistration,
+                 range_formatting: _DynamicRegistration,
+                 on_type_formatting: _DynamicRegistration,
+                 definition: _DynamicRegistration,
+                 type_definition: _DynamicRegistration,
+                 implementation: _DynamicRegistration,
+                 code_action: _CodeAction,
+                 code_lens: _DynamicRegistration,
+                 document_link: _DynamicRegistration,
+                 color_provider: _DynamicRegistration,
+                 rename: _Rename,
+                 publish_diagnostics: _PublishDiagnostics,
+                 folding_range: _FoldingRange):
+        self.synchronization = synchronization
+        self.completion = completion
+        self.hover = hover
+        self.signatureHelp = signature_help
+        self.references = references
+        self.documentHighlight = document_highlight
+        self.formatting = formatting
+        self.rangeFormatting = range_formatting
+        self.onTypeFormatting = on_type_formatting
+        self.definition = definition
+        self.typeDefinition = type_definition
+        self.implementation = implementation
+        self.codeAction = code_action
+        self.codeLens = code_lens
+        self.documentLink = document_highlight
+        self.colorProvider = color_provider
+        self.rename = rename
+        self.publishDiagnostics = publish_diagnostics
+        self.foldingRange = folding_range
+
+
+class TextDocumentItem:
+    def __init__(self, uri: str, language_id: str, version: Num, text: str):
+        self.uri = uri
+        self.languageId = language_id
+        self.version = version
+        self.text = text
 
 
 class TextDocumentSyncKind:
