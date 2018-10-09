@@ -9,9 +9,10 @@ import logging
 import os
 import re
 
-from .types import _TextDocumentContentChangeEvent, MessageType, \
+from .types import _TextDocumentContentChangeEvent, MessageType, Num, \
     TextDocumentItem, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
-    WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE
+    WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE, \
+    WorkspaceFolder
 from .uris import to_fs_path, urlparse
 from .utils import find_parents
 
@@ -138,14 +139,17 @@ class Workspace(object):
         self._folders = {}
         self._docs = {}
 
-    def _create_document(self, doc_uri, source=None, version=None):
+    def _create_document(self,
+                         doc_uri: str,
+                         source: str = None,
+                         version: Num = None):
         path = to_fs_path(doc_uri)
         return Document(
             doc_uri, source=source, version=version,
             extra_sys_path=self.source_roots(path)
         )
 
-    def add_folder(self, folder):
+    def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
 
     # def apply_edit(self, edit):
@@ -158,9 +162,9 @@ class Workspace(object):
 
     @property
     def folders(self):
-        return self._folders.items()
+        return self._folders.values()
 
-    def get_document(self, doc_uri):
+    def get_document(self, doc_uri: str):
         """
         Return a managed document if-present,
         else create one pointing at disk.
@@ -188,9 +192,9 @@ class Workspace(object):
             version=text_document.version
         )
 
-    def remove_folder(self, folder):
+    def remove_folder(self, folder: WorkspaceFolder):
         try:
-            del self._folders[folder.get('uri')]
+            del self._folders[folder.uri]
         except:
             pass
 

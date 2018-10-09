@@ -7,13 +7,14 @@ import json
 import logging
 import traceback
 from collections import namedtuple
+from itertools import zip_longest
 from multiprocessing.pool import ThreadPool
-
 
 from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
 from .types import DidOpenTextDocumentParams, DidChangeTextDocumentParams, \
-    DidCloseTextDocumentParams, InitializeParams, InitializeResult, \
+    DidChangeWorkspaceFoldersParams, DidCloseTextDocumentParams, \
+    InitializeParams, InitializeResult, ExecuteCommandParams, \
     ServerCapabilities
 from .uris import from_fs_path
 from .workspace import Workspace
@@ -254,13 +255,23 @@ class LanguageServerProtocol(JsonRPCProtocol):
 
         self._shutdown = False
 
+        # TODO: Naming convention for builtin methods for easier registration
         self.fm.add_builtin_feature('initialize', self.gf_initialize)
-        self.fm.add_builtin_feature('textDocument/didOpen',
-                                    self.gf_text_document__did_open)
-        self.fm.add_builtin_feature('textDocument/didChange',
-                                    self.gf_text_document__did_change)
-        self.fm.add_builtin_feature('textDocument/didClose',
-                                    self.gf_text_document__did_close)
+        self.fm.add_builtin_feature(
+            'textDocument/didOpen',
+            self.gf_text_document__did_open)
+        self.fm.add_builtin_feature(
+            'textDocument/didChange',
+            self.gf_text_document__did_change)
+        self.fm.add_builtin_feature(
+            'workspace/didChangeWorkspaceFolders',
+            self.gf_workspace__did_change_workspace_folders)
+        self.fm.add_builtin_feature(
+            'textDocument/didClose',
+            self.gf_text_document__did_close)
+        self.fm.add_builtin_feature(
+            'workspace/executeCommand',
+            self.gf_workspace__execute_command)
 
         # self._register_builtin_features()
 
@@ -373,32 +384,37 @@ class LanguageServerProtocol(JsonRPCProtocol):
         '''
         self.workspace.put_document(params.textDocument)
 
-    # def gf_workspace__did_change_workspace_folders(self, event=None):
-    #     '''
-    #     Adds/Removes folders from the workspace
-    #     '''
-    #     logger.info(f'Workspace folders changed: {event}')
+    def gf_workspace__did_change_workspace_folders(
+            self,
+            params: DidChangeWorkspaceFoldersParams):
+        '''
+        Adds/Removes folders from the workspace
+        '''
+        logger.info('Workspace folders changed: {}'.format(params._asdict()))
 
-    #     added_folders = event['added'] or []
-    #     removed_folders = event['removed'] or []
+        added_folders = params.event.added or []
+        removed_folders = params.event.removed or []
 
-    #     for f_add, f_remove in zip_longest(added_folders, removed_folders):
-    #         if f_add:
-    #             self.workspace.add_folder(f_add)
-    #         if f_remove:
-    #             self.workspace.remove_folder(f_remove)
+        for f_add, f_remove in zip_longest(added_folders, removed_folders):
+            if f_add:
+                self.workspace.add_folder(f_add)
+            if f_remove:
+                self.workspace.remove_folder(f_remove)
 
-    # def gf_workspace__execute_command(self, command=None, arguments=None):
-    #     '''
-    #     Executes commands with passed arguments and returns a value.
-    #     '''
-    #     try:
-    #         return self.commands[command](self, arguments)
-    #     except Exception as ex:
-    #         ex_msg = repr(ex)
-    # logger.error(f"Error while executing command '{command}': {ex_msg}")
-    #         self.workspace.show_message(
-    #             f"Error while executing command: {ex_msg}")
+    def gf_workspace__execute_command(self, params: ExecuteCommandParams):
+        '''
+        Executes commands with passed arguments and returns a value.
+        '''
+        command = params.command
+        args = params.arguments
+        try:
+            # Same execution logic as request (create execution functions)
+            return self.fm.commands[command](self, args)
+        except:
+            logger.error('Error while executing command `{}`: {}'
+                         .format(command, traceback.format_exc()))
+            # self.workspace.show_message(
+            #     'Error while executing command: {}'.format(command))
 
     # def send_notification(self, notification_name, params):
     #     self._endpoint.notify(notification_name, params)
