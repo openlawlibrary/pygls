@@ -12,7 +12,7 @@ from multiprocessing.pool import ThreadPool
 
 from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
-from .types import InitializeParams, ServerCapabilities
+from .types import InitializeParams, InitializeResult, ServerCapabilities
 from .uris import from_fs_path
 from .workspace import Workspace
 
@@ -296,14 +296,21 @@ class LanguageServerProtocol(JsonRPCProtocol):
     #     self._jsonrpc_stream_reader.close()
     #     self._jsonrpc_stream_writer.close()
 
+    def gf_exit(self):
+        '''
+        Clean resources
+        '''
+        self.thread_pool.terminate()
+        # TODO: Shutdown server
+
     def gf_initialize(self, initialize_params: InitializeParams):
         '''
         This method is called once, after the client activates server.
         It will compute and return server capabilities based on
         registered features.
         '''
-        logger.debug('Language server initialized {}'
-                     .format(initialize_params._asdict()))
+        logger.info('Language server initialized {}'
+                    .format(initialize_params._asdict()))
 
         client_capabilities = initialize_params.capabilities
         root_uri = initialize_params.rootUri
@@ -318,19 +325,22 @@ class LanguageServerProtocol(JsonRPCProtocol):
         for folder in workspace_folders:
             self.workspace.add_folder(folder)
 
-        return {'capabilities': ServerCapabilities(self)}
+        server_capabilities = ServerCapabilities(self.fm.features.keys(),
+                                                 self.fm.feature_options,
+                                                 self.fm.commands,
+                                                 client_capabilities)
 
-    # def gf_initialized(self):
-    #     '''
-    #     Notification that everything works well.
-    #     '''
-    #     pass
+        logger.debug('Server capabilities: {}'
+                     .format(server_capabilities.__dict__))
 
-    # def gf_shutdown(self, **_kwargs):
-    #     '''
-    #     Request from client which asks server to shutdown.
-    #     '''
-    #     self._shutdown = True
+        return InitializeResult(server_capabilities)
+
+    def gf_shutdown(self):
+        '''
+        Request from client which asks server to shutdown.
+        '''
+        self._shutdown = True
+        return None
 
     # def gf_text_document__did_change(self, contentChanges=None,
     #                                  textDocument=None, **_kwargs):
@@ -351,13 +361,13 @@ class LanguageServerProtocol(JsonRPCProtocol):
     #     '''
     #     self.workspace.rm_document(textDocument['uri'])
 
-    # def gf_text_document__did_open(self, textDocument=None, **_kwargs):
-    #     '''
-    #     Puts document to workspace.
-    #     '''
-    #     self.workspace.put_document(doc_uri=textDocument['uri'],
-    #                                 source=textDocument['text'],
-    #                                 version=textDocument.get('version'))
+    def gf_text_document__did_open(self, textDocument=None, **_kwargs):
+        '''
+        Puts document to the workspace.
+        '''
+        self.workspace.put_document(doc_uri=textDocument['uri'],
+                                    source=textDocument['text'],
+                                    version=textDocument.get('version'))
 
     # def gf_text_document__did_save(self, textDocument=None, **_kwargs):
     #     '''
