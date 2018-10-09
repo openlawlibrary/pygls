@@ -12,7 +12,9 @@ from multiprocessing.pool import ThreadPool
 
 from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
-from .types import InitializeParams, InitializeResult, ServerCapabilities
+from .types import DidOpenTextDocumentParams, DidChangeTextDocumentParams, \
+    DidCloseTextDocumentParams, InitializeParams, InitializeResult, \
+    ServerCapabilities
 from .uris import from_fs_path
 from .workspace import Workspace
 
@@ -253,6 +255,12 @@ class LanguageServerProtocol(JsonRPCProtocol):
         self._shutdown = False
 
         self.fm.add_builtin_feature('initialize', self.gf_initialize)
+        self.fm.add_builtin_feature('textDocument/didOpen',
+                                    self.gf_text_document__did_open)
+        self.fm.add_builtin_feature('textDocument/didChange',
+                                    self.gf_text_document__did_change)
+        self.fm.add_builtin_feature('textDocument/didClose',
+                                    self.gf_text_document__did_close)
 
         # self._register_builtin_features()
 
@@ -342,50 +350,28 @@ class LanguageServerProtocol(JsonRPCProtocol):
         self._shutdown = True
         return None
 
-    # def gf_text_document__did_change(self, contentChanges=None,
-    #                                  textDocument=None, **_kwargs):
-    #     '''
-    #     Updates document's content.
-    #     (Incremental (from server capabilities); not configurable for now)
-    #     '''
-    #     for change in contentChanges:
-    #         self.workspace.update_document(
-    #             textDocument['uri'],
-    #             change,
-    #             version=textDocument.get('version')
-    #         )
+    def gf_text_document__did_change(self,
+                                     params: DidChangeTextDocumentParams):
+        '''
+        Updates document's content.
+        (Incremental (from server capabilities); not configurable for now)
+        '''
+        for change in params.contentChanges:
+            self.workspace.update_document(params.textDocument, change)
 
-    # def gf_text_document__did_close(self, textDocument=None, **_kwargs):
-    #     '''
-    #     Removes document from workspace.
-    #     '''
-    #     self.workspace.rm_document(textDocument['uri'])
+    def gf_text_document__did_close(self,
+                                    params: DidCloseTextDocumentParams):
+        '''
+        Removes document from workspace.
+        '''
+        self.workspace.rm_document(params.textDocument.uri)
 
-    def gf_text_document__did_open(self, textDocument=None, **_kwargs):
+    def gf_text_document__did_open(self,
+                                   params: DidOpenTextDocumentParams):
         '''
         Puts document to the workspace.
         '''
-        self.workspace.put_document(doc_uri=textDocument['uri'],
-                                    source=textDocument['text'],
-                                    version=textDocument.get('version'))
-
-    # def gf_text_document__did_save(self, textDocument=None, **_kwargs):
-    #     '''
-    #     Does nothing.
-    #     '''
-    #     pass
-
-    # def gf_text_document__rename(
-    #     self,
-    #     textDocument=None,
-    #     position=None,
-    #     newName=None,
-    #     **_kwargs
-    # ):
-    #     '''
-    #     Changes document name in the workspace
-    #     '''
-    #     return self.rename(textDocument['uri'], position, newName)
+        self.workspace.put_document(params.textDocument)
 
     # def gf_workspace__did_change_workspace_folders(self, event=None):
     #     '''

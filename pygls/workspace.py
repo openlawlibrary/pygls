@@ -9,7 +9,8 @@ import logging
 import os
 import re
 
-from .types import MessageType, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
+from .types import _TextDocumentContentChangeEvent, MessageType, \
+    TextDocumentItem, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
     WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE
 from .uris import to_fs_path, urlparse
 from .utils import find_parents
@@ -43,20 +44,20 @@ class Document(object):
     def __str__(self):
         return str(self.uri)
 
-    def apply_change(self, change):
+    def apply_change(self, change: _TextDocumentContentChangeEvent):
         """Apply a change to the document."""
-        text = change['text']
-        change_range = change.get('range')
+        text = change.text
+        change_range = change.range
 
         if not change_range:
             # The whole file has changed
             self._source = text
             return
 
-        start_line = change_range['start']['line']
-        start_col = change_range['start']['character']
-        end_line = change_range['end']['line']
-        end_col = change_range['end']['character']
+        start_line = change_range.start.line
+        start_col = change_range.start.character
+        end_line = change_range.end.line
+        end_col = change_range.end.character
 
         # Check for an edit occuring at the very end of the file
         if start_line == len(self.lines):
@@ -178,9 +179,14 @@ class Workspace(object):
     #                 params={'uri': doc_uri,
     #                         'diagnostics': diagnostics})
 
-    def put_document(self, doc_uri, source, version=None):
+    def put_document(self, text_document: TextDocumentItem):
+        doc_uri = text_document.uri
+
         self._docs[doc_uri] = self._create_document(
-            doc_uri, source=source, version=version)
+            doc_uri,
+            source=text_document.text,
+            version=text_document.version
+        )
 
     def remove_folder(self, folder):
         try:
@@ -188,7 +194,7 @@ class Workspace(object):
         except:
             pass
 
-    def rm_document(self, doc_uri):
+    def rm_document(self, doc_uri: str):
         self._docs.pop(doc_uri)
 
     @property
@@ -213,6 +219,9 @@ class Workspace(object):
             self._root_path, document_path, ['setup.py']) or []
         return [os.path.dirname(setup_py) for setup_py in files]
 
-    def update_document(self, doc_uri, change, version=None):
+    def update_document(self,
+                        text_doc: TextDocumentItem,
+                        change: _TextDocumentContentChangeEvent):
+        doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
-        self._docs[doc_uri].version = version
+        self._docs[doc_uri].version = text_doc.version

@@ -133,6 +133,24 @@ class _Synchronization:
         self.didSave = did_save
 
 
+class _TextDocumentContentChangeEvent:
+    def __init__(self, range: 'Range', range_length: Num, text: str):
+        self.range = range
+        self.range_length = range_length
+        self.text = text
+
+
+class _TextDocumentIdentifier:
+    def __init__(self, uri: str):
+        self.uri = uri
+
+
+class _VersionedTextDocumentIdentifier(_TextDocumentIdentifier):
+    def __init__(self, uri: str, version: Num):
+        super().__init__(uri)
+        self.version = version
+
+
 '''
 Methods
 '''
@@ -322,6 +340,18 @@ class DiagnosticRelatedInformation:
 
 
 class DidOpenTextDocumentParams:
+    def __init__(self, text_document: 'TextDocumentItem'):
+        self.textDocument = text_document
+
+
+class DidChangeTextDocumentParams:
+    def __init__(self, text_document: _VersionedTextDocumentIdentifier,
+                 content_changes: List[_TextDocumentContentChangeEvent]):
+        self.textDocument = text_document
+        self.contentChanges = content_changes
+
+
+class DidCloseTextDocumentParams:
     def __init__(self, text_document: 'TextDocumentItem'):
         self.textDocument = text_document
 
