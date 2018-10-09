@@ -151,6 +151,14 @@ class _VersionedTextDocumentIdentifier(_TextDocumentIdentifier):
         self.version = version
 
 
+class _WorkspaceFoldersChangeEvent:
+    def __init__(self,
+                 added: List['WorkspaceFolder'],
+                 removed: List['WorkspaceFolder']):
+        self.added = added
+        self.removed = removed
+
+
 '''
 Methods
 '''
@@ -351,6 +359,11 @@ class DidChangeTextDocumentParams:
         self.contentChanges = content_changes
 
 
+class DidChangeWorkspaceFoldersParams:
+    def __init__(self, events: _WorkspaceFoldersChangeEvent):
+        self.events = events
+
+
 class DidCloseTextDocumentParams:
     def __init__(self, text_document: 'TextDocumentItem'):
         self.textDocument = text_document
@@ -424,6 +437,12 @@ class MessageType:
     Warning = 2
     Info = 3
     Log = 4
+
+
+class ExecuteCommandParams:
+    def __init__(self, command: str, arguments: List[object] = None):
+        self.command = command
+        self.arguments = arguments
 
 
 class Position:
@@ -718,3 +737,9 @@ class WorkspaceEdit:
         self.documentChanges = document_changes
         self.resourceOperations = resource_operations
         self.failureHandling = failure_handling
+
+
+class WorkspaceFolder:
+    def __init__(self, uri: str, name: str):
+        self.uri = uri
+        self.name = name
