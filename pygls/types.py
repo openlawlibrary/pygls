@@ -4,7 +4,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from typing import List, Union
+from typing import List, Optional, Union
 '''
 Some Language Server Protocol constants
 https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
@@ -314,6 +314,19 @@ class CompletionOptions:
     def __init__(self, resolve_provider=None, trigger_characters=None):
         self.resolveProvider = resolve_provider
         self.triggerCharacters = trigger_characters
+
+
+class ConfigurationItem:
+    def __init__(self,
+                 scope_uri: Optional[str] = None,
+                 section: Optional[str] = None):
+        self.scopeUri = scope_uri
+        self.section = section
+
+
+class ConfigurationParams:
+    def __init__(self, items: List[ConfigurationItem]):
+        self.items = items
 
 
 class DiagnosticSeverity:
