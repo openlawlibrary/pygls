@@ -14,6 +14,26 @@ import json
 log = logging.getLogger(__name__)
 
 
+def call_user_feature(base_func, method_name):
+    '''
+    Wraps generic LSP features and calls user registered
+    feature immediately after it.
+    '''
+    @functools.wraps(base_func)
+    def decorator(self, *args, **kwargs):
+        ret_val = base_func(self, *args, **kwargs)
+
+        try:
+            user_func = self.fm.features[method_name]
+            self._execute_notification(user_func, self, *args, **kwargs)
+        except:
+            pass
+
+        return ret_val
+
+    return decorator
+
+
 def clip_column(column, lines, line_number):
     # Normalize the position as per the LSP
     # that accepts character positions >line length
