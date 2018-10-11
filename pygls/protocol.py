@@ -5,6 +5,7 @@
 import asyncio
 import json
 import logging
+import re
 import traceback
 import uuid
 from collections import namedtuple
@@ -80,6 +81,8 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     This class provides bidirectional communication which is needed for LSP.
     '''
+    BODY_PATTERN = re.compile(b'\{.+?\}.*')
+
     CANCEL_METHOD = '$/cancelRequest'
 
     DEFAULT_CHARSET = 'utf-8'
@@ -241,16 +244,14 @@ class JsonRPCProtocol(asyncio.Protocol):
         '''Method from base class, called when server receives the data'''
         logger.debug('Received {}'.format(data))
 
-        if not data:
-            return
-
-        try:
-            _, body = data.decode(self.charset).split('\r\n\r\n')
-
-            self._procedure_handler(
-                json.loads(body, object_hook=deserialize_message))
-        except:
-            pass
+        for part in data.split(b'Content-Length'):
+            try:
+                body = JsonRPCProtocol.BODY_PATTERN.findall(part)[0]
+                self._procedure_handler(
+                    json.loads(body.decode(self.charset),
+                               object_hook=deserialize_message))
+            except:
+                pass
 
     def notify(self, method: str, params=None):
         '''
