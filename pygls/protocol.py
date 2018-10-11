@@ -20,7 +20,7 @@ from .types import DidOpenTextDocumentParams, DidChangeTextDocumentParams, \
     InitializeParams, InitializeResult, ExecuteCommandParams, \
     ServerCapabilities
 from .uris import from_fs_path
-from .utils import to_lsp_name
+from .utils import call_user_feature, to_lsp_name
 from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -164,14 +164,14 @@ class JsonRPCProtocol(asyncio.Protocol):
                      .format(msg_id, result))
         future.set_result(result)
 
-    def _execute_notification(self, handler, params):
+    def _execute_notification(self, handler, *params):
         if asyncio.iscoroutinefunction(handler):
-            asyncio.ensure_future(handler(params))
+            asyncio.ensure_future(handler(*params))
         else:
             if getattr(handler, 'execute_in_thread', False):
-                self.get_thread_pool().apply_async(handler, (params, ))
+                self.get_thread_pool().apply_async(handler, (*params, ))
             else:
-                handler(params)
+                handler(*params)
 
     def _execute_request(self, handler, params, msg_id):
         if asyncio.iscoroutinefunction(handler):
@@ -321,7 +321,28 @@ class JsonRPCProtocol(asyncio.Protocol):
         return decorator
 
 
-class LanguageServerProtocol(JsonRPCProtocol):
+class LSPMeta(type):
+    '''
+    Metaclass for language server protocol.
+    Purpose:
+        Wrap LSP base methods with decorator which will call the user
+        registered method with the same LSP name.
+    '''
+
+    def __new__(self, cls_name, cls_bases, cls):
+        for attr_name, attr_val in cls.items():
+            if callable(attr_val) and attr_name.startswith('bf_'):
+                method_name = to_lsp_name(attr_name[3:])
+                cls[attr_name] = call_user_feature(attr_val, method_name)
+
+                logger.debug('Added decorator for lsp method: {}'
+                             .format(attr_name))
+
+        return super().__new__(
+            self, cls_name, cls_bases, cls)
+
+
+class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     CONTENT_TYPE = 'application/vscode-jsonrpc'
 
     def __init__(self):
