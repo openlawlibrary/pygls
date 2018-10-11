@@ -81,7 +81,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     This class provides bidirectional communication which is needed for LSP.
     '''
-    BODY_PATTERN = re.compile(b'\{.+?\}.*')
+    BODY_PATTERN = re.compile(rb'\{.+?\}.*')
 
     CANCEL_METHOD = '$/cancelRequest'
 
