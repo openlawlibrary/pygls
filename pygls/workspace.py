@@ -9,8 +9,9 @@ import logging
 import os
 import re
 
-from .types import _TextDocumentContentChangeEvent, MessageType, Num, \
-    TextDocumentItem, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
+from .types import _TextDocumentContentChangeEvent, ApplyWorkspaceEditParams, \
+    LogMessageParams, MessageType, Num, PublishDiagnosticsParams, \
+    ShowMessageParams, TextDocumentItem, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
     WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE, \
     WorkspaceFolder
 from .uris import to_fs_path, urlparse
@@ -152,9 +153,9 @@ class Workspace(object):
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
 
-    # def apply_edit(self, edit):
-    #     return self.request(WORKSPACE_APPLY_EDIT,
-    #                         {'edit': edit})
+    def apply_edit(self, edit, label=None):
+        return self._lsp.request(WORKSPACE_APPLY_EDIT,
+                                 ApplyWorkspaceEditParams(edit, label))
 
     @property
     def documents(self):
@@ -178,10 +179,9 @@ class Workspace(object):
                 self._root_uri_scheme == 'file') and \
             os.path.exists(self._root_path)
 
-    # def publish_diagnostics(self, doc_uri, diagnostics):
-    #     self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-    #                 params={'uri': doc_uri,
-    #                         'diagnostics': diagnostics})
+    def publish_diagnostics(self, doc_uri, diagnostics):
+        self._lsp.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                         PublishDiagnosticsParams(doc_uri, diagnostics))
 
     def put_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri
@@ -209,13 +209,13 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    # def show_message(self, message, msg_type=MessageType.Info):
-    #     self._endpoint.notify(WINDOW_SHOW_MESSAGE, params={
-    #                           'type': msg_type, 'message': message})
+    def show_message(self, message, msg_type=MessageType.Info):
+        self._lsp.notify(WINDOW_SHOW_MESSAGE,
+                         ShowMessageParams(msg_type, message))
 
-    # def show_message_log(self, message, msg_type=MessageType.Log):
-    #     self._endpoint.notify(WINDOW_LOG_MESSAGE, params={
-    #                           'type': msg_type, 'message': message})
+    def show_message_log(self, message, msg_type=MessageType.Log):
+        self._lsp.notify(WINDOW_LOG_MESSAGE,
+                         LogMessageParams(msg_type, message))
 
     def source_roots(self, document_path):
         """Return the source roots for the given document."""

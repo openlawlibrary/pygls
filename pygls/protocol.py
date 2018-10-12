@@ -26,6 +26,23 @@ from .workspace import Workspace
 logger = logging.getLogger(__name__)
 
 
+class JsonRPCNotification:
+    '''
+    Used for constructing notification message.
+
+    Attributes:
+        id(str): Message id
+        jsonrpc(str): Version of a json rpc protocol
+        method(str): Name of the method that should be executed
+        params(dict): Parameters that should be passed to the method
+    '''
+
+    def __init__(self, jsonrpc=None, method=None, params=None):
+        self.jsonrpc = jsonrpc
+        self.method = method
+        self.params = params
+
+
 class JsonRPCRequestMessage:
     '''
     Used for deserialization of client message from json to object.
@@ -64,10 +81,13 @@ class JsonRPCResponseMessage:
 
 def deserialize_message(data):
     if 'jsonrpc' in data:
-        if 'method' in data:
-            return JsonRPCRequestMessage(**data)
+        if 'id' in data:
+            if 'method' in data:
+                return JsonRPCRequestMessage(**data)
+            else:
+                return JsonRPCResponseMessage(**data)
         else:
-            return JsonRPCResponseMessage(**data)
+            return JsonRPCNotification(**data)
 
     return namedtuple('Object',
                       data.keys())(*data.values())
@@ -85,24 +105,20 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     CANCEL_METHOD = '$/cancelRequest'
 
-    DEFAULT_CHARSET = 'utf-8'
-    DEFAULT_CONTENT_TYPE = 'application/jsonrpc'
+    CHARSET = 'utf-8'
+    CONTENT_TYPE = 'application/vscode-jsonrpc'
     VERSION = '2.0'
 
-    def __init__(self, **kwargs):
+    def __init__(self, server):
+        # Lazy initialized
+        self._pool = None
+        self._server = server
+
         self._client_request_futures = {}
         self._server_request_futures = {}
 
-        self.charset = kwargs.get('charset',
-                                  self.DEFAULT_CHARSET)
-        self.content_type = kwargs.get('content_type',
-                                       self.DEFAULT_CONTENT_TYPE)
-
         self.fm = FeatureManager()
         self.transport = None
-
-        # Lazy initialized
-        self._pool = None
 
     def __call__(self):
         return self
@@ -202,13 +218,13 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.warn('Unknown message {}'.format(message))
             return
 
-        if message.id is None:
+        if isinstance(message, JsonRPCNotification):
             logger.debug('Notification message received.')
             self._handle_notification(message.method, message.params)
-        elif getattr(message, 'method', None) is None:
+        elif isinstance(message, JsonRPCResponseMessage):
             logger.debug('Response message received.')
             self._handle_response(message.id, message.result, message.error)
-        else:
+        elif isinstance(message, JsonRPCRequestMessage):
             logger.debug('Request message received.')
             self._handle_request(message.id, message.method, message.params)
 
@@ -219,20 +235,20 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         try:
             body = json.dumps(data, default=lambda o: o.__dict__)
-            content_length = len(body.encode(self.charset)) if body else 0
+            content_length = len(body.encode(self.CHARSET)) if body else 0
 
             response = (
                 'Content-Length: {}\r\n'
                 'Content-Type: {}; charset={}\r\n\r\n'
                 '{}'.format(content_length,
-                            self.content_type,
-                            self.charset,
+                            self.CONTENT_TYPE,
+                            self.CHARSET,
                             body)
             )
 
             logger.info('Sending data: {}'.format(body))
 
-            self.transport.write(response.encode(self.charset))
+            self.transport.write(response.encode(self.CHARSET))
         except:
             logger.error(traceback.format_exc())
 
@@ -248,7 +264,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             try:
                 body = JsonRPCProtocol.BODY_PATTERN.findall(part)[0]
                 self._procedure_handler(
-                    json.loads(body.decode(self.charset),
+                    json.loads(body.decode(self.CHARSET),
                                object_hook=deserialize_message))
             except:
                 pass
@@ -259,8 +275,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         '''
         logger.debug('Sending notification: {} {}'.format(method, params))
 
-        request = JsonRPCRequestMessage(
-            id=None,
+        request = JsonRPCNotification(
             jsonrpc=JsonRPCProtocol.VERSION,
             method=method,
             params=params
@@ -338,19 +353,16 @@ class LSPMeta(type):
                 logger.debug('Added decorator for lsp method: {}'
                              .format(attr_name))
 
-        return super().__new__(
-            self, cls_name, cls_bases, cls)
+        return super().__new__(self, cls_name, cls_bases, cls)
 
 
 class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
-    CONTENT_TYPE = 'application/vscode-jsonrpc'
-
-    def __init__(self):
-        super().__init__(content_type=LanguageServerProtocol.CONTENT_TYPE)
-
-        self.workspace = None
+    def __init__(self, server):
+        super().__init__(server)
 
         self._shutdown = False
+
+        self.workspace = None
 
         self._register_builtin_features()
 
@@ -388,12 +400,13 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         else:
             return self.request('workspace/configuration', params)
 
-    def bf_exit(self):
+    def bf_exit(self, *args):
         '''
         Stops the server process. Should only work if _shutdown flag is setted
         '''
+        self.transport.close()
         self.get_thread_pool().terminate()
-        # TODO: Shutdown server
+        self._server.shutdown()
 
     def bf_initialize(self, initialize_params: InitializeParams):
         '''
@@ -427,7 +440,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         return InitializeResult(server_capabilities)
 
-    def bf_shutdown(self):
+    def bf_shutdown(self, *args):
         '''
         Request from client which asks server to shutdown.
         '''

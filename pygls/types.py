@@ -229,6 +229,12 @@ Language Server Protocol classes
 '''
 
 
+class ApplyWorkspaceEditParams:
+    def __init__(self, edit: 'WorkspaceEdit', label: Optional[str]):
+        self.edit = edit
+        self.label = label
+
+
 class ClientCapabilities:
     def __init__(self, workspace: 'WorkspaceClientCapabilities',
                  text_document: 'TextDocumentClientCapabilities',
@@ -440,6 +446,12 @@ class Location:
         self.range = range
 
 
+class LogMessageParams:
+    def __init__(self, type: Num, message: str):
+        self.type = type
+        self.message = message
+
+
 class MarkupKind:
     PlainText = 'plaintext'
     Markdown = 'markdown'
@@ -620,6 +632,12 @@ class ServerCapabilities:
 
     def __repr__(self):
         return '{}( {} )'.format(type(self).__name__, self.__dict__)
+
+
+class ShowMessageParams:
+    def __init__(self, type: Num, message: str):
+        self.type = type
+        self.message = message
 
 
 class SignatureHelpOptions:
