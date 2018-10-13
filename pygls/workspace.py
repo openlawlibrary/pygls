@@ -9,11 +9,11 @@ import logging
 import os
 import re
 
+from .features import TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
+    WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE
 from .types import _TextDocumentContentChangeEvent, ApplyWorkspaceEditParams, \
     LogMessageParams, MessageType, Num, PublishDiagnosticsParams, \
-    ShowMessageParams, TextDocumentItem, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, \
-    WORKSPACE_APPLY_EDIT, WINDOW_SHOW_MESSAGE, WINDOW_LOG_MESSAGE, \
-    WorkspaceFolder
+    ShowMessageParams, TextDocumentItem, WorkspaceFolder
 from .uris import to_fs_path, urlparse
 from .utils import find_parents
 

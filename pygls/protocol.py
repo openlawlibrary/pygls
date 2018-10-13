@@ -15,6 +15,7 @@ from multiprocessing.pool import ThreadPool
 
 from .exceptions import ThreadDecoratorError
 from .feature_manager import FeatureManager
+from .features import WORKSPACE_EXECUTE_COMMAND
 from .types import DidOpenTextDocumentParams, DidChangeTextDocumentParams, \
     DidChangeWorkspaceFoldersParams, DidCloseTextDocumentParams, \
     InitializeParams, InitializeResult, ExecuteCommandParams, \
@@ -156,7 +157,12 @@ class JsonRPCProtocol(asyncio.Protocol):
         '''Handles a request from the client.'''
         try:
             handler = self.fm.get_feature_handler(method_name)
-            self._execute_request(handler, params, msg_id)
+
+            # workspace/executeCommand is a special case
+            if method_name == WORKSPACE_EXECUTE_COMMAND:
+                handler(params, msg_id)
+            else:
+                self._execute_request(handler, params, msg_id)
         except Exception:
             logger.exception('Failed to handle request {} {} {}'
                              .format(msg_id, method_name, params))
@@ -487,18 +493,19 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if f_remove:
                 self.workspace.remove_folder(f_remove)
 
-    def bf_workspace__execute_command(self, params: ExecuteCommandParams):
+    def bf_workspace__execute_command(self,
+                                      params: ExecuteCommandParams,
+                                      msg_id):
         '''
         Executes commands with passed arguments and returns a value.
         '''
         command = params.command
         args = params.arguments
         try:
-            # Same execution logic as request (create execution functions)
-            handler = self.fm.commands[command]
-            self.get_thread_pool().apply_async(handler)
+            cmd_handler = self.fm.commands[command]
+            self._execute_request(cmd_handler, args, msg_id)
         except:
             logger.error('Error while executing command `{}`: {}'
                          .format(command, traceback.format_exc()))
-            # self.workspace.show_message(
-            #     'Error while executing command: {}'.format(command))
+            self.workspace.show_message('Error while executing command: {} {}'
+                                        .format(command, args))
