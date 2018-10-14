@@ -104,7 +104,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     '''
     BODY_PATTERN = re.compile(rb'\{.+?\}.*')
 
-    CANCEL_METHOD = '$/cancelRequest'
+    CANCEL_REQUEST = '$/cancelRequest'
 
     CHARSET = 'utf-8'
     CONTENT_TYPE = 'application/vscode-jsonrpc'
@@ -139,12 +139,12 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _handle_notification(self, method_name, params):
         '''Handles a notification from the client.'''
-        if method_name == JsonRPCProtocol.CANCEL_METHOD:
+        if method_name == JsonRPCProtocol.CANCEL_REQUEST:
             self._handle_cancel_notification(params.get('id'))
             return
 
         try:
-            handler = self.fm.get_feature_handler(method_name)
+            handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
         except KeyError:
             logger.warn('Ignoring notification for unknown method {}'
@@ -156,13 +156,13 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _handle_request(self, msg_id, method_name, params):
         '''Handles a request from the client.'''
         try:
-            handler = self.fm.get_feature_handler(method_name)
+            handler = self._get_handler(method_name)
 
             # workspace/executeCommand is a special case
             if method_name == WORKSPACE_EXECUTE_COMMAND:
                 handler(params, msg_id)
             else:
-                self._execute_request(handler, params, msg_id)
+                self._execute_request(msg_id, handler, params)
         except Exception:
             logger.exception('Failed to handle request {} {} {}'
                              .format(msg_id, method_name, params))
@@ -195,28 +195,21 @@ class JsonRPCProtocol(asyncio.Protocol):
             else:
                 handler(*params)
 
-    def _execute_request(self, handler, params, msg_id):
+    def _execute_request(self, msg_id, handler, params):
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(params))
             self._client_request_futures[msg_id] = future
             future.add_done_callback(
-                lambda res: self._send_data(res.result()))
+                lambda res: self._send_response(msg_id, res.result()))
         else:
             # Can't be canceled
             if getattr(handler, 'execute_in_thread', False):
                 self.get_thread_pool().apply_async(
-                    handler, (params, ),
-                    callback=lambda res: self._send_data(
-                        JsonRPCResponseMessage(msg_id,
-                                               JsonRPCProtocol.VERSION,
-                                               res,
-                                               None)))
+                    handler, (*params, ),
+                    callback=lambda res: self._send_response(msg_id,
+                                                             res.result()))
             else:
-                self._send_data(
-                    JsonRPCResponseMessage(msg_id,
-                                           JsonRPCProtocol.VERSION,
-                                           handler(params),
-                                           None))
+                self._send_response(msg_id, handler(params))
 
     def _procedure_handler(self, message):
         '''Delegates message to handlers depending on message type'''
@@ -233,6 +226,20 @@ class JsonRPCProtocol(asyncio.Protocol):
         elif isinstance(message, JsonRPCRequestMessage):
             logger.debug('Request message received.')
             self._handle_request(message.id, message.method, message.params)
+
+    def _get_handler(self, feature_name):
+        '''
+        Returns builtin feature by name if exists. If not, user defined
+        feature will be returned.
+        '''
+        try:
+            return self.fm.builtin_features[feature_name]
+        except:
+            try:
+                return self.fm.features[feature_name]
+            except:
+                # TODO: raise MethodNotFoundError
+                raise Exception()
 
     def _send_data(self, data):
         '''Sends data to the client'''
@@ -257,6 +264,48 @@ class JsonRPCProtocol(asyncio.Protocol):
             self.transport.write(response.encode(self.CHARSET))
         except:
             logger.error(traceback.format_exc())
+
+    def _send_response(self, msg_id, result=None, error=None):
+        '''Sends a JSON RPC response to the client.
+
+        Args:
+            msg_id (str): Id from request
+            result (any): Result returned by handler
+            error (any): Error returned by handler
+        '''
+        response = JsonRPCResponseMessage(msg_id,
+                                          JsonRPCProtocol.VERSION,
+                                          result,
+                                          error)
+        self._send_data(response)
+
+    def _send_request(self, method: str, params=None):
+        '''Sends a JSON RPC request to the client.
+
+        Args:
+            method (str): The method name of the message to send
+            params (any): The payload of the message
+
+        Returns:
+            Future that will resolve once a response has been received
+        '''
+        msg_id = str(uuid.uuid4())
+        logger.debug('Sending request with id {}: {} {}'
+                     .format(msg_id, method, params))
+
+        request = JsonRPCRequestMessage(
+            id=msg_id,
+            jsonrpc=JsonRPCProtocol.VERSION,
+            method=method,
+            params=params
+        )
+
+        future = Future()
+
+        self._server_request_futures[msg_id] = future
+        self._send_data(request)
+
+        return future
 
     def connection_made(self, transport: asyncio.Transport):
         '''Method from base class, called when connection is established'''
@@ -288,34 +337,6 @@ class JsonRPCProtocol(asyncio.Protocol):
         )
 
         self._send_data(request)
-
-    def request(self, method: str, params=None):
-        '''Sends a JSON RPC request to the client.
-
-        Args:
-            method (str): The method name of the message to send
-            params (any): The payload of the message
-
-        Returns:
-            Future that will resolve once a response has been received
-        '''
-        msg_id = str(uuid.uuid4())
-        logger.debug('Sending request with id {}: {} {}'
-                     .format(msg_id, method, params))
-
-        request = JsonRPCRequestMessage(
-            id=msg_id,
-            jsonrpc=JsonRPCProtocol.VERSION,
-            method=method,
-            params=params
-        )
-
-        future = Future()
-
-        self._server_request_futures[msg_id] = future
-        self._send_data(request)
-
-        return future
 
     def get_thread_pool(self):
         '''
@@ -401,10 +422,10 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                             .format(params, result))
                 return callback(result)
 
-            future = self.request('workspace/configuration', params)
+            future = self._send_request('workspace/configuration', params)
             future.add_done_callback(configuration)
         else:
-            return self.request('workspace/configuration', params)
+            return self._send_request('workspace/configuration', params)
 
     def bf_exit(self, *args):
         '''
@@ -445,6 +466,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                      .format(server_capabilities.__dict__))
 
         return InitializeResult(server_capabilities)
+
+    def bf_initialized(self, *args):
+        pass
 
     def bf_shutdown(self, *args):
         '''
@@ -503,7 +527,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         args = params.arguments
         try:
             cmd_handler = self.fm.commands[command]
-            self._execute_request(cmd_handler, args, msg_id)
+            self._execute_request(msg_id, cmd_handler, args)
         except:
             logger.error('Error while executing command `{}`: {}'
                          .format(command, traceback.format_exc()))
