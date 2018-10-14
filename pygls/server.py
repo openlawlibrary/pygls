@@ -36,7 +36,7 @@ class LanguageServer(Server):
         Args:
             command_name(str): Name of the command to register
         '''
-        return self.lsp.fm.command(command_name)
+        return self.lsp.fm.command(self, command_name)
 
     def feature(self, *feature_names, **options):
         '''
@@ -48,7 +48,7 @@ class LanguageServer(Server):
             **options(dict): Options for registered feature
                 E.G. triggerCharacters=['.']
         '''
-        return self.lsp.fm.feature(*feature_names, **options)
+        return self.lsp.fm.feature(self, *feature_names, **options)
 
     def thread(self):
         return self.lsp.thread()

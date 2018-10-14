@@ -4,8 +4,10 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+import asyncio
 import functools
 import inspect
+import itertools
 import logging
 import os
 import threading
@@ -25,7 +27,7 @@ def call_user_feature(base_func, method_name):
 
         try:
             user_func = self.fm.features[method_name]
-            self._execute_notification(user_func, self, *args, **kwargs)
+            self._execute_notification(user_func, *args, **kwargs)
         except:
             pass
 
@@ -122,6 +124,15 @@ def format_docstring(contents):
     return contents
 
 
+def has_ls_param_or_annotation(f, annotation):
+    try:
+        sig = inspect.signature(f)
+        first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
+        return first_p.name == 'ls' or first_p.annotation is annotation
+    except:
+        return False
+
+
 def list_to_string(value):
     return ','.join(value) if isinstance(value, list) else value
 
@@ -172,3 +183,13 @@ def to_lsp_name(method_name):
         m_replaced.append(ch)
 
     return ''.join(m_replaced)
+
+
+def wrap_with_server(f, server):
+    if not has_ls_param_or_annotation(f, type(server)):
+        return f
+
+    if asyncio.iscoroutinefunction(f):
+        return asyncio.coroutine(functools.partial(f, server))
+    else:
+        return functools.partial(f, server)

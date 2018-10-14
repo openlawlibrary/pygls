@@ -3,8 +3,10 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import logging
+
 from .exceptions import CommandAlreadyRegisteredError, \
     FeatureAlreadyRegisteredError, ValidationError
+from .utils import wrap_with_server
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class FeatureManager(object):
     def builtin_features(self):
         return self._builtin_features
 
-    def command(self, command_name, **options):
+    def command(self, server, command_name, **options):
         '''
         Decorator used to register commands
         Params:
@@ -54,7 +56,7 @@ class FeatureManager(object):
                              .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
-            self._commands[command_name] = f
+            self._commands[command_name] = wrap_with_server(f, server)
 
             if options:
                 self._command_options[command_name] = options
@@ -74,17 +76,7 @@ class FeatureManager(object):
     def commands(self):
         return self._commands
 
-    def get_feature_handler(self, feature_name):
-        '''
-        Returns builtin feature by name if exists. If not, user defined
-        feature will be returned.
-        '''
-        try:
-            return self._builtin_features[feature_name]
-        except:
-            return self._features[feature_name]
-
-    def feature(self, *feature_names, **options):
+    def feature(self, server, *feature_names, **options):
         '''
         Decorator used to register LSP features
         Params:
@@ -100,7 +92,7 @@ class FeatureManager(object):
                                  .format(feature_name))
                     raise FeatureAlreadyRegisteredError()
 
-                self._features[feature_name] = f
+                self._features[feature_name] = wrap_with_server(f, server)
 
             if options:
                 self._feature_options[feature_name] = options
