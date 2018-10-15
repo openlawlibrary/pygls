@@ -205,9 +205,8 @@ class JsonRPCProtocol(asyncio.Protocol):
             # Can't be canceled
             if getattr(handler, 'execute_in_thread', False):
                 self.get_thread_pool().apply_async(
-                    handler, (*params, ),
-                    callback=lambda res: self._send_response(msg_id,
-                                                             res.result()))
+                    handler, (params, ),
+                    callback=lambda res: self._send_response(msg_id, res))
             else:
                 self._send_response(msg_id, handler(params))
 

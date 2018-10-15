@@ -192,4 +192,7 @@ def wrap_with_server(f, server):
     if asyncio.iscoroutinefunction(f):
         return asyncio.coroutine(functools.partial(f, server))
     else:
-        return functools.partial(f, server)
+        wrapped = functools.partial(f, server)
+        if getattr(f, 'execute_in_thread', False):
+            wrapped.execute_in_thread = True
+        return wrapped
