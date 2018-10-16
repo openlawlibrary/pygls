@@ -33,6 +33,7 @@ class FeatureManager(object):
         Register builtin (predefined) features
         '''
         self._builtin_features[feature_name] = func
+        logger.info('Registered builtin feature {}'.format(feature_name))
 
     @property
     def builtin_features(self):
