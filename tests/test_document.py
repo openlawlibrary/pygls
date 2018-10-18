@@ -4,19 +4,16 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from tests.fixtures import DOC_URI, DOC, doc
+from .fixtures import DOC_URI, DOC, doc
+from pygls.types import _TextDocumentContentChangeEvent, Position, Range
 from pygls.workspace import Document
 
 
 def test_document_empty_edit():
     doc = Document('file:///uri', u'')
-    doc.apply_change({
-        'range': {
-            'start': {'line': 0, 'character': 0},
-            'end': {'line': 0, 'character': 0}
-        },
-        'text': u'f'
-    })
+    change = _TextDocumentContentChangeEvent(
+        Range(Position(0, 0), Position(0, 0)), 0, u'f')
+    doc.apply_change(change)
     assert doc.source == u'f'
 
 
@@ -26,10 +23,11 @@ def test_document_end_of_file_edit():
         "print 'b'\n"
     ]
     doc = Document('file:///uri', u''.join(old))
-    doc.apply_change({'text': u'o', 'range': {
-        'start': {'line': 2, 'character': 0},
-        'end': {'line': 2, 'character': 0}
-    }})
+
+    change = _TextDocumentContentChangeEvent(
+        Range(Position(2, 0), Position(2, 0)), 0, u'o')
+    doc.apply_change(change)
+
     assert doc.lines == [
         "print 'a'\n",
         "print 'b'\n",
@@ -39,19 +37,15 @@ def test_document_end_of_file_edit():
 
 def test_document_line_edit():
     doc = Document('file:///uri', u'itshelloworld')
-    doc.apply_change({
-        'text': u'goodbye',
-        'range': {
-            'start': {'line': 0, 'character': 3},
-            'end': {'line': 0, 'character': 8}
-        }
-    })
+    change = _TextDocumentContentChangeEvent(
+        Range(Position(0, 3), Position(0, 8)), 0, u'goodbye')
+    doc.apply_change(change)
     assert doc.source == u'itsgoodbyeworld'
 
 
 def test_document_lines(doc):
-    assert len(doc.lines) == 4
-    assert doc.lines[0] == 'import sys\n'
+    assert len(doc.lines) == 3
+    assert doc.lines[0] == 'document\n'
 
 
 def test_document_multiline_edit():
@@ -61,10 +55,10 @@ def test_document_multiline_edit():
         "    print b\n"
     ]
     doc = Document('file:///uri', u''.join(old))
-    doc.apply_change({'text': u'print a, b', 'range': {
-        'start': {'line': 1, 'character': 4},
-        'end': {'line': 2, 'character': 11}
-    }})
+    change = _TextDocumentContentChangeEvent(
+        Range(Position(1, 4), Position(2, 11)), 0, u'print a, b')
+    doc.apply_change(change)
+
     assert doc.lines == [
         "def hello(a, b):\n",
         "    print a, b\n"
@@ -84,23 +78,18 @@ def test_document_source_unicode():
 
 def test_offset_at_position(doc):
     assert doc.offset_at_position({'line': 0, 'character': 8}) == 8
-    assert doc.offset_at_position({'line': 1, 'character': 5}) == 16
-    assert doc.offset_at_position({'line': 2, 'character': 0}) == 12
-    assert doc.offset_at_position({'line': 2, 'character': 4}) == 16
-    assert doc.offset_at_position({'line': 4, 'character': 0}) == 51
+    assert doc.offset_at_position({'line': 1, 'character': 5}) == 14
+    assert doc.offset_at_position({'line': 2, 'character': 0}) == 13
+    assert doc.offset_at_position({'line': 2, 'character': 4}) == 17
+    assert doc.offset_at_position({'line': 4, 'character': 0}) == 21
 
 
 def test_word_at_position(doc):
     """
     Return the position under the cursor (or last in line if past the end)
     """
-    # import sys
-    assert doc.word_at_position({'line': 0, 'character': 8}) == 'sys'
-    # Past end of import sys
-    assert doc.word_at_position({'line': 0, 'character': 1000}) == 'sys'
-    # Empty line
-    assert doc.word_at_position({'line': 1, 'character': 5}) == ''
-    # def main():
-    assert doc.word_at_position({'line': 2, 'character': 0}) == 'def'
-    # Past end of file
+    assert doc.word_at_position({'line': 0, 'character': 8}) == 'document'
+    assert doc.word_at_position({'line': 0, 'character': 1000}) == 'document'
+    assert doc.word_at_position({'line': 1, 'character': 5}) == 'for'
+    assert doc.word_at_position({'line': 2, 'character': 0}) == 'testing'
     assert doc.word_at_position({'line': 4, 'character': 0}) == ''
