@@ -527,7 +527,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         '''
         Removes document from workspace.
         '''
-        self.workspace.rm_document(params.textDocument.uri)
+        self.workspace.remove_document(params.textDocument.uri)
 
     def bf_text_document__did_open(self,
                                    params: DidOpenTextDocumentParams):

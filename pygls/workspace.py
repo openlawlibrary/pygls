@@ -163,7 +163,7 @@ class Workspace(object):
 
     @property
     def folders(self):
-        return self._folders.values()
+        return self._folders
 
     def get_document(self, doc_uri: str):
         """
@@ -192,13 +192,13 @@ class Workspace(object):
             version=text_document.version
         )
 
-    def remove_folder(self, folder: WorkspaceFolder):
+    def remove_folder(self, folder_uri: str):
         try:
-            del self._folders[folder.uri]
+            del self._folders[folder_uri]
         except:
             pass
 
-    def rm_document(self, doc_uri: str):
+    def remove_document(self, doc_uri: str):
         self._docs.pop(doc_uri)
 
     @property
