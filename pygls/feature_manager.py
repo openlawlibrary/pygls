@@ -11,13 +11,14 @@ from .utils import wrap_with_server
 logger = logging.getLogger(__name__)
 
 
-class FeatureManager(object):
+class FeatureManager:
     '''
     Class for registering user defined features.
 
     Attributes:
-        _features(dict): Registered features
+        _builtin_features(dict): Predefined set of lsp methods
         _feature_options(dict): Registered feature's options
+        _features(dict): Registered features
         _commands(dict): Registered commands
     '''
 
@@ -25,7 +26,6 @@ class FeatureManager(object):
         self._builtin_features = {}
         self._feature_options = {}
         self._features = {}
-        self._command_options = {}
         self._commands = {}
 
     def add_builtin_feature(self, feature_name: str, func):
@@ -37,9 +37,12 @@ class FeatureManager(object):
 
     @property
     def builtin_features(self):
+        '''
+        Returns predefined set of features
+        '''
         return self._builtin_features
 
-    def command(self, server, command_name, **options):
+    def command(self, server, command_name):
         '''
         Decorator used to register commands
         Params:
@@ -59,9 +62,6 @@ class FeatureManager(object):
 
             self._commands[command_name] = wrap_with_server(f, server)
 
-            if options:
-                self._command_options[command_name] = options
-
             logger.info('Command {} is successfully registered.'
                         .format(command_name))
 
@@ -70,14 +70,10 @@ class FeatureManager(object):
         return decorator
 
     @property
-    def command_options(self):
-        return self._command_options
-
-    @property
     def commands(self):
         return self._commands
 
-    def feature(self, server, *feature_names, **options):
+    def feature(self, server, feature_name, **options):
         '''
         Decorator used to register LSP features
         Params:
@@ -86,14 +82,18 @@ class FeatureManager(object):
                 E.G. triggerCharacters=['.']
         '''
         def decorator(f):
-            # Add feature if not exists
-            for feature_name in feature_names:
-                if feature_name in self._features:
-                    logger.error('Feature {} already exists.'
-                                 .format(feature_name))
-                    raise FeatureAlreadyRegisteredError()
+            # Validate
+            if feature_name.isspace():
+                logger.error('Missing feature name.')
+                raise ValidationError('Feature name is required.')
 
-                self._features[feature_name] = wrap_with_server(f, server)
+            # Add feature if not exists
+            if feature_name in self._features:
+                logger.error('Feature {} already exists.'
+                             .format(feature_name))
+                raise FeatureAlreadyRegisteredError()
+
+            self._features[feature_name] = wrap_with_server(f, server)
 
             if options:
                 self._feature_options[feature_name] = options
