@@ -13,10 +13,9 @@ from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
 from pygls.workspace import Workspace, Document
 
-DOC = """import sys
-
-def main():
-    print sys.stdin.read()
+DOC = """document
+for
+testing
 """
 DOC_URI = uris.from_fs_path(__file__)
 

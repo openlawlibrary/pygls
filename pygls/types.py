@@ -481,7 +481,7 @@ class PublishDiagnosticsParams:
 
 
 class Range:
-    def __init__(self, start, end):
+    def __init__(self, start: Position, end: Position):
         self.start = start
         self.end = end
 
