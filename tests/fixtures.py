@@ -5,15 +5,13 @@
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
 import sys
-from mock import Mock
 import pytest
+from mock import Mock
 
 from pygls import uris
-from pygls.ls import LanguageServer
-from pygls.workspace import Workspace, Document
 from pygls.feature_manager import FeatureManager
-from io import StringIO
-
+from pygls.server import LanguageServer
+from pygls.workspace import Workspace, Document
 
 DOC = """import sys
 
@@ -34,19 +32,19 @@ def feature_manager():
     return FeatureManager()
 
 
-@pytest.fixture
-def pygls(tmpdir):
-    """ Return an initialized LS """
-    ls = LanguageServer()
-    ls.setup_streams(StringIO, StringIO)
+# @pytest.fixture
+# def pygls(tmpdir):
+#     """ Return an initialized LS """
+#     ls = LanguageServer()
+#     ls.setup_streams(StringIO, StringIO)
 
-    ls.gf_initialize(
-        processId=1,
-        rootUri=uris.from_fs_path(str(tmpdir)),
-        initializationOptions={}
-    )
+#     ls.gf_initialize(
+#         processId=1,
+#         rootUri=uris.from_fs_path(str(tmpdir)),
+#         initializationOptions={}
+#     )
 
-    return ls
+#     return ls
 
 
 @pytest.fixture
