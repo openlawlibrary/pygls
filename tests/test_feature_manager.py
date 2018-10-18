@@ -4,16 +4,16 @@
 ##########################################################################
 import pytest
 
-from pygls import lsp
-from pygls.feature_manager import OptionsValidationError, \
-    FeatureAlreadyRegisteredError, CommandAlreadyRegisteredError
+from pygls import features as lsp
+from pygls.exceptions import CommandAlreadyRegisteredError, \
+    FeatureAlreadyRegisteredError, ValidationError
 from tests.fixtures import feature_manager
 
 
 def test_register_command_validation_error(feature_manager):
 
-    with pytest.raises(OptionsValidationError) as e:
-        @feature_manager.command(' \n\t')
+    with pytest.raises(ValidationError):
+        @feature_manager.command(None, ' \n\t')
         def cmd1():
             pass
 
