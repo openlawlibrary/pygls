@@ -4,7 +4,7 @@
 ##########################################################################
 import pytest
 
-from pygls import features as lsp
+from pygls import features
 from pygls.exceptions import CommandAlreadyRegisteredError, \
     FeatureAlreadyRegisteredError, ValidationError
 from tests.fixtures import feature_manager
@@ -13,7 +13,7 @@ from tests.fixtures import feature_manager
 def test_register_command_validation_error(feature_manager):
 
     with pytest.raises(ValidationError):
-        @feature_manager.command(None, ' \n\t')
+        @feature_manager.command(' \n\t')
         def cmd1():
             pass
 
@@ -46,56 +46,37 @@ def test_register_feature_with_options(feature_manager):
         'opt2': 2
     }
 
-    @feature_manager.feature(lsp.COMPLETION, **options)
+    @feature_manager.feature(features.COMPLETION, **options)
     def completions():
         pass
 
     reg_features = feature_manager.features.keys()
     reg_feature_options = feature_manager.feature_options.keys()
 
-    assert lsp.COMPLETION in reg_features
-    assert lsp.COMPLETION in reg_feature_options
+    assert features.COMPLETION in reg_features
+    assert features.COMPLETION in reg_feature_options
 
-    assert feature_manager.features[lsp.COMPLETION] is completions
-    assert feature_manager.feature_options[lsp.COMPLETION] == options
+    assert feature_manager.features[features.COMPLETION] is completions
+    assert feature_manager.feature_options[features.COMPLETION] == options
 
 
 def test_register_features(feature_manager):
 
-    @feature_manager.feature(lsp.COMPLETION)
+    @feature_manager.feature(features.COMPLETION)
     def completions():
         pass
 
-    @feature_manager.feature(lsp.CODE_LENS)
+    @feature_manager.feature(features.CODE_LENS)
     def code_lens():
         pass
 
     reg_features = feature_manager.features.keys()
 
-    assert lsp.COMPLETION in reg_features
-    assert lsp.CODE_LENS in reg_features
+    assert features.COMPLETION in reg_features
+    assert features.CODE_LENS in reg_features
 
-    assert feature_manager.features[lsp.COMPLETION] is completions
-    assert feature_manager.features[lsp.CODE_LENS] is code_lens
-
-
-def test_register_multiple_features_in_same_decorator(feature_manager):
-
-    @feature_manager.feature(lsp.TEXT_DOCUMENT_DID_OPEN,
-                             lsp.TEXT_DOCUMENT_DID_CHANGE,
-                             lsp.TEXT_DOCUMENT_DID_CLOSE)
-    def validate():
-        pass
-
-    reg_features = feature_manager.features.keys()
-
-    assert lsp.TEXT_DOCUMENT_DID_OPEN in reg_features
-    assert lsp.TEXT_DOCUMENT_DID_CHANGE in reg_features
-    assert lsp.TEXT_DOCUMENT_DID_CLOSE in reg_features
-
-    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_OPEN] is validate
-    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_CHANGE] is validate
-    assert feature_manager.features[lsp.TEXT_DOCUMENT_DID_CLOSE] is validate
+    assert feature_manager.features[features.COMPLETION] is completions
+    assert feature_manager.features[features.CODE_LENS] is code_lens
 
 
 def test_register_same_command_twice_error(feature_manager):
@@ -115,10 +96,10 @@ def test_register_same_feature_twice_error(feature_manager):
 
     with pytest.raises(FeatureAlreadyRegisteredError) as e:
 
-        @feature_manager.feature(lsp.CODE_ACTION)
+        @feature_manager.feature(features.CODE_ACTION)
         def code_action1():
             pass
 
-        @feature_manager.feature(lsp.CODE_ACTION)
+        @feature_manager.feature(features.CODE_ACTION)
         def code_action2():
             pass

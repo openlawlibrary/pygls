@@ -67,7 +67,7 @@ class Server:
         if IS_WIN:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
 
         self.lsp = protocol_cls(self)
         self.server = None
@@ -87,9 +87,9 @@ class Server:
         transport = StdOutTransportAdapter(stdout or sys.stdout.buffer)
         self.lsp.connection_made(transport)
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(aio_readline(loop, stdin or sys.stdin,
-                                             self.lsp.data_received))
+        self.loop.run_until_complete(aio_readline(self.loop,
+                                                  stdin or sys.stdin,
+                                                  self.lsp.data_received))
 
 
 class LanguageServer(Server):
@@ -103,7 +103,7 @@ class LanguageServer(Server):
         Args:
             command_name(str): Name of the command to register
         '''
-        return self.lsp.fm.command(self, command_name)
+        return self.lsp.fm.command(command_name)
 
     def feature(self, *feature_names, **options):
         '''
@@ -115,7 +115,7 @@ class LanguageServer(Server):
             **options(dict): Options for registered feature
                 E.G. triggerCharacters=['.']
         '''
-        return self.lsp.fm.feature(self, *feature_names, **options)
+        return self.lsp.fm.feature(*feature_names, **options)
 
     def thread(self):
         return self.lsp.thread()
