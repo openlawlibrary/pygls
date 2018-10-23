@@ -10,13 +10,13 @@ from .protocol import LanguageServerProtocol
 logger = logging.getLogger(__name__)
 
 
-async def aio_readline(loop, proxy):
+async def aio_readline(loop, rfile, proxy):
     '''
     Read data from stdin in separate thread (asynchronously)
     '''
     while True:
         # Read line
-        line = await loop.run_in_executor(None, sys.stdin.readline)
+        line = await loop.run_in_executor(None, rfile.readline)
 
         if not line:
             continue
@@ -30,13 +30,13 @@ async def aio_readline(loop, proxy):
 
         # Throw away empty lines
         while line and line.strip():
-            line = await loop.run_in_executor(None, sys.stdin.readline)
+            line = await loop.run_in_executor(None, rfile.readline)
 
         if not line:
             continue
 
         # Read body
-        body = await loop.run_in_executor(None, sys.stdin.read, content_length)
+        body = await loop.run_in_executor(None, rfile.read, content_length)
 
         # Pass body to language server protocol
         if body:
@@ -49,12 +49,15 @@ class StdOutTransportAdapter(asyncio.Transport):
     Write method sends data to stdout.
     '''
 
+    def __init__(self, wfile):
+        self.wfile = wfile
+
     def close(self):
-        sys.stdout.buffer.close()
+        self.wfile.close()
 
     def write(self, data):
-        sys.stdout.buffer.write(data)
-        sys.stdout.buffer.flush()
+        self.wfile.write(data)
+        self.wfile.flush()
 
 
 class Server:
@@ -80,12 +83,13 @@ class Server:
         )
         self.loop.run_forever()
 
-    def start_io(self):
-        transport = StdOutTransportAdapter()
+    def start_io(self, stdin=None, stdout=None):
+        transport = StdOutTransportAdapter(stdout or sys.stdout.buffer)
         self.lsp.connection_made(transport)
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(aio_readline(loop, self.lsp.data_received))
+        loop.run_until_complete(aio_readline(loop, stdin or sys.stdin,
+                                             self.lsp.data_received))
 
 
 class LanguageServer(Server):
