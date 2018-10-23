@@ -121,7 +121,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         self._client_request_futures = {}
         self._server_request_futures = {}
 
-        self.fm = FeatureManager()
+        self.fm = FeatureManager(server)
         self.transport = None
 
     def __call__(self):

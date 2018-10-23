@@ -20,13 +20,19 @@ class FeatureManager:
         _feature_options(dict): Registered feature's options
         _features(dict): Registered features
         _commands(dict): Registered commands
+        server(object): Reference to the language server
+                        If passed, server will be passed to registered
+                        features/commands with first parameter:
+                            1. ls - parameter naming convention
+                            2. name: LanguageServer - add typings
     '''
 
-    def __init__(self):
+    def __init__(self, server=None):
         self._builtin_features = {}
         self._feature_options = {}
         self._features = {}
         self._commands = {}
+        self.server = server
 
     def add_builtin_feature(self, feature_name: str, func):
         '''
@@ -42,7 +48,7 @@ class FeatureManager:
         '''
         return self._builtin_features
 
-    def command(self, server, command_name):
+    def command(self, command_name):
         '''
         Decorator used to register commands
         Params:
@@ -60,7 +66,7 @@ class FeatureManager:
                              .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
-            self._commands[command_name] = wrap_with_server(f, server)
+            self._commands[command_name] = wrap_with_server(f, self.server)
 
             logger.info('Command {} is successfully registered.'
                         .format(command_name))
@@ -73,7 +79,7 @@ class FeatureManager:
     def commands(self):
         return self._commands
 
-    def feature(self, server, feature_name, **options):
+    def feature(self, feature_name, **options):
         '''
         Decorator used to register LSP features
         Params:
@@ -93,7 +99,7 @@ class FeatureManager:
                              .format(feature_name))
                 raise FeatureAlreadyRegisteredError()
 
-            self._features[feature_name] = wrap_with_server(f, server)
+            self._features[feature_name] = wrap_with_server(f, self.server)
 
             if options:
                 self._feature_options[feature_name] = options
