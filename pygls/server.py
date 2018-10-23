@@ -23,7 +23,7 @@ async def aio_readline(loop, rfile, proxy):
 
         # Extract content length from line
         try:
-            content_length = int(findall(r'\b\d+\b', line)[0])
+            content_length = int(findall(rb'\b\d+\b', line)[0])
             logger.info(content_length)
         except:
             continue
@@ -40,7 +40,7 @@ async def aio_readline(loop, rfile, proxy):
 
         # Pass body to language server protocol
         if body:
-            proxy(body.encode('utf-8'))
+            proxy(body)
 
 
 class StdOutTransportAdapter(asyncio.Transport):
@@ -88,7 +88,7 @@ class Server:
         self.lsp.connection_made(transport)
 
         self.loop.run_until_complete(aio_readline(self.loop,
-                                                  stdin or sys.stdin,
+                                                  stdin or sys.stdin.buffer,
                                                   self.lsp.data_received))
 
 
