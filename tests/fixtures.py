@@ -47,6 +47,9 @@ def client_server():
     server_thread.daemon = True
     server_thread.start()
 
+    # Add thread id to the server (just for testing)
+    server.thread_id = server_thread.ident
+
     # Setup client
     client = LanguageServer()
 
@@ -73,21 +76,6 @@ def doc():
 def feature_manager():
     """ Return a feature manager """
     return FeatureManager()
-
-
-# @pytest.fixture
-# def pygls(tmpdir):
-#     """ Return an initialized LS """
-#     ls = LanguageServer()
-#     ls.setup_streams(StringIO, StringIO)
-
-#     ls.gf_initialize(
-#         processId=1,
-#         rootUri=uris.from_fs_path(str(tmpdir)),
-#         initializationOptions={}
-#     )
-
-#     return ls
 
 
 @pytest.fixture

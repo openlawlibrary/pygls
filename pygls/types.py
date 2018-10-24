@@ -361,16 +361,21 @@ class FailureHandlingKind:
 
 
 class InitializeParams:
-    def __init__(self, process_id: int, root_path: str, root_uri: str,
-                 initialization_options: object,
-                 capabilities: ClientCapabilities):
-        self.processId = None
-        self.rootPath = None
-        self.rootUri = None
-        self.initializationOptions = {}
-        self.capabilities = None
-        self.trace = None
-        self.workspaceFolders = None
+    def __init__(self,
+                 process_id: Optional[int] = None,
+                 root_path: Optional[str] = None,
+                 root_uri: Optional[str] = None,
+                 initialization_options: Optional[object] = None,
+                 capabilities: Optional[ClientCapabilities] = None,
+                 trace: str = 'off',
+                 workspace_folders: List['WorkspaceFolder'] = None):
+        self.processId = process_id
+        self.rootPath = root_path
+        self.rootUri = root_uri
+        self.initializationOptions = initialization_options
+        self.capabilities = capabilities
+        self.trace = trace
+        self.workspaceFolders = workspace_folders
 
 
 class InitializeResult:
