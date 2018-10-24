@@ -66,12 +66,13 @@ class FeatureManager:
                              .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
-            self._commands[command_name] = wrap_with_server(f, self.server)
+            wrapped_f = wrap_with_server(f, self.server)
+            self._commands[command_name] = wrapped_f
 
             logger.info('Command {} is successfully registered.'
                         .format(command_name))
 
-            return f
+            return wrapped_f
 
         return decorator
 
@@ -99,7 +100,8 @@ class FeatureManager:
                              .format(feature_name))
                 raise FeatureAlreadyRegisteredError()
 
-            self._features[feature_name] = wrap_with_server(f, self.server)
+            wrapped_f = wrap_with_server(f, self.server)
+            self._features[feature_name] = wrapped_f
 
             if options:
                 self._feature_options[feature_name] = options
@@ -107,7 +109,7 @@ class FeatureManager:
             logger.info('Registered {} with options {}'
                         .format(feature_name, options))
 
-            return f
+            return wrapped_f
         return decorator
 
     @property
