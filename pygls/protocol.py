@@ -13,7 +13,6 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
-from multiprocessing.pool import ThreadPool
 
 from .exceptions import JsonRpcException, JsonRpcInternalError, \
     JsonRpcMethodNotFound, ThreadDecoratorError
@@ -376,14 +375,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         self._send_data(request)
 
     def get_thread_pool(self):
-        '''
-        Returns thread pool instance (lazy initialization)
-        '''
-        # TODO: Specify number of processes
-        if not self._pool:
-            self._pool = ThreadPool()
-
-        return self._pool
+        return self._server.thread_pool
 
     def thread(self):
         '''
@@ -468,22 +460,20 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         Stops the server process. Should only work if _shutdown flag is setted
         '''
         self.transport.close()
-        self.get_thread_pool().terminate()
         self._server.shutdown()
 
-    def bf_initialize(self, initialize_params: InitializeParams):
+    def bf_initialize(self, params: InitializeParams):
         '''
         This method is called once, after the client activates server.
         It will compute and return server capabilities based on
         registered features.
         '''
-        logger.info('Language server initialized {}'
-                    .format(initialize_params._asdict()))
+        logger.info('Language server initialized {}'.format(params))
 
-        client_capabilities = initialize_params.capabilities
-        root_uri = initialize_params.rootUri
-        root_path = initialize_params.rootPath
-        workspace_folders = initialize_params.workspaceFolders or []
+        client_capabilities = params.capabilities
+        root_uri = params.rootUri
+        root_path = params.rootPath
+        workspace_folders = params.workspaceFolders or []
 
         if root_uri is None:
             root_uri = from_fs_path(root_path) if root_path is not None else ''
