@@ -4,8 +4,8 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from pygls import IS_WIN
 import pytest
+from pygls import IS_WIN
 
 unix_only = pytest.mark.skipif(IS_WIN, reason="Unix only")
 windows_only = pytest.mark.skipif(not IS_WIN, reason="Windows only")

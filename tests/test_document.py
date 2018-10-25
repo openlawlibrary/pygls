@@ -4,9 +4,10 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from .fixtures import DOC_URI, DOC, doc
-from pygls.types import _TextDocumentContentChangeEvent, Position, Range
+from pygls.types import Position, Range, _TextDocumentContentChangeEvent
 from pygls.workspace import Document
+
+from .fixtures import DOC, DOC_URI, doc
 
 
 def test_document_empty_edit():

@@ -4,8 +4,8 @@
 ##########################################################################
 import logging
 
-from .exceptions import CommandAlreadyRegisteredError, \
-    FeatureAlreadyRegisteredError, ValidationError
+from .exceptions import (CommandAlreadyRegisteredError,
+                         FeatureAlreadyRegisteredError, ValidationError)
 from .utils import wrap_with_server
 
 logger = logging.getLogger(__name__)

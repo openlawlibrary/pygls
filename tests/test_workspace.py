@@ -5,9 +5,10 @@
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
 import os
+
 from pygls import uris
-from pygls.workspace import Workspace
 from pygls.types import TextDocumentItem, WorkspaceFolder
+from pygls.workspace import Workspace
 
 from .fixtures import workspace
 

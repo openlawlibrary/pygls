@@ -14,14 +14,15 @@ from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
 
-from .exceptions import JsonRpcException, JsonRpcInternalError, \
-    JsonRpcMethodNotFound, ThreadDecoratorError
+from .exceptions import (JsonRpcException, JsonRpcInternalError,
+                         JsonRpcMethodNotFound, ThreadDecoratorError)
 from .feature_manager import FeatureManager
 from .features import WORKSPACE_EXECUTE_COMMAND
-from .types import DidOpenTextDocumentParams, DidChangeTextDocumentParams, \
-    DidChangeWorkspaceFoldersParams, DidCloseTextDocumentParams, \
-    InitializeParams, InitializeResult, ExecuteCommandParams, \
-    ServerCapabilities
+from .types import (DidChangeTextDocumentParams,
+                    DidChangeWorkspaceFoldersParams,
+                    DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+                    ExecuteCommandParams, InitializeParams, InitializeResult,
+                    ServerCapabilities)
 from .uris import from_fs_path
 from .utils import call_user_feature, to_lsp_name
 from .workspace import Workspace
@@ -532,7 +533,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         '''
         Adds/Removes folders from the workspace
         '''
-        logger.info('Workspace folders changed: {}'.format(params._asdict()))
+        logger.info('Workspace folders changed: {}'.format(params))
 
         added_folders = params.event.added or []
         removed_folders = params.event.removed or []
