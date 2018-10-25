@@ -5,8 +5,8 @@
 import pytest
 
 from pygls import features
-from pygls.exceptions import CommandAlreadyRegisteredError, \
-    FeatureAlreadyRegisteredError, ValidationError
+from pygls.exceptions import (CommandAlreadyRegisteredError,
+                              FeatureAlreadyRegisteredError, ValidationError)
 from tests.fixtures import feature_manager
 
 
@@ -14,7 +14,7 @@ def test_register_command_validation_error(feature_manager):
 
     with pytest.raises(ValidationError):
         @feature_manager.command(' \n\t')
-        def cmd1():
+        def cmd1():  # pylint: disable=unused-variable
             pass
 
 
@@ -81,25 +81,25 @@ def test_register_features(feature_manager):
 
 def test_register_same_command_twice_error(feature_manager):
 
-    with pytest.raises(CommandAlreadyRegisteredError) as e:
+    with pytest.raises(CommandAlreadyRegisteredError):
 
         @feature_manager.command('cmd1')
-        def cmd1():
+        def cmd1():  # pylint: disable=unused-variable
             pass
 
         @feature_manager.command('cmd1')
-        def cmd2():
+        def cmd2():  # pylint: disable=unused-variable
             pass
 
 
 def test_register_same_feature_twice_error(feature_manager):
 
-    with pytest.raises(FeatureAlreadyRegisteredError) as e:
+    with pytest.raises(FeatureAlreadyRegisteredError):
 
         @feature_manager.feature(features.CODE_ACTION)
-        def code_action1():
+        def code_action1():  # pylint: disable=unused-variable
             pass
 
         @feature_manager.feature(features.CODE_ACTION)
-        def code_action2():
+        def code_action2():  # pylint: disable=unused-variable
             pass

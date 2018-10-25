@@ -7,11 +7,12 @@ import threading
 from time import sleep
 
 import pytest
+
 from pygls.features import TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
-from pygls.types import DidOpenTextDocumentParams, ExecuteCommandParams, \
-    InitializeParams, InitializeResult, TextDocumentItem
-from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, \
-    FEATURE_SYNC, FEATURE_THREAD
+from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
+                         InitializeParams, InitializeResult, TextDocumentItem)
+from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
+                   FEATURE_SYNC, FEATURE_THREAD)
 from tests.fixtures import client_server
 
 CALL_TIMEOUT = 2

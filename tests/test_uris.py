@@ -4,9 +4,10 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from tests import unix_only, windows_only
 import pytest
+
 from pygls import uris
+from tests import unix_only, windows_only
 
 
 @unix_only

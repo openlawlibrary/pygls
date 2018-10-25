@@ -14,9 +14,8 @@ from mock import Mock
 from pygls import features, uris
 from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
-from pygls.workspace import Workspace, Document
+from pygls.workspace import Document, Workspace
 from tests.ls_setup import setup_ls_features
-
 
 CALL_TIMEOUT = 2
 
