@@ -3,6 +3,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import logging
+from typing import Callable, Dict
 
 from .exceptions import (CommandAlreadyRegisteredError,
                          FeatureAlreadyRegisteredError, ValidationError)
@@ -12,20 +13,19 @@ logger = logging.getLogger(__name__)
 
 
 class FeatureManager:
-    '''
-    Class for registering user defined features.
+    """A class for managing server features.
 
     Attributes:
         _builtin_features(dict): Predefined set of lsp methods
         _feature_options(dict): Registered feature's options
         _features(dict): Registered features
         _commands(dict): Registered commands
-        server(object): Reference to the language server
-                        If passed, server will be passed to registered
-                        features/commands with first parameter:
-                            1. ls - parameter naming convention
-                            2. name: LanguageServer - add typings
-    '''
+        server(LanguageServer): Reference to the language server
+                                If passed, server will be passed to registered
+                                features/commands with first parameter:
+                                    1. ls - parameter naming convention
+                                    2. name: LanguageServer - add typings
+    """
 
     def __init__(self, server=None):
         self._builtin_features = {}
@@ -34,35 +34,31 @@ class FeatureManager:
         self._commands = {}
         self.server = server
 
-    def add_builtin_feature(self, feature_name: str, func):
-        '''
-        Register builtin (predefined) features
-        '''
+    def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
+        """Registers builtin (predefined) feature."""
         self._builtin_features[feature_name] = func
         logger.info('Registered builtin feature {}'.format(feature_name))
 
     @property
-    def builtin_features(self):
-        '''
-        Returns predefined set of features
-        '''
+    def builtin_features(self) -> Dict:
+        """Returns server builtin features."""
         return self._builtin_features
 
-    def command(self, command_name):
-        '''
-        Decorator used to register commands
-        Params:
-            command_name(str): Name of the command
-        '''
+    def command(self, command_name: str) -> Callable:
+        """Decorator used to register custom commands.
+
+        Example:
+            @ls.command('myCustomCommand')
+        """
         def decorator(f):
             # Validate
             if command_name.isspace():
                 logger.error('Missing command name.')
                 raise ValidationError('Command name is required.')
 
-            # Add if not exists
+            # Check if not already registered
             if command_name in self._commands:
-                logger.error('Command {} already exists.'
+                logger.error('Command {} already registered.'
                              .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
@@ -77,17 +73,16 @@ class FeatureManager:
         return decorator
 
     @property
-    def commands(self):
+    def commands(self) -> Dict:
+        """Returns registered custom commands."""
         return self._commands
 
-    def feature(self, feature_name, **options):
-        '''
-        Decorator used to register LSP features
-        Params:
-            *feature_names(tuple): Name of the LSP feature(s)
-            **options(dict): Feature options
-                E.G. triggerCharacters=['.']
-        '''
+    def feature(self, feature_name: str, **options: Dict) -> Callable:
+        """Decorator used to register LSP features.
+
+        Example:
+            @ls.feature('textDocument/completion', triggerCharacters=['.'])
+        """
         def decorator(f):
             # Validate
             if feature_name.isspace():
@@ -96,7 +91,7 @@ class FeatureManager:
 
             # Add feature if not exists
             if feature_name in self._features:
-                logger.error('Feature {} already exists.'
+                logger.error('Feature {} already registered.'
                              .format(feature_name))
                 raise FeatureAlreadyRegisteredError()
 
@@ -113,9 +108,11 @@ class FeatureManager:
         return decorator
 
     @property
-    def feature_options(self):
+    def feature_options(self) -> Dict:
+        """Returns feature options for registered features."""
         return self._feature_options
 
     @property
-    def features(self):
+    def features(self) -> Dict:
+        """Returns registered features"""
         return self._features

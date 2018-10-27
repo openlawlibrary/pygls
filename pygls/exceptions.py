@@ -8,6 +8,7 @@ import traceback
 
 
 class JsonRpcException(Exception):
+    """A class used as a base class for json rpc exceptions."""
 
     def __init__(self, message=None, code=None, data=None):
         super().__init__()

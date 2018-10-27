@@ -194,9 +194,10 @@ class Workspace(object):
         )
 
     def remove_folder(self, folder_uri: str):
+        self._folders.pop(folder_uri, None)
         try:
             del self._folders[folder_uri]
-        except:
+        except KeyError:
             pass
 
     def remove_document(self, doc_uri: str):

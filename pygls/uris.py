@@ -3,10 +3,10 @@
 # Original work licensed under the MIT License.                          #
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
-'''A collection of URI utilities with logic built on the VSCode URI library.
+"""A collection of URI utilities with logic built on the VSCode URI library.
 
 https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef13bb9/lib/index.ts
-'''
+"""
 import re
 from urllib import parse
 
@@ -47,7 +47,7 @@ def _normalize_win_path(path):
 
 
 def from_fs_path(path):
-    '''Returns a URI for the given filesystem path.'''
+    """Returns a URI for the given filesystem path."""
     scheme = 'file'
     params, query, fragment = '', '', ''
     path, netloc = _normalize_win_path(path)
@@ -55,13 +55,13 @@ def from_fs_path(path):
 
 
 def to_fs_path(uri):
-    '''Returns the filesystem path of the given URI.
+    """Returns the filesystem path of the given URI.
 
     Will handle UNC paths and normalize windows drive letters to lower-case.
     Also uses the platform specific path separator. Will *not* validate the
     path for invalid characters and semantics.
     Will *not* look at the scheme of this URI.
-    '''
+    """
     # scheme://netloc/path;parameters?query#fragment
     scheme, netloc, path, _params, _query, _fragment = urlparse(uri)
 
@@ -92,10 +92,10 @@ def uri_with(
     query=None,
     fragment=None
 ):
-    '''Return a URI with the given part(s) replaced.
+    """Return a URI with the given part(s) replaced.
 
     Parts are decoded / encoded.
-    '''
+    """
     old_scheme, old_netloc, old_path, old_params, old_query, old_fragment = \
         urlparse(uri)
 
@@ -111,7 +111,7 @@ def uri_with(
 
 
 def urlparse(uri):
-    '''Parse and decode the parts of a URI.'''
+    """Parse and decode the parts of a URI."""
     scheme, netloc, path, params, query, fragment = parse.urlparse(uri)
     return (
         parse.unquote(scheme),
@@ -124,7 +124,7 @@ def urlparse(uri):
 
 
 def urlunparse(parts):
-    '''Unparse and encode parts of a URI.'''
+    """Unparse and encode parts of a URI."""
     scheme, netloc, path, params, query, fragment = parts
 
     # Avoid encoding the windows drive letter colon
