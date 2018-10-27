@@ -12,14 +12,13 @@ from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        FORMATTING, HOVER, ON_TYPE_FORMATTING, RANGE_FORMATTING,
                        REFERENCES, RENAME, SIGNATURE_HELP, WORKSPACE_SYMBOL)
 
-'''
-Some Language Server Protocol constants
+"""
+This module contains Language Server Protocol constants
 https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
-'''
+"""
 
-'''
-Classes used for type hints.
-'''
+
+# Classes used for type hints.
 Num = Union[int, float]
 
 
@@ -166,9 +165,7 @@ class _WorkspaceFoldersChangeEvent:
         self.removed = removed
 
 
-'''
-Language Server Protocol classes
-'''
+# Language Server Protocol classes
 
 
 class ApplyWorkspaceEditParams:

@@ -17,10 +17,9 @@ log = logging.getLogger(__name__)
 
 
 def call_user_feature(base_func, method_name):
-    '''
-    Wraps generic LSP features and calls user registered
-    feature immediately after it.
-    '''
+    """Wraps generic LSP features and calls user registered feature
+    immediately after it.
+    """
     @functools.wraps(base_func)
     def decorator(self, *args, **kwargs):
         ret_val = base_func(self, *args, **kwargs)
@@ -28,7 +27,7 @@ def call_user_feature(base_func, method_name):
         try:
             user_func = self.fm.features[method_name]
             self._execute_notification(user_func, *args, **kwargs)
-        except:
+        except Exception:
             pass
 
         return ret_val
@@ -46,7 +45,7 @@ def clip_column(column, lines, line_number):
 
 
 def debounce(interval_s, keyed_by=None):
-    '''Debounce calls to this function until interval_s seconds have passed.'''
+    """Debounce calls to this function until interval_s seconds have passed."""
     def wrapper(func):
         timers = {}
         lock = threading.Lock()
@@ -74,7 +73,7 @@ def debounce(interval_s, keyed_by=None):
 
 
 def find_parents(root, path, names):
-    '''Find files matching the given names relative to the given path.
+    """Find files matching the given names relative to the given path.
 
     Args:
         path (str): The file path to start searching up from.
@@ -83,7 +82,7 @@ def find_parents(root, path, names):
 
     Note:
         The path MUST be within the root.
-    '''
+    """
     if not root:
         return []
 
@@ -113,11 +112,11 @@ def find_parents(root, path, names):
 
 
 def format_docstring(contents):
-    '''Python doc strings come in a number of formats, but LSP wants markdown.
+    """Python doc strings come in a number of formats, but LSP wants markdown.
 
     Until we can find a fast enough way of discovering and parsing each format,
     we can do a little better by at least preserving indentation.
-    '''
+    """
     contents = contents.replace('\t', u'\u00A0' * 4)
     contents = contents.replace('  ', u'\u00A0' * 2)
     contents = contents.replace('*', '\\*')
@@ -125,11 +124,13 @@ def format_docstring(contents):
 
 
 def has_ls_param_or_annotation(f, annotation):
+    """Returns true if callable has first parameter named `ls` or type of
+    annotation"""
     try:
         sig = inspect.signature(f)
         first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
         return first_p.name == 'ls' or first_p.annotation is annotation
-    except:
+    except Exception:
         return False
 
 
@@ -138,10 +139,10 @@ def list_to_string(value):
 
 
 def merge_dicts(dict_a, dict_b):
-    '''Recursively merge dictionary b into dictionary a.
+    """Recursively merge dictionary b into dictionary a.
 
     If override_nones is True, then
-    '''
+    """
     def _merge_dicts_(a, b):
         for key in set(a.keys()).union(b.keys()):
             if key in a and key in b:
@@ -163,11 +164,11 @@ def to_dict(obj):
 
 
 def to_lsp_name(method_name):
-    '''
-    Convert method name to LSP real name
-    EXAMPLE:
-    text_document__did_open -> textDocument/didOpen
-    '''
+    """Convert method name to LSP real name
+
+    Example:
+        text_document__did_open -> textDocument/didOpen
+    """
     method_name = method_name.replace('__', '/')
     m_chars = list(method_name)
     m_replaced = []
@@ -186,6 +187,7 @@ def to_lsp_name(method_name):
 
 
 def wrap_with_server(f, server):
+    """Returns a new callable/coroutine with server as first argument."""
     if not has_ls_param_or_annotation(f, type(server)):
         return f
 

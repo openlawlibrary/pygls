@@ -2,6 +2,11 @@
 # Copyright (c) Open Law Library. All rights reserved.                   #
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
+"""This module contains all features supported by Language Server Protocol
+
+LSP Specification:
+    https://microsoft.github.io/language-server-protocol/specification
+"""
 
 # Client
 CLIENT_REGISTER_CAPABILITY = 'client/registerCapability'
