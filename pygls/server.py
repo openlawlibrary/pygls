@@ -5,14 +5,16 @@
 import asyncio
 import logging
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from re import findall
 from threading import Event
-from typing import Dict
+from typing import Any, Callable, Dict, List, Optional
 
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
+from .types import ConfigurationParams
+from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +164,10 @@ class Server:
 
 
 class LanguageServer(Server):
-    """Class that represents Language server using Language Server Protocol.
+    """A class that represents Language server using Language Server Protocol.
+
+    This class can be extended and it can be passed as a first argument to
+    registered commands/features.
 
     Args:
         max_workers(int, optional): Number of workers for `ThreadPool` and
@@ -192,6 +197,18 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, **options)
 
+    def get_configuration(self,
+                          params: ConfigurationParams,
+                          callback: Optional[Callable[[
+                              List[Any]], None]] = None
+                          ) -> Future:
+        """Gets the configuration settings from the client."""
+        return self.lsp.get_configuration(params, callback)
+
+    def notify(self, method: str, params: object) -> None:
+        """Sends notification to the client."""
+        self.lsp.notify(method, params)
+
     def thread(self):
         """Decorator that tells server to execute command/feature in separate
         thread.
@@ -204,3 +221,8 @@ class LanguageServer(Server):
                 pass
         """
         return self.lsp.thread()
+
+    @property
+    def workspace(self) -> Workspace:
+        """Returns in-memory workspace."""
+        return self.lsp.workspace
