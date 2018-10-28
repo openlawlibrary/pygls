@@ -39,6 +39,7 @@ function startLangServerTCP(addr: number, documentSelector: string[]): LanguageC
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
     documentSelector,
+    outputChannelName: "JsonLanguageServer",
     synchronize: {
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
@@ -64,6 +65,7 @@ function startLangServer(
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
     documentSelector,
+    outputChannelName: "JsonLanguageServer",
     synchronize: {
       // In the past this told the client to actively synchronize settings. Since the
       // client now supports 'getConfiguration' requests this active synchronization is not
@@ -80,7 +82,7 @@ function startLangServer(
 export function activate(context: ExtensionContext) {
   if (isStartedInDebugMode()) {
     // Development - Run the server manually
-    client = startLangServerTCP(2087, ["plaintext"]);
+    client = startLangServerTCP(2087, ["json"]);
   } else {
     // Production - Client is going to run the server (for use within `.vsix` package;
     // the `server` folder needs to be copied into `vscode-client/`).
@@ -91,7 +93,7 @@ export function activate(context: ExtensionContext) {
       throw new Error("`python.pythonPath` is not set");
     }
 
-    client = startLangServer(pythonPath, ["-m", "server"], cwd, ["plaintext"]);
+    client = startLangServer(pythonPath, ["-m", "server"], cwd, ["json"]);
   }
 
   context.subscriptions.push(client.start());
