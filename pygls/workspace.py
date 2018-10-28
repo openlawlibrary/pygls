@@ -166,7 +166,7 @@ class Workspace(object):
     def folders(self):
         return self._folders
 
-    def get_document(self, doc_uri: str):
+    def get_document(self, doc_uri: str) -> Document:
         """
         Return a managed document if-present,
         else create one pointing at disk.

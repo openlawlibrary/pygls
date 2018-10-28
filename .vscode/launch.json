@@ -2,22 +2,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Multi-root Client",
+            "name": "Launch JsonExtension Client",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}/examples/multi-root/vscode-client"
+                "--extensionDevelopmentPath=${workspaceRoot}/examples/json-extension/vscode-client"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/examples/multi-root/vscode-client/out/src/**/*.js"
+                "${workspaceRoot}/examples/json-extension/vscode-client/out/src/**/*.js"
             ],
-            "preLaunchTask": "multi-root-watch:client"
+            "preLaunchTask": "json-extension-watch:client"
         },
         {
-            "name": "Launch Multi-root Server",
+            "name": "Launch JsonExtension Server",
             "module": "server",
             "type": "python",
             "pythonPath": "${config:python.pythonPath}",
@@ -28,42 +28,7 @@
             "args": [
                 "--tcp"
             ],
-            "cwd": "${workspaceFolder}/examples/multi-root/",
-            "debugOptions": [
-                "RedirectOutput"
-            ]
-        },
-        {
-            "name": "Launch Simple-JSON Client",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}/examples/simple-json/vscode-client"
-            ],
-            "stopOnEntry": false,
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/examples/simple-json/vscode-client/out/src/**/*.js"
-            ],
-            "preLaunchTask": "simple-json-watch:client"
-        },
-        {
-            "name": "Launch Simple-JSON Server",
-            "module": "server",
-            "type": "python",
-            "pythonPath": "${config:python.pythonPath}",
-            "request": "launch",
-            "stopOnEntry": false,
-            "console": "none",
-            "program": "${workspaceFolder}",
-            "args": [
-                "--tcp"
-            ],
-            "cwd": "${workspaceFolder}/examples/simple-json/",
-            "debugOptions": [
-                "RedirectOutput"
-            ]
+            "cwd": "${workspaceFolder}/examples/json-extension/"
         }
     ]
 }

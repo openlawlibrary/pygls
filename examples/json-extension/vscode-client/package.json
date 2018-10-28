@@ -1,6 +1,6 @@
 {
-  "name": "multi-root",
-  "description": "Multi root extension example",
+  "name": "simple-json",
+  "description": "Simple json extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "All rights reserved",
@@ -13,42 +13,15 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:json"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "custom.Command",
-        "title": "TEST REGISTERED COMMAND"
+        "command": "showPythonPath",
+        "title": "Show python path"
       }
-    ],
-    "configuration": {
-      "title": "pygls configuration",
-      "type": "object",
-      "properties": {
-        "pygls.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "pygls.customConfigWin": {
-          "scope": "window",
-          "type": "string",
-          "description": "Custom configWin"
-        },
-        "pygls.customConfigApp": {
-          "scope": "application",
-          "type": "string",
-          "description": "Custom configApp"
-        },
-        "pygls.maxTextLength": {
-          "scope": "resource",
-          "type": "integer",
-          "default": 10
-        }
-      }
-    }
+    ]
   },
   "main": "./out/extension",
   "scripts": {
