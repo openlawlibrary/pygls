@@ -42,6 +42,7 @@ install:
 
         $env:production_build = $False;
         $json_extension_client_json.version = $json_extension_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
+        $prefixed_version = $prefixed_version + "+" + $env:APPVEYOR_BUILD_NUMBER;
 
       } ElseIf ($env:APPVEYOR_REPO_TAG_NAME -ne $prefixed_version) {
         # tag is present and tag name does not match package version, so exit
