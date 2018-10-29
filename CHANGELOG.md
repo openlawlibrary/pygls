@@ -1,9 +1,17 @@
 # pygls Change Log
 
-## 0.1.0
+## 0.3.0
 
-- Initial Version
+- async functions (coroutines) support
+- mark function to execute it in a thread pool
+- added `lsp` types
+- new example
+- fixed `appveyor.yml`
 
 ## 0.2.0
 
-- asyncio pygls
+- Added classes for textDocument/completion method response
+
+## 0.1.0
+
+- Initial Version
