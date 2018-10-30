@@ -4,7 +4,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT,
@@ -19,168 +19,66 @@ https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
 
 # Classes used for type hints.
-Num = Union[int, float]
-
-
-class _CodeAction:
-    def __init(self, dynamic_registration: bool,
-               code_action_literal_support: '_CodeActionLiteralSupport'):
-        self.dynamicRegistration = dynamic_registration
-        self.codeActionLiteralSupport = code_action_literal_support
-
-
-class _CodeActionKind:
-    def __init__(self, value_set: List['CodeActionKind']):
-        self.valueSet = value_set
-
-
-class _CodeActionLiteralSupport:
-    def __init__(self, code_action_kind: _CodeActionKind):
-        self.codeActionKind = code_action_kind
-
-
-class _FoldingRange:
-    def __init(self, dynamic_registration: bool, range_limit: Num,
-               line_folding_only: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.rangeLimit = range_limit
-        self.lineFoldingOnly = line_folding_only
-
-
-class _Completion:
-    def __init__(self, dynamic_registration: bool,
-                 completion_item: '_CompletionItem',
-                 completion_item_kind: '_CompletionItemKind',
-                 context_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.completionItem = completion_item
-        self.completionItemKind = completion_item_kind
-        self.contextSupport = context_support
-
-
-class _CompletionItem:
-    def __init__(self, snippet_support: bool, commit_character_support: bool,
-                 documentation_format: List['MarkupKind'],
-                 deprecated_support: bool, preselected_support):
-        self.snippetSupport = snippet_support
-        self.commitCharacterSupport = commit_character_support
-        self.documentationFormat = documentation_format
-        self.deprecatedSupport = deprecated_support
-        self.preselectedSupport = preselected_support
-
-
-class _CompletionItemKind:
-    def __init__(self, value_set: List['CompletionItemKind']):
-        self.valueSet = value_set
-
-
-class DocumentSymbol:
-    def __init__(self, dynamic_registration: bool, symbol_kind: '_SymbolKind',
-                 hierarchical_document_symbol_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.symbolKind = symbol_kind
-        self.hierarchicalDocumentSymbolSupport = \
-            hierarchical_document_symbol_support
-
-
-class _DynamicRegistration:
-    def __init__(self, dynamic_registration: bool):
-        self.dynamicRegistration = dynamic_registration
-
-
-class _Hover:
-    def __init__(self, dynamic_registration,
-                 content_format: List['MarkupKind']):
-        self.dynamicRegistration = dynamic_registration
-        self.contentFormat = content_format
-
-
-class _PublishDiagnostics:
-    def __init(self, related_information: bool):
-        self.relatedInformation = related_information
-
-
-class _Rename:
-    def __init(self, dynamic_registration: bool, prepare_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.prepareSupport = prepare_support
-
-
-class _SignatureHelp:
-    def __init__(self, dynamic_registration,
-                 signature_information: List['MarkupKind']):
-        self.dynamicRegistration = dynamic_registration
-        self.signatureInformation = signature_information
-
-
-class _SignatureInformation:
-    def __init__(self, documentation_format: List['MarkupKind']):
-        self.documentationFormat = documentation_format
-
-
-class _Symbol:
-    def __init__(self, dynamic_registration: bool,
-                 symbol_kind: '_SymbolKind'):
-        self.dynamicRegistration = dynamic_registration
-        self.symbolKind = symbol_kind
-
-
-class _SymbolKind:
-    def __init__(self, value_set: 'SymbolKind'):
-        self.valueSet = value_set
-
-
-class _Synchronization:
-    def __init__(self, dynamic_registration: bool, will_save: bool,
-                 will_save_wait_until: bool, did_save: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.willSave = will_save
-        self.willSaveWaitUntil = will_save_wait_until
-        self.didSave = did_save
-
-
-class _TextDocumentContentChangeEvent:
-    def __init__(self, range: 'Range', range_length: Num, text: str):
-        self.range = range
-        self.range_length = range_length
-        self.text = text
-
-
-class _TextDocumentIdentifier:
-    def __init__(self, uri: str):
-        self.uri = uri
-
-
-class _VersionedTextDocumentIdentifier(_TextDocumentIdentifier):
-    def __init__(self, uri: str, version: Num):
-        super().__init__(uri)
-        self.version = version
-
-
-class _WorkspaceFoldersChangeEvent:
-    def __init__(self,
-                 added: List['WorkspaceFolder'],
-                 removed: List['WorkspaceFolder']):
-        self.added = added
-        self.removed = removed
-
-
-# Language Server Protocol classes
+DocumentChangesType = Union[List['TextDocumentEdit'],
+                            'TextDocumentEdit',
+                            'CreateFile', 'RenameFile', 'DeleteFile']
+DocumentSelectorType = List['DocumentFilter']
+NumType = Union[int, float]
 
 
 class ApplyWorkspaceEditParams:
-    def __init__(self, edit: 'WorkspaceEdit', label: Optional[str]):
+    def __init__(self, edit: 'WorkspaceEditCapability', label: Optional[str]):
         self.edit = edit
         self.label = label
 
 
+class ApplyWorkspaceEditResponse:
+    def __init__(self, applied: bool):
+        self.applied = applied
+
+
 class ClientCapabilities:
-    def __init__(self, workspace: 'WorkspaceClientCapabilities',
+    def __init__(self,
+                 workspace: 'WorkspaceClientCapabilities',
                  text_document: 'TextDocumentClientCapabilities',
-                 experimental: object):
+                 experimental: Any):
         self.workspace = workspace
         self.textDocument = text_document
         self.experimental = experimental
+
+
+class CodeActionAbstract:
+    def __init(self,
+               dynamic_registration: bool,
+               code_action_literal_support:
+               'CodeActionAbstractLiteralSupport'):
+        self.dynamicRegistration = dynamic_registration
+        self.codeActionLiteralSupport = code_action_literal_support
+
+
+class CodeActionAbstractKind:
+    def __init__(self, value_set: List[str]):
+        self.valueSet = value_set
+
+
+class CodeActionAbstractLiteralSupport:
+    def __init__(self, code_action_kind: CodeActionAbstractKind):
+        self.codeActionKind = code_action_kind
+
+
+class CodeActionKind:
+    QuickFix = 'quickfix'
+    Refactor = 'refactor'
+    RefactorExtract = 'refactor.extract'
+    RefactorInline = 'refactor.inline'
+    RefactorRewrite = 'refactor.rewrite'
+    Source = 'source'
+    SourceOrganizeImports = 'source.organizeImports'
+
+
+class CodeActionOptions:
+    def __init__(self, code_action_kinds: List[CodeActionKind] = None):
+        self.codeActionKinds = code_action_kinds
 
 
 class CodeLensOptions:
@@ -193,10 +91,41 @@ class ColorProviderOptions:
 
 
 class Command:
-    def __init__(self, title, command, arguments=None):
+    def __init__(self, title: str, command: str, arguments: List[Any] = None):
         self.title = title
         self.command = command
         self.arguments = arguments
+
+
+class CompletionAbstract:
+    def __init__(self,
+                 dynamic_registration: bool,
+                 completion_item: 'CompletionItemAbstract',
+                 completion_item_kind: 'CompletionItemKindAbstract',
+                 context_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.completionItem = completion_item
+        self.completionItemKind = completion_item_kind
+        self.contextSupport = context_support
+
+
+class CompletionItemAbstract:
+    def __init__(self,
+                 snippet_support: bool,
+                 commit_character_support: bool,
+                 documentation_format: List['MarkupKind'],
+                 deprecated_support: bool,
+                 preselected_support: bool):
+        self.snippetSupport = snippet_support
+        self.commitCharacterSupport = commit_character_support
+        self.documentationFormat = documentation_format
+        self.deprecatedSupport = deprecated_support
+        self.preselectedSupport = preselected_support
+
+
+class CompletionItemKindAbstract:
+    def __init__(self, value_set: List['CompletionItemKind']):
+        self.valueSet = value_set
 
 
 class CompletionItemKind:
@@ -233,11 +162,23 @@ class CompletionList:
 
 
 class CompletionItem:
-    def __init__(self, label, kind=None, detail=None, documentation=None,
-                 deprecated=None, preselect=None, sort_text=None,
-                 filter_text=None, insert_text=None, insert_text_format=None,
-                 text_edit=None, additional_text_edits=None,
-                 commit_characters=None, command=None, data=None):
+    def __init__(self,
+                 label,
+                 kind=None,
+                 detail=None,
+                 documentation=None,
+
+                 deprecated=None,
+                 preselect=None,
+                 sort_text=None,
+                 filter_text=None,
+                 insert_text=None,
+                 insert_text_format=None,
+                 text_edit=None,
+                 additional_text_edits=None,
+                 commit_characters=None,
+                 command=None,
+                 data=None):
         self.label = label
         self.kind = kind
         self.detail = detail
@@ -261,10 +202,18 @@ class CompletionOptions:
         self.triggerCharacters = trigger_characters
 
 
+class CompletionRegistrationOptions:
+    def __init__(self,
+                 trigger_characters: List[str] = None,
+                 resolve_provider: bool = False):
+        self.triggerCharacters = trigger_characters
+        self.resolveProvider = resolve_provider
+
+
 class ConfigurationItem:
     def __init__(self,
-                 scope_uri: Optional[str] = None,
-                 section: Optional[str] = None):
+                 scope_uri: str = None,
+                 section: str = None):
         self.scopeUri = scope_uri
         self.section = section
 
@@ -272,6 +221,36 @@ class ConfigurationItem:
 class ConfigurationParams:
     def __init__(self, items: List[ConfigurationItem]):
         self.items = items
+
+
+class CreateFile:
+    def __init__(self, uri: str, options: 'CreateFileOptions' = None):
+        self.kind = 'create'
+        self.uri = uri
+        self.options = options
+
+
+class CreateFileOptions:
+    def __init__(self,
+                 overwrite: bool = False,
+                 ignore_if_exists: bool = False):
+        self.overwrite = overwrite
+        self.ignoreIfExists = ignore_if_exists
+
+
+class DeleteFile:
+    def __init__(self, uri: str, options: 'DeleteFileOptions'):
+        self.kind = 'delete'
+        self.uri = uri
+        self.options = options
+
+
+class DeleteFileOptions:
+    def __init__(self,
+                 recursive: bool = False,
+                 ignore_if_exists: bool = False):
+        self.recursive = recursive
+        self.ignore_if_exists = ignore_if_exists
 
 
 class DiagnosticSeverity:
@@ -284,12 +263,12 @@ class DiagnosticSeverity:
 class Diagnostic:
     def __init__(
         self,
-        range,
-        message,
-        severity=DiagnosticSeverity.Error,
-        code=None,
-        source=None,
-        related_information=None
+        range: 'Range',
+        message: str,
+        severity: DiagnosticSeverity = DiagnosticSeverity.Error,
+        code: str = None,
+        source: str = None,
+        related_information: 'DiagnosticRelatedInformation' = None
     ):
         self.range = range
         self.message = message
@@ -300,31 +279,68 @@ class Diagnostic:
 
 
 class DiagnosticRelatedInformation:
-    def __init__(self, location, message):
+    def __init__(self, location: 'Location', message: str):
         self.location = location
         self.message = message
 
 
-class DidOpenTextDocumentParams:
-    def __init__(self, text_document: 'TextDocumentItem'):
-        self.textDocument = text_document
+class DidChangeConfigurationParams:
+    def __init__(self, settings: Any):
+        self.settings = settings
 
 
 class DidChangeTextDocumentParams:
-    def __init__(self, text_document: _VersionedTextDocumentIdentifier,
-                 content_changes: List[_TextDocumentContentChangeEvent]):
+    def __init__(self,
+                 text_document: 'VersionedTextDocumentIdentifier',
+                 content_changes: List['TextDocumentContentChangeEvent']):
         self.textDocument = text_document
         self.contentChanges = content_changes
 
 
+class DidChangeWatchedFiles:
+    def __init__(self, changes: List['FileEvent']):
+        self.changes = changes
+
+
+class DidChangeWatchedFilesRegistrationOptions:
+    def __init__(self, watchers: List['FileSystemWatcher']):
+        self.watchers = watchers
+
+
 class DidChangeWorkspaceFoldersParams:
-    def __init__(self, events: _WorkspaceFoldersChangeEvent):
+    def __init__(self, events: 'WorkspaceFoldersChangeEvent'):
         self.events = events
 
 
 class DidCloseTextDocumentParams:
-    def __init__(self, text_document: 'TextDocumentItem'):
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
         self.textDocument = text_document
+
+
+class DidOpenTextDocumentParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
+
+
+class DidSaveTextDocumentParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier', text: str):
+        self.textDocument = text_document
+        self.text = text
+
+
+class DynamicRegistrationAbstract:
+    def __init__(self, dynamic_registration: bool):
+        self.dynamicRegistration = dynamic_registration
+
+
+class DocumentFilter:
+    def __init__(self,
+                 language: str = None,
+                 scheme: str = None,
+                 pattern: str = None):
+        self.language = language
+        self.scheme = scheme
+        self.pattern = pattern
 
 
 class DocumentHighlightKind:
@@ -344,6 +360,17 @@ class DocumentOnTypeFormattingOptions:
         self.moreTriggerCharacter = more_trigger_character
 
 
+class DocumentSymbol:
+    def __init__(self,
+                 dynamic_registration: bool,
+                 symbol_kind: 'SymbolAbstractKind',
+                 hierarchical_document_symbol_support: bool):
+        self.dynamicRegistration = dynamic_registration,
+        self.symbolKind = symbol_kind
+        self.hierarchicalDocumentSymbolSupport = \
+            hierarchical_document_symbol_support
+
+
 class ExecuteCommandOptions:
     def __init__(self, commands):
         self.commands = commands
@@ -356,14 +383,55 @@ class FailureHandlingKind:
     FailureHandlingKind = 'undo'
 
 
+class FileChangeType:
+    Created = 1
+    Changed = 2
+    Deleted = 3
+
+
+class FileEvent:
+    def __init__(self, uri: str, type: FileChangeType):
+        self.uri = uri
+        self.type = type
+
+
+class FileSystemWatcher:
+    def __init__(self, glob_pattern: str, kind: int = 7):
+        self.globPattern = glob_pattern
+        self.kind = kind
+
+
+class FoldingRangeAbstract:
+    def __init(self,
+               dynamic_registration: bool,
+               range_limit: NumType,
+               line_folding_only: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.rangeLimit = range_limit
+        self.lineFoldingOnly = line_folding_only
+
+
+class Hover:
+    def __init__(self, contents: Any, range: 'Range' = None):
+        self.contents = contents
+        self.range = range
+
+
+class HoverAbstract:
+    def __init__(self, dynamic_registration,
+                 content_format: List['MarkupKindEnum']):
+        self.dynamicRegistration = dynamic_registration
+        self.contentFormat = content_format
+
+
 class InitializeParams:
     def __init__(self,
-                 process_id: Optional[int] = None,
-                 root_path: Optional[str] = None,
-                 root_uri: Optional[str] = None,
-                 initialization_options: Optional[object] = None,
-                 capabilities: Optional[ClientCapabilities] = None,
-                 trace: str = 'off',
+                 process_id: int = None,
+                 root_path: str = None,
+                 root_uri: str = None,
+                 initialization_options: Any = None,
+                 capabilities: ClientCapabilities = None,
+                 trace: 'TraceEnum' = 'off',
                  workspace_folders: List['WorkspaceFolder'] = None):
         self.processId = process_id
         self.rootPath = root_path
@@ -384,16 +452,27 @@ class InsertTextFormat:
     Snippet = 2
 
 
+class MessageActionItem:
+    def __init__(self, title: str):
+        self.title = title
+
+
 class Location:
-    def __init__(self, uri, range):
+    def __init__(self, uri: str, range: 'Range'):
         self.uri = uri
         self.range = range
 
 
 class LogMessageParams:
-    def __init__(self, type: Num, message: str):
+    def __init__(self, type: NumType, message: str):
         self.type = type
         self.message = message
+
+
+class MarkupContent:
+    def __init__(self, kind: 'MarkupKind', value: str):
+        self.kind = kind
+        self.value = value
 
 
 class MarkupKind:
@@ -414,8 +493,21 @@ class ExecuteCommandParams:
         self.arguments = arguments
 
 
+class ExecuteCommandRegistrationOptions:
+    def __init__(self, commands: List[str]):
+        self.commands = commands
+
+
+class ParameterInformation:
+    def __init__(self,
+                 label: str,
+                 documentation: Union[str, MarkupContent] = None):
+        self.label = label
+        self.documentation = documentation
+
+
 class Position:
-    def __init__(self, line=0, character=0):
+    def __init__(self, line: int = 0, character: int = 0):
         self.line = line
         self.character = character
 
@@ -475,8 +567,13 @@ class Position:
         return '{}:{}'.format(self.line, self.character)
 
 
+class PublishDiagnosticsAbstract:
+    def __init(self, related_information: bool):
+        self.relatedInformation = related_information
+
+
 class PublishDiagnosticsParams:
-    def __init__(self, uri, diagnostics):
+    def __init__(self, uri: str, diagnostics: List[Diagnostic]):
         self.uri = uri
         self.diagnostics = diagnostics
 
@@ -485,6 +582,43 @@ class Range:
     def __init__(self, start: Position, end: Position):
         self.start = start
         self.end = end
+
+
+class Registration:
+    def __init__(self, id: str, method: str, register_options: Any = None):
+        self.id = id
+        self.method = method
+        self.registerOptions = register_options
+
+
+class RegistrationOptions:
+    def __init__(self, registrations: List[Registration]):
+        self.registrations = registrations
+
+
+class RenameAbstract:
+    def __init(self, dynamic_registration: bool, prepare_support: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.prepareSupport = prepare_support
+
+
+class RenameFile:
+    def __init__(self,
+                 old_uri: str,
+                 new_uri: str,
+                 options: 'RenameFileOptions' = None):
+        self.kind = 'rename'
+        self.old_uri = old_uri
+        self.new_uri = new_uri
+        self.options = options
+
+
+class RenameFileOptions:
+    def __init__(self,
+                 overwrite: bool = False,
+                 ignore_if_exists: bool = False):
+        self.overwrite = overwrite
+        self.ignoreIfExists = ignore_if_exists
 
 
 class ResourceOperationKind:
@@ -579,9 +713,51 @@ class ServerCapabilities:
 
 
 class ShowMessageParams:
-    def __init__(self, type: Num, message: str):
+    def __init__(self, type: MessageType, message: str):
         self.type = type
         self.message = message
+
+
+class ShowMessageRequestParams:
+    def __init__(self,
+                 type: MessageType,
+                 message: str,
+                 actions: List[MessageActionItem]):
+        self.type = type
+        self.message = message
+        self.actions = actions
+
+
+class SignatureHelp:
+    def __init__(self,
+                 signatures: List['SignatureInformation'],
+                 active_signature: int = 0,
+                 active_parameter: int = 0):
+        self.signatures = signatures
+        self.activeSignature = active_parameter
+        self.activeParameter = active_parameter
+
+
+class SignatureHelpAbstract:
+    def __init__(self, dynamic_registration,
+                 signature_information: List[MarkupKind]):
+        self.dynamicRegistration = dynamic_registration
+        self.signatureInformation = signature_information
+
+
+class SignatureInformation:
+    def __init__(self,
+                 label: str,
+                 documentation: Union[str, MarkupContent] = None,
+                 parameters: List[ParameterInformation] = None):
+        self.label = label
+        self.documentation = documentation
+        self.parameters = parameters
+
+
+class SignatureInformationAbstract:
+    def __init__(self, documentation_format: List[MarkupKind]):
+        self.documentationFormat = documentation_format
 
 
 class SignatureHelpOptions:
@@ -592,6 +768,19 @@ class SignatureHelpOptions:
 class StaticRegistrationOptions:
     def __init__(self, id):
         self.id = id
+
+
+class SymbolAbstract:
+    def __init__(self,
+                 dynamic_registration: bool,
+                 symbol_kind: 'SymbolAbstractKind'):
+        self.dynamicRegistration = dynamic_registration
+        self.symbolKind = symbol_kind
+
+
+class SymbolAbstractKind:
+    def __init__(self, value_set: 'SymbolKind'):
+        self.valueSet = value_set
 
 
 class SymbolKind:
@@ -610,34 +799,43 @@ class SymbolKind:
     Variable = 13
     Constant = 14
     String = 15
-    Number = 16
+    NumTypeber = 16
     Boolean = 17
     Array = 18
+
+
+class SynchronizationAbstract:
+    def __init__(self, dynamic_registration: bool, will_save: bool,
+                 will_save_wait_until: bool, did_save: bool):
+        self.dynamicRegistration = dynamic_registration
+        self.willSave = will_save
+        self.willSaveWaitUntil = will_save_wait_until
+        self.didSave = did_save
 
 
 class TextDocumentClientCapabilities:
 
     def __init__(self,
-                 synchronization: _Synchronization,
-                 completion: _Completion,
-                 hover: _Hover,
-                 signature_help: _SignatureHelp,
-                 references: _DynamicRegistration,
-                 document_highlight: _DynamicRegistration,
+                 synchronization: SynchronizationAbstract,
+                 completion: CompletionAbstract,
+                 hover: HoverAbstract,
+                 signature_help: SignatureHelpAbstract,
+                 references: DynamicRegistrationAbstract,
+                 document_highlight: DynamicRegistrationAbstract,
                  document_symbol: DocumentSymbol,
-                 formatting: _DynamicRegistration,
-                 range_formatting: _DynamicRegistration,
-                 on_type_formatting: _DynamicRegistration,
-                 definition: _DynamicRegistration,
-                 type_definition: _DynamicRegistration,
-                 implementation: _DynamicRegistration,
-                 code_action: _CodeAction,
-                 code_lens: _DynamicRegistration,
-                 document_link: _DynamicRegistration,
-                 color_provider: _DynamicRegistration,
-                 rename: _Rename,
-                 publish_diagnostics: _PublishDiagnostics,
-                 folding_range: _FoldingRange):
+                 formatting: DynamicRegistrationAbstract,
+                 range_formatting: DynamicRegistrationAbstract,
+                 on_type_formatting: DynamicRegistrationAbstract,
+                 definition: DynamicRegistrationAbstract,
+                 type_definition: DynamicRegistrationAbstract,
+                 implementation: DynamicRegistrationAbstract,
+                 code_action: CodeActionAbstract,
+                 code_lens: DynamicRegistrationAbstract,
+                 document_link: DynamicRegistrationAbstract,
+                 color_provider: DynamicRegistrationAbstract,
+                 rename: RenameAbstract,
+                 publish_diagnostics: PublishDiagnosticsAbstract,
+                 folding_range: FoldingRangeAbstract):
         self.synchronization = synchronization
         self.completion = completion
         self.hover = hover
@@ -659,12 +857,87 @@ class TextDocumentClientCapabilities:
         self.foldingRange = folding_range
 
 
+class TextDocumentContentChangeEvent:
+    def __init__(self, range: 'Range', range_length: NumType, text: str):
+        self.range = range
+        self.range_length = range_length
+        self.text = text
+
+
+class TextDocumentEdit:
+    def __init__(self,
+                 text_document: 'VersionedTextDocumentIdentifier',
+                 edits: List['TextEdit']):
+        self.textDocument = text_document
+        self.edits = edits
+
+
+class TextDocumentIdentifier:
+    def __init__(self, uri: str):
+        self.uri = uri
+
+
 class TextDocumentItem:
-    def __init__(self, uri: str, language_id: str, version: Num, text: str):
+    def __init__(self,
+                 uri: str,
+                 language_id: str,
+                 version: NumType,
+                 text: str):
         self.uri = uri
         self.languageId = language_id
         self.version = version
         self.text = text
+
+
+class TextDocumentPositionParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: Position):
+        self.textDocument = text_document
+        self.position = position
+
+
+class CompletionTriggerKind:
+    Invoked = 1
+    TriggerCharacter = 2
+    TriggerForIncompleteCompletions = 3
+
+
+class CompletionContext:
+    def __init__(self,
+                 trigger_kind: CompletionTriggerKind,
+                 trigger_character: str = None):
+        self.triggerKind = trigger_kind
+        self.triggerCharacter = trigger_character
+
+
+class CompletionParams(TextDocumentPositionParams):
+    def __init__(self, context: CompletionContext):
+        self.context = context
+
+
+class TextDocumentSaveReason:
+    Manual = 1
+    AfterDelay = 2
+    FocusOut = 3
+
+
+class TextDocumentRegistrationOptions:
+    def __init__(self, document_selector: DocumentSelectorType = None):
+        self.documentSelector = document_selector
+
+
+class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init(self, trigger_characters: List[str] = None):
+        self.triggerCharacters = trigger_characters
+
+
+class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 include_text: bool = False):
+        super.__init__(document_selector)
+        self.includeText = include_text
 
 
 class TextDocumentSyncKind:
@@ -674,7 +947,11 @@ class TextDocumentSyncKind:
 
 
 class TextDocumentSyncOptions:
-    def __init__(self, open_close, change, will_save, will_save_wait_until,
+    def __init__(self,
+                 open_close,
+                 change,
+                 will_save,
+                 will_save_wait_until,
                  save):
         self.openClose = open_close
         self.change = change
@@ -684,17 +961,56 @@ class TextDocumentSyncOptions:
 
 
 class TextEdit:
-    def __init__(self, range, new_text):
+    def __init__(self, range: Range, new_text: str):
         self.range = range
         self.newText = new_text
 
 
+class TraceEnum:
+    Off = 'off'
+    Messages = 'messages'
+    Verbose = 'verbose'
+
+
+class Unregistration:
+    def __init__(self, id: str, method: str):
+        self.id = id
+        self.method = method
+
+
+class UnregistrationParams:
+    def __init__(self, unregistrations: List[Unregistration]):
+        self.unregistration = unregistrations
+
+
+class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
+    def __init__(self, uri: str, version: NumType):
+        super().__init__(uri)
+        self.version = version
+
+
+class WatchKind:
+    Create = 1
+    Change = 2
+    Delete = 4
+
+
+class WillSaveTextDocumentParams:
+    def __init__(self, text_document: TextDocumentIdentifier, reason: int):
+        self.textDocument = text_document
+        self.reason = reason
+
+
 class WorkspaceClientCapabilities:
-    def __init__(self, apply_edit: bool, workspace_edit: 'WorkspaceEdit',
-                 did_change_configuration: _DynamicRegistration,
-                 did_change_watched_files: _DynamicRegistration,
-                 symbol: _Symbol, execute_command: _DynamicRegistration,
-                 workspace_folders: bool, configuration: bool):
+    def __init__(self,
+                 apply_edit: bool,
+                 workspace_edit: 'WorkspaceEditCapability',
+                 did_change_configuration: DynamicRegistrationAbstract,
+                 did_change_watched_files: DynamicRegistrationAbstract,
+                 symbol: SymbolAbstract,
+                 execute_command: DynamicRegistrationAbstract,
+                 workspace_folders: bool,
+                 configuration: bool):
         self.applyEdit = apply_edit
         self.workspaceEdit = workspace_edit
         self.didChangeConfiguration = did_change_configuration
@@ -706,7 +1022,16 @@ class WorkspaceClientCapabilities:
 
 
 class WorkspaceEdit:
-    def __init__(self, document_changes: bool,
+    def __init__(self,
+                 changes: Dict[str, List[TextEdit]] = None,
+                 document_changes: DocumentChangesType = None):
+        self.changes = changes
+        self.documentChanges = document_changes
+
+
+class WorkspaceEditCapability:
+    def __init__(self,
+                 document_changes: bool,
                  resource_operations: List[ResourceOperationKind],
                  failure_handling: FailureHandlingKind):
         self.documentChanges = document_changes
@@ -718,3 +1043,16 @@ class WorkspaceFolder:
     def __init__(self, uri: str, name: str):
         self.uri = uri
         self.name = name
+
+
+class WorkspaceFoldersChangeEvent:
+    def __init__(self,
+                 added: List[WorkspaceFolder],
+                 removed: List[WorkspaceFolder]):
+        self.added = added
+        self.removed = removed
+
+
+class WorkspaceSymbolParams:
+    def __init__(self, query: str):
+        self.query = query

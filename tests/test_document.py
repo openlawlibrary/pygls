@@ -4,7 +4,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-from pygls.types import Position, Range, _TextDocumentContentChangeEvent
+from pygls.types import Position, Range, TextDocumentContentChangeEvent
 from pygls.workspace import Document
 
 from .fixtures import DOC, DOC_URI, doc
@@ -12,7 +12,7 @@ from .fixtures import DOC, DOC_URI, doc
 
 def test_document_empty_edit():
     doc = Document('file:///uri', u'')
-    change = _TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent(
         Range(Position(0, 0), Position(0, 0)), 0, u'f')
     doc.apply_change(change)
     assert doc.source == u'f'
@@ -25,7 +25,7 @@ def test_document_end_of_file_edit():
     ]
     doc = Document('file:///uri', u''.join(old))
 
-    change = _TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent(
         Range(Position(2, 0), Position(2, 0)), 0, u'o')
     doc.apply_change(change)
 
@@ -38,7 +38,7 @@ def test_document_end_of_file_edit():
 
 def test_document_line_edit():
     doc = Document('file:///uri', u'itshelloworld')
-    change = _TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent(
         Range(Position(0, 3), Position(0, 8)), 0, u'goodbye')
     doc.apply_change(change)
     assert doc.source == u'itsgoodbyeworld'
@@ -56,7 +56,7 @@ def test_document_multiline_edit():
         "    print b\n"
     ]
     doc = Document('file:///uri', u''.join(old))
-    change = _TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent(
         Range(Position(1, 4), Position(2, 11)), 0, u'print a, b')
     doc.apply_change(change)
 
