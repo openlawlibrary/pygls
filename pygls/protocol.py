@@ -390,8 +390,9 @@ class LSPMeta(type):
     """Metaclass for language server protocol.
 
     Purpose:
-        Wraps LSP base methods with decorator which will call the user
-        registered method with the same LSP name.
+        Wraps LSP built-in features (`bf_` naming convention).
+        Built-in features cannot be overridden but user defined features with
+        the same LSP name will be called after them.
     """
 
     def __new__(self, cls_name, cls_bases, cls):
@@ -432,34 +433,6 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if callable(attr) and name.startswith('bf_'):
                 lsp_name = to_lsp_name(name[3:])
                 self.fm.add_builtin_feature(lsp_name, attr)
-
-    def get_configuration(self, params, callback=None):
-        """Gets the configuration settings from the client.
-
-        This method is asynchronous and the callback function
-        will be called after the response is received.
-
-        Args:
-            params(dict): ConfigurationParams from lsp specs
-            callback(callable): Callabe which will be called after
-                                response from the client is received
-        Returns:
-            Future that will be resolved once a response has been received
-            NOTE: Calling `future.result()` blocks the main thread, so it
-                  should be used for features/commands marked with
-                  `@ls.thread()` decorator
-        """
-        if callback:
-            def configuration(future):
-                result = future.result()
-                logger.info('Configuration for {} received: {}'
-                            .format(params, result))
-                return callback(result)
-
-            future = self._send_request('workspace/configuration', params)
-            future.add_done_callback(configuration)
-        else:
-            return self._send_request('workspace/configuration', params)
 
     def bf_exit(self, *args):
         """Stops the server process."""
@@ -544,3 +517,31 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Executes commands with passed arguments and returns a value."""
         cmd_handler = self.fm.commands[params.command]
         self._execute_request(msg_id, cmd_handler, params.arguments)
+
+    def get_configuration(self, params, callback=None):
+        """Gets the configuration settings from the client.
+
+        This method is asynchronous and the callback function
+        will be called after the response is received.
+
+        Args:
+            params(dict): ConfigurationParams from lsp specs
+            callback(callable): Callabe which will be called after
+                                response from the client is received
+        Returns:
+            Future that will be resolved once a response has been received
+            NOTE: Calling `future.result()` blocks the main thread, so it
+                  should be used for features/commands marked with
+                  `@ls.thread()` decorator
+        """
+        if callback:
+            def configuration(future):
+                result = future.result()
+                logger.info('Configuration for {} received: {}'
+                            .format(params, result))
+                return callback(result)
+
+            future = self._send_request('workspace/configuration', params)
+            future.add_done_callback(configuration)
+        else:
+            return self._send_request('workspace/configuration', params)

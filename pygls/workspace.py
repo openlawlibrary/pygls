@@ -12,9 +12,9 @@ import re
 from .features import (TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                        WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT)
 from .types import (ApplyWorkspaceEditParams, LogMessageParams, MessageType,
-                    Num, PublishDiagnosticsParams, ShowMessageParams,
-                    TextDocumentItem, WorkspaceFolder,
-                    _TextDocumentContentChangeEvent)
+                    NumType, PublishDiagnosticsParams, ShowMessageParams,
+                    TextDocumentContentChangeEvent, TextDocumentItem,
+                    WorkspaceFolder)
 from .uris import to_fs_path, urlparse
 from .utils import find_parents
 
@@ -47,7 +47,7 @@ class Document(object):
     def __str__(self):
         return str(self.uri)
 
-    def apply_change(self, change: _TextDocumentContentChangeEvent):
+    def apply_change(self, change: TextDocumentContentChangeEvent):
         """Apply a change to the document."""
         text = change.text
         change_range = change.range
@@ -144,7 +144,7 @@ class Workspace(object):
     def _create_document(self,
                          doc_uri: str,
                          source: str = None,
-                         version: Num = None):
+                         version: NumType = None):
         path = to_fs_path(doc_uri)
         return Document(
             doc_uri, source=source, version=version,
@@ -227,7 +227,7 @@ class Workspace(object):
 
     def update_document(self,
                         text_doc: TextDocumentItem,
-                        change: _TextDocumentContentChangeEvent):
+                        change: TextDocumentContentChangeEvent):
         doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
         self._docs[doc_uri].version = text_doc.version
