@@ -9,7 +9,14 @@ import logging
 import os
 import re
 
-from . import lsp, uris, _utils
+from .features import (TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
+                       WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT)
+from .types import (ApplyWorkspaceEditParams, LogMessageParams, MessageType,
+                    NumType, PublishDiagnosticsParams, ShowMessageParams,
+                    TextDocumentContentChangeEvent, TextDocumentItem,
+                    WorkspaceFolder)
+from .uris import to_fs_path, urlparse
+from .utils import find_parents
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
@@ -30,7 +37,7 @@ class Document(object):
     ):
         self.uri = uri
         self.version = version
-        self.path = uris.to_fs_path(uri)
+        self.path = to_fs_path(uri)
         self.filename = os.path.basename(self.path)
 
         self._local = local
@@ -40,20 +47,20 @@ class Document(object):
     def __str__(self):
         return str(self.uri)
 
-    def apply_change(self, change):
+    def apply_change(self, change: TextDocumentContentChangeEvent):
         """Apply a change to the document."""
-        text = change['text']
-        change_range = change.get('range')
+        text = change.text
+        change_range = change.range
 
         if not change_range:
             # The whole file has changed
             self._source = text
             return
 
-        start_line = change_range['start']['line']
-        start_col = change_range['start']['character']
-        end_line = change_range['end']['line']
-        end_col = change_range['end']['character']
+        start_line = change_range.start.line
+        start_col = change_range.start.character
+        end_line = change_range.end.line
+        end_col = change_range.end.character
 
         # Check for an edit occuring at the very end of the file
         if start_line == len(self.lines):
@@ -126,26 +133,30 @@ class Document(object):
 
 class Workspace(object):
 
-    def __init__(self, root_uri, endpoint):
+    def __init__(self, root_uri, lsp):
         self._root_uri = root_uri
-        self._endpoint = endpoint
-        self._root_uri_scheme = uris.urlparse(self._root_uri)[0]
-        self._root_path = uris.to_fs_path(self._root_uri)
+        self._lsp = lsp
+        self._root_uri_scheme = urlparse(self._root_uri)[0]
+        self._root_path = to_fs_path(self._root_uri)
         self._folders = {}
         self._docs = {}
 
-    def _create_document(self, doc_uri, source=None, version=None):
-        path = uris.to_fs_path(doc_uri)
+    def _create_document(self,
+                         doc_uri: str,
+                         source: str = None,
+                         version: NumType = None):
+        path = to_fs_path(doc_uri)
         return Document(
             doc_uri, source=source, version=version,
             extra_sys_path=self.source_roots(path)
         )
 
-    def add_folder(self, folder):
-        self._folders[folder.get('uri')] = folder
+    def add_folder(self, folder: WorkspaceFolder):
+        self._folders[folder.uri] = folder
 
-    def apply_edit(self, edit):
-        return self._endpoint.request(lsp.M_APPLY_EDIT, {'edit': edit})
+    def apply_edit(self, edit, label=None):
+        return self._lsp._send_request(WORKSPACE_APPLY_EDIT,
+                                       ApplyWorkspaceEditParams(edit, label))
 
     @property
     def documents(self):
@@ -153,10 +164,12 @@ class Workspace(object):
 
     @property
     def folders(self):
-        return self._folders.items()
+        return self._folders
 
-    def get_document(self, doc_uri):
-        """Return a managed document if-present, else create one pointing at disk.
+    def get_document(self, doc_uri: str) -> Document:
+        """
+        Return a managed document if-present,
+        else create one pointing at disk.
 
         See https://github.com/Microsoft/language-server-protocol/issues/177
         """
@@ -168,20 +181,26 @@ class Workspace(object):
             os.path.exists(self._root_path)
 
     def publish_diagnostics(self, doc_uri, diagnostics):
-        self._endpoint.notify(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params={
-                              'uri': doc_uri, 'diagnostics': diagnostics})
+        self._lsp.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                         PublishDiagnosticsParams(doc_uri, diagnostics))
 
-    def put_document(self, doc_uri, source, version=None):
+    def put_document(self, text_document: TextDocumentItem):
+        doc_uri = text_document.uri
+
         self._docs[doc_uri] = self._create_document(
-            doc_uri, source=source, version=version)
+            doc_uri,
+            source=text_document.text,
+            version=text_document.version
+        )
 
-    def remove_folder(self, folder):
+    def remove_folder(self, folder_uri: str):
+        self._folders.pop(folder_uri, None)
         try:
-            del self._folders[folder.get('uri')]
-        except:
+            del self._folders[folder_uri]
+        except KeyError:
             pass
 
-    def rm_document(self, doc_uri):
+    def remove_document(self, doc_uri: str):
         self._docs.pop(doc_uri)
 
     @property
@@ -192,20 +211,23 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    def show_message(self, message, msg_type=lsp.MessageType.Info):
-        self._endpoint.notify(lsp.WINDOW_SHOW_MESSAGE, params={
-                              'type': msg_type, 'message': message})
+    def show_message(self, message, msg_type=MessageType.Info):
+        self._lsp.notify(WINDOW_SHOW_MESSAGE,
+                         ShowMessageParams(msg_type, message))
 
-    def show_message_log(self, message, msg_type=lsp.MessageType.Log):
-        self._endpoint.notify(lsp.WINDOW_LOG_MESSAGE, params={
-                              'type': msg_type, 'message': message})
+    def show_message_log(self, message, msg_type=MessageType.Log):
+        self._lsp.notify(WINDOW_LOG_MESSAGE,
+                         LogMessageParams(msg_type, message))
 
     def source_roots(self, document_path):
         """Return the source roots for the given document."""
-        files = _utils.find_parents(
+        files = find_parents(
             self._root_path, document_path, ['setup.py']) or []
         return [os.path.dirname(setup_py) for setup_py in files]
 
-    def update_document(self, doc_uri, change, version=None):
+    def update_document(self,
+                        text_doc: TextDocumentItem,
+                        change: TextDocumentContentChangeEvent):
+        doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
-        self._docs[doc_uri].version = version
+        self._docs[doc_uri].version = text_doc.version

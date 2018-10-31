@@ -1,239 +1,127 @@
-##########################################################################
-# Copyright (c) Open Law Library. All rights reserved.                   #
-# See ThirdPartyNotices.txt in the project root for license information. #
-##########################################################################
+# ##########################################################################
+# # Copyright (c) Open Law Library. All rights reserved.                   #
+# # See ThirdPartyNotices.txt in the project root for license information. #
+# ##########################################################################
 import os
-from threading import Thread
+import threading
+from time import sleep
+
 import pytest
 
-from pygls import lsp
-from pygls.jsonrpc.exceptions import JsonRpcMethodNotFound
-from pygls.ls import LanguageServer
-from tests import DUMMY_FEATURE, TRIGGER_CHARS, COMMANDS
-from tests.ls_setup import setup_ls_features
+from pygls.features import TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
+from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
+                         InitializeParams, InitializeResult, TextDocumentItem)
+from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
+                   FEATURE_SYNC, FEATURE_THREAD)
+from tests.fixtures import client_server
 
 CALL_TIMEOUT = 2
 
 
-@pytest.fixture
-def client_server():
-    """ A fixture to setup a client/server """
-
-    # Client to Server pipe
-    csr, csw = os.pipe()
-    # Server to client pipe
-    scr, scw = os.pipe()
-
-    # Setup server
-    server = LanguageServer()
-    setup_ls_features(server)
-
-    server_thread = Thread(target=server.start_io, args=(
-        os.fdopen(csr, 'rb'), os.fdopen(scw, 'wb')
+def _initialize_server(server):
+    server.lsp.bf_initialize(InitializeParams(
+        process_id=1234,
+        root_path=os.path.dirname(__file__)
     ))
 
-    server_thread.daemon = True
-    server_thread.start()
 
-    # Setup client
-    client = LanguageServer()
+def test_bf_initialize(client_server):
+    client, _ = client_server
 
-    client_thread = Thread(target=client.start_io, args=(
-        os.fdopen(scr, 'rb'), os.fdopen(csw, 'wb')))
+    response = client.lsp._send_request(
+        'initialize',
+        InitializeParams(
+            process_id=1234,
+            root_path=os.path.dirname(__file__)
+        )
+    ).result(timeout=CALL_TIMEOUT)
 
-    client_thread.daemon = True
-    client_thread.start()
-
-    yield client, server
-
-    shutdown_response = client._endpoint.request(
-        'shutdown').result(timeout=CALL_TIMEOUT)
-    assert shutdown_response is None
-    client._endpoint.notify('exit')
+    assert hasattr(response, 'capabilities')
 
 
-def test_initialize(client_server):
-    client, server = client_server
-    response = client._endpoint.request('initialize', {
-        'processId': 1234,
-        'rootPath': os.path.dirname(__file__),
-        'initializationOptions': {}
-    }).result(timeout=CALL_TIMEOUT)
-    assert 'capabilities' in response
-
-
-def test_feature_is_called(client_server):
+def test_bf_text_document_did_open(client_server):
     client, server = client_server
 
-    is_called = client._endpoint.request(
-        lsp.COMPLETION).result(timeout=CALL_TIMEOUT)
+    _initialize_server(server)
+
+    client.lsp.notify(TEXT_DOCUMENT_DID_OPEN,
+                      DidOpenTextDocumentParams(
+                          TextDocumentItem(__file__, 'python', 1, 'test')
+                      ))
+
+    sleep(1)
+
+    assert len(server.lsp.workspace.documents) == 1
+
+
+def test_feature_async(client_server):
+    client, server = client_server
+
+    is_called, thread_id = client.lsp._send_request(FEATURE_ASYNC, {}) \
+                                     .result(timeout=CALL_TIMEOUT)
 
     assert is_called
+    assert thread_id == server.thread_id
 
 
-def test_feature_params(client_server):
+def test_feature_sync(client_server):
     client, server = client_server
 
-    # Add dummy feature just to test this case
-    @server.feature(DUMMY_FEATURE)
-    def dummy_feature(param1=None, param2=None, **_kwargs):
-        return {
-            'param1': param1,
-            'param2': param2
-        }
+    is_called, thread_id = client.lsp._send_request(FEATURE_SYNC, {}) \
+                                     .result(timeout=CALL_TIMEOUT)
 
-    kwargs = {
-        'param1': 'test',
-        'param2': True
-    }
-
-    response = client._endpoint.request(
-        DUMMY_FEATURE, kwargs).result(timeout=CALL_TIMEOUT)
-
-    assert response == kwargs
+    assert is_called
+    assert thread_id == server.thread_id
 
 
-def test_ls_instance_is_passed_to_user_defined_features(client_server):
+def test_feature_thread(client_server):
     client, server = client_server
 
-    # Add dummy feature just to test this case
-    @server.feature(DUMMY_FEATURE)
-    def dummy_feature(ls, param1=None, param2=None, **_kwargs):
-        return id(ls)
+    is_called, thread_id = client.lsp._send_request(FEATURE_THREAD, {}) \
+                                     .result(timeout=CALL_TIMEOUT)
 
-    response = client._endpoint.request(
-        DUMMY_FEATURE).result(timeout=CALL_TIMEOUT)
-
-    assert response == id(server)
+    assert is_called
+    assert thread_id != server.thread_id
 
 
-def test_missing_message(client_server):
-    client, server = client_server
-    with pytest.raises(JsonRpcMethodNotFound):
-        client._endpoint.request(
-            'unknown_method').result(timeout=CALL_TIMEOUT)
-
-
-def test_registered_commands(client_server):
+def test_command_async(client_server):
     client, server = client_server
 
-    assert list(server.commands.keys()) == COMMANDS
+    is_called, thread_id = client.lsp._send_request(WORKSPACE_EXECUTE_COMMAND,
+                                                    ExecuteCommandParams(
+                                                        CMD_ASYNC
+                                                    ))\
+        .result(timeout=CALL_TIMEOUT)
 
-    add_cmd = COMMANDS[0]
-
-    kwargs = {
-        'command': add_cmd,
-        'arguments': [1, 2]
-    }
-
-    response = client._endpoint.request(
-        lsp.WORKSPACE_EXECUTE_COMMAND, kwargs).result(timeout=CALL_TIMEOUT)
-
-    assert response == 3
+    assert is_called
+    assert thread_id == server.thread_id
 
 
-def test_server_capabilities(client_server):
-    client, server = client_server
-    response = client._endpoint.request('initialize', {
-        'processId': 1234,
-        'rootPath': os.path.dirname(__file__),
-        'initializationOptions': {}
-    }).result(timeout=CALL_TIMEOUT)
-
-    sc = response.get('capabilities', {})
-
-    assert sc.get('hoverProvider') is True
-    assert sc.get('completionProvider').get('resolveProvider') is True
-    assert sc.get('completionProvider').get(
-        'triggerCharacters') == TRIGGER_CHARS
-    assert sc.get('signatureHelpProvider').get(
-        'triggerCharacters') == TRIGGER_CHARS
-    assert sc.get('definitionProvider') is True
-    # assert sc.get('typeDefinitionProvider') is True
-    # assert sc.get('implementationProvider') is True
-    assert sc.get('referencesProvider') is True
-    assert sc.get('documentHighlightProvider') is True
-    assert sc.get('documentSymbolProvider') is True
-    assert sc.get('workspaceSymbolProvider') is True
-    assert sc.get('codeActionProvider') is True
-    assert sc.get('codeLensProvider').get('resolveProvider') is True
-    assert sc.get('documentFormattingProvider') is True
-    assert sc.get('documentRangeFormattingProvider') is True
-    # assert sc.get('documentOnTypeFormattingProvider') is True
-    assert sc.get('renameProvider') is True
-    assert sc.get('documentLinkProvider').get('resolveProvider') is True
-    # assert sc.get('colorProvider') is True
-    assert sc.get('executeCommandProvider').get('commands') == COMMANDS
-    assert sc.get('workspace').get('workspaceFolders').get('supported') is True
-    assert sc.get('workspace').get('workspaceFolders').get(
-        'changeNotifications') is True
-
-
-def test_users_feature_called_after_same_default_feature(client_server):
+def test_command_sync(client_server):
     client, server = client_server
 
-    is_called = [False]
+    is_called, thread_id = \
+        client.lsp._send_request(
+            WORKSPACE_EXECUTE_COMMAND,
+            ExecuteCommandParams(
+                CMD_SYNC
+            )
+        ).result(timeout=CALL_TIMEOUT)
 
-    @server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
-    def tx_doc_did_open(ls, textDocument=None, **_kwargs):
-        '''
-            Since this is notification, there is no response
-        '''
-        is_called[0] = True
-
-    # Initialize server's workspace
-    response = client._endpoint.request('initialize', {
-        'processId': 1234,
-        'rootPath': os.path.dirname(__file__),
-        'initializationOptions': {}
-    }).result(timeout=CALL_TIMEOUT)
-
-    kwargs = {
-        'textDocument': {
-            'uri': 'C:\\test',
-            'text': 'test'
-        }
-    }
-    client._endpoint.request(
-        lsp.TEXT_DOCUMENT_DID_OPEN, kwargs).result(timeout=CALL_TIMEOUT)
-
-    assert is_called[0] is True
+    assert is_called
+    assert thread_id == server.thread_id
 
 
-def test_server_send_notification(client_server):
+def test_command_thread(client_server):
     client, server = client_server
 
-    notification_name = "pygls/testNotification"
-    notification_data = {"message": "Test message"}
+    is_called, thread_id = \
+        client.lsp._send_request(
+            WORKSPACE_EXECUTE_COMMAND,
+            ExecuteCommandParams(
+                CMD_THREAD
+            )
+        ).result(timeout=CALL_TIMEOUT)
 
-    result = [False]
-
-    # Client subscription for notification
-    @client.feature(notification_name)
-    def get_notification(**kwargs):
-        result[0] = kwargs == notification_data
-
-    @server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
-    def tx_doc_did_open(ls, textDocument=None, **_kwargs):
-        '''
-            On did open -> send notification to client
-        '''
-        ls.send_notification(notification_name, notification_data)
-
-    # Initialize server's workspace
-    response = client._endpoint.request('initialize', {
-        'processId': 1234,
-        'rootPath': os.path.dirname(__file__),
-        'initializationOptions': {}
-    }).result(timeout=CALL_TIMEOUT)
-
-    kwargs = {
-        'textDocument': {
-            'uri': 'C:\\test',
-            'text': 'test'
-        }
-    }
-    client._endpoint.request(
-        lsp.TEXT_DOCUMENT_DID_OPEN, kwargs).result(timeout=CALL_TIMEOUT)
-
-    assert result[0]
+    assert is_called
+    assert thread_id != server.thread_id

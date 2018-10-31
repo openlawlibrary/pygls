@@ -3,12 +3,15 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import argparse
+import logging
 
 from .server import ls
 
+logging.basicConfig(filename='pygls.log', level=logging.DEBUG)
+
 
 def add_arguments(parser):
-    parser.description = "multi-root example"
+    parser.description = "simple json server example"
 
     parser.add_argument(
         "--tcp", action="store_true",

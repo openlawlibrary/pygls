@@ -4,14 +4,35 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+import asyncio
 import functools
 import inspect
+import itertools
+import json
 import logging
 import os
 import threading
-import json
 
 log = logging.getLogger(__name__)
+
+
+def call_user_feature(base_func, method_name):
+    """Wraps generic LSP features and calls user registered feature
+    immediately after it.
+    """
+    @functools.wraps(base_func)
+    def decorator(self, *args, **kwargs):
+        ret_val = base_func(self, *args, **kwargs)
+
+        try:
+            user_func = self.fm.features[method_name]
+            self._execute_notification(user_func, *args, **kwargs)
+        except Exception:
+            pass
+
+        return ret_val
+
+    return decorator
 
 
 def clip_column(column, lines, line_number):
@@ -66,7 +87,7 @@ def find_parents(root, path, names):
         return []
 
     if not os.path.commonprefix((root, path)):
-        log.warning(f"Path {path} not in {root}")
+        log.warning('Path {} not in {}'.format(path, root))
         return []
 
     # Split the relative by directory, generate all the parent directories,
@@ -102,8 +123,19 @@ def format_docstring(contents):
     return contents
 
 
+def has_ls_param_or_annotation(f, annotation):
+    """Returns true if callable has first parameter named `ls` or type of
+    annotation"""
+    try:
+        sig = inspect.signature(f)
+        first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
+        return first_p.name == 'ls' or first_p.annotation is annotation
+    except Exception:
+        return False
+
+
 def list_to_string(value):
-    return ",".join(value) if isinstance(value, list) else value
+    return ','.join(value) if isinstance(value, list) else value
 
 
 def merge_dicts(dict_a, dict_b):
@@ -132,11 +164,11 @@ def to_dict(obj):
 
 
 def to_lsp_name(method_name):
-    '''
-    Convert method name to LSP real name
-    EXAMPLE:
-    text_document__did_open -> textDocument/didOpen
-    '''
+    """Convert method name to LSP real name
+
+    Example:
+        text_document__did_open -> textDocument/didOpen
+    """
     method_name = method_name.replace('__', '/')
     m_chars = list(method_name)
     m_replaced = []
@@ -152,3 +184,17 @@ def to_lsp_name(method_name):
         m_replaced.append(ch)
 
     return ''.join(m_replaced)
+
+
+def wrap_with_server(f, server):
+    """Returns a new callable/coroutine with server as first argument."""
+    if not has_ls_param_or_annotation(f, type(server)):
+        return f
+
+    if asyncio.iscoroutinefunction(f):
+        return asyncio.coroutine(functools.partial(f, server))
+    else:
+        wrapped = functools.partial(f, server)
+        if getattr(f, 'execute_in_thread', False):
+            wrapped.execute_in_thread = True
+        return wrapped

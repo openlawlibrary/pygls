@@ -8,6 +8,7 @@ import traceback
 
 
 class JsonRpcException(Exception):
+    """A class used as a base class for json rpc exceptions."""
 
     def __init__(self, message=None, code=None, data=None):
         super().__init__()
@@ -45,11 +46,6 @@ class JsonRpcException(Exception):
         if self.data is not None:
             exception_dict['data'] = self.data
         return exception_dict
-
-
-class JsonRpcRequestCancelled(JsonRpcException):
-    CODE = -32800
-    MESSAGE = 'Request Cancelled'
 
 
 class JsonRpcInternalError(JsonRpcException):
@@ -90,6 +86,11 @@ class JsonRpcParseError(JsonRpcException):
     MESSAGE = 'Parse Error'
 
 
+class JsonRpcRequestCancelled(JsonRpcException):
+    CODE = -32800
+    MESSAGE = 'Request Cancelled'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
@@ -107,11 +108,33 @@ def _is_server_error_code(code):
 
 
 _EXCEPTIONS = (
-    JsonRpcParseError,
+    JsonRpcInternalError,
+    JsonRpcInvalidParams,
     JsonRpcInvalidRequest,
     JsonRpcMethodNotFound,
-    JsonRpcInvalidParams,
-    JsonRpcInternalError,
+    JsonRpcParseError,
     JsonRpcRequestCancelled,
     JsonRpcServerError,
 )
+
+
+class CommandAlreadyRegisteredError(Exception):
+    pass
+
+
+class FeatureAlreadyRegisteredError(Exception):
+    pass
+
+
+class ThreadDecoratorError(Exception):
+    pass
+
+
+class ValidationError(Exception):
+
+    def __init__(self, errors=None):
+        self.errors = errors or []
+
+    def __repr__(self):
+        opt_errs = '\n-'.join([e for e in self.errors])
+        return 'Missing options: {}'.format(opt_errs)
