@@ -105,23 +105,6 @@ class Server:
 
         self.lsp = protocol_cls(self)
 
-    @property
-    def thread_pool(self) -> ThreadPool:
-        """Returns thread pool instance (lazy initialization)."""
-        if not self._thread_pool:
-            self._thread_pool = ThreadPool(processes=self._max_workers)
-
-        return self._thread_pool
-
-    @property
-    def thread_pool_executor(self) -> ThreadPoolExecutor:
-        """Returns thread pool instance (lazy initialization)."""
-        if not self._thread_pool_executor:
-            self._thread_pool_executor = \
-                ThreadPoolExecutor(max_workers=self._max_workers)
-
-        return self._thread_pool_executor
-
     def shutdown(self):
         """Shutdown server."""
         logger.info('Shutting down the server')
@@ -161,6 +144,23 @@ class Server:
                                                   self._stop_event,
                                                   stdin or sys.stdin.buffer,
                                                   self.lsp.data_received))
+
+    @property
+    def thread_pool(self) -> ThreadPool:
+        """Returns thread pool instance (lazy initialization)."""
+        if not self._thread_pool:
+            self._thread_pool = ThreadPool(processes=self._max_workers)
+
+        return self._thread_pool
+
+    @property
+    def thread_pool_executor(self) -> ThreadPoolExecutor:
+        """Returns thread pool instance (lazy initialization)."""
+        if not self._thread_pool_executor:
+            self._thread_pool_executor = \
+                ThreadPoolExecutor(max_workers=self._max_workers)
+
+        return self._thread_pool_executor
 
 
 class LanguageServer(Server):
