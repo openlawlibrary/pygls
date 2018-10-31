@@ -4,6 +4,20 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+"""
+This module contains Language Server Protocol types
+https://microsoft.github.io/language-server-protocol/specification
+
+Class attributes are named with camel-case notation because client is expecting
+that.
+
+Some classes (e.g. `Unregister` and `Unregistration`) are used to match similar
+usage in the Language Server Protocol (LSP) documentation.
+
+https://microsoft.github.io/language-server-protocol/specification#client_unregisterCapability
+"""
+
+
 from typing import Any, Dict, List, Optional, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
@@ -11,12 +25,6 @@ from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        DOCUMENT_LINK, DOCUMENT_LINK_RESOLVE, DOCUMENT_SYMBOL,
                        FORMATTING, HOVER, ON_TYPE_FORMATTING, RANGE_FORMATTING,
                        REFERENCES, RENAME, SIGNATURE_HELP, WORKSPACE_SYMBOL)
-
-"""
-This module contains Language Server Protocol constants
-https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
-"""
-
 
 # Classes used for type hints.
 DocumentChangesType = Union[List['TextDocumentEdit'],
@@ -808,7 +816,7 @@ class SymbolKind:
     Variable = 13
     Constant = 14
     String = 15
-    NumTypeber = 16
+    Number = 16
     Boolean = 17
     Array = 18
 
