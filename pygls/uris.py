@@ -9,7 +9,8 @@ https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef
 """
 import re
 from urllib import parse
-from pygls import IS_WIN
+
+from . import IS_WIN
 
 RE_DRIVE_LETTER_PATH = re.compile(r'^\/[a-zA-Z]:')
 
@@ -32,8 +33,6 @@ def _normalize_win_path(path):
         else:
             netloc = path[2:idx]
             path = path[idx:]
-    else:
-        path = path
 
     # Ensure that path starts with a slash
     # or that it is at least a slash
@@ -68,7 +67,7 @@ def to_fs_path(uri):
 
     if netloc and path and scheme == 'file':
         # unc path: file://shares/c$/far/boo
-        value = "//{}{}".format(netloc, path)
+        value = '//{}{}'.format(netloc, path)
 
     elif RE_DRIVE_LETTER_PATH.match(path):
         # windows drive letter: file:///C:/far/boo

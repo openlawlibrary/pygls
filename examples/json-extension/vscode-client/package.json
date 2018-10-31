@@ -1,10 +1,10 @@
 {
-  "name": "simple-json",
+  "name": "json-extension",
   "description": "Simple json extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "All rights reserved",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "open-law-library",
   "engines": {
     "vscode": "^1.25.1"
@@ -15,7 +15,14 @@
   "activationEvents": [
     "onLanguage:json"
   ],
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "showPythonPath",
+        "title": "Show python path"
+      }
+    ]
+  },
   "main": "./out/extension",
   "scripts": {
     "vscode:prepublish": "tsc -p ./",

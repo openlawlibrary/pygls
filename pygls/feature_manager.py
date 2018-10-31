@@ -3,110 +3,116 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import logging
-from . import lsp
+from typing import Callable, Dict
 
-log = logging.getLogger(__name__)
+from .exceptions import (CommandAlreadyRegisteredError,
+                         FeatureAlreadyRegisteredError, ValidationError)
+from .utils import wrap_with_server
 
-
-class CommandAlreadyRegisteredError(Exception):
-    pass
-
-
-class FeatureAlreadyRegisteredError(Exception):
-    pass
+logger = logging.getLogger(__name__)
 
 
-class FeatureManager(object):
-    '''
-    Class for registering user defined features.
+class FeatureManager:
+    """A class for managing server features.
 
     Attributes:
-        _features(dict): Registered features
+        _builtin_features(dict): Predefined set of lsp methods
         _feature_options(dict): Registered feature's options
+        _features(dict): Registered features
         _commands(dict): Registered commands
-    '''
+        server(LanguageServer): Reference to the language server
+                                If passed, server will be passed to registered
+                                features/commands with first parameter:
+                                    1. ls - parameter naming convention
+                                    2. name: LanguageServer - add typings
+    """
 
-    def __init__(self):
-        # Key(str): LSP feature name
-        # Value(func): Feature
-        self._features = {}
-
-        # Key(str): LSP feature name
-        # Value(dict): Feature options
+    def __init__(self, server=None):
+        self._builtin_features = {}
         self._feature_options = {}
-
-        # Key(string): Command name
-        # Value(func): Command
+        self._features = {}
         self._commands = {}
+        self.server = server
 
-    def command(self, command_name):
-        '''
-        Decorator used to register commands
-        Params:
-            command_name(str): Name of the command
-        '''
+    def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
+        """Registers builtin (predefined) feature."""
+        self._builtin_features[feature_name] = func
+        logger.info('Registered builtin feature {}'.format(feature_name))
+
+    @property
+    def builtin_features(self) -> Dict:
+        """Returns server builtin features."""
+        return self._builtin_features
+
+    def command(self, command_name: str) -> Callable:
+        """Decorator used to register custom commands.
+
+        Example:
+            @ls.command('myCustomCommand')
+        """
         def decorator(f):
             # Validate
             if command_name.isspace():
-                log.error(f'Missing command name.')
-                raise OptionsValidationError('Command name is required.')
+                logger.error('Missing command name.')
+                raise ValidationError('Command name is required.')
 
-            # Add if not exists
+            # Check if not already registered
             if command_name in self._commands:
-                log.error(f'Command {command_name} already exists.')
+                logger.error('Command {} already registered.'
+                             .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
-            self._commands[command_name] = f
+            wrapped_f = wrap_with_server(f, self.server)
+            self._commands[command_name] = wrapped_f
 
-            log.info(f'Command {command_name} is successfully registered.')
+            logger.info('Command {} is successfully registered.'
+                        .format(command_name))
 
-            return f
+            return wrapped_f
 
         return decorator
 
     @property
-    def commands(self):
+    def commands(self) -> Dict:
+        """Returns registered custom commands."""
         return self._commands
 
-    def feature(self, *feature_names, **options):
-        '''
-        Decorator used to register LSP features
-        Params:
-            *feature_names(tuple): Name of the LSP feature(s)
-            **options(dict): Feature options
-                E.G. triggerCharacters=['.']
-        '''
-        def decorator(f):
-            # Add feature if not exists
-            for feature_name in feature_names:
-                if feature_name in self._features:
-                    log.error(f'Feature {feature_name} already exists.')
-                    raise FeatureAlreadyRegisteredError()
+    def feature(self, feature_name: str, **options: Dict) -> Callable:
+        """Decorator used to register LSP features.
 
-                self._features[feature_name] = f
+        Example:
+            @ls.feature('textDocument/completion', triggerCharacters=['.'])
+        """
+        def decorator(f):
+            # Validate
+            if feature_name.isspace():
+                logger.error('Missing feature name.')
+                raise ValidationError('Feature name is required.')
+
+            # Add feature if not exists
+            if feature_name in self._features:
+                logger.error('Feature {} already registered.'
+                             .format(feature_name))
+                raise FeatureAlreadyRegisteredError()
+
+            wrapped_f = wrap_with_server(f, self.server)
+            self._features[feature_name] = wrapped_f
 
             if options:
                 self._feature_options[feature_name] = options
 
-            log.info(f'Registered {feature_name} with options {options}')
+            logger.info('Registered {} with options {}'
+                        .format(feature_name, options))
 
-            return f
+            return wrapped_f
         return decorator
 
     @property
-    def feature_options(self):
+    def feature_options(self) -> Dict:
+        """Returns feature options for registered features."""
         return self._feature_options
 
     @property
-    def features(self):
+    def features(self) -> Dict:
+        """Returns registered features"""
         return self._features
-
-
-class OptionsValidationError(Exception):
-
-    def __init__(self, errors=None):
-        self.errors = errors or []
-
-    def __repr__(self):
-        opt_errs = '\n-'.join([e for e in self.errors])
-        return f"Missing options: {opt_errs}"

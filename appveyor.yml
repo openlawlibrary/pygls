@@ -30,9 +30,8 @@ install:
 
   - ps: Update-NodeJsInstallation 7.9.0;                             # match version used by VS Code
   - ps: >-
-      $multi_root_client_json = (Get-Content -Raw -Path examples\multi-root\vscode-client\package.json | ConvertFrom-Json);
-      $simple_json_client_json = (Get-Content -Raw -Path examples\simple-json\vscode-client\package.json | ConvertFrom-Json);
-      $prefixed_version = "v" + $multi_root_client_json.version;
+      $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\vscode-client\package.json | ConvertFrom-Json);
+      $prefixed_version = "v" + $json_extension_client_json.version;
 
       # if we are building a tag, then replace the package version with the tag name
       # else append the build number to the package version and save
@@ -42,30 +41,28 @@ install:
         # append the build number to the client and server package versions
 
         $env:production_build = $False;
-        $multi_root_client_json.version = $multi_root_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
-        $simple_json_client_json.version = $simple_json_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
+        $json_extension_client_json.version = $json_extension_client_json.version + "+" + $env:APPVEYOR_BUILD_NUMBER;
         $prefixed_version = $prefixed_version + "+" + $env:APPVEYOR_BUILD_NUMBER;
 
       } ElseIf ($env:APPVEYOR_REPO_TAG_NAME -ne $prefixed_version) {
         # tag is present and tag name does not match package version, so exit
 
-        echo "Multi-root client version is $($multi_root_client_json.version) and simple-json client version is $($simple_json_client_json.version), but tag is $env:APPVEYOR_REPO_TAG_NAME";
-        echo "You must update the multi-root client and/or simple json client version, or change tag to $prefixed_version";
+        echo "Json-extension client version is $($json_extension_client_json.version)";
+        echo "You must update the json-extension client version, or change tag to $prefixed_version";
         Exit-AppveyorBuild;
         exit;
       }
 
       # update the package files so that vsce will pick up the altered version number
 
-      $multi_root_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\multi-root\vscode-client\package.json;
-      $simple_json_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\simple-json\vscode-client\package.json;
+      $json_extension_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\json-extension\vscode-client\package.json;
 
       # update it with Appveyor
       # from this point on, version numbers should always include the "v" prefix
 
       try {
         Update-AppveyorBuild -Version $prefixed_version;
-        Set-AppveyorBuildVariable unprefixed_version $multi_root_client_json.version
+        Set-AppveyorBuildVariable unprefixed_version $json_extension_client_json.version
       } catch {
         echo $PSItem.ToString();
         echo "Cannot set Appveyor build version to $prefixed_version"
@@ -86,19 +83,10 @@ install:
   - npm --version
 
   # install pygls and dev dependencies
-  - C:\Python36-x64\Scripts\pip.exe install -r requirements_dev.txt
+  - C:\Python36-x64\Scripts\pip.exe install .[test]
   - C:\Python36-x64\Scripts\pip.exe install -e .
 
-  - cd examples\multi-root\vscode-client
-  # install extension-wide js dependencies
-  - npm install --save-dev
-  # run tslint
-  - .\node_modules\.bin\tslint src\*.ts
-  # install our dependencies
-  - npm install                                                  # TODO: replace with `yarn install`
-  - tsc -p .
-
-  - cd ..\..\simple-json\vscode-client
+  - cd examples\json-extension\vscode-client
   # install extension-wide js dependencies
   - npm install --save-dev
   # run tslint
@@ -121,28 +109,8 @@ build_script:
         }
       }
 
-  # package up the multi-root client example VS Code extension
-  - ps: cd examples/multi-root/
-  # copy server.py into client for distribution
-  - ps: cp -r server/ vscode-client/server
-  - ps: cd vscode-client/
-  # check to see if key files will be in the `.vsix` package to be built
-  - vsce ls > packages.txt               rem list files to be packaged
-  # files/folders to be checked
-  - ps: CheckInVsixPackage "CHANGELOG.md"
-  - ps: CheckInVsixPackage "package.json"
-  - ps: CheckInVsixPackage "out/extension.js"
-  - ps: CheckInVsixPackage "server/__init__.py"
-  - ps: CheckInVsixPackage "server/__main__.py"
-  - ps: CheckInVsixPackage "server/server.py"
-  # clean-up after ourselves (so these files don't end up in our `.vsix` package)
-  - rm packages.txt
-  - rm results.txt
-  # passed the basic checks, should be good-to-go
-  - vsce package                         rem "normal" command line is on purpose
-
-  # package up the simple-json client example VS Code extension
-  - ps: cd ../../simple-json/
+  # package up the json-extension client example VS Code extension
+  - ps: cd examples/json-extension/
   # copy server.py into client for distribution
   - ps: cp -r server/ vscode-client/server
   - ps: cd vscode-client/
@@ -168,9 +136,6 @@ test_script:
 
 # Create extensions artifacts
 artifacts:
-  - path: examples/multi-root/vscode-client/multi-root-$(unprefixed_version).vsix
-    name: multi-root-example-$(unprefixed_version).vsix
-    type: file
-  - path: examples/simple-json/vscode-client/simple-json-$(unprefixed_version).vsix
-    name: simple-json-example-$(unprefixed_version).vsix
+  - path: examples/json-extension/vscode-client/json-extension-$(unprefixed_version).vsix
+    name: json-extension-example-$(unprefixed_version).vsix
     type: file
