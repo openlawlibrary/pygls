@@ -51,19 +51,9 @@ class CodeActionAbstract:
     def __init(self,
                dynamic_registration: bool,
                code_action_literal_support:
-               'CodeActionAbstractLiteralSupport'):
+               'CodeActionLiteralSupportAbstract'):
         self.dynamicRegistration = dynamic_registration
         self.codeActionLiteralSupport = code_action_literal_support
-
-
-class CodeActionAbstractKind:
-    def __init__(self, value_set: List[str]):
-        self.valueSet = value_set
-
-
-class CodeActionAbstractLiteralSupport:
-    def __init__(self, code_action_kind: CodeActionAbstractKind):
-        self.codeActionKind = code_action_kind
 
 
 class CodeActionKind:
@@ -74,6 +64,16 @@ class CodeActionKind:
     RefactorRewrite = 'refactor.rewrite'
     Source = 'source'
     SourceOrganizeImports = 'source.organizeImports'
+
+
+class CodeActionKindAbstract:
+    def __init__(self, value_set: List[str]):
+        self.valueSet = value_set
+
+
+class CodeActionLiteralSupportAbstract:
+    def __init__(self, code_action_kind: CodeActionKindAbstract):
+        self.codeActionKind = code_action_kind
 
 
 class CodeActionOptions:
@@ -109,56 +109,12 @@ class CompletionAbstract:
         self.contextSupport = context_support
 
 
-class CompletionItemAbstract:
+class CompletionContext:
     def __init__(self,
-                 snippet_support: bool,
-                 commit_character_support: bool,
-                 documentation_format: List['MarkupKind'],
-                 deprecated_support: bool,
-                 preselected_support: bool):
-        self.snippetSupport = snippet_support
-        self.commitCharacterSupport = commit_character_support
-        self.documentationFormat = documentation_format
-        self.deprecatedSupport = deprecated_support
-        self.preselectedSupport = preselected_support
-
-
-class CompletionItemKindAbstract:
-    def __init__(self, value_set: List['CompletionItemKind']):
-        self.valueSet = value_set
-
-
-class CompletionItemKind:
-    Text = 1
-    Method = 2
-    Function = 3
-    Constructor = 4
-    Field = 5
-    Variable = 6
-    Class = 7
-    Interface = 8
-    Module = 9
-    Property = 10
-    Unit = 11
-    Value = 12
-    Enum = 13
-    Keyword = 14
-    Snippet = 15
-    Color = 16
-    File = 17
-    Reference = 18
-
-
-class CompletionList:
-    def __init__(self, is_incomplete, items=None):
-        self.isIncomplete = is_incomplete
-        self.items = items if items else []
-
-    def add_item(self, completion_item):
-        self.items.append(completion_item)
-
-    def add_items(self, completion_items):
-        self.items.extend(completion_items)
+                 trigger_kind: 'CompletionTriggerKind',
+                 trigger_character: str = None):
+        self.triggerKind = trigger_kind
+        self.triggerCharacter = trigger_character
 
 
 class CompletionItem:
@@ -196,6 +152,58 @@ class CompletionItem:
         self.data = data
 
 
+class CompletionItemAbstract:
+    def __init__(self,
+                 snippet_support: bool,
+                 commit_character_support: bool,
+                 documentation_format: List['MarkupKind'],
+                 deprecated_support: bool,
+                 preselected_support: bool):
+        self.snippetSupport = snippet_support
+        self.commitCharacterSupport = commit_character_support
+        self.documentationFormat = documentation_format
+        self.deprecatedSupport = deprecated_support
+        self.preselectedSupport = preselected_support
+
+
+class CompletionItemKind:
+    Text = 1
+    Method = 2
+    Function = 3
+    Constructor = 4
+    Field = 5
+    Variable = 6
+    Class = 7
+    Interface = 8
+    Module = 9
+    Property = 10
+    Unit = 11
+    Value = 12
+    Enum = 13
+    Keyword = 14
+    Snippet = 15
+    Color = 16
+    File = 17
+    Reference = 18
+
+
+class CompletionItemKindAbstract:
+    def __init__(self, value_set: List['CompletionItemKind']):
+        self.valueSet = value_set
+
+
+class CompletionList:
+    def __init__(self, is_incomplete, items=None):
+        self.isIncomplete = is_incomplete
+        self.items = items if items else []
+
+    def add_item(self, completion_item):
+        self.items.append(completion_item)
+
+    def add_items(self, completion_items):
+        self.items.extend(completion_items)
+
+
 class CompletionOptions:
     def __init__(self, resolve_provider=None, trigger_characters=None):
         self.resolveProvider = resolve_provider
@@ -208,6 +216,12 @@ class CompletionRegistrationOptions:
                  resolve_provider: bool = False):
         self.triggerCharacters = trigger_characters
         self.resolveProvider = resolve_provider
+
+
+class CompletionTriggerKind:
+    Invoked = 1
+    TriggerCharacter = 2
+    TriggerForIncompleteCompletions = 3
 
 
 class ConfigurationItem:
@@ -253,19 +267,12 @@ class DeleteFileOptions:
         self.ignore_if_exists = ignore_if_exists
 
 
-class DiagnosticSeverity:
-    Error = 1
-    Warning = 2
-    Information = 3
-    Hint = 4
-
-
 class Diagnostic:
     def __init__(
         self,
         range: 'Range',
         message: str,
-        severity: DiagnosticSeverity = DiagnosticSeverity.Error,
+        severity: 'DiagnosticSeverity' = 1,
         code: str = None,
         source: str = None,
         related_information: 'DiagnosticRelatedInformation' = None
@@ -276,6 +283,13 @@ class Diagnostic:
         self.code = code
         self.source = source
         self.relatedInformation = related_information
+
+
+class DiagnosticSeverity:
+    Error = 1
+    Warning = 2
+    Information = 3
+    Hint = 4
 
 
 class DiagnosticRelatedInformation:
@@ -328,11 +342,6 @@ class DidSaveTextDocumentParams:
         self.text = text
 
 
-class DynamicRegistrationAbstract:
-    def __init__(self, dynamic_registration: bool):
-        self.dynamicRegistration = dynamic_registration
-
-
 class DocumentFilter:
     def __init__(self,
                  language: str = None,
@@ -363,12 +372,17 @@ class DocumentOnTypeFormattingOptions:
 class DocumentSymbol:
     def __init__(self,
                  dynamic_registration: bool,
-                 symbol_kind: 'SymbolAbstractKind',
+                 symbol_kind: 'SymbolKindAbstract',
                  hierarchical_document_symbol_support: bool):
         self.dynamicRegistration = dynamic_registration,
         self.symbolKind = symbol_kind
         self.hierarchicalDocumentSymbolSupport = \
             hierarchical_document_symbol_support
+
+
+class DynamicRegistrationAbstract:
+    def __init__(self, dynamic_registration: bool):
+        self.dynamicRegistration = dynamic_registration
 
 
 class ExecuteCommandOptions:
@@ -431,7 +445,7 @@ class InitializeParams:
                  root_uri: str = None,
                  initialization_options: Any = None,
                  capabilities: ClientCapabilities = None,
-                 trace: 'TraceEnum' = 'off',
+                 trace: 'Trace' = 'off',
                  workspace_folders: List['WorkspaceFolder'] = None):
         self.processId = process_id
         self.rootPath = root_path
@@ -450,11 +464,6 @@ class InitializeResult:
 class InsertTextFormat:
     PlainText = 1
     Snippet = 2
-
-
-class MessageActionItem:
-    def __init__(self, title: str):
-        self.title = title
 
 
 class Location:
@@ -478,6 +487,11 @@ class MarkupContent:
 class MarkupKind:
     PlainText = 'plaintext'
     Markdown = 'markdown'
+
+
+class MessageActionItem:
+    def __init__(self, title: str):
+        self.title = title
 
 
 class MessageType:
@@ -745,6 +759,11 @@ class SignatureHelpAbstract:
         self.signatureInformation = signature_information
 
 
+class SignatureHelpOptions:
+    def __init__(self, trigger_characters):
+        self.triggerCharacters = trigger_characters
+
+
 class SignatureInformation:
     def __init__(self,
                  label: str,
@@ -760,11 +779,6 @@ class SignatureInformationAbstract:
         self.documentationFormat = documentation_format
 
 
-class SignatureHelpOptions:
-    def __init__(self, trigger_characters):
-        self.triggerCharacters = trigger_characters
-
-
 class StaticRegistrationOptions:
     def __init__(self, id):
         self.id = id
@@ -773,14 +787,9 @@ class StaticRegistrationOptions:
 class SymbolAbstract:
     def __init__(self,
                  dynamic_registration: bool,
-                 symbol_kind: 'SymbolAbstractKind'):
+                 symbol_kind: 'SymbolKindAbstract'):
         self.dynamicRegistration = dynamic_registration
         self.symbolKind = symbol_kind
-
-
-class SymbolAbstractKind:
-    def __init__(self, value_set: 'SymbolKind'):
-        self.valueSet = value_set
 
 
 class SymbolKind:
@@ -802,6 +811,11 @@ class SymbolKind:
     NumTypeber = 16
     Boolean = 17
     Array = 18
+
+
+class SymbolKindAbstract:
+    def __init__(self, value_set: SymbolKind):
+        self.valueSet = value_set
 
 
 class SynchronizationAbstract:
@@ -897,34 +911,20 @@ class TextDocumentPositionParams:
         self.position = position
 
 
-class CompletionTriggerKind:
-    Invoked = 1
-    TriggerCharacter = 2
-    TriggerForIncompleteCompletions = 3
-
-
-class CompletionContext:
-    def __init__(self,
-                 trigger_kind: CompletionTriggerKind,
-                 trigger_character: str = None):
-        self.triggerKind = trigger_kind
-        self.triggerCharacter = trigger_character
-
-
 class CompletionParams(TextDocumentPositionParams):
     def __init__(self, context: CompletionContext):
         self.context = context
+
+
+class TextDocumentRegistrationOptions:
+    def __init__(self, document_selector: DocumentSelectorType = None):
+        self.documentSelector = document_selector
 
 
 class TextDocumentSaveReason:
     Manual = 1
     AfterDelay = 2
     FocusOut = 3
-
-
-class TextDocumentRegistrationOptions:
-    def __init__(self, document_selector: DocumentSelectorType = None):
-        self.documentSelector = document_selector
 
 
 class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
@@ -938,12 +938,6 @@ class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
                  include_text: bool = False):
         super.__init__(document_selector)
         self.includeText = include_text
-
-
-class TextDocumentSyncKind:
-    NONE = 0
-    FULL = 1
-    INCREMENTAL = 2
 
 
 class TextDocumentSyncOptions:
@@ -960,13 +954,19 @@ class TextDocumentSyncOptions:
         self.save = save
 
 
+class TextDocumentSyncKind:
+    NONE = 0
+    FULL = 1
+    INCREMENTAL = 2
+
+
 class TextEdit:
     def __init__(self, range: Range, new_text: str):
         self.range = range
         self.newText = new_text
 
 
-class TraceEnum:
+class Trace:
     Off = 'off'
     Messages = 'messages'
     Verbose = 'verbose'

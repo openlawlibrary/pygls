@@ -48,11 +48,6 @@ class JsonRpcException(Exception):
         return exception_dict
 
 
-class JsonRpcRequestCancelled(JsonRpcException):
-    CODE = -32800
-    MESSAGE = 'Request Cancelled'
-
-
 class JsonRpcInternalError(JsonRpcException):
     CODE = -32602
     MESSAGE = 'Internal Error'
@@ -91,6 +86,11 @@ class JsonRpcParseError(JsonRpcException):
     MESSAGE = 'Parse Error'
 
 
+class JsonRpcRequestCancelled(JsonRpcException):
+    CODE = -32800
+    MESSAGE = 'Request Cancelled'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
@@ -108,11 +108,11 @@ def _is_server_error_code(code):
 
 
 _EXCEPTIONS = (
-    JsonRpcParseError,
+    JsonRpcInternalError,
+    JsonRpcInvalidParams,
     JsonRpcInvalidRequest,
     JsonRpcMethodNotFound,
-    JsonRpcInvalidParams,
-    JsonRpcInternalError,
+    JsonRpcParseError,
     JsonRpcRequestCancelled,
     JsonRpcServerError,
 )
