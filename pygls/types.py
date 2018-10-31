@@ -285,17 +285,17 @@ class Diagnostic:
         self.relatedInformation = related_information
 
 
+class DiagnosticRelatedInformation:
+    def __init__(self, location: 'Location', message: str):
+        self.location = location
+        self.message = message
+
+
 class DiagnosticSeverity:
     Error = 1
     Warning = 2
     Information = 3
     Hint = 4
-
-
-class DiagnosticRelatedInformation:
-    def __init__(self, location: 'Location', message: str):
-        self.location = location
-        self.message = message
 
 
 class DidChangeConfigurationParams:
@@ -940,6 +940,12 @@ class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
         self.includeText = include_text
 
 
+class TextDocumentSyncKind:
+    NONE = 0
+    FULL = 1
+    INCREMENTAL = 2
+
+
 class TextDocumentSyncOptions:
     def __init__(self,
                  open_close,
@@ -952,12 +958,6 @@ class TextDocumentSyncOptions:
         self.willSave = will_save
         self.willSaveWaitUntil = will_save_wait_until
         self.save = save
-
-
-class TextDocumentSyncKind:
-    NONE = 0
-    FULL = 1
-    INCREMENTAL = 2
 
 
 class TextEdit:
