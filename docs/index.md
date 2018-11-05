@@ -2,8 +2,8 @@
 
 Pygls (pronounced like "spy glass") is generic implementation of 
 [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification)
-written in Python. It allows you to write your own Python based
-[Language Server](https://langserver.org/) in just few lines of code.
+written in Python programming language. It allows you to write your own
+[Language Server](https://langserver.org/), using python programming language, in just few lines of code.
 
 ## Features
 
@@ -21,7 +21,3 @@ written in Python. It allows you to write your own Python based
 ## Python versions
 
 Pygls works with Python 3.5+.
-
-## Examples
-
-- [json-extension](https://github.com/openlawlibrary/pygls/tree/master/examples/json-extension) - Simple extension for json documents based on pygls
