@@ -7,7 +7,6 @@ import threading
 from time import sleep
 
 import pytest
-
 from pygls.features import TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
 from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
                          InitializeParams, InitializeResult, TextDocumentItem)
@@ -28,7 +27,7 @@ def _initialize_server(server):
 def test_bf_initialize(client_server):
     client, _ = client_server
 
-    response = client.lsp._send_request(
+    response = client.lsp.send_request(
         'initialize',
         InitializeParams(
             process_id=1234,
@@ -57,7 +56,7 @@ def test_bf_text_document_did_open(client_server):
 def test_feature_async(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp._send_request(FEATURE_ASYNC, {}) \
+    is_called, thread_id = client.lsp.send_request(FEATURE_ASYNC, {}) \
                                      .result(timeout=CALL_TIMEOUT)
 
     assert is_called
@@ -67,7 +66,7 @@ def test_feature_async(client_server):
 def test_feature_sync(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp._send_request(FEATURE_SYNC, {}) \
+    is_called, thread_id = client.lsp.send_request(FEATURE_SYNC, {}) \
                                      .result(timeout=CALL_TIMEOUT)
 
     assert is_called
@@ -77,7 +76,7 @@ def test_feature_sync(client_server):
 def test_feature_thread(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp._send_request(FEATURE_THREAD, {}) \
+    is_called, thread_id = client.lsp.send_request(FEATURE_THREAD, {}) \
                                      .result(timeout=CALL_TIMEOUT)
 
     assert is_called
@@ -87,10 +86,10 @@ def test_feature_thread(client_server):
 def test_command_async(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp._send_request(WORKSPACE_EXECUTE_COMMAND,
-                                                    ExecuteCommandParams(
-                                                        CMD_ASYNC
-                                                    ))\
+    is_called, thread_id = client.lsp.send_request(WORKSPACE_EXECUTE_COMMAND,
+                                                   ExecuteCommandParams(
+                                                       CMD_ASYNC
+                                                   ))\
         .result(timeout=CALL_TIMEOUT)
 
     assert is_called
@@ -101,7 +100,7 @@ def test_command_sync(client_server):
     client, server = client_server
 
     is_called, thread_id = \
-        client.lsp._send_request(
+        client.lsp.send_request(
             WORKSPACE_EXECUTE_COMMAND,
             ExecuteCommandParams(
                 CMD_SYNC
@@ -116,7 +115,7 @@ def test_command_thread(client_server):
     client, server = client_server
 
     is_called, thread_id = \
-        client.lsp._send_request(
+        client.lsp.send_request(
             WORKSPACE_EXECUTE_COMMAND,
             ExecuteCommandParams(
                 CMD_THREAD
