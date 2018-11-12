@@ -17,7 +17,7 @@ from itertools import zip_longest
 from .exceptions import (JsonRpcException, JsonRpcInternalError,
                          JsonRpcMethodNotFound, ThreadDecoratorError)
 from .feature_manager import FeatureManager
-from .features import WORKSPACE_EXECUTE_COMMAND
+from .features import WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
 from .types import (DidChangeTextDocumentParams,
                     DidChangeWorkspaceFoldersParams,
                     DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -302,34 +302,6 @@ class JsonRPCProtocol(asyncio.Protocol):
         except Exception:
             logger.error(traceback.format_exc())
 
-    def _send_request(self, method, params=None):
-        """Sends a JSON RPC request to the client.
-
-        Args:
-            method(str): The method name of the message to send
-            params(any): The payload of the message
-
-        Returns:
-            Future that will be resolved once a response has been received
-        """
-        msg_id = str(uuid.uuid4())
-        logger.debug('Sending request with id {}: {} {}'
-                     .format(msg_id, method, params))
-
-        request = JsonRPCRequestMessage(
-            id=msg_id,
-            jsonrpc=JsonRPCProtocol.VERSION,
-            method=method,
-            params=params
-        )
-
-        future = Future()
-
-        self._server_request_futures[msg_id] = future
-        self._send_data(request)
-
-        return future
-
     def _send_response(self, msg_id, result=None, error=None):
         """Sends a JSON RPC response to the client.
 
@@ -372,6 +344,34 @@ class JsonRPCProtocol(asyncio.Protocol):
         )
 
         self._send_data(request)
+
+    def send_request(self, method, params=None):
+        """Sends a JSON RPC request to the client.
+
+        Args:
+            method(str): The method name of the message to send
+            params(any): The payload of the message
+
+        Returns:
+            Future that will be resolved once a response has been received
+        """
+        msg_id = str(uuid.uuid4())
+        logger.debug('Sending request with id {}: {} {}'
+                     .format(msg_id, method, params))
+
+        request = JsonRPCRequestMessage(
+            id=msg_id,
+            jsonrpc=JsonRPCProtocol.VERSION,
+            method=method,
+            params=params
+        )
+
+        future = Future()
+
+        self._server_request_futures[msg_id] = future
+        self._send_data(request)
+
+        return future
 
     def thread(self):
         """Marks function to execute it in a thread pool."""
@@ -541,7 +541,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                             .format(params, result))
                 return callback(result)
 
-            future = self._send_request('workspace/configuration', params)
+            future = self.send_request(WORKSPACE_CONFIGURATION, params)
             future.add_done_callback(configuration)
         else:
-            return self._send_request('workspace/configuration', params)
+            return self.send_request(WORKSPACE_CONFIGURATION, params)

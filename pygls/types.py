@@ -330,8 +330,8 @@ class DidChangeWatchedFilesRegistrationOptions:
 
 
 class DidChangeWorkspaceFoldersParams:
-    def __init__(self, events: 'WorkspaceFoldersChangeEvent'):
-        self.events = events
+    def __init__(self, event: 'WorkspaceFoldersChangeEvent'):
+        self.event = event
 
 
 class DidCloseTextDocumentParams:
@@ -340,7 +340,7 @@ class DidCloseTextDocumentParams:
 
 
 class DidOpenTextDocumentParams:
-    def __init__(self, text_document: 'TextDocumentIdentifier'):
+    def __init__(self, text_document: 'TextDocumentItem'):
         self.textDocument = text_document
 
 
@@ -358,6 +358,14 @@ class DocumentFilter:
         self.language = language
         self.scheme = scheme
         self.pattern = pattern
+
+
+class DocumentFormattingParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 options: 'FormattingOptions'):
+        self.textDocument = text_document
+        self.options = options
 
 
 class DocumentHighlightKind:
@@ -431,6 +439,17 @@ class FoldingRangeAbstract:
         self.dynamicRegistration = dynamic_registration
         self.rangeLimit = range_limit
         self.lineFoldingOnly = line_folding_only
+
+
+class FormattingOptions:
+    def __init__(self,
+                 tab_size: int,
+                 insert_spaces: bool,
+                 **kwargs
+                 ):
+        self.tabSize = tab_size
+        self.insertSpaces = insert_spaces
+        self.kwargs = kwargs
 
 
 class Hover:

@@ -5,12 +5,10 @@
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
 import os
-import sys
 from threading import Thread
 
 import pytest
 from mock import Mock
-
 from pygls import features, uris
 from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
@@ -60,7 +58,7 @@ def client_server():
 
     yield client, server
 
-    shutdown_response = client.lsp._send_request(
+    shutdown_response = client.lsp.send_request(
         features.SHUTDOWN).result(timeout=CALL_TIMEOUT)
     assert shutdown_response is None
     client.lsp.notify(features.EXIT)
