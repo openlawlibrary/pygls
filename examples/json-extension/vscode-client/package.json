@@ -18,6 +18,14 @@
   "contributes": {
     "commands": [
       {
+        "command": "countDownBlocking",
+        "title": "Count down 10 seconds [Blocking]"
+      },
+      {
+        "command": "countDownNonBlocking",
+        "title": "Count down 10 seconds [Non Blocking]"
+      },
+      {
         "command": "showPythonPath",
         "title": "Show python path"
       }
