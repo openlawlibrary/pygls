@@ -4,7 +4,7 @@
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "All rights reserved",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "open-law-library",
   "engines": {
     "vscode": "^1.25.1"
