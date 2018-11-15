@@ -4,8 +4,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
-"""
-This module contains Language Server Protocol types
+"""This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
 Class attributes are named with camel-case notation because client is expecting
@@ -55,6 +54,20 @@ class ClientCapabilities:
         self.experimental = experimental
 
 
+class CodeAction:
+    def __init__(self,
+                 title: str,
+                 kind: 'CodeActionKind' = None,
+                 diagnostics: List['Diagnostic'] = None,
+                 edit: 'WorkspaceEdit' = None,
+                 command: 'Command' = None):
+        self.title = title
+        self.kind = kind
+        self.diagnostics = diagnostics
+        self.edit = edit
+        self.command = command
+
+
 class CodeActionAbstract:
     def __init(self,
                dynamic_registration: bool,
@@ -62,6 +75,13 @@ class CodeActionAbstract:
                'CodeActionLiteralSupportAbstract'):
         self.dynamicRegistration = dynamic_registration
         self.codeActionLiteralSupport = code_action_literal_support
+
+
+class CodeActionContext:
+    def __init__(self, diagnostics: List['Diagnostic'],
+                 only: List['CodeActionKind'] = None):
+        self.diagnostics = diagnostics
+        self.only = only
 
 
 class CodeActionKind:
@@ -89,9 +109,68 @@ class CodeActionOptions:
         self.codeActionKinds = code_action_kinds
 
 
+class CodeActionParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 _range: 'Range',
+                 context: CodeActionContext):
+        self.textDocument = text_document
+        self.range = _range
+        self.context = context
+
+
+class CodeLens:
+    def __init__(self,
+                 _range: 'Range',
+                 command: 'Command' = None,
+                 data: Any = None):
+        self.range = _range
+        self.command = command
+        self.data = data
+
+
 class CodeLensOptions:
-    def __init__(self, resolve_provider):
+    def __init__(self, resolve_provider: bool = False):
         self.resolveProvider = resolve_provider
+
+
+class CodeLensParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
+
+
+class Color:
+    def __init__(self, red: float, green: float, blue: float, alpha: float):
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.alpha = alpha
+
+
+class ColorInformation:
+    def __init__(self, _range: 'Range', color: Color):
+        self.range = _range
+        self.color = color
+
+
+class ColorPresentation:
+    def __init__(self,
+                 label: str,
+                 text_edit: 'TextEdit' = None,
+                 additional_text_edits: List['TextEdit'] = None):
+        self.label = label
+        self.textEdit = text_edit
+        self.additionalTextEdits = additional_text_edits
+
+
+class ColorPresentationParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 color: Color,
+                 _range: 'Range'):
+        self.textDocument = text_document
+        self.color = color
+        self.range = _range
 
 
 class ColorProviderOptions:
@@ -278,14 +357,14 @@ class DeleteFileOptions:
 class Diagnostic:
     def __init__(
         self,
-        range: 'Range',
+        _range: 'Range',
         message: str,
         severity: 'DiagnosticSeverity' = 1,
         code: str = None,
         source: str = None,
         related_information: 'DiagnosticRelatedInformation' = None
     ):
-        self.range = range
+        self.range = _range
         self.message = message
         self.severity = severity
         self.code = code
@@ -350,6 +429,11 @@ class DidSaveTextDocumentParams:
         self.text = text
 
 
+class DocumentColorParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
+
+
 class DocumentFilter:
     def __init__(self,
                  language: str = None,
@@ -368,15 +452,33 @@ class DocumentFormattingParams:
         self.options = options
 
 
+class DocumentHighlight:
+    def __init__(self, _range: 'Range', kind: int = 1):
+        self.range = _range
+        self.kind = kind
+
+
 class DocumentHighlightKind:
     Text = 1
     Read = 2
     Write = 3
 
 
+class DocumentLink:
+    def __init__(self, _range: 'Range', target: str = None, data: Any = None):
+        self.range = _range
+        self.target = target
+        self.data = data
+
+
 class DocumentLinkOptions:
-    def __init__(self, resolve_provider):
+    def __init__(self, resolve_provider: bool = False):
         self.resolveProvider = resolve_provider
+
+
+class DocumentLinkParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
 
 
 class DocumentOnTypeFormattingOptions:
@@ -385,7 +487,47 @@ class DocumentOnTypeFormattingOptions:
         self.moreTriggerCharacter = more_trigger_character
 
 
+class DocumentOnTypeFormattingParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: 'Position',
+                 ch: str,
+                 options: 'FormattingOptions'):
+        self.textDocument = text_document
+        self.position = position
+        self.ch = ch
+        self.options = options
+
+
+class DocumentRangeFormattingParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 _range: 'Range',
+                 options: 'FormattingOptions'):
+        self.textDocument = text_document
+        self.range = _range
+        self.options = options
+
+
 class DocumentSymbol:
+    def __init__(self,
+                 name: str,
+                 kind: int,
+                 _range: 'Range',
+                 selection__range: 'Range',
+                 detail: str = None,
+                 children: List['DocumentSymbol'] = None,
+                 deprecated: bool = False):
+        self.name = name
+        self.kind = kind
+        self.range = _range
+        self.selectionRange = selection__range
+        self.detail = detail
+        self.children = children
+        self.deprecated = deprecated
+
+
+class DocumentSymbolAbstract:
     def __init__(self,
                  dynamic_registration: bool,
                  symbol_kind: 'SymbolKindAbstract',
@@ -394,6 +536,11 @@ class DocumentSymbol:
         self.symbolKind = symbol_kind
         self.hierarchicalDocumentSymbolSupport = \
             hierarchical_document_symbol_support
+
+
+class DocumentSymbolParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
 
 
 class DynamicRegistrationAbstract:
@@ -420,9 +567,9 @@ class FileChangeType:
 
 
 class FileEvent:
-    def __init__(self, uri: str, type: FileChangeType):
+    def __init__(self, uri: str, _type: FileChangeType):
         self.uri = uri
-        self.type = type
+        self.type = _type
 
 
 class FileSystemWatcher:
@@ -431,14 +578,39 @@ class FileSystemWatcher:
         self.kind = kind
 
 
+class FoldingRange:
+    def __init__(self,
+                 start_line: int,
+                 start_character: int,
+                 end_line: int,
+                 end_character: int,
+                 kind: str = None):
+        self.startLine = start_line
+        self.startCharacter = start_character
+        self.endLine = end_line
+        self.endCharacter = end_character
+        self.kind = kind
+
+
 class FoldingRangeAbstract:
     def __init(self,
                dynamic_registration: bool,
-               range_limit: NumType,
+               _range_limit: NumType,
                line_folding_only: bool):
         self.dynamicRegistration = dynamic_registration
-        self.rangeLimit = range_limit
+        self.rangeLimit = _range_limit
         self.lineFoldingOnly = line_folding_only
+
+
+class FoldingRangeKind:
+    Comment = 'comment'
+    Imports = 'imports'
+    Region = 'region'
+
+
+class FoldingRangeParams:
+    def __init__(self, text_document: 'TextDocumentIdentifier'):
+        self.textDocument = text_document
 
 
 class FormattingOptions:
@@ -453,14 +625,14 @@ class FormattingOptions:
 
 
 class Hover:
-    def __init__(self, contents: Any, range: 'Range' = None):
+    def __init__(self, contents: Any, _range: 'Range' = None):
         self.contents = contents
-        self.range = range
+        self.range = _range
 
 
 class HoverAbstract:
     def __init__(self, dynamic_registration,
-                 content_format: List['MarkupKindEnum']):
+                 content_format: List['MarkupKind']):
         self.dynamicRegistration = dynamic_registration
         self.contentFormat = content_format
 
@@ -494,14 +666,14 @@ class InsertTextFormat:
 
 
 class Location:
-    def __init__(self, uri: str, range: 'Range'):
+    def __init__(self, uri: str, _range: 'Range'):
         self.uri = uri
-        self.range = range
+        self.range = _range
 
 
 class LogMessageParams:
-    def __init__(self, type: NumType, message: str):
-        self.type = type
+    def __init__(self, _type: NumType, message: str):
+        self.type = _type
         self.message = message
 
 
@@ -625,9 +797,14 @@ class Range:
         self.end = end
 
 
+class ReferenceContext:
+    def __init__(self, include_declaration: bool):
+        self.includeDeclaration = include_declaration
+
+
 class Registration:
-    def __init__(self, id: str, method: str, register_options: Any = None):
-        self.id = id
+    def __init__(self, _id: str, method: str, register_options: Any = None):
+        self.id = _id
         self.method = method
         self.registerOptions = register_options
 
@@ -660,6 +837,16 @@ class RenameFileOptions:
                  ignore_if_exists: bool = False):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
+
+
+class RenameParams:
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: Position,
+                 new_name: str):
+        self.textDocument = text_document
+        self.position = position
+        self.newName = new_name
 
 
 class ResourceOperationKind:
@@ -754,17 +941,17 @@ class ServerCapabilities:
 
 
 class ShowMessageParams:
-    def __init__(self, type: MessageType, message: str):
-        self.type = type
+    def __init__(self, _type: MessageType, message: str):
+        self.type = _type
         self.message = message
 
 
 class ShowMessageRequestParams:
     def __init__(self,
-                 type: MessageType,
+                 _type: MessageType,
                  message: str,
                  actions: List[MessageActionItem]):
-        self.type = type
+        self.type = _type
         self.message = message
         self.actions = actions
 
@@ -775,7 +962,7 @@ class SignatureHelp:
                  active_signature: int = 0,
                  active_parameter: int = 0):
         self.signatures = signatures
-        self.activeSignature = active_parameter
+        self.activeSignature = active_signature
         self.activeParameter = active_parameter
 
 
@@ -807,8 +994,8 @@ class SignatureInformationAbstract:
 
 
 class StaticRegistrationOptions:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, _id):
+        self.id = _id
 
 
 class SymbolAbstract:
@@ -817,6 +1004,20 @@ class SymbolAbstract:
                  symbol_kind: 'SymbolKindAbstract'):
         self.dynamicRegistration = dynamic_registration
         self.symbolKind = symbol_kind
+
+
+class SymbolInformation:
+    def __init__(self,
+                 name: str,
+                 kind: int,
+                 location: 'Location',
+                 container_name: str = None,
+                 deprecated: bool = False):
+        self.name = name
+        self.kind = kind
+        self.location = location
+        self.containerName = container_name
+        self.deprecated = deprecated
 
 
 class SymbolKind:
@@ -863,9 +1064,9 @@ class TextDocumentClientCapabilities:
                  signature_help: SignatureHelpAbstract,
                  references: DynamicRegistrationAbstract,
                  document_highlight: DynamicRegistrationAbstract,
-                 document_symbol: DocumentSymbol,
+                 document_symbol: DocumentSymbolAbstract,
                  formatting: DynamicRegistrationAbstract,
-                 range_formatting: DynamicRegistrationAbstract,
+                 _range_formatting: DynamicRegistrationAbstract,
                  on_type_formatting: DynamicRegistrationAbstract,
                  definition: DynamicRegistrationAbstract,
                  type_definition: DynamicRegistrationAbstract,
@@ -876,32 +1077,33 @@ class TextDocumentClientCapabilities:
                  color_provider: DynamicRegistrationAbstract,
                  rename: RenameAbstract,
                  publish_diagnostics: PublishDiagnosticsAbstract,
-                 folding_range: FoldingRangeAbstract):
+                 folding__range: FoldingRangeAbstract):
         self.synchronization = synchronization
         self.completion = completion
         self.hover = hover
         self.signatureHelp = signature_help
         self.references = references
         self.documentHighlight = document_highlight
+        self.documentSymbol = document_symbol
         self.formatting = formatting
-        self.rangeFormatting = range_formatting
+        self.rangeFormatting = _range_formatting
         self.onTypeFormatting = on_type_formatting
         self.definition = definition
         self.typeDefinition = type_definition
         self.implementation = implementation
         self.codeAction = code_action
         self.codeLens = code_lens
-        self.documentLink = document_highlight
+        self.documentLink = document_link
         self.colorProvider = color_provider
         self.rename = rename
         self.publishDiagnostics = publish_diagnostics
-        self.foldingRange = folding_range
+        self.foldingRange = folding__range
 
 
 class TextDocumentContentChangeEvent:
-    def __init__(self, range: 'Range', range_length: NumType, text: str):
-        self.range = range
-        self.range_length = range_length
+    def __init__(self, _range: 'Range', _range_length: NumType, text: str):
+        self.range = _range
+        self.range_length = _range_length
         self.text = text
 
 
@@ -939,7 +1141,20 @@ class TextDocumentPositionParams:
 
 
 class CompletionParams(TextDocumentPositionParams):
-    def __init__(self, context: CompletionContext):
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: Position,
+                 context: CompletionContext):
+        super().__init__(text_document, position)
+        self.context = context
+
+
+class ReferenceParams(TextDocumentPositionParams):
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: Position,
+                 context: ReferenceContext):
+        super().__init__(text_document, position)
         self.context = context
 
 
@@ -948,14 +1163,46 @@ class TextDocumentRegistrationOptions:
         self.documentSelector = document_selector
 
 
-class TextDocumentSaveReason:
-    Manual = 1
-    AfterDelay = 2
-    FocusOut = 3
+class CodeLensRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 resolve_provider: bool = False):
+        super().__init__(document_selector)
+        self.resolveProvider = resolve_provider
+
+
+class DocumentLinkRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 resolve_provider: bool = False):
+        super().__init__(document_selector)
+        self.resolveProvider = resolve_provider
+
+
+class DocumentOnTypeFormattingRegistrationOptions(
+        TextDocumentRegistrationOptions):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 first_trigger_character: str = None,
+                 more_trigger_characters: List[str] = None):
+        super().__init__(document_selector)
+        self.firstTriggerCharacter = first_trigger_character
+        self.moreTriggerCharacter = more_trigger_characters
+
+
+class RenameRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 prepare_provider: bool = False):
+        super().__init__(document_selector)
+        self.prepareProvider = prepare_provider
 
 
 class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
-    def __init(self, trigger_characters: List[str] = None):
+    def __init(self,
+               document_selector: DocumentSelectorType = None,
+               trigger_characters: List[str] = None):
+        super().__init__(document_selector)
         self.triggerCharacters = trigger_characters
 
 
@@ -963,8 +1210,14 @@ class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
                  include_text: bool = False):
-        super.__init__(document_selector)
+        super().__init__(document_selector)
         self.includeText = include_text
+
+
+class TextDocumentSaveReason:
+    Manual = 1
+    AfterDelay = 2
+    FocusOut = 3
 
 
 class TextDocumentSyncKind:
@@ -988,8 +1241,8 @@ class TextDocumentSyncOptions:
 
 
 class TextEdit:
-    def __init__(self, range: Range, new_text: str):
-        self.range = range
+    def __init__(self, _range: Range, new_text: str):
+        self.range = _range
         self.newText = new_text
 
 
@@ -1000,8 +1253,8 @@ class Trace:
 
 
 class Unregistration:
-    def __init__(self, id: str, method: str):
-        self.id = id
+    def __init__(self, _id: str, method: str):
+        self.id = _id
         self.method = method
 
 
