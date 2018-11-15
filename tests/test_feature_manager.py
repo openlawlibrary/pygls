@@ -7,7 +7,6 @@ import pytest
 from pygls import features
 from pygls.exceptions import (CommandAlreadyRegisteredError,
                               FeatureAlreadyRegisteredError, ValidationError)
-from tests.fixtures import feature_manager
 
 
 def test_register_command_validation_error(feature_manager):

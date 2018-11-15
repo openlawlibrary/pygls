@@ -155,8 +155,8 @@ class Workspace(object):
         self._folders[folder.uri] = folder
 
     def apply_edit(self, edit, label=None):
-        return self._lsp._send_request(WORKSPACE_APPLY_EDIT,
-                                       ApplyWorkspaceEditParams(edit, label))
+        return self._lsp.send_request(WORKSPACE_APPLY_EDIT,
+                                      ApplyWorkspaceEditParams(edit, label))
 
     @property
     def documents(self):

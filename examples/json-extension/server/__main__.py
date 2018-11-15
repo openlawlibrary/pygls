@@ -5,9 +5,9 @@
 import argparse
 import logging
 
-from .server import ls
+from .server import json_server
 
-logging.basicConfig(filename='pygls.log', level=logging.DEBUG)
+logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
 
 
 def add_arguments(parser):
@@ -33,9 +33,9 @@ def main():
     args = parser.parse_args()
 
     if args.tcp:
-        ls.start_tcp(args.host, args.port)
+        json_server.start_tcp(args.host, args.port)
     else:
-        ls.start_io()
+        json_server.start_io()
 
 
 if __name__ == '__main__':

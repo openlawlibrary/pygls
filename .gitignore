@@ -1,4 +1,5 @@
 .vscode/settings.json
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -101,3 +102,6 @@ venv.bak/
 
 # mkdocs documentation
 /site
+
+# OS files
+.DS_Store

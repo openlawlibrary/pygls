@@ -7,7 +7,7 @@
 from pygls.types import Position, Range, TextDocumentContentChangeEvent
 from pygls.workspace import Document
 
-from .fixtures import DOC, DOC_URI, doc
+from .conftest import DOC, DOC_URI
 
 
 def test_document_empty_edit():
