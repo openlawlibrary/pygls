@@ -18,7 +18,7 @@ from .exceptions import (JsonRpcException, JsonRpcInternalError,
                          JsonRpcMethodNotFound, JsonRpcRequestCancelled,
                          ThreadDecoratorError)
 from .feature_manager import FeatureManager
-from .features import WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
+from .features import EXIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
 from .types import (DidChangeTextDocumentParams,
                     DidChangeWorkspaceFoldersParams,
                     DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -114,6 +114,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     def __init__(self, server):
         self._pool = None  # Lazy initialized
         self._server = server
+        self._shutdown = False
 
         self._client_request_futures = {}
         self._server_request_futures = {}
@@ -273,6 +274,10 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.warning('Unknown message {}'.format(message))
             return
 
+        if self._shutdown and getattr(message, 'method', '') != EXIT:
+            logger.warning('Server shutting down. No more requests!')
+            return
+
         if isinstance(message, JsonRPCNotification):
             logger.debug('Notification message received.')
             self._handle_notification(message.method, message.params)
@@ -415,14 +420,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     It contains implementations for generic LSP features.
 
     Attributes:
-        _shutdown(bool): Set to true if server received shutdown request
         workspace(Workspace): In memory workspace
     """
 
     def __init__(self, server):
         super().__init__(server)
-
-        self._shutdown = False
 
         self.workspace = None
 
