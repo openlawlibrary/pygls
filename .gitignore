@@ -102,3 +102,6 @@ venv.bak/
 
 # mkdocs documentation
 /site
+
+# OS files
+.DS_Store
