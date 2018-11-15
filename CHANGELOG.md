@@ -1,12 +1,19 @@
 # pygls Change Log
 
+## 0.4.0
+
+- Gracefully shutdown and exit server process
+- Disallow requests after shutdown request is received
+- Added more types for type hints
+- Improved example
+
 ## 0.3.0
 
-- async functions (coroutines) support
-- mark function to execute it in a thread pool
-- added `lsp` types
-- new example
-- fixed `appveyor.yml`
+- Async functions (coroutines) support
+- Mark function to execute it in a thread pool
+- Added `lsp` types
+- New example
+- Fixed `appveyor.yml`
 
 ## 0.2.0
 
