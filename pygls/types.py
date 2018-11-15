@@ -206,21 +206,21 @@ class CompletionContext:
 
 class CompletionItem:
     def __init__(self,
-                 label,
-                 kind=None,
-                 detail=None,
-                 documentation=None,
-                 deprecated=None,
-                 preselect=None,
-                 sort_text=None,
-                 filter_text=None,
-                 insert_text=None,
-                 insert_text_format=None,
-                 text_edit=None,
-                 additional_text_edits=None,
-                 commit_characters=None,
-                 command=None,
-                 data=None):
+                 label: str,
+                 kind: int = None,
+                 detail: str = None,
+                 documentation: Union[str, 'MarkupContent'] = None,
+                 deprecated: bool = False,
+                 preselect: bool = False,
+                 sort_text: str = None,
+                 filter_text: str = None,
+                 insert_text: str = None,
+                 insert_text_format: str = None,
+                 text_edit: 'TextEdit' = None,
+                 additional_text_edits: List['TextEdit'] = None,
+                 commit_characters: List[str] = None,
+                 command: Command = None,
+                 data: Any = None):
         self.label = label
         self.kind = kind
         self.detail = detail
@@ -279,7 +279,9 @@ class CompletionItemKindAbstract:
 
 
 class CompletionList:
-    def __init__(self, is_incomplete, items=None):
+    def __init__(self,
+                 is_incomplete: bool,
+                 items: List[CompletionItem] = None):
         self.isIncomplete = is_incomplete
         self.items = items if items else []
 
@@ -291,17 +293,19 @@ class CompletionList:
 
 
 class CompletionOptions:
-    def __init__(self, resolve_provider=None, trigger_characters=None):
+    def __init__(self,
+                 resolve_provider: bool = False,
+                 trigger_characters: List[str] = None):
         self.resolveProvider = resolve_provider
         self.triggerCharacters = trigger_characters
 
 
 class CompletionRegistrationOptions:
     def __init__(self,
-                 trigger_characters: List[str] = None,
-                 resolve_provider: bool = False):
-        self.triggerCharacters = trigger_characters
+                 resolve_provider: bool = False,
+                 trigger_characters: List[str] = None):
         self.resolveProvider = resolve_provider
+        self.triggerCharacters = trigger_characters
 
 
 class CompletionTriggerKind:
@@ -481,7 +485,9 @@ class DocumentLinkParams:
 
 
 class DocumentOnTypeFormattingOptions:
-    def __init__(self, first_trigger_character, more_trigger_character):
+    def __init__(self,
+                 first_trigger_character: str,
+                 more_trigger_character: List[str] = None):
         self.firstTriggerCharacter = first_trigger_character
         self.moreTriggerCharacter = more_trigger_character
 
@@ -513,14 +519,14 @@ class DocumentSymbol:
                  name: str,
                  kind: int,
                  range: 'Range',
-                 selection__range: 'Range',
+                 selection_range: 'Range',
                  detail: str = None,
                  children: List['DocumentSymbol'] = None,
                  deprecated: bool = False):
         self.name = name
         self.kind = kind
         self.range = range
-        self.selectionRange = selection__range
+        self.selectionRange = selection_range
         self.detail = detail
         self.children = children
         self.deprecated = deprecated
@@ -548,7 +554,7 @@ class DynamicRegistrationAbstract:
 
 
 class ExecuteCommandOptions:
-    def __init__(self, commands):
+    def __init__(self, commands: List[str]):
         self.commands = commands
 
 
@@ -594,10 +600,10 @@ class FoldingRange:
 class FoldingRangeAbstract:
     def __init(self,
                dynamic_registration: bool,
-               _range_limit: NumType,
+               range_limit: NumType,
                line_folding_only: bool):
         self.dynamicRegistration = dynamic_registration
-        self.rangeLimit = _range_limit
+        self.rangeLimit = range_limit
         self.lineFoldingOnly = line_folding_only
 
 
@@ -855,7 +861,7 @@ class ResourceOperationKind:
 
 
 class SaveOptions:
-    def __init__(self, include_text):
+    def __init__(self, include_text: bool = False):
         self.includeText = include_text
 
 
@@ -966,14 +972,16 @@ class SignatureHelp:
 
 
 class SignatureHelpAbstract:
-    def __init__(self, dynamic_registration,
-                 signature_information: List[MarkupKind]):
+    def __init__(self,
+                 dynamic_registration: bool = False,
+                 signature_information: List[MarkupKind] = None):
         self.dynamicRegistration = dynamic_registration
         self.signatureInformation = signature_information
 
 
 class SignatureHelpOptions:
-    def __init__(self, trigger_characters):
+    def __init__(self,
+                 trigger_characters: List[str]):
         self.triggerCharacters = trigger_characters
 
 
@@ -993,7 +1001,7 @@ class SignatureInformationAbstract:
 
 
 class StaticRegistrationOptions:
-    def __init__(self, id):
+    def __init__(self, id: str):
         self.id = id
 
 
@@ -1065,7 +1073,7 @@ class TextDocumentClientCapabilities:
                  document_highlight: DynamicRegistrationAbstract,
                  document_symbol: DocumentSymbolAbstract,
                  formatting: DynamicRegistrationAbstract,
-                 _range_formatting: DynamicRegistrationAbstract,
+                 range_formatting: DynamicRegistrationAbstract,
                  on_type_formatting: DynamicRegistrationAbstract,
                  definition: DynamicRegistrationAbstract,
                  type_definition: DynamicRegistrationAbstract,
@@ -1076,7 +1084,7 @@ class TextDocumentClientCapabilities:
                  color_provider: DynamicRegistrationAbstract,
                  rename: RenameAbstract,
                  publish_diagnostics: PublishDiagnosticsAbstract,
-                 folding__range: FoldingRangeAbstract):
+                 folding_range: FoldingRangeAbstract):
         self.synchronization = synchronization
         self.completion = completion
         self.hover = hover
@@ -1085,7 +1093,7 @@ class TextDocumentClientCapabilities:
         self.documentHighlight = document_highlight
         self.documentSymbol = document_symbol
         self.formatting = formatting
-        self.rangeFormatting = _range_formatting
+        self.rangeFormatting = range_formatting
         self.onTypeFormatting = on_type_formatting
         self.definition = definition
         self.typeDefinition = type_definition
@@ -1096,13 +1104,13 @@ class TextDocumentClientCapabilities:
         self.colorProvider = color_provider
         self.rename = rename
         self.publishDiagnostics = publish_diagnostics
-        self.foldingRange = folding__range
+        self.foldingRange = folding_range
 
 
 class TextDocumentContentChangeEvent:
-    def __init__(self, range: 'Range', _range_length: NumType, text: str):
+    def __init__(self, range: 'Range', range_length: NumType, text: str):
         self.range = range
-        self.range_length = _range_length
+        self.range_length = range_length
         self.text = text
 
 
@@ -1227,11 +1235,11 @@ class TextDocumentSyncKind:
 
 class TextDocumentSyncOptions:
     def __init__(self,
-                 open_close,
-                 change,
-                 will_save,
-                 will_save_wait_until,
-                 save):
+                 open_close: bool = False,
+                 change: int = TextDocumentSyncKind.NONE,
+                 will_save: bool = False,
+                 will_save_wait_until: bool = False,
+                 save: SaveOptions = None):
         self.openClose = open_close
         self.change = change
         self.willSave = will_save
