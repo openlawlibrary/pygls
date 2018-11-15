@@ -15,9 +15,10 @@ from functools import partial
 from itertools import zip_longest
 
 from .exceptions import (JsonRpcException, JsonRpcInternalError,
-                         JsonRpcMethodNotFound, ThreadDecoratorError)
+                         JsonRpcMethodNotFound, JsonRpcRequestCancelled,
+                         ThreadDecoratorError)
 from .feature_manager import FeatureManager
-from .features import WORKSPACE_EXECUTE_COMMAND
+from .features import EXIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
 from .types import (DidChangeTextDocumentParams,
                     DidChangeWorkspaceFoldersParams,
                     DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -34,7 +35,6 @@ class JsonRPCNotification:
     """A class that represents json rpc notification message.
 
     Attributes:
-        id(str): Message id
         jsonrpc(str): Version of a json rpc protocol
         method(str): Name of the method that should be executed
         params(dict): Parameters that should be passed to the method
@@ -64,7 +64,7 @@ class JsonRPCRequestMessage:
 
 
 class JsonRPCResponseMessage:
-    """A class that represents json rpc response message.\
+    """A class that represents json rpc response message.
 
     Attributes:
         id(str): Message id (same as id from `JsonRPCRequestMessage`)
@@ -112,9 +112,9 @@ class JsonRPCProtocol(asyncio.Protocol):
     VERSION = '2.0'
 
     def __init__(self, server):
-        # Lazy initialized
-        self._pool = None
+        self._pool = None  # Lazy initialized
         self._server = server
+        self._shutdown = False
 
         self._client_request_futures = {}
         self._server_request_futures = {}
@@ -168,7 +168,13 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _execute_request_callback(self, msg_id, future):
         """Success callback used for coroutine request message."""
         try:
-            self._send_response(msg_id, result=future.result())
+            if not future.cancelled():
+                self._send_response(msg_id, result=future.result())
+            else:
+                self._send_response(
+                    msg_id,
+                    error=JsonRpcRequestCancelled(
+                        f"Request with id {msg_id} is canceled"))
             self._client_request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
@@ -199,8 +205,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._client_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warn('Cancel notification for unknown message id {}'
-                        .format(msg_id))
+            logger.warning('Cancel notification for unknown message id {}'
+                           .format(msg_id))
             return
 
         # Will only work if the request hasn't started executing
@@ -217,8 +223,8 @@ class JsonRPCProtocol(asyncio.Protocol):
             handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
         except KeyError:
-            logger.warn('Ignoring notification for unknown method {}'
-                        .format(method_name))
+            logger.warning('Ignoring notification for unknown method {}'
+                           .format(method_name))
         except Exception:
             logger.exception('Failed to handle notification {}: {}'
                              .format(method_name, params))
@@ -249,8 +255,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._server_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warn('Received response to unknown message id {}'
-                        .format(msg_id))
+            logger.warning('Received response to unknown message id {}'
+                           .format(msg_id))
             return
 
         if error is not None:
@@ -265,7 +271,11 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
         if message.jsonrpc != JsonRPCProtocol.VERSION:
-            logger.warn('Unknown message {}'.format(message))
+            logger.warning('Unknown message {}'.format(message))
+            return
+
+        if self._shutdown and getattr(message, 'method', '') != EXIT:
+            logger.warning('Server shutting down. No more requests!')
             return
 
         if isinstance(message, JsonRPCNotification):
@@ -301,34 +311,6 @@ class JsonRPCProtocol(asyncio.Protocol):
             self.transport.write(response.encode(self.CHARSET))
         except Exception:
             logger.error(traceback.format_exc())
-
-    def _send_request(self, method, params=None):
-        """Sends a JSON RPC request to the client.
-
-        Args:
-            method(str): The method name of the message to send
-            params(any): The payload of the message
-
-        Returns:
-            Future that will be resolved once a response has been received
-        """
-        msg_id = str(uuid.uuid4())
-        logger.debug('Sending request with id {}: {} {}'
-                     .format(msg_id, method, params))
-
-        request = JsonRPCRequestMessage(
-            id=msg_id,
-            jsonrpc=JsonRPCProtocol.VERSION,
-            method=method,
-            params=params
-        )
-
-        future = Future()
-
-        self._server_request_futures[msg_id] = future
-        self._send_data(request)
-
-        return future
 
     def _send_response(self, msg_id, result=None, error=None):
         """Sends a JSON RPC response to the client.
@@ -373,6 +355,34 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         self._send_data(request)
 
+    def send_request(self, method, params=None):
+        """Sends a JSON RPC request to the client.
+
+        Args:
+            method(str): The method name of the message to send
+            params(any): The payload of the message
+
+        Returns:
+            Future that will be resolved once a response has been received
+        """
+        msg_id = str(uuid.uuid4())
+        logger.debug('Sending request with id {}: {} {}'
+                     .format(msg_id, method, params))
+
+        request = JsonRPCRequestMessage(
+            id=msg_id,
+            jsonrpc=JsonRPCProtocol.VERSION,
+            method=method,
+            params=params
+        )
+
+        future = Future()
+
+        self._server_request_futures[msg_id] = future
+        self._send_data(request)
+
+        return future
+
     def thread(self):
         """Marks function to execute it in a thread pool."""
         def decorator(f):
@@ -387,15 +397,12 @@ class JsonRPCProtocol(asyncio.Protocol):
 
 
 class LSPMeta(type):
-    """Metaclass for language server protocol.
+    """Wraps LSP built-in features (`bf_` naming convention).
 
-    Purpose:
-        Wraps LSP built-in features (`bf_` naming convention).
-        Built-in features cannot be overridden but user defined features with
-        the same LSP name will be called after them.
+    Built-in features cannot be overridden but user defined features with
+    the same LSP name will be called after them.
     """
-
-    def __new__(self, cls_name, cls_bases, cls):
+    def __new__(mcs, cls_name, cls_bases, cls):
         for attr_name, attr_val in cls.items():
             if callable(attr_val) and attr_name.startswith('bf_'):
                 method_name = to_lsp_name(attr_name[3:])
@@ -404,7 +411,7 @@ class LSPMeta(type):
                 logger.debug('Added decorator for lsp method: {}'
                              .format(attr_name))
 
-        return super().__new__(self, cls_name, cls_bases, cls)
+        return super().__new__(mcs, cls_name, cls_bases, cls)
 
 
 class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
@@ -413,14 +420,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     It contains implementations for generic LSP features.
 
     Attributes:
-        _shutdown(bool): Set to true if server received shutdown request
         workspace(Workspace): In memory workspace
     """
 
     def __init__(self, server):
         super().__init__(server)
-
-        self._shutdown = False
 
         self.workspace = None
 
@@ -437,7 +441,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def bf_exit(self, *args):
         """Stops the server process."""
         self.transport.close()
-        self._server.shutdown()
+        sys.exit(1)
 
     def bf_initialize(self, params: InitializeParams):
         """Method that initializes language server.
@@ -475,6 +479,12 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def bf_shutdown(self, *args):
         """Request from client which asks server to shutdown."""
+        for future in self._client_request_futures.values():
+            future.cancel()
+
+        for future in self._server_request_futures.values():
+            future.cancel()
+
         self._shutdown = True
         return None
 
@@ -535,13 +545,13 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                   `@ls.thread()` decorator
         """
         if callback:
-            def configuration(future):
+            def configuration(future: Future):
                 result = future.result()
                 logger.info('Configuration for {} received: {}'
                             .format(params, result))
                 return callback(result)
 
-            future = self._send_request('workspace/configuration', params)
-            future.add_done_callback(configuration)
+            request_future = self.send_request(WORKSPACE_CONFIGURATION, params)
+            request_future.add_done_callback(configuration)
         else:
-            return self._send_request('workspace/configuration', params)
+            return self.send_request(WORKSPACE_CONFIGURATION, params)

@@ -4,7 +4,7 @@
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "All rights reserved",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "open-law-library",
   "engines": {
     "vscode": "^1.25.1"
@@ -17,6 +17,14 @@
   ],
   "contributes": {
     "commands": [
+      {
+        "command": "countDownBlocking",
+        "title": "Count down 10 seconds [Blocking]"
+      },
+      {
+        "command": "countDownNonBlocking",
+        "title": "Count down 10 seconds [Non Blocking]"
+      },
       {
         "command": "showPythonPath",
         "title": "Show python path"

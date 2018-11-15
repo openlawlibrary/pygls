@@ -4,13 +4,12 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+import asyncio
 import os
-import sys
 from threading import Thread
 
 import pytest
 from mock import Mock
-
 from pygls import features, uris
 from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
@@ -26,7 +25,7 @@ testing
 DOC_URI = uris.from_fs_path(__file__)
 
 
-@pytest.fixture
+@pytest.fixture(scope='session', autouse=True)
 def client_server():
     """ A fixture to setup a client/server """
 
@@ -50,7 +49,7 @@ def client_server():
     server.thread_id = server_thread.ident
 
     # Setup client
-    client = LanguageServer()
+    client = LanguageServer(asyncio.new_event_loop())
 
     client_thread = Thread(target=client.start_io, args=(
         os.fdopen(scr, 'rb'), os.fdopen(csw, 'wb')))
@@ -60,7 +59,7 @@ def client_server():
 
     yield client, server
 
-    shutdown_response = client.lsp._send_request(
+    shutdown_response = client.lsp.send_request(
         features.SHUTDOWN).result(timeout=CALL_TIMEOUT)
     assert shutdown_response is None
     client.lsp.notify(features.EXIT)

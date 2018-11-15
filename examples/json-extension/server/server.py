@@ -2,7 +2,9 @@
 # Copyright (c) Open Law Library. All rights reserved.                   #
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
+import asyncio
 import json
+import time
 from json import JSONDecodeError
 
 from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
@@ -16,13 +18,15 @@ from pygls.types import (CompletionItem, CompletionList, ConfigurationItem,
 
 
 class JsonLanguageServer(LanguageServer):
+    CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
+    CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
     CMD_SHOW_PYTHON_PATH = "showPythonPath"
 
     def __init__(self):
         super().__init__()
 
 
-ls = JsonLanguageServer()
+json_server = JsonLanguageServer()
 
 
 def _validate(ls, params):
@@ -50,7 +54,7 @@ def _validate_json(doc):
                 Position(line-1, col)
             ),
             msg,
-            source=type(ls).__name__
+            source=type(json_server).__name__
         )
 
         diagnostics.append(d)
@@ -58,7 +62,7 @@ def _validate_json(doc):
     return diagnostics
 
 
-@ls.feature(COMPLETION, trigger_characters=[','])
+@json_server.feature(COMPLETION, trigger_characters=[','])
 def completions(params):
     """Returns completion items."""
     return CompletionList(False, [
@@ -70,19 +74,41 @@ def completions(params):
     ])
 
 
-@ls.feature(TEXT_DOCUMENT_DID_CHANGE)
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+def count_down_10_seconds_blocking(ls, *args):
+    """Starts counting down and showing message synchronously.
+    It will `block` the main thread, which can be tested by trying to show
+    completion items.
+    """
+    for i in range(10):
+        ls.workspace.show_message("Counting down... {}".format(10 - i))
+        time.sleep(1)
+
+
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
+async def count_down_10_seconds_non_blocking(ls, *args):
+    """Starts counting down and showing message asynchronously.
+    It won't `block` the main thread, which can be tested by trying to show
+    completion items.
+    """
+    for i in range(10):
+        ls.workspace.show_message("Counting down... {}".format(10 - i))
+        await asyncio.sleep(1)
+
+
+@json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
     _validate(ls, params)
 
 
-@ls.feature(TEXT_DOCUMENT_DID_CLOSE)
+@json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
     server.workspace.show_message("Text Document Did Close")
 
 
-@ls.feature(TEXT_DOCUMENT_DID_OPEN)
+@json_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.workspace.show_message("Text Document Did Open")
@@ -91,8 +117,8 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     _validate(ls, params)
 
 
-@ls.thread()
-@ls.command(ls.CMD_SHOW_PYTHON_PATH)
+@json_server.thread()
+@json_server.command(JsonLanguageServer.CMD_SHOW_PYTHON_PATH)
 def show_python_path(ls, *args):
     """Gets python path from configuration and displays it."""
     configs = ls.get_configuration(ConfigurationParams([
@@ -102,7 +128,7 @@ def show_python_path(ls, *args):
     python_path = None
     try:
         python_path = configs[0].pythonPath
-    except Exception:
+    except (IndexError, AttributeError):
         pass
 
     ls.workspace.show_message("Python path: {}".format(python_path))
