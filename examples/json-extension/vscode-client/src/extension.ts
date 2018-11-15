@@ -70,7 +70,6 @@ function startLangServer(
       // In the past this told the client to actively synchronize settings. Since the
       // client now supports 'getConfiguration' requests this active synchronization is not
       // necessary anymore.
-      configurationSection: ["pygls"],
       // Notify the server about file changes to '.clientrc files contain in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
     },

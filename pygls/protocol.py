@@ -15,7 +15,8 @@ from functools import partial
 from itertools import zip_longest
 
 from .exceptions import (JsonRpcException, JsonRpcInternalError,
-                         JsonRpcMethodNotFound, ThreadDecoratorError)
+                         JsonRpcMethodNotFound, JsonRpcRequestCancelled,
+                         ThreadDecoratorError)
 from .feature_manager import FeatureManager
 from .features import WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
 from .types import (DidChangeTextDocumentParams,
@@ -111,8 +112,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     VERSION = '2.0'
 
     def __init__(self, server):
-        # Lazy initialized
-        self._pool = None
+        self._pool = None  # Lazy initialized
         self._server = server
 
         self._client_request_futures = {}
@@ -167,7 +167,13 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _execute_request_callback(self, msg_id, future):
         """Success callback used for coroutine request message."""
         try:
-            self._send_response(msg_id, result=future.result())
+            if not future.cancelled():
+                self._send_response(msg_id, result=future.result())
+            else:
+                self._send_response(
+                    msg_id,
+                    error=JsonRpcRequestCancelled(
+                        f"Request with id {msg_id} is canceled"))
             self._client_request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
@@ -386,14 +392,11 @@ class JsonRPCProtocol(asyncio.Protocol):
 
 
 class LSPMeta(type):
-    """Metaclass for language server protocol.
+    """Wraps LSP built-in features (`bf_` naming convention).
 
-    Purpose:
-        Wraps LSP built-in features (`bf_` naming convention).
-        Built-in features cannot be overridden but user defined features with
-        the same LSP name will be called after them.
+    Built-in features cannot be overridden but user defined features with
+    the same LSP name will be called after them.
     """
-
     def __new__(mcs, cls_name, cls_bases, cls):
         for attr_name, attr_val in cls.items():
             if callable(attr_val) and attr_name.startswith('bf_'):
