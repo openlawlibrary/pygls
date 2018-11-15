@@ -50,7 +50,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
             proxy(body)
 
 
-class StdOutTransportAdapter(asyncio.Transport):
+class StdOutTransportAdapter:
     """Protocol adapter which overrides write method.
 
     Write method sends data to stdout.
@@ -89,7 +89,7 @@ class Server:
                                                     - lazy instantiated
     """
 
-    def __init__(self, protocol_cls, max_workers=2):
+    def __init__(self, protocol_cls, loop=None, max_workers=2):
         assert issubclass(protocol_cls, asyncio.Protocol)
 
         self._max_workers = max_workers
@@ -100,14 +100,18 @@ class Server:
 
         if IS_WIN:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
+        else:
+            asyncio.set_event_loop(asyncio.SelectorEventLoop())
 
-        self.loop = asyncio.new_event_loop()
+        self.loop = loop or asyncio.get_event_loop()
 
         self.lsp = protocol_cls(self)
 
     def shutdown(self):
         """Shutdown server."""
         logger.info('Shutting down the server')
+
+        self._stop_event.set()
 
         if self._thread_pool:
             self._thread_pool.terminate()
@@ -120,15 +124,21 @@ class Server:
             self._server.close()
             self.loop.run_until_complete(self._server.wait_closed())
 
-        self.loop.stop()
+        self.loop.close()
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
         logger.info('Starting server on {}:{}'.format(host, port))
 
         self._server = self.loop.run_until_complete(
-            self.loop.create_server(self.lsp, host, port))
-        self.loop.run_forever()
+            self.loop.create_server(self.lsp, host, port)
+        )
+        try:
+            self.loop.run_forever()
+        except SystemExit:
+            pass
+        finally:
+            self.shutdown()
 
     def start_io(self, stdin=None, stdout=None):
         """Starts IO server."""
@@ -140,10 +150,17 @@ class Server:
         self.lsp.connection_made(transport)
 
         self.loop.run_until_complete(aio_readline(self.loop,
-                                                  self._thread_pool_executor,
+                                                  self.thread_pool_executor,
                                                   self._stop_event,
                                                   stdin or sys.stdin.buffer,
                                                   self.lsp.data_received))
+
+        try:
+            self.loop.run_forever()
+        except SystemExit:
+            pass
+        finally:
+            self.shutdown()
 
     @property
     def thread_pool(self) -> ThreadPool:
@@ -174,8 +191,8 @@ class LanguageServer(Server):
                                     `ThreadPoolExecutor`
     """
 
-    def __init__(self, max_workers: int = 2):
-        super().__init__(LanguageServerProtocol, max_workers)
+    def __init__(self, loop=None, max_workers: int = 2):
+        super().__init__(LanguageServerProtocol, loop, max_workers)
 
     def command(self, command_name: str):
         """Decorator used to register custom commands.

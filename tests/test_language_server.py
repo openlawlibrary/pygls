@@ -3,16 +3,14 @@
 # # See ThirdPartyNotices.txt in the project root for license information. #
 # ##########################################################################
 import os
-import threading
 from time import sleep
 
-import pytest
-from pygls.features import TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
+from pygls.features import (INITIALIZE, TEXT_DOCUMENT_DID_OPEN,
+                            WORKSPACE_EXECUTE_COMMAND)
 from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
-                         InitializeParams, InitializeResult, TextDocumentItem)
+                         InitializeParams, TextDocumentItem)
 from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
                    FEATURE_SYNC, FEATURE_THREAD)
-from tests.fixtures import client_server
 
 CALL_TIMEOUT = 2
 
@@ -28,7 +26,7 @@ def test_bf_initialize(client_server):
     client, _ = client_server
 
     response = client.lsp.send_request(
-        'initialize',
+        INITIALIZE,
         InitializeParams(
             process_id=1234,
             root_path=os.path.dirname(__file__)

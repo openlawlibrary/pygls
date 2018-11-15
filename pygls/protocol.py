@@ -34,7 +34,6 @@ class JsonRPCNotification:
     """A class that represents json rpc notification message.
 
     Attributes:
-        id(str): Message id
         jsonrpc(str): Version of a json rpc protocol
         method(str): Name of the method that should be executed
         params(dict): Parameters that should be passed to the method
@@ -64,7 +63,7 @@ class JsonRPCRequestMessage:
 
 
 class JsonRPCResponseMessage:
-    """A class that represents json rpc response message.\
+    """A class that represents json rpc response message.
 
     Attributes:
         id(str): Message id (same as id from `JsonRPCRequestMessage`)
@@ -199,8 +198,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._client_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warn('Cancel notification for unknown message id {}'
-                        .format(msg_id))
+            logger.warning('Cancel notification for unknown message id {}'
+                           .format(msg_id))
             return
 
         # Will only work if the request hasn't started executing
@@ -217,8 +216,8 @@ class JsonRPCProtocol(asyncio.Protocol):
             handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
         except KeyError:
-            logger.warn('Ignoring notification for unknown method {}'
-                        .format(method_name))
+            logger.warning('Ignoring notification for unknown method {}'
+                           .format(method_name))
         except Exception:
             logger.exception('Failed to handle notification {}: {}'
                              .format(method_name, params))
@@ -249,8 +248,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._server_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warn('Received response to unknown message id {}'
-                        .format(msg_id))
+            logger.warning('Received response to unknown message id {}'
+                           .format(msg_id))
             return
 
         if error is not None:
@@ -265,7 +264,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
         if message.jsonrpc != JsonRPCProtocol.VERSION:
-            logger.warn('Unknown message {}'.format(message))
+            logger.warning('Unknown message {}'.format(message))
             return
 
         if isinstance(message, JsonRPCNotification):
@@ -395,7 +394,7 @@ class LSPMeta(type):
         the same LSP name will be called after them.
     """
 
-    def __new__(self, cls_name, cls_bases, cls):
+    def __new__(mcs, cls_name, cls_bases, cls):
         for attr_name, attr_val in cls.items():
             if callable(attr_val) and attr_name.startswith('bf_'):
                 method_name = to_lsp_name(attr_name[3:])
@@ -404,7 +403,7 @@ class LSPMeta(type):
                 logger.debug('Added decorator for lsp method: {}'
                              .format(attr_name))
 
-        return super().__new__(self, cls_name, cls_bases, cls)
+        return super().__new__(mcs, cls_name, cls_bases, cls)
 
 
 class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
@@ -437,7 +436,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def bf_exit(self, *args):
         """Stops the server process."""
         self.transport.close()
-        self._server.shutdown()
+        sys.exit(1)
 
     def bf_initialize(self, params: InitializeParams):
         """Method that initializes language server.
@@ -475,6 +474,12 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def bf_shutdown(self, *args):
         """Request from client which asks server to shutdown."""
+        for future in self._client_request_futures.values():
+            future.cancel()
+
+        for future in self._server_request_futures.values():
+            future.cancel()
+
         self._shutdown = True
         return None
 
@@ -535,13 +540,13 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                   `@ls.thread()` decorator
         """
         if callback:
-            def configuration(future):
+            def configuration(future: Future):
                 result = future.result()
                 logger.info('Configuration for {} received: {}'
                             .format(params, result))
                 return callback(result)
 
-            future = self.send_request(WORKSPACE_CONFIGURATION, params)
-            future.add_done_callback(configuration)
+            request_future = self.send_request(WORKSPACE_CONFIGURATION, params)
+            request_future.add_done_callback(configuration)
         else:
             return self.send_request(WORKSPACE_CONFIGURATION, params)
