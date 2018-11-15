@@ -7,7 +7,7 @@ import logging
 
 from .server import json_server
 
-logging.basicConfig(filename='pygls.log', level=logging.DEBUG)
+logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
 
 
 def add_arguments(parser):

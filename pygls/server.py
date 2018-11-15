@@ -111,8 +111,6 @@ class Server:
         """Shutdown server."""
         logger.info('Shutting down the server')
 
-        self._stop_event.set()
-
         if self._thread_pool:
             self._thread_pool.terminate()
             self._thread_pool.join()
@@ -124,6 +122,7 @@ class Server:
             self._server.close()
             self.loop.run_until_complete(self._server.wait_closed())
 
+        logger.info('Closing the event loop.')
         self.loop.close()
 
     def start_tcp(self, host, port):
@@ -149,17 +148,17 @@ class Server:
                                            stdout or sys.stdout.buffer)
         self.lsp.connection_made(transport)
 
-        self.loop.run_until_complete(aio_readline(self.loop,
-                                                  self.thread_pool_executor,
-                                                  self._stop_event,
-                                                  stdin or sys.stdin.buffer,
-                                                  self.lsp.data_received))
-
         try:
-            self.loop.run_forever()
+            self.loop.run_until_complete(
+                aio_readline(self.loop,
+                             self.thread_pool_executor,
+                             self._stop_event,
+                             stdin or sys.stdin.buffer,
+                             self.lsp.data_received))
         except SystemExit:
             pass
         finally:
+            self._stop_event.set()
             self.shutdown()
 
     @property
