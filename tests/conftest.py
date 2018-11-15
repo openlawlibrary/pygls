@@ -4,6 +4,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 # All modifications Copyright (c) Open Law Library. All rights reserved. #
 ##########################################################################
+import asyncio
 import os
 from threading import Thread
 
@@ -24,7 +25,7 @@ testing
 DOC_URI = uris.from_fs_path(__file__)
 
 
-@pytest.fixture
+@pytest.fixture(scope='session', autouse=True)
 def client_server():
     """ A fixture to setup a client/server """
 
@@ -48,7 +49,7 @@ def client_server():
     server.thread_id = server_thread.ident
 
     # Setup client
-    client = LanguageServer()
+    client = LanguageServer(asyncio.new_event_loop())
 
     client_thread = Thread(target=client.start_io, args=(
         os.fdopen(scr, 'rb'), os.fdopen(csw, 'wb')))

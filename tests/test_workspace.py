@@ -8,13 +8,11 @@ import os
 
 from pygls import uris
 from pygls.types import TextDocumentItem, WorkspaceFolder
-from pygls.workspace import Workspace
 
-from .fixtures import workspace
 
 DOC_URI = uris.from_fs_path(__file__)
 DOC_TEXT = '''test'''
-DOC = TextDocumentItem(DOC_URI, 'plaintext', '0', DOC_TEXT)
+DOC = TextDocumentItem(DOC_URI, 'plaintext', 0, DOC_TEXT)
 
 
 def test_add_folder(workspace):

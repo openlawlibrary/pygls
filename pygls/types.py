@@ -112,19 +112,19 @@ class CodeActionOptions:
 class CodeActionParams:
     def __init__(self,
                  text_document: 'TextDocumentIdentifier',
-                 _range: 'Range',
+                 range: 'Range',
                  context: CodeActionContext):
         self.textDocument = text_document
-        self.range = _range
+        self.range = range
         self.context = context
 
 
 class CodeLens:
     def __init__(self,
-                 _range: 'Range',
+                 range: 'Range',
                  command: 'Command' = None,
                  data: Any = None):
-        self.range = _range
+        self.range = range
         self.command = command
         self.data = data
 
@@ -148,8 +148,8 @@ class Color:
 
 
 class ColorInformation:
-    def __init__(self, _range: 'Range', color: Color):
-        self.range = _range
+    def __init__(self, range: 'Range', color: Color):
+        self.range = range
         self.color = color
 
 
@@ -167,10 +167,10 @@ class ColorPresentationParams:
     def __init__(self,
                  text_document: 'TextDocumentIdentifier',
                  color: Color,
-                 _range: 'Range'):
+                 range: 'Range'):
         self.textDocument = text_document
         self.color = color
-        self.range = _range
+        self.range = range
 
 
 class ColorProviderOptions:
@@ -210,7 +210,6 @@ class CompletionItem:
                  kind=None,
                  detail=None,
                  documentation=None,
-
                  deprecated=None,
                  preselect=None,
                  sort_text=None,
@@ -357,14 +356,14 @@ class DeleteFileOptions:
 class Diagnostic:
     def __init__(
         self,
-        _range: 'Range',
+        range: 'Range',
         message: str,
         severity: 'DiagnosticSeverity' = 1,
         code: str = None,
         source: str = None,
         related_information: 'DiagnosticRelatedInformation' = None
     ):
-        self.range = _range
+        self.range = range
         self.message = message
         self.severity = severity
         self.code = code
@@ -453,8 +452,8 @@ class DocumentFormattingParams:
 
 
 class DocumentHighlight:
-    def __init__(self, _range: 'Range', kind: int = 1):
-        self.range = _range
+    def __init__(self, range: 'Range', kind: int = 1):
+        self.range = range
         self.kind = kind
 
 
@@ -465,8 +464,8 @@ class DocumentHighlightKind:
 
 
 class DocumentLink:
-    def __init__(self, _range: 'Range', target: str = None, data: Any = None):
-        self.range = _range
+    def __init__(self, range: 'Range', target: str = None, data: Any = None):
+        self.range = range
         self.target = target
         self.data = data
 
@@ -502,10 +501,10 @@ class DocumentOnTypeFormattingParams:
 class DocumentRangeFormattingParams:
     def __init__(self,
                  text_document: 'TextDocumentIdentifier',
-                 _range: 'Range',
+                 range: 'Range',
                  options: 'FormattingOptions'):
         self.textDocument = text_document
-        self.range = _range
+        self.range = range
         self.options = options
 
 
@@ -513,14 +512,14 @@ class DocumentSymbol:
     def __init__(self,
                  name: str,
                  kind: int,
-                 _range: 'Range',
+                 range: 'Range',
                  selection__range: 'Range',
                  detail: str = None,
                  children: List['DocumentSymbol'] = None,
                  deprecated: bool = False):
         self.name = name
         self.kind = kind
-        self.range = _range
+        self.range = range
         self.selectionRange = selection__range
         self.detail = detail
         self.children = children
@@ -567,9 +566,9 @@ class FileChangeType:
 
 
 class FileEvent:
-    def __init__(self, uri: str, _type: FileChangeType):
+    def __init__(self, uri: str, type: FileChangeType):
         self.uri = uri
-        self.type = _type
+        self.type = type
 
 
 class FileSystemWatcher:
@@ -625,9 +624,9 @@ class FormattingOptions:
 
 
 class Hover:
-    def __init__(self, contents: Any, _range: 'Range' = None):
+    def __init__(self, contents: Any, range: 'Range' = None):
         self.contents = contents
-        self.range = _range
+        self.range = range
 
 
 class HoverAbstract:
@@ -666,14 +665,14 @@ class InsertTextFormat:
 
 
 class Location:
-    def __init__(self, uri: str, _range: 'Range'):
+    def __init__(self, uri: str, range: 'Range'):
         self.uri = uri
-        self.range = _range
+        self.range = range
 
 
 class LogMessageParams:
-    def __init__(self, _type: NumType, message: str):
-        self.type = _type
+    def __init__(self, type: NumType, message: str):
+        self.type = type
         self.message = message
 
 
@@ -803,8 +802,8 @@ class ReferenceContext:
 
 
 class Registration:
-    def __init__(self, _id: str, method: str, register_options: Any = None):
-        self.id = _id
+    def __init__(self, id: str, method: str, register_options: Any = None):
+        self.id = id
         self.method = method
         self.registerOptions = register_options
 
@@ -941,17 +940,17 @@ class ServerCapabilities:
 
 
 class ShowMessageParams:
-    def __init__(self, _type: MessageType, message: str):
-        self.type = _type
+    def __init__(self, type: MessageType, message: str):
+        self.type = type
         self.message = message
 
 
 class ShowMessageRequestParams:
     def __init__(self,
-                 _type: MessageType,
+                 type: MessageType,
                  message: str,
                  actions: List[MessageActionItem]):
-        self.type = _type
+        self.type = type
         self.message = message
         self.actions = actions
 
@@ -994,8 +993,8 @@ class SignatureInformationAbstract:
 
 
 class StaticRegistrationOptions:
-    def __init__(self, _id):
-        self.id = _id
+    def __init__(self, id):
+        self.id = id
 
 
 class SymbolAbstract:
@@ -1101,8 +1100,8 @@ class TextDocumentClientCapabilities:
 
 
 class TextDocumentContentChangeEvent:
-    def __init__(self, _range: 'Range', _range_length: NumType, text: str):
-        self.range = _range
+    def __init__(self, range: 'Range', _range_length: NumType, text: str):
+        self.range = range
         self.range_length = _range_length
         self.text = text
 
@@ -1241,8 +1240,8 @@ class TextDocumentSyncOptions:
 
 
 class TextEdit:
-    def __init__(self, _range: Range, new_text: str):
-        self.range = _range
+    def __init__(self, range: Range, new_text: str):
+        self.range = range
         self.newText = new_text
 
 
@@ -1253,8 +1252,8 @@ class Trace:
 
 
 class Unregistration:
-    def __init__(self, _id: str, method: str):
-        self.id = _id
+    def __init__(self, id: str, method: str):
+        self.id = id
         self.method = method
 
 
