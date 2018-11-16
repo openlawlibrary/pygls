@@ -519,7 +519,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if f_add:
                 self.workspace.add_folder(f_add)
             if f_remove:
-                self.workspace.remove_folder(f_remove)
+                self.workspace.remove_folder(f_remove.uri)
 
     def bf_workspace__execute_command(self,
                                       params: ExecuteCommandParams,
@@ -554,4 +554,5 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             request_future = self.send_request(WORKSPACE_CONFIGURATION, params)
             request_future.add_done_callback(configuration)
         else:
-            return self.send_request(WORKSPACE_CONFIGURATION, params)
+            return asyncio.wrap_future(
+                self.send_request(WORKSPACE_CONFIGURATION, params))

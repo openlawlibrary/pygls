@@ -105,6 +105,11 @@ class Server:
 
         self.loop = loop or asyncio.get_event_loop()
 
+        try:
+            asyncio.get_child_watcher().attach_loop(self.loop)
+        except NotImplementedError:
+            pass
+
         self.lsp = protocol_cls(self)
 
     def shutdown(self):
