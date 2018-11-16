@@ -1,5 +1,11 @@
 # pygls Change Log
 
+## 0.5.0
+
+- Return awaitable Future object from get_configuration
+- Add / Remove Workspace folders bugfix
+- Attach loop to child watcher for UNIX systems
+
 ## 0.4.0
 
 - Gracefully shutdown and exit server process
