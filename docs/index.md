@@ -1,9 +1,6 @@
-# Pygls
+# pygls
 
-Pygls (pronounced like "spy glass") is generic implementation of 
-[Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification)
-written in Python programming language. It allows you to write your own
-[Language Server](https://langserver.org/), using python programming language, in just few lines of code.
+_pygls_ (pronounced like "spy glass") is generic implementation of [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) written in Python programming language. It allows you to write your own [Language Server](https://langserver.org/) in just few lines of code.
 
 ## Features
 
@@ -20,4 +17,4 @@ written in Python programming language. It allows you to write your own
 
 ## Python versions
 
-Pygls works with Python 3.5+.
+_pygls_ works with Python 3.5+.
