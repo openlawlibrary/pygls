@@ -73,7 +73,7 @@ def cmd_return_hello_world(ls, *args):
     return 'Hello World!'
 ```
 
-Features that are currently supported by the LSP specification can be found in [pygls.features](https://github.com/openlawlibrary/pygls/blob/master/pygls/features.py) module, while corresponding request/response classes can be found in [pygls.types](https://github.com/openlawlibrary/pygls/blob/master/pygls/types.py) module.
+Features that are currently supported by the LSP specification can be found in [pygls.features](../pygls/features.py) module, while corresponding request/response classes can be found in [pygls.types](../pygls/types.py) module.
 
 ## Advanced usage
 
@@ -81,4 +81,4 @@ To reveal the full potential of _pygls_ (`thread management`, `coroutines`, `mul
 
 ## Try the examples
 
-Take a look at [Json Extension](https://github.com/openlawlibrary/pygls/tree/master/examples/json-extension) and follow the [README file](https://github.com/openlawlibrary/pygls/blob/master/examples/README.md) to install and try it out.
+Take a look at [Json Extension](../examples/json-extension) and follow the [README file](../examples/README.md) to install and try it out.
