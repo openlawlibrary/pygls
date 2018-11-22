@@ -120,7 +120,19 @@ Registering _feature_ as a regular function is exactly the same.
 
 #### _threaded_ functions
 
+_Threaded_ functions are just regular functions, but marked with _pygls_'s `thread` decorator:
 
+```python
+# Decorator order is not important in this case
+@json_server.thread()
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+def count_down_10_seconds_blocking(ls, *args):
+    # Omitted
+```
+
+_pygls_ uses its own _thread pool_ to execute above function in _daemon_ thread and it is _lazy_ initialized first time when function market with `thread` decorator is fired.
+
+Use _threaded_ functions to run blocking operations, but make sure that you understand python's `multithreading` and [GIL](https://en.wikipedia.org/wiki/Global_interpreter_lock) before messing with threads.
 
 ### Notifications
 
