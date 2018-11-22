@@ -6,7 +6,7 @@ _pygls_ (pronounced like "spy glass") is generic implementation of [Language Ser
 
 - cross-platform support
 - TCP/IP and IO communication
-- running in asyncio event loop
+- run in asyncio event loop
 - register LSP features and custom commands as:
   - asynchronous functions (coroutines)
   - synchronous functions
