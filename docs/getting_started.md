@@ -1,6 +1,6 @@
 # Getting started
 
-This document explains how to install and get started writing Language Servers that are based on _pygls_.
+This document explains how to install and get started writing Language servers that are based on _pygls_.
 
 ---
 
@@ -38,13 +38,13 @@ _pygls_ comes with following predefined set of `Language Server Protocol` (LSP) 
 
 - [initialize](https://microsoft.github.io/language-server-protocol/specification#initialize) request is sent as a first request from client to the server to setup their communication. _pygls_ automatically computes registered LSP capabilities and sends them as part of `InitializeResult` response.
 
-- [shutdown](https://microsoft.github.io/language-server-protocol/specification#shutdown) request is sent from the client to the server and asks the server to shutdown.
+- [shutdown](https://microsoft.github.io/language-server-protocol/specification#shutdown) request is sent from the client to the server to ask the server to shutdown.
 
-- [exit](https://microsoft.github.io/language-server-protocol/specification#exit) notification is sent from client to the server and asks server to exit the process. _pygls_ automatically release all resources and stops the process.
+- [exit](https://microsoft.github.io/language-server-protocol/specification#exit) notification is sent from client to the server to ask the server to exit the process. _pygls_ automatically releases all resources and stops the process.
 
-- [textDocument/didOpen](https://microsoft.github.io/language-server-protocol/specification#textDocument_didOpen) notification will tell _pygls_ to create a document in the in-memory workspace which will exists as long as document is opened in editor.
+- [textDocument/didOpen](https://microsoft.github.io/language-server-protocol/specification#textDocument_didOpen) notification will tell _pygls_ to create a document in the in-memory workspace which will exist as long as document is opened in editor.
 
-- [textDocument/didChange](https://microsoft.github.io/language-server-protocol/specification#textDocument_didChange) notification will tell _pygls_ to update the document text. For now, _pygls_ supports **just** incremental document changes.
+- [textDocument/didChange](https://microsoft.github.io/language-server-protocol/specification#textDocument_didChange) notification will tell _pygls_ to update the document text. For now, _pygls_ supports **only** incremental document changes.
 
 - [textDocument/didClose](https://microsoft.github.io/language-server-protocol/specification#textDocument_didClose) notification will tell _pygls_ to remove a document from the in-memory workspace.
 
@@ -65,7 +65,7 @@ def completions(params: CompletionParams):
     ])
 ```
 
-... as well as [custom commands](change_link):
+... as well as custom commands:
 
 ```python
 @server.command('myVerySpecialCommandName')
