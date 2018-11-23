@@ -265,10 +265,30 @@ def send_notification(self, method: str, params: object = None) -> None:
     # Omitted
 ```
 
-And method invocation:
+And method invocation sample:
 
 ```python
 server.send_notification('myCustomNotification', 'test data')
 ```
 
 ### Workspace
+
+[Workspace](../pygls/workspace.py) is a python object that holds information about workspace folders, opened documents and has the logic for updating document content.
+
+_pygls_ automatically take care about mentioned features of the workspace.
+
+Workspace methods that can be used for user defined features are:
+
+- Get document from the workspace
+
+```python
+    def get_document(self, doc_uri: str) -> Document:
+        # Omitted
+```
+
+- [Apply edit](https://microsoft.github.io/language-server-protocol/specification#workspace_applyEdit) request
+
+```python
+def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
+    # Omitted
+```
