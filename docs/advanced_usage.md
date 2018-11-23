@@ -2,7 +2,7 @@
 
 ## Language server
 
-Language server is responsible for receiving and sending messages over the Language Server Protocol which is based on [_Json RPC_ protocol](https://www.jsonrpc.org/specification).
+Language server is responsible for receiving and sending messages over the `Language Server Protocol` which is based on [_Json RPC_ protocol](https://www.jsonrpc.org/specification).
 
 ### Connections
 
@@ -60,7 +60,7 @@ server.start_io()
 
 ## Features
 
-What is a feature in _pygls_? In terms of Language servers and Language Server Protocol, by feature we mean one of the predefined methods from LSP [specification](https://microsoft.github.io/language-server-protocol/specification), such as: _code completion_, _formatting_, _code lens_, etc. Features that are available can be found in [pygls.features](../features) module.
+What is a feature in _pygls_? In terms of Language servers and `Language Server Protocol`, by feature we mean one of the predefined methods from LSP [specification](https://microsoft.github.io/language-server-protocol/specification), such as: _code completion_, _formatting_, _code lens_, etc. Features that are available can be found in [pygls.features](../features) module.
 
 ### _Built-in_ features
 
@@ -95,6 +95,8 @@ _pygls_ is a language server which relies on _asyncio event loop_. It is _asynch
 Depending on the use case, _features_ and _commands_ can be registered in three different ways.
 
 To make sure that you fully understand what is happening under the hood, please take a look at the example [server](../examples/json-extension/server/server.py) and test it following the [instructions](../examples/README.md).
+
+_NOTE_: It is possible to register features that are already _built-in_ and it will be called immediately after them.
 
 #### _asynchronous_ functions (_coroutines_)
 
@@ -152,6 +154,121 @@ Use _threaded_ functions to run blocking operations, but make sure that you unde
 
 ### Notifications
 
-### Configuration
+Notification is a request message without `id` field and server _must not_ reply to it. This means that, if your language server received the notification, even if you return result inside your handler function, the result won't be passed to the client.
+
+`Language Server Protocol`, unlike `Json RPC`, allows bidirectional communication between the server and the client.
+
+#### Configuration
+
+[Configuration](https://microsoft.github.io/language-server-protocol/specification#workspace_configuration) request is sent from the server to the client in order to fetch configuration settings from the client. When the requested configuration is collected, the client sends data as a notification to the server.
+
+_NOTE_: Although `configuration` is a `request`, it is explained in this section because the client sends back the `notification` object.
+
+Code snippet bellow shows how to send configuration to the client:
+
+```python
+def get_configuration(self,
+                      params: ConfigurationParams,
+                      callback: Optional[Callable[[List[Any]], None]] = None
+                      ) -> asyncio.Future:
+    # Omitted
+```
+
+_pygls_ has three ways for handling configuration notification from the client, depending on way how the function is registered (described [here](#Feature-and-command-advanced-registration)):
+
+- _asynchronous_ functions (_coroutines_)
+
+```python
+# await keyword tells event loop to switch to another task until notification is received
+config = await ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]))
+```
+
+- _synchronous_ functions
+
+```python
+# callback is called when notification is received
+def callback(config):
+    # Omitted
+
+config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]), callback)
+```
+
+- _threaded_ functions
+
+```python
+# .result() will block the thread
+config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')])).result()
+```
+
+#### Show message
+
+[Show message](https://microsoft.github.io/language-server-protocol/specification#window_showMessage) is notification that is sent from the server to the client to display text message.
+
+Code snippet bellow shows how to send show message notification:
+
+```python
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
+async def count_down_10_seconds_non_blocking(ls, *args):
+    for i in range(10):
+        # Sends message notification to the client
+        ls.workspace.show_message("Counting down... {}".format(10 - i))
+        await asyncio.sleep(1)
+```
+
+#### Show message log
+
+[Show message log](https://microsoft.github.io/language-server-protocol/specification#window_logMessage) is notification that is sent from the server to the client to display text message in the output channel.
+
+Code snippet bellow shows how to send show message log notification:
+
+```python
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
+async def count_down_10_seconds_non_blocking(ls, *args):
+    for i in range(10):
+        # Sends message log notification to the client's output channel
+        ls.workspace.show_message_log("Counting down... {}".format(10 - i))
+        await asyncio.sleep(1)
+```
+
+#### Publish diagnostics
+
+[Publish diagnostics](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics) notifications are sent from the server to the client to signal results of validation runs.
+
+Usually this notification is sent after document is opened, or on document content change, e.g.:
+
+```python
+@json_server.feature(TEXT_DOCUMENT_DID_OPEN)
+async def did_open(ls, params: DidOpenTextDocumentParams):
+    """Text document did open notification."""
+    ls.workspace.show_message("Text Document Did Open")
+    ls.workspace.show_message_log("Validating json...")
+
+    # Get document from workspace
+    text_doc = ls.workspace.get_document(params.textDocument.uri)
+
+    diagnostic = Diagnostic(
+                     range=Range(Position(line-1, col-1), Position(line-1, col)),
+                     message="Custom validation message",
+                     source="Json Server"
+                 )
+
+    # Send diagnostics
+    ls.workspace.publish_diagnostics(text_doc.uri, [diagnostic])
+```
+
+#### Custom notifications
+
+_pygls_ supports sending custom notifications to the client and bellow is method declaration for this functionality:
+
+```python
+def send_notification(self, method: str, params: object = None) -> None:
+    # Omitted
+```
+
+And method invocation:
+
+```python
+server.send_notification('myCustomNotification', 'test data')
+```
 
 ### Workspace
