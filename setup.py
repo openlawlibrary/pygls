@@ -19,6 +19,7 @@ package_root_dir = os.path.abspath(os.path.dirname(__file__))
 
 tests_require = [
     "pytest==3.6.1",
+    "pytest-asyncio==0.9.0",
     "mock==2.0.0"
 ]
 
