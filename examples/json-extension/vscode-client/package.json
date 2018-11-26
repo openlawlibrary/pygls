@@ -26,10 +26,21 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
-        "command": "showPythonPath",
-        "title": "Show python path"
+        "command": "showConfiguration",
+        "title": "Show Json Example Configuration"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Json Server Configuration",
+      "properties": {
+        "jsonServer.exampleConfiguration": {
+          "scope": "resource",
+          "type": "string",
+          "default": "You can override this message."
+        }
+      }
+    }
   },
   "main": "./out/extension",
   "scripts": {

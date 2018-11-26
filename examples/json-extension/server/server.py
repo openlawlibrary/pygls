@@ -20,7 +20,9 @@ from pygls.types import (CompletionItem, CompletionList, ConfigurationItem,
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
-    CMD_SHOW_PYTHON_PATH = "showPythonPath"
+    CMD_SHOW_CONFIGURATION = 'showConfiguration'
+
+    CONFIGURATION_SECTION = 'jsonServer'
 
     def __init__(self):
         super().__init__()
@@ -30,6 +32,8 @@ json_server = JsonLanguageServer()
 
 
 def _validate(ls, params):
+    ls.show_message_log('Validating json...')
+
     text_doc = ls.workspace.get_document(params.textDocument.uri)
 
     diagnostics = _validate_json(text_doc)
@@ -81,7 +85,7 @@ def count_down_10_seconds_blocking(ls, *args):
     completion items.
     """
     for i in range(10):
-        ls.workspace.show_message("Counting down... {}".format(10 - i))
+        ls.workspace.show_message('Counting down... {}'.format(10 - i))
         time.sleep(1)
 
 
@@ -92,7 +96,7 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     completion items.
     """
     for i in range(10):
-        ls.workspace.show_message("Counting down... {}".format(10 - i))
+        ls.workspace.show_message('Counting down... {}'.format(10 - i))
         await asyncio.sleep(1)
 
 
@@ -105,30 +109,30 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 @json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.workspace.show_message("Text Document Did Close")
+    server.workspace.show_message('Text Document Did Close')
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.workspace.show_message("Text Document Did Open")
-    ls.workspace.show_message_log("Validating json...")
-
+    ls.show_message('Text Document Did Open')
     _validate(ls, params)
 
 
 @json_server.thread()
-@json_server.command(JsonLanguageServer.CMD_SHOW_PYTHON_PATH)
-def show_python_path(ls, *args):
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION)
+def show_python_path(ls: JsonLanguageServer, *args):
     """Gets python path from configuration and displays it."""
-    configs = ls.get_configuration(ConfigurationParams([
-        ConfigurationItem("", "python")
-    ])).result(1)
-
-    python_path = None
     try:
-        python_path = configs[0].pythonPath
-    except (IndexError, AttributeError):
-        pass
+        config = ls.get_configuration(ConfigurationParams([
+            ConfigurationItem('', 'jsonServer')
+        ])).result()
 
-    ls.workspace.show_message("Python path: {}".format(python_path))
+        example_config = config[0].exampleConfiguration
+
+        ls.workspace.show_message(
+            'jsonServer.exampleConfiguration value: {}'.format(example_config)
+        )
+
+    except Exception as e:
+        ls.workspace.show_message_log('Error ocurred: {}'.format(e))
