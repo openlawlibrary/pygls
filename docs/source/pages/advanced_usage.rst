@@ -1,3 +1,5 @@
+.. _advanced-usage:
+
 Advanced usage
 ==============
 
@@ -222,6 +224,45 @@ Use *threaded* functions to run blocking operations, but make sure that
 you understand python's ``multithreading`` and
 `GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__ before
 messing with threads.
+
+.. _passing-instance:
+
+Passing language server instance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using language server methods inside registered features and commands are quite
+often and, in that case, we recommend adding language server as a
+**first parameter** of a registered function.
+
+There are two ways of doing this:
+
+- **ls** (**l**\anguage **s**\erver) naming convention
+
+Add **ls** as first parameter of a function and *pygls* will automatically pass
+the language server instance.
+
+.. code-block:: python
+
+    @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+    def count_down_10_seconds_blocking(ls, *args):
+        # Omitted
+
+
+- add **type** to first parameter
+
+Add **LanguageServer** or any class derived from it as a type to first
+parameter of a function
+
+.. code-block:: python
+
+    @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+    def count_down_10_seconds_blocking(ser: JsonLanguageServer, *args):
+        # Omitted
+
+
+Using outer ``json_server`` instance inside registered function will make
+writing unit :ref:`tests <testing>` more difficult.
+
 
 Notifications
 ~~~~~~~~~~~~~

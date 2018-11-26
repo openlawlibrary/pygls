@@ -80,6 +80,6 @@ Language server is **not blocked** because we used ``asyncio.sleep`` this time,
 while it's still executing *just* in the *main* thread.
 
 
-.. _Json Extension: https://github.com/openlawlibrary/pygls//blob/master/examples/json-extension
+.. _Json Extension: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension
 .. _README: https://github.com/openlawlibrary/pygls/blob/master/examples/README.md
 .. _server.py: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension/server/server.py

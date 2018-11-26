@@ -42,7 +42,6 @@ User Guide
    pages/example_extension
    pages/advanced_usage
    pages/testing
-   pages/error_handling
 
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
