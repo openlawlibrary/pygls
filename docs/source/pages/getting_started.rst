@@ -78,14 +78,14 @@ To reveal the full potential of *pygls* (``thread management``,
 ``coroutines``, ``multi-root workspace``, ``TCP/IO communication`` etc.)
 keep on reading the docs.
 
-Try the examples
-----------------
+Try the example
+---------------
 
-Take a look at `Json Extension`_ and follow the `README file`_ to
-install and try it out.
+We suggest :ref:`setting up the example extension <example-extension>` before
+you go further with the documentation, specially if you haven't worked with
+language servers before.
+
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
-.. _pygls.features: ../pygls/features.py
-.. _pygls.types: ../pygls/types.py
-.. _Json Extension: ../examples/json-extension
-.. _README file: ../examples/README.md
+.. _pygls.features: https://github.com/openlawlibrary/pygls/blob/master/pygls/features.py
+.. _pygls.types: https://github.com/openlawlibrary/pygls/blob/master/pygls/types.py
