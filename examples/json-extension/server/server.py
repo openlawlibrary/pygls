@@ -10,8 +10,8 @@ from json import JSONDecodeError
 from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                             TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
 from pygls.server import LanguageServer
-from pygls.types import (CompletionItem, CompletionList, ConfigurationItem,
-                         ConfigurationParams, Diagnostic,
+from pygls.types import (CompletionItem, CompletionList, CompletionParams,
+                         ConfigurationItem, ConfigurationParams, Diagnostic,
                          DidChangeTextDocumentParams,
                          DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                          Position, Range)
@@ -67,14 +67,14 @@ def _validate_json(doc):
 
 
 @json_server.feature(COMPLETION, trigger_characters=[','])
-def completions(params):
+def completions(params: CompletionParams = None):
     """Returns completion items."""
     return CompletionList(False, [
         CompletionItem('"'),
         CompletionItem('['),
+        CompletionItem(']'),
         CompletionItem('{'),
-        CompletionItem('}'),
-        CompletionItem(']')
+        CompletionItem('}')
     ])
 
 
