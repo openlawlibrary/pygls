@@ -32,22 +32,18 @@ Python versions
 
 *pygls* works with Python 3.5+.
 
+User Guide
+----------
 
 .. toctree::
    :maxdepth: 2
 
    pages/getting_started
+   pages/example_extension
    pages/advanced_usage
    pages/testing
    pages/error_handling
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language Server: https://langserver.org/
