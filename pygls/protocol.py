@@ -3,6 +3,7 @@
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
 import asyncio
+import functools
 import json
 import logging
 import re
@@ -14,10 +15,13 @@ from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
 
+from .constants import (ATTR_COMMAND_TYPE, ATTR_FEATURE_TYPE,
+                        ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE)
 from .exceptions import (JsonRpcException, JsonRpcInternalError,
                          JsonRpcMethodNotFound, JsonRpcRequestCancelled,
                          ThreadDecoratorError)
-from .feature_manager import FeatureManager
+from .feature_manager import (FeatureManager, assign_thread_attr,
+                              is_thread_function)
 from .features import EXIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
 from .types import (DidChangeTextDocumentParams,
                     DidChangeWorkspaceFoldersParams,
@@ -25,10 +29,66 @@ from .types import (DidChangeTextDocumentParams,
                     ExecuteCommandParams, InitializeParams, InitializeResult,
                     ServerCapabilities)
 from .uris import from_fs_path
-from .utils import call_user_feature, to_lsp_name
 from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
+
+
+def call_user_feature(base_func, method_name):
+    """Wraps generic LSP features and calls user registered feature
+    immediately after it.
+    """
+    @functools.wraps(base_func)
+    def decorator(self, *args, **kwargs):
+        ret_val = base_func(self, *args, **kwargs)
+
+        try:
+            user_func = self.fm.features[method_name]
+            self._execute_notification(user_func, *args, **kwargs)
+        except Exception:
+            pass
+
+        return ret_val
+
+    return decorator
+
+
+def deserialize_message(data):
+    """Function used to deserialize data received from client."""
+    if 'jsonrpc' in data:
+        if 'id' in data:
+            if 'method' in data:
+                return JsonRPCRequestMessage(**data)
+            else:
+                return JsonRPCResponseMessage(**data)
+        else:
+            return JsonRPCNotification(**data)
+
+    return namedtuple('Object',
+                      data.keys())(*data.values())
+
+
+def to_lsp_name(method_name):
+    """Convert method name to LSP real name
+
+    Example:
+        text_document__did_open -> textDocument/didOpen
+    """
+    method_name = method_name.replace('__', '/')
+    m_chars = list(method_name)
+    m_replaced = []
+
+    for i, ch in enumerate(m_chars):
+        if ch is '_':
+            continue
+
+        if m_chars[i-1] is '_':
+            m_replaced.append(ch.capitalize())
+            continue
+
+        m_replaced.append(ch)
+
+    return ''.join(m_replaced)
 
 
 class JsonRPCNotification:
@@ -80,21 +140,6 @@ class JsonRPCResponseMessage:
         self.error = error
 
 
-def deserialize_message(data):
-    """Function used to deserialize data received from client."""
-    if 'jsonrpc' in data:
-        if 'id' in data:
-            if 'method' in data:
-                return JsonRPCRequestMessage(**data)
-            else:
-                return JsonRPCResponseMessage(**data)
-        else:
-            return JsonRPCNotification(**data)
-
-    return namedtuple('Object',
-                      data.keys())(*data.values())
-
-
 class JsonRPCProtocol(asyncio.Protocol):
     """Json RPC protocol implementation using on top of `asyncio.Protocol`.
 
@@ -131,7 +176,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             future = asyncio.ensure_future(handler(*params))
             future.add_done_callback(self._execute_notification_callback)
         else:
-            if getattr(handler, 'execute_in_thread', False):
+            if is_thread_function(handler):
                 self._server.thread_pool.apply_async(handler, (*params, ))
             else:
                 handler(*params)
@@ -156,7 +201,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                                              msg_id))
         else:
             # Can't be canceled
-            if getattr(handler, 'execute_in_thread', False):
+            if is_thread_function(handler):
                 self._server.thread_pool.apply_async(
                     handler, (params, ),
                     callback=lambda res: self._send_response(msg_id, res),
@@ -388,10 +433,22 @@ class JsonRPCProtocol(asyncio.Protocol):
         def decorator(f):
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
-                    "Thread decorator can't be used with async function `{}`"
+                    "Thread decorator can't be used with async functions `{}`"
                     .format(f.__name__))
 
-            f.execute_in_thread = True
+            # Allow any decorator order
+            try:
+                reg_name = getattr(f, ATTR_REGISTERED_NAME)
+                reg_type = getattr(f, ATTR_REGISTERED_TYPE)
+
+                if reg_type is ATTR_FEATURE_TYPE:
+                    assign_thread_attr(self.fm.features[reg_name])
+                elif reg_type is ATTR_COMMAND_TYPE:
+                    assign_thread_attr(self.fm.commands[reg_name])
+
+            except AttributeError:
+                assign_thread_attr(f)
+
             return f
         return decorator
 
@@ -529,17 +586,15 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self._execute_request(msg_id, cmd_handler, params.arguments)
 
     def get_configuration(self, params, callback=None):
-        """Gets the configuration settings from the client.
-
-        This method is asynchronous and the callback function
-        will be called after the response is received.
+        """Sends configuration request to the client.
 
         Args:
             params(dict): ConfigurationParams from lsp specs
             callback(callable): Callabe which will be called after
                                 response from the client is received
         Returns:
-            Future that will be resolved once a response has been received
+            concurrent.futures.Future object that will be resolved once a
+            response has been received
             NOTE: Calling `future.result()` blocks the main thread, so it
                   should be used for features/commands marked with
                   `@ls.thread()` decorator
@@ -554,5 +609,16 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             request_future = self.send_request(WORKSPACE_CONFIGURATION, params)
             request_future.add_done_callback(configuration)
         else:
-            return asyncio.wrap_future(
-                self.send_request(WORKSPACE_CONFIGURATION, params))
+            return self.send_request(WORKSPACE_CONFIGURATION, params)
+
+    def get_configuration_async(self, params):
+        """Sends configuration request to the client.
+
+        Args:
+            params(dict): ConfigurationParams from lsp specs
+            callback(callable): Callabe which will be called after
+                                response from the client is received
+        Returns:
+            asyncio.Future that can be awaited
+        """
+        return asyncio.wrap_future(self.get_configuration(params))
