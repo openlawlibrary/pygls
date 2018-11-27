@@ -226,6 +226,12 @@ class LanguageServer(Server):
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
+    def get_configuration_async(self,
+                                params: ConfigurationParams
+                                ) -> asyncio.Future:
+        """Gets the configuration settings from the client."""
+        return self.lsp.get_configuration_async(params)
+
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
         self.lsp.notify(method, params)

@@ -26,8 +26,16 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
-        "command": "showConfiguration",
-        "title": "Show Json Example Configuration"
+        "command": "showConfigurationAsync",
+        "title": "Show Json Example Configuration [Async]"
+      },
+      {
+        "command": "showConfigurationCallback",
+        "title": "Show Json Example Configuration [Callback]"
+      },
+      {
+        "command": "showConfigurationThread",
+        "title": "Show Json Example Configuration [Thread]"
       }
     ],
     "configuration": {
