@@ -86,6 +86,8 @@ install:
   - C:\Python36-x64\Scripts\pip.exe install .[test]
   - C:\Python36-x64\Scripts\pip.exe install -e .
 
+# Create a Visual Studio Code Extension
+build_script:
   - cd examples\json-extension\vscode-client
   # install extension-wide js dependencies
   - npm install --save-dev
@@ -97,8 +99,10 @@ install:
 
   - cd ..\..\..\
 
-# Create a Visual Studio Code Extension
-build_script:
+test_script:
+  - C:\Python36-x64\Scripts\pytest.exe
+
+after_test:
   # check function
   - ps: >-
       Function CheckInVsixPackage([string]$stringToCheck)
@@ -130,9 +134,6 @@ build_script:
   - vsce package                         rem "normal" command line is on purpose
 
   - ps: cd ../../../
-
-test_script:
-  - C:\Python36-x64\Scripts\pytest.exe
 
 # Create extensions artifacts
 artifacts:
