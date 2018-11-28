@@ -14,20 +14,22 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
+from typing import List
 
-from .constants import (ATTR_COMMAND_TYPE, ATTR_FEATURE_TYPE,
-                        ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE)
 from .exceptions import (JsonRpcException, JsonRpcInternalError,
-                         JsonRpcMethodNotFound, JsonRpcRequestCancelled,
-                         ThreadDecoratorError)
-from .feature_manager import (FeatureManager, assign_thread_attr,
-                              is_thread_function)
-from .features import EXIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND
-from .types import (DidChangeTextDocumentParams,
+                         JsonRpcMethodNotFound, JsonRpcRequestCancelled)
+from .feature_manager import FeatureManager, is_thread_function
+from .features import (EXIT, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                       WINDOW_LOG_MESSAGE, WINDOW_SHOW_MESSAGE,
+                       WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
+                       WORKSPACE_EXECUTE_COMMAND)
+from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse,
+                    Diagnostic, DidChangeTextDocumentParams,
                     DidChangeWorkspaceFoldersParams,
                     DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                     ExecuteCommandParams, InitializeParams, InitializeResult,
-                    ServerCapabilities)
+                    LogMessageParams, MessageType, PublishDiagnosticsParams,
+                    ServerCapabilities, ShowMessageParams, WorkspaceEdit)
 from .uris import from_fs_path
 from .workspace import Workspace
 
@@ -429,28 +431,8 @@ class JsonRPCProtocol(asyncio.Protocol):
         return future
 
     def thread(self):
-        """Marks function to execute it in a thread pool."""
-        def decorator(f):
-            if asyncio.iscoroutinefunction(f):
-                raise ThreadDecoratorError(
-                    "Thread decorator can't be used with async functions `{}`"
-                    .format(f.__name__))
-
-            # Allow any decorator order
-            try:
-                reg_name = getattr(f, ATTR_REGISTERED_NAME)
-                reg_type = getattr(f, ATTR_REGISTERED_TYPE)
-
-                if reg_type is ATTR_FEATURE_TYPE:
-                    assign_thread_attr(self.fm.features[reg_name])
-                elif reg_type is ATTR_COMMAND_TYPE:
-                    assign_thread_attr(self.fm.commands[reg_name])
-
-            except AttributeError:
-                assign_thread_attr(f)
-
-            return f
-        return decorator
+        """Decorator that mark function to execute it in a thread."""
+        return self.fm.thread()
 
 
 class LSPMeta(type):
@@ -494,6 +476,12 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if callable(attr) and name.startswith('bf_'):
                 lsp_name = to_lsp_name(name[3:])
                 self.fm.add_builtin_feature(lsp_name, attr)
+
+    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> \
+            ApplyWorkspaceEditResponse:
+        """Sends apply edit request to the client."""
+        return self.send_request(WORKSPACE_APPLY_EDIT,
+                                 ApplyWorkspaceEditParams(edit, label))
 
     def bf_exit(self, *args):
         """Stops the server process."""
@@ -595,9 +583,6 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         Returns:
             concurrent.futures.Future object that will be resolved once a
             response has been received
-            NOTE: Calling `future.result()` blocks the main thread, so it
-                  should be used for features/commands marked with
-                  `@ls.thread()` decorator
         """
         if callback:
             def configuration(future: Future):
@@ -612,13 +597,24 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             return self.send_request(WORKSPACE_CONFIGURATION, params)
 
     def get_configuration_async(self, params):
-        """Sends configuration request to the client.
+        """Calls `get_configuration` method but designed to use with coroutines
 
         Args:
             params(dict): ConfigurationParams from lsp specs
-            callback(callable): Callabe which will be called after
-                                response from the client is received
         Returns:
             asyncio.Future that can be awaited
         """
         return asyncio.wrap_future(self.get_configuration(params))
+
+    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
+        """Sends diagnostic notification to the client."""
+        self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                    PublishDiagnosticsParams(doc_uri, diagnostics))
+
+    def show_message(self, message, msg_type=MessageType.Info):
+        """Sends message to the client to display message."""
+        self.notify(WINDOW_SHOW_MESSAGE, ShowMessageParams(msg_type, message))
+
+    def show_message_log(self, message, msg_type=MessageType.Log):
+        """Sends message to the client's output channel."""
+        self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(msg_type, message))

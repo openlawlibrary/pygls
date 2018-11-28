@@ -10,13 +10,8 @@ import os
 import re
 from typing import List
 
-from .features import (TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
-                       WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT)
-from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse,
-                    Diagnostic, LogMessageParams, MessageType, NumType,
-                    Position, PublishDiagnosticsParams, ShowMessageParams,
-                    TextDocumentContentChangeEvent, TextDocumentItem,
-                    WorkspaceEdit, WorkspaceFolder)
+from .types import (NumType, Position, TextDocumentContentChangeEvent,
+                    TextDocumentItem, WorkspaceFolder)
 from .uris import to_fs_path, urlparse
 
 # TODO: this is not the best e.g. we capture numbers
@@ -144,12 +139,6 @@ class Workspace(object):
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
 
-    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> \
-            ApplyWorkspaceEditResponse:
-        """Sends apply edit request to the client."""
-        return self._lsp.send_request(WORKSPACE_APPLY_EDIT,
-                                      ApplyWorkspaceEditParams(edit, label))
-
     @property
     def documents(self):
         return self._docs
@@ -171,11 +160,6 @@ class Workspace(object):
         return (self._root_uri_scheme == '' or
                 self._root_uri_scheme == 'file') and \
             os.path.exists(self._root_path)
-
-    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
-        """Sends diagnostic notification to the client."""
-        self._lsp.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                         PublishDiagnosticsParams(doc_uri, diagnostics))
 
     def put_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri
@@ -203,14 +187,6 @@ class Workspace(object):
     @property
     def root_uri(self):
         return self._root_uri
-
-    def show_message(self, message, msg_type=MessageType.Info):
-        self._lsp.notify(WINDOW_SHOW_MESSAGE,
-                         ShowMessageParams(msg_type, message))
-
-    def show_message_log(self, message, msg_type=MessageType.Log):
-        self._lsp.notify(WINDOW_LOG_MESSAGE,
-                         LogMessageParams(msg_type, message))
 
     def update_document(self,
                         text_doc: TextDocumentItem,

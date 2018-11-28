@@ -40,7 +40,7 @@ def _validate(ls, params):
 
     diagnostics = _validate_json(text_doc)
 
-    ls.workspace.publish_diagnostics(text_doc.uri, diagnostics)
+    ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
 def _validate_json(doc):
@@ -87,7 +87,7 @@ def count_down_10_seconds_blocking(ls, *args):
     completion items.
     """
     for i in range(10):
-        ls.workspace.show_message('Counting down... {}'.format(10 - i))
+        ls.show_message('Counting down... {}'.format(10 - i))
         time.sleep(1)
 
 
@@ -98,7 +98,7 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     completion items.
     """
     for i in range(10):
-        ls.workspace.show_message('Counting down... {}'.format(10 - i))
+        ls.show_message('Counting down... {}'.format(10 - i))
         await asyncio.sleep(1)
 
 
@@ -111,7 +111,7 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 @json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.workspace.show_message('Text Document Did Close')
+    server.show_message('Text Document Did Close')
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_OPEN)
@@ -131,12 +131,12 @@ async def show_python_path_async(ls: JsonLanguageServer, *args):
 
         example_config = config[0].exampleConfiguration
 
-        ls.workspace.show_message(
+        ls.show_message(
             'jsonServer.exampleConfiguration value: {}'.format(example_config)
         )
 
     except Exception as e:
-        ls.workspace.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log('Error ocurred: {}'.format(e))
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
@@ -146,13 +146,13 @@ def show_python_path_callback(ls: JsonLanguageServer, *args):
         try:
             example_config = config[0].exampleConfiguration
 
-            ls.workspace.show_message(
+            ls.show_message(
                 'jsonServer.exampleConfiguration value: {}'
                 .format(example_config)
             )
 
         except Exception as e:
-            ls.workspace.show_message_log('Error ocurred: {}'.format(e))
+            ls.show_message_log('Error ocurred: {}'.format(e))
 
     ls.get_configuration(ConfigurationParams([
         ConfigurationItem('', 'jsonServer')
@@ -170,9 +170,9 @@ def show_python_path_thread(ls: JsonLanguageServer, *args):
 
         example_config = config[0].exampleConfiguration
 
-        ls.workspace.show_message(
+        ls.show_message(
             'jsonServer.exampleConfiguration value: {}'.format(example_config)
         )
 
     except Exception as e:
-        ls.workspace.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log('Error ocurred: {}'.format(e))
