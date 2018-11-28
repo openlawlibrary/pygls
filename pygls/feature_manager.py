@@ -13,7 +13,8 @@ from .constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD,
                         ATTR_FEATURE_TYPE, ATTR_REGISTERED_NAME,
                         ATTR_REGISTERED_TYPE, PARAM_LS)
 from .exceptions import (CommandAlreadyRegisteredError,
-                         FeatureAlreadyRegisteredError, ValidationError)
+                         FeatureAlreadyRegisteredError, ThreadDecoratorError,
+                         ValidationError)
 
 logger = logging.getLogger(__name__)
 
@@ -163,3 +164,27 @@ class FeatureManager:
     def features(self) -> Dict:
         """Returns registered features"""
         return self._features
+
+    def thread(self) -> Callable:
+        """Decorator that mark function to execute it in a thread."""
+        def decorator(f):
+            if asyncio.iscoroutinefunction(f):
+                raise ThreadDecoratorError(
+                    "Thread decorator can't be used with async functions `{}`"
+                    .format(f.__name__))
+
+            # Allow any decorator order
+            try:
+                reg_name = getattr(f, ATTR_REGISTERED_NAME)
+                reg_type = getattr(f, ATTR_REGISTERED_TYPE)
+
+                if reg_type is ATTR_FEATURE_TYPE:
+                    assign_thread_attr(self.features[reg_name])
+                elif reg_type is ATTR_COMMAND_TYPE:
+                    assign_thread_attr(self.commands[reg_name])
+
+            except AttributeError:
+                assign_thread_attr(f)
+
+            return f
+        return decorator
