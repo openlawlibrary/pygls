@@ -28,7 +28,6 @@ init:
 install:
   - C:\Python36-x64\python.exe -m pip install --upgrade pip          # upgrade pip
 
-  - ps: Update-NodeJsInstallation 7.9.0;                             # match version used by VS Code
   - ps: >-
       $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\vscode-client\package.json | ConvertFrom-Json);
       $prefixed_version = "v" + $json_extension_client_json.version;
@@ -71,12 +70,12 @@ install:
       }
       echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
 
-  # point to tsc 2.9.1
-  - npm install -g typescript@2.9.1
+  # point to tsc 3.2.1
+  - npm install -g typescript@3.2.1
   - tsc --version
 
   # install vsce module (for packaging our extension into a .vsix file)
-  - npm install -g vsce@1.42.0
+  - npm install -g vsce@1.51.0
 
   # Output useful info for debugging.
   - node --version

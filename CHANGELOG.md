@@ -1,5 +1,13 @@
 # pygls Change Log
 
+## 0.6.0
+
+- Modules/functions/methods reorganization
+- Added more features/commands to json-extension example
+- Added unit tests to json-extension example
+- Updated appveyor
+- Small bug fixes
+
 ## 0.5.0
 
 - Return awaitable Future object from get_configuration
