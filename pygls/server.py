@@ -11,7 +11,8 @@ from re import findall
 from threading import Event
 from typing import Any, Callable, Dict, List, Optional
 
-from pygls.types import ApplyWorkspaceEditResponse, MessageType, WorkspaceEdit
+from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
+                         MessageType, WorkspaceEdit)
 
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
@@ -200,11 +201,7 @@ class LanguageServer(Server):
     def __init__(self, loop=None, max_workers: int = 2):
         super().__init__(LanguageServerProtocol, loop, max_workers)
 
-    def apply_edit(
-        self,
-        edit: WorkspaceEdit,
-        label: str = None
-    ) -> ApplyWorkspaceEditResponse:
+    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 
@@ -228,18 +225,11 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, **options)
 
-    def get_configuration(
-        self,
-        params: ConfigurationParams,
-        callback: Optional[Callable[[List[Any]], None]] = None
-    ) -> Future:
+    def get_configuration(self, params: ConfigurationParams, callback: ConfigCallbackType = None) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
-    def get_configuration_async(
-        self,
-        params: ConfigurationParams
-    ) -> asyncio.Future:
+    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration_async(params)
 

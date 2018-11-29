@@ -23,13 +23,7 @@ log = logging.getLogger(__name__)
 
 class Document(object):
 
-    def __init__(
-        self,
-        uri,
-        source=None,
-        version=None,
-        local=True,
-    ):
+    def __init__(self, uri, source=None, version=None, local=True,):
         self.uri = uri
         self.version = version
         self.path = to_fs_path(uri)
@@ -170,15 +164,15 @@ class Workspace(object):
             version=text_document.version
         )
 
+    def remove_document(self, doc_uri: str):
+        self._docs.pop(doc_uri)
+
     def remove_folder(self, folder_uri: str):
         self._folders.pop(folder_uri, None)
         try:
             del self._folders[folder_uri]
         except KeyError:
             pass
-
-    def remove_document(self, doc_uri: str):
-        self._docs.pop(doc_uri)
 
     @property
     def root_path(self):
