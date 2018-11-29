@@ -17,7 +17,7 @@ https://microsoft.github.io/language-server-protocol/specification#client_unregi
 """
 
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT,
@@ -26,6 +26,7 @@ from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        REFERENCES, RENAME, SIGNATURE_HELP, WORKSPACE_SYMBOL)
 
 # Classes used for type hints.
+ConfigCallbackType = Optional[Callable[[List[Any]], None]]
 DocumentChangesType = Union[List['TextDocumentEdit'],
                             'TextDocumentEdit',
                             'CreateFile', 'RenameFile', 'DeleteFile']
@@ -358,15 +359,13 @@ class DeleteFileOptions:
 
 
 class Diagnostic:
-    def __init__(
-        self,
-        range: 'Range',
-        message: str,
-        severity: 'DiagnosticSeverity' = 1,
-        code: str = None,
-        source: str = None,
-        related_information: 'DiagnosticRelatedInformation' = None
-    ):
+    def __init__(self,
+                 range: 'Range',
+                 message: str,
+                 severity: 'DiagnosticSeverity' = 1,
+                 code: str = None,
+                 source: str = None,
+                 related_information: 'DiagnosticRelatedInformation' = None):
         self.range = range
         self.message = message
         self.severity = severity
@@ -866,13 +865,11 @@ class SaveOptions:
 
 
 class ServerCapabilities:
-    def __init__(
-        self,
-        features,
-        feature_options,
-        commands,
-        client_capabilities
-    ):
+    def __init__(self,
+                 features,
+                 feature_options,
+                 commands,
+                 client_capabilities):
         self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
         self.hoverProvider = HOVER in features
 
@@ -890,10 +887,6 @@ class ServerCapabilities:
             )
 
         self.definitionProvider = DEFINITION in features
-
-        # Additional options
-        # self.typeDefinitionProvider = False
-        # self.implementationProvider = False
 
         self.referencesProvider = REFERENCES in features
         self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
@@ -927,8 +920,6 @@ class ServerCapabilities:
             self.documentLinkProvider = DocumentLinkOptions(
                 resolve_provider=DOCUMENT_LINK_RESOLVE in features
             )
-
-        # self.colorProvider = False
 
         self.executeCommandProvider = ExecuteCommandOptions(
             commands=list(commands.keys())
