@@ -6,7 +6,7 @@
         {
             "label": "json-extension-watch:client",
             "type": "typescript",
-            "tsconfig": "examples\\json-extension\\vscode-client\\tsconfig.json",
+            "tsconfig": "examples/json-extension/vscode-client/tsconfig.json",
             "option": "watch",
             "problemMatcher": [
                 "$tsc-watch"

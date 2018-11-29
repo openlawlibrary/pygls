@@ -132,20 +132,6 @@ class Server:
         logger.info('Closing the event loop.')
         self.loop.close()
 
-    def start_tcp(self, host, port):
-        """Starts TCP server."""
-        logger.info('Starting server on {}:{}'.format(host, port))
-
-        self._server = self.loop.run_until_complete(
-            self.loop.create_server(self.lsp, host, port)
-        )
-        try:
-            self.loop.run_forever()
-        except SystemExit:
-            pass
-        finally:
-            self.shutdown()
-
     def start_io(self, stdin=None, stdout=None):
         """Starts IO server."""
         logger.info('Starting IO server')
@@ -166,6 +152,20 @@ class Server:
             pass
         finally:
             self._stop_event.set()
+            self.shutdown()
+
+    def start_tcp(self, host, port):
+        """Starts TCP server."""
+        logger.info('Starting server on {}:{}'.format(host, port))
+
+        self._server = self.loop.run_until_complete(
+            self.loop.create_server(self.lsp, host, port)
+        )
+        try:
+            self.loop.run_forever()
+        except SystemExit:
+            pass
+        finally:
             self.shutdown()
 
     @property
@@ -231,8 +231,7 @@ class LanguageServer(Server):
     def get_configuration(
         self,
         params: ConfigurationParams,
-        callback: Optional[Callable[[
-            List[Any]], None]] = None
+        callback: Optional[Callable[[List[Any]], None]] = None
     ) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
