@@ -21,9 +21,9 @@ PACKAGE_NAME = 'pygls'
 VERSION = '0.6.0'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
-DESCRIPTION = 'Python Generic Language Server (pronounced like "spy glass").'
-KEYWORDS = 'python generic language server protocol'
-LICENSE = 'All rights reserved'
+DESCRIPTION = 'a pythonic generic language server (pronounced like "spy glass").'
+KEYWORDS = 'python pythonic generic language server protocol'
+LICENSE = 'Apache 2.0'
 URL = 'https://github.com/openlawlibrary/pygls/tree/master/'
 
 packages = find_packages()
@@ -73,12 +73,16 @@ setup(
     },
     tests_require=tests_require,
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ]
 )
