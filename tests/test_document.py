@@ -78,19 +78,19 @@ def test_document_source_unicode():
 
 
 def test_offset_at_position(doc):
-    assert doc.offset_at_position({'line': 0, 'character': 8}) == 8
-    assert doc.offset_at_position({'line': 1, 'character': 5}) == 14
-    assert doc.offset_at_position({'line': 2, 'character': 0}) == 13
-    assert doc.offset_at_position({'line': 2, 'character': 4}) == 17
-    assert doc.offset_at_position({'line': 4, 'character': 0}) == 21
+    assert doc.offset_at_position(Position(0, 8)) == 8
+    assert doc.offset_at_position(Position(1, 5)) == 14
+    assert doc.offset_at_position(Position(2, 0)) == 13
+    assert doc.offset_at_position(Position(2, 4)) == 17
+    assert doc.offset_at_position(Position(4, 0)) == 21
 
 
 def test_word_at_position(doc):
     """
     Return the position under the cursor (or last in line if past the end)
     """
-    assert doc.word_at_position({'line': 0, 'character': 8}) == 'document'
-    assert doc.word_at_position({'line': 0, 'character': 1000}) == 'document'
-    assert doc.word_at_position({'line': 1, 'character': 5}) == 'for'
-    assert doc.word_at_position({'line': 2, 'character': 0}) == 'testing'
-    assert doc.word_at_position({'line': 4, 'character': 0}) == ''
+    assert doc.word_at_position(Position(0, 8)) == 'document'
+    assert doc.word_at_position(Position(0, 1000)) == 'document'
+    assert doc.word_at_position(Position(1, 5)) == 'for'
+    assert doc.word_at_position(Position(2, 0)) == 'testing'
+    assert doc.word_at_position(Position(4, 0)) == ''

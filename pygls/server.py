@@ -11,6 +11,9 @@ from re import findall
 from threading import Event
 from typing import Any, Callable, Dict, List, Optional
 
+from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
+                         MessageType, WorkspaceEdit)
+
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
 from .types import ConfigurationParams
@@ -130,20 +133,6 @@ class Server:
         logger.info('Closing the event loop.')
         self.loop.close()
 
-    def start_tcp(self, host, port):
-        """Starts TCP server."""
-        logger.info('Starting server on {}:{}'.format(host, port))
-
-        self._server = self.loop.run_until_complete(
-            self.loop.create_server(self.lsp, host, port)
-        )
-        try:
-            self.loop.run_forever()
-        except SystemExit:
-            pass
-        finally:
-            self.shutdown()
-
     def start_io(self, stdin=None, stdout=None):
         """Starts IO server."""
         logger.info('Starting IO server')
@@ -164,6 +153,20 @@ class Server:
             pass
         finally:
             self._stop_event.set()
+            self.shutdown()
+
+    def start_tcp(self, host, port):
+        """Starts TCP server."""
+        logger.info('Starting server on {}:{}'.format(host, port))
+
+        self._server = self.loop.run_until_complete(
+            self.loop.create_server(self.lsp, host, port)
+        )
+        try:
+            self.loop.run_forever()
+        except SystemExit:
+            pass
+        finally:
             self.shutdown()
 
     @property
@@ -198,7 +201,11 @@ class LanguageServer(Server):
     def __init__(self, loop=None, max_workers: int = 2):
         super().__init__(LanguageServerProtocol, loop, max_workers)
 
-    def command(self, command_name: str):
+    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
+        """Sends apply edit request to the client."""
+        return self.lsp.apply_edit(edit, label)
+
+    def command(self, command_name: str) -> Callable:
         """Decorator used to register custom commands.
 
         Example:
@@ -208,7 +215,7 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.command(command_name)
 
-    def feature(self, feature_name: str, **options: Dict):
+    def feature(self, feature_name: str, **options: Dict) -> Callable:
         """Decorator used to register LSP features.
 
         Example:
@@ -218,29 +225,28 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, **options)
 
-    def get_configuration(self,
-                          params: ConfigurationParams,
-                          callback: Optional[Callable[[
-                              List[Any]], None]] = None
-                          ) -> Future:
+    def get_configuration(self, params: ConfigurationParams, callback: ConfigCallbackType = None) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
+
+    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
+        """Gets the configuration settings from the client."""
+        return self.lsp.get_configuration_async(params)
 
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
         self.lsp.notify(method, params)
 
-    def thread(self):
-        """Decorator that tells server to execute command/feature in separate
-        thread.
+    def show_message(self, message, msg_type=MessageType.Info) -> None:
+        """Sends message to the client to display message."""
+        self.lsp.show_message(message, msg_type)
 
-        Example:
-            @ls.thread()
-            @ls.command('myCustomCommand')
-            # @ls.thread() - decorator order is not important
-            def my_cmd(ls, a, b, c):
-                pass
-        """
+    def show_message_log(self, message, msg_type=MessageType.Log) -> None:
+        """Sends message to the client's output channel."""
+        self.lsp.show_message_log(message, msg_type)
+
+    def thread(self) -> Callable:
+        """Decorator that mark function to execute it in a thread."""
         return self.lsp.thread()
 
     @property

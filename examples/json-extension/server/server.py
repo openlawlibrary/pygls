@@ -10,17 +10,24 @@ from json import JSONDecodeError
 from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                             TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
 from pygls.server import LanguageServer
-from pygls.types import (CompletionItem, CompletionList, ConfigurationItem,
-                         ConfigurationParams, Diagnostic,
+from pygls.types import (CompletionItem, CompletionList, CompletionParams,
+                         ConfigurationItem, ConfigurationParams, Diagnostic,
                          DidChangeTextDocumentParams,
                          DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                          Position, Range)
+
+COUNT_DOWN_START_IN_SECONDS = 10
+COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
-    CMD_SHOW_PYTHON_PATH = "showPythonPath"
+    CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
+    CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
+    CMD_SHOW_CONFIGURATION_THREAD = 'showConfigurationThread'
+
+    CONFIGURATION_SECTION = 'jsonServer'
 
     def __init__(self):
         super().__init__()
@@ -30,11 +37,13 @@ json_server = JsonLanguageServer()
 
 
 def _validate(ls, params):
+    ls.show_message_log('Validating json...')
+
     text_doc = ls.workspace.get_document(params.textDocument.uri)
 
     diagnostics = _validate_json(text_doc)
 
-    ls.workspace.publish_diagnostics(text_doc.uri, diagnostics)
+    ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
 def _validate_json(doc):
@@ -63,14 +72,14 @@ def _validate_json(doc):
 
 
 @json_server.feature(COMPLETION, trigger_characters=[','])
-def completions(params):
+def completions(params: CompletionParams = None):
     """Returns completion items."""
     return CompletionList(False, [
         CompletionItem('"'),
         CompletionItem('['),
+        CompletionItem(']'),
         CompletionItem('{'),
-        CompletionItem('}'),
-        CompletionItem(']')
+        CompletionItem('}')
     ])
 
 
@@ -80,9 +89,10 @@ def count_down_10_seconds_blocking(ls, *args):
     It will `block` the main thread, which can be tested by trying to show
     completion items.
     """
-    for i in range(10):
-        ls.workspace.show_message("Counting down... {}".format(10 - i))
-        time.sleep(1)
+    for i in range(COUNT_DOWN_START_IN_SECONDS):
+        ls.show_message('Counting down... {}'
+                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
@@ -91,9 +101,10 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     It won't `block` the main thread, which can be tested by trying to show
     completion items.
     """
-    for i in range(10):
-        ls.workspace.show_message("Counting down... {}".format(10 - i))
-        await asyncio.sleep(1)
+    for i in range(COUNT_DOWN_START_IN_SECONDS):
+        ls.show_message('Counting down... {}'
+                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -105,30 +116,68 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 @json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
-    server.workspace.show_message("Text Document Did Close")
+    server.show_message('Text Document Did Close')
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.workspace.show_message("Text Document Did Open")
-    ls.workspace.show_message_log("Validating json...")
-
+    ls.show_message('Text Document Did Open')
     _validate(ls, params)
 
 
-@json_server.thread()
-@json_server.command(JsonLanguageServer.CMD_SHOW_PYTHON_PATH)
-def show_python_path(ls, *args):
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
+async def show_python_path_async(ls: JsonLanguageServer, *args):
     """Gets python path from configuration and displays it."""
-    configs = ls.get_configuration(ConfigurationParams([
-        ConfigurationItem("", "python")
-    ])).result(1)
-
-    python_path = None
     try:
-        python_path = configs[0].pythonPath
-    except (IndexError, AttributeError):
-        pass
+        config = await ls.get_configuration_async(ConfigurationParams([
+            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        ]))
 
-    ls.workspace.show_message("Python path: {}".format(python_path))
+        example_config = config[0].exampleConfiguration
+
+        ls.show_message(
+            'jsonServer.exampleConfiguration value: {}'.format(example_config)
+        )
+
+    except Exception as e:
+        ls.show_message_log('Error ocurred: {}'.format(e))
+
+
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
+def show_python_path_callback(ls: JsonLanguageServer, *args):
+    """Gets python path from configuration and displays it."""
+    def _config_callback(config):
+        try:
+            example_config = config[0].exampleConfiguration
+
+            ls.show_message(
+                'jsonServer.exampleConfiguration value: {}'
+                .format(example_config)
+            )
+
+        except Exception as e:
+            ls.show_message_log('Error ocurred: {}'.format(e))
+
+    ls.get_configuration(ConfigurationParams([
+        ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+    ]), _config_callback)
+
+
+@json_server.thread()
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
+def show_python_path_thread(ls: JsonLanguageServer, *args):
+    """Gets python path from configuration and displays it."""
+    try:
+        config = ls.get_configuration(ConfigurationParams([
+            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        ])).result(2)
+
+        example_config = config[0].exampleConfiguration
+
+        ls.show_message(
+            'jsonServer.exampleConfiguration value: {}'.format(example_config)
+        )
+
+    except Exception as e:
+        ls.show_message_log('Error ocurred: {}'.format(e))

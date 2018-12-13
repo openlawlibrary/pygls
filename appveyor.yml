@@ -28,7 +28,6 @@ init:
 install:
   - C:\Python36-x64\python.exe -m pip install --upgrade pip          # upgrade pip
 
-  - ps: Update-NodeJsInstallation 7.9.0;                             # match version used by VS Code
   - ps: >-
       $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\vscode-client\package.json | ConvertFrom-Json);
       $prefixed_version = "v" + $json_extension_client_json.version;
@@ -71,12 +70,12 @@ install:
       }
       echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
 
-  # point to tsc 2.9.1
-  - npm install -g typescript@2.9.1
+  # point to tsc 3.2.1
+  - npm install -g typescript@3.2.1
   - tsc --version
 
   # install vsce module (for packaging our extension into a .vsix file)
-  - npm install -g vsce@1.42.0
+  - npm install -g vsce@1.51.0
 
   # Output useful info for debugging.
   - node --version
@@ -86,6 +85,8 @@ install:
   - C:\Python36-x64\Scripts\pip.exe install .[test]
   - C:\Python36-x64\Scripts\pip.exe install -e .
 
+# Create a Visual Studio Code Extension
+build_script:
   - cd examples\json-extension\vscode-client
   # install extension-wide js dependencies
   - npm install --save-dev
@@ -97,8 +98,10 @@ install:
 
   - cd ..\..\..\
 
-# Create a Visual Studio Code Extension
-build_script:
+test_script:
+  - C:\Python36-x64\Scripts\pytest.exe
+
+after_test:
   # check function
   - ps: >-
       Function CheckInVsixPackage([string]$stringToCheck)
@@ -130,9 +133,6 @@ build_script:
   - vsce package                         rem "normal" command line is on purpose
 
   - ps: cd ../../../
-
-test_script:
-  - C:\Python36-x64\Scripts\pytest.exe
 
 # Create extensions artifacts
 artifacts:

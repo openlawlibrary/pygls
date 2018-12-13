@@ -8,15 +8,11 @@ import io
 import logging
 import os
 import re
+from typing import List
 
-from .features import (TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
-                       WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT)
-from .types import (ApplyWorkspaceEditParams, LogMessageParams, MessageType,
-                    NumType, PublishDiagnosticsParams, ShowMessageParams,
-                    TextDocumentContentChangeEvent, TextDocumentItem,
-                    WorkspaceFolder)
+from .types import (NumType, Position, TextDocumentContentChangeEvent,
+                    TextDocumentItem, WorkspaceFolder)
 from .uris import to_fs_path, urlparse
-from .utils import find_parents
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
@@ -27,14 +23,7 @@ log = logging.getLogger(__name__)
 
 class Document(object):
 
-    def __init__(
-        self,
-        uri,
-        source=None,
-        version=None,
-        local=True,
-        extra_sys_path=None
-    ):
+    def __init__(self, uri, source=None, version=None, local=True,):
         self.uri = uri
         self.version = version
         self.path = to_fs_path(uri)
@@ -42,12 +31,11 @@ class Document(object):
 
         self._local = local
         self._source = source
-        self._extra_sys_path = extra_sys_path or []
 
     def __str__(self):
         return str(self.uri)
 
-    def apply_change(self, change: TextDocumentContentChangeEvent):
+    def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
         """Apply a change to the document."""
         text = change.text
         change_range = change.range
@@ -91,34 +79,29 @@ class Document(object):
         self._source = new.getvalue()
 
     @property
-    def lines(self):
+    def lines(self) -> List[str]:
         return self.source.splitlines(True)
 
-    def offset_at_position(self, position):
+    def offset_at_position(self, position: Position) -> int:
         """Return the byte-offset pointed at by the given position."""
-        return position['character'] + \
-            len(''.join(self.lines[:position['line']]))
+        return position.character + len(''.join(self.lines[:position.line]))
 
     @property
-    def source(self):
+    def source(self) -> str:
         if self._source is None:
             with io.open(self.path, 'r', encoding='utf-8') as f:
                 return f.read()
         return self._source
 
-    def sys_path(self):
-        # Copy our extra sys path
-        return list(self._extra_sys_path)
-
-    def word_at_position(self, position):
+    def word_at_position(self, position: Position) -> str:
         """
         Get the word under the cursor returning the start and end positions.
         """
-        if position['line'] >= len(self.lines):
+        if position.line >= len(self.lines):
             return ''
 
-        line = self.lines[position['line']]
-        i = position['character']
+        line = self.lines[position.line]
+        i = position.character
         # Split word in two
         start = line[:i]
         end = line[i:]
@@ -144,19 +127,11 @@ class Workspace(object):
     def _create_document(self,
                          doc_uri: str,
                          source: str = None,
-                         version: NumType = None):
-        path = to_fs_path(doc_uri)
-        return Document(
-            doc_uri, source=source, version=version,
-            extra_sys_path=self.source_roots(path)
-        )
+                         version: NumType = None) -> Document:
+        return Document(doc_uri, source=source, version=version)
 
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
-
-    def apply_edit(self, edit, label=None):
-        return self._lsp.send_request(WORKSPACE_APPLY_EDIT,
-                                      ApplyWorkspaceEditParams(edit, label))
 
     @property
     def documents(self):
@@ -180,10 +155,6 @@ class Workspace(object):
                 self._root_uri_scheme == 'file') and \
             os.path.exists(self._root_path)
 
-    def publish_diagnostics(self, doc_uri, diagnostics):
-        self._lsp.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                         PublishDiagnosticsParams(doc_uri, diagnostics))
-
     def put_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri
 
@@ -193,15 +164,15 @@ class Workspace(object):
             version=text_document.version
         )
 
+    def remove_document(self, doc_uri: str):
+        self._docs.pop(doc_uri)
+
     def remove_folder(self, folder_uri: str):
         self._folders.pop(folder_uri, None)
         try:
             del self._folders[folder_uri]
         except KeyError:
             pass
-
-    def remove_document(self, doc_uri: str):
-        self._docs.pop(doc_uri)
 
     @property
     def root_path(self):
@@ -210,20 +181,6 @@ class Workspace(object):
     @property
     def root_uri(self):
         return self._root_uri
-
-    def show_message(self, message, msg_type=MessageType.Info):
-        self._lsp.notify(WINDOW_SHOW_MESSAGE,
-                         ShowMessageParams(msg_type, message))
-
-    def show_message_log(self, message, msg_type=MessageType.Log):
-        self._lsp.notify(WINDOW_LOG_MESSAGE,
-                         LogMessageParams(msg_type, message))
-
-    def source_roots(self, document_path):
-        """Return the source roots for the given document."""
-        files = find_parents(
-            self._root_path, document_path, ['setup.py']) or []
-        return [os.path.dirname(setup_py) for setup_py in files]
 
     def update_document(self,
                         text_doc: TextDocumentItem,
