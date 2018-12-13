@@ -1,15 +1,23 @@
 Getting started
 ===============
 
-This document explains how to install and get started writing Language
-servers that are based on *pygls*.
+This document explains how to install *pygls* and get started writing Language
+servers that are based on it.
 
---------------
+.. note::
+
+    Before getting any further, if you are not familiar with *Language Servers*
+    and *Language Server Protocol*, we recommend reading following articles:
+
+        - `Language Server Protocol Overview <https://microsoft.github.io/language-server-protocol/overview>`_
+        - `Language Server Protocol Specification <https://microsoft.github.io/language-server-protocol/specification>`_
+        - `Language Server Protocol SDKs <https://microsoft.github.io/language-server-protocol/implementors/sdks/>`_
+
 
 Installation
 ------------
 
-To get the latest release from PyPI, simply run:
+To get the latest release from *PyPI*, simply run:
 
 .. code:: console
 
@@ -78,11 +86,11 @@ To reveal the full potential of *pygls* (``thread management``,
 ``coroutines``, ``multi-root workspace``, ``TCP/IO communication`` etc.)
 keep on reading the docs.
 
-Try the example
----------------
+Tutorial
+--------
 
-We suggest :ref:`setting up the example extension <example-extension>` before
-you go further with the documentation, specially if you haven't worked with
+We suggest following up the :ref:`tutorial <tutorial>` before getting any
+further with the documentation, specially if you haven't worked with
 language servers before.
 
 
