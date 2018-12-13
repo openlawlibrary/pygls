@@ -2,14 +2,59 @@
 # Copyright (c) Open Law Library. All rights reserved.                   #
 # See ThirdPartyNotices.txt in the project root for license information. #
 ##########################################################################
+import asyncio
+import functools
+import inspect
+import itertools
 import logging
 from typing import Callable, Dict
 
+from .constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD,
+                        ATTR_FEATURE_TYPE, ATTR_REGISTERED_NAME,
+                        ATTR_REGISTERED_TYPE, PARAM_LS)
 from .exceptions import (CommandAlreadyRegisteredError,
-                         FeatureAlreadyRegisteredError, ValidationError)
-from .utils import wrap_with_server
+                         FeatureAlreadyRegisteredError, ThreadDecoratorError,
+                         ValidationError)
 
 logger = logging.getLogger(__name__)
+
+
+def assign_help_attrs(f, reg_name, reg_type):
+    setattr(f, ATTR_REGISTERED_NAME, reg_name)
+    setattr(f, ATTR_REGISTERED_TYPE, reg_type)
+
+
+def assign_thread_attr(f):
+    setattr(f, ATTR_EXECUTE_IN_THREAD, True)
+
+
+def has_ls_param_or_annotation(f, annotation):
+    """Returns true if callable has first parameter named `ls` or type of
+    annotation"""
+    try:
+        sig = inspect.signature(f)
+        first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
+        return first_p.name == PARAM_LS or first_p.annotation is annotation
+    except Exception:
+        return False
+
+
+def is_thread_function(f):
+    return getattr(f, ATTR_EXECUTE_IN_THREAD, False)
+
+
+def wrap_with_server(f, server):
+    """Returns a new callable/coroutine with server as first argument."""
+    if not has_ls_param_or_annotation(f, type(server)):
+        return f
+
+    if asyncio.iscoroutinefunction(f):
+        return asyncio.coroutine(functools.partial(f, server))
+    else:
+        wrapped = functools.partial(f, server)
+        if is_thread_function(f):
+            assign_thread_attr(wrapped)
+        return wrapped
 
 
 class FeatureManager:
@@ -62,14 +107,15 @@ class FeatureManager:
                              .format(command_name))
                 raise CommandAlreadyRegisteredError()
 
-            wrapped_f = wrap_with_server(f, self.server)
-            self._commands[command_name] = wrapped_f
+            self._commands[command_name] = wrap_with_server(f, self.server)
+
+            # Assign help attributes for thread decorator
+            assign_help_attrs(f, command_name, ATTR_COMMAND_TYPE)
 
             logger.info('Command {} is successfully registered.'
                         .format(command_name))
 
-            return wrapped_f
-
+            return f
         return decorator
 
     @property
@@ -95,8 +141,10 @@ class FeatureManager:
                              .format(feature_name))
                 raise FeatureAlreadyRegisteredError()
 
-            wrapped_f = wrap_with_server(f, self.server)
-            self._features[feature_name] = wrapped_f
+            self._features[feature_name] = wrap_with_server(f, self.server)
+
+            # Assign help attributes for thread decorator
+            assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 
             if options:
                 self._feature_options[feature_name] = options
@@ -104,7 +152,7 @@ class FeatureManager:
             logger.info('Registered {} with options {}'
                         .format(feature_name, options))
 
-            return wrapped_f
+            return f
         return decorator
 
     @property
@@ -116,3 +164,27 @@ class FeatureManager:
     def features(self) -> Dict:
         """Returns registered features"""
         return self._features
+
+    def thread(self) -> Callable:
+        """Decorator that mark function to execute it in a thread."""
+        def decorator(f):
+            if asyncio.iscoroutinefunction(f):
+                raise ThreadDecoratorError(
+                    "Thread decorator can't be used with async functions `{}`"
+                    .format(f.__name__))
+
+            # Allow any decorator order
+            try:
+                reg_name = getattr(f, ATTR_REGISTERED_NAME)
+                reg_type = getattr(f, ATTR_REGISTERED_TYPE)
+
+                if reg_type is ATTR_FEATURE_TYPE:
+                    assign_thread_attr(self.features[reg_name])
+                elif reg_type is ATTR_COMMAND_TYPE:
+                    assign_thread_attr(self.commands[reg_name])
+
+            except AttributeError:
+                assign_thread_attr(f)
+
+            return f
+        return decorator

@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = 'pygls'
-VERSION = '0.5.0'
+VERSION = '0.6.0'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
 DESCRIPTION = 'Python Generic Language Server (pronounced like "spy glass").'
@@ -19,6 +19,7 @@ package_root_dir = os.path.abspath(os.path.dirname(__file__))
 
 tests_require = [
     "pytest==3.6.1",
+    "pytest-asyncio==0.9.0",
     "mock==2.0.0"
 ]
 

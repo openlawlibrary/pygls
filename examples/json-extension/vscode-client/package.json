@@ -4,10 +4,10 @@
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "All rights reserved",
-  "version": "0.5.0",
-  "publisher": "open-law-library",
+  "version": "0.6.0",
+  "publisher": "openlawlibrary",
   "engines": {
-    "vscode": "^1.25.1"
+    "vscode": "^1.29.1"
   },
   "categories": [
     "Other"
@@ -26,10 +26,29 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
-        "command": "showPythonPath",
-        "title": "Show python path"
+        "command": "showConfigurationAsync",
+        "title": "Show Json Example Configuration [Async]"
+      },
+      {
+        "command": "showConfigurationCallback",
+        "title": "Show Json Example Configuration [Callback]"
+      },
+      {
+        "command": "showConfigurationThread",
+        "title": "Show Json Example Configuration [Thread]"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Json Server Configuration",
+      "properties": {
+        "jsonServer.exampleConfiguration": {
+          "scope": "resource",
+          "type": "string",
+          "default": "You can override this message."
+        }
+      }
+    }
   },
   "main": "./out/extension",
   "scripts": {
@@ -40,14 +59,14 @@
     "vscode": "npm run vscode:prepublish && VSCODE=$(which code-insiders || which code || echo echo ERROR: neither the code nor code-insiders vscode executable is installed); USER=dummy-dont-share-vscode-instance $VSCODE --user-data-dir=$PWD/.vscode-dev/user-data --extensionHomePath=$PWD/.vscode-dev/extensions --extensionDevelopmentPath=$PWD $*"
   },
   "devDependencies": {
-    "@types/node": "^8.0.0",
-    "tslint": "^5.10.0",
-    "tslint-microsoft-contrib": "^5.0.3",
-    "tsutils": "^2.27.1",
-    "typescript": "^2.9.1"
+    "@types/node": "^8.9.4",
+    "tslint": "^5.11.0",
+    "tslint-microsoft-contrib": "^5.2.1",
+    "tsutils": "^3.5.1",
+    "typescript": "^3.2.1"
   },
   "dependencies": {
-    "vscode": "^1.1.18",
-    "vscode-languageclient": "^4.2.1"
+    "vscode": "^1.1.22",
+    "vscode-languageclient": "^5.1.1"
   }
 }

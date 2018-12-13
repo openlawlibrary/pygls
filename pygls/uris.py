@@ -83,15 +83,7 @@ def to_fs_path(uri):
     return value
 
 
-def uri_with(
-    uri,
-    scheme=None,
-    netloc=None,
-    path=None,
-    params=None,
-    query=None,
-    fragment=None
-):
+def uri_with(uri, scheme=None, netloc=None, path=None, params=None, query=None, fragment=None):
     """Return a URI with the given part(s) replaced.
 
     Parts are decoded / encoded.
