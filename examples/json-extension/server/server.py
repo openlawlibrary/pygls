@@ -16,6 +16,9 @@ from pygls.types import (CompletionItem, CompletionList, CompletionParams,
                          DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                          Position, Range)
 
+COUNT_DOWN_START_IN_SECONDS = 10
+COUNT_DOWN_SLEEP_IN_SECONDS = 1
+
 
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
@@ -86,9 +89,10 @@ def count_down_10_seconds_blocking(ls, *args):
     It will `block` the main thread, which can be tested by trying to show
     completion items.
     """
-    for i in range(10):
-        ls.show_message('Counting down... {}'.format(10 - i))
-        time.sleep(1)
+    for i in range(COUNT_DOWN_START_IN_SECONDS):
+        ls.show_message('Counting down... {}'
+                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
@@ -97,9 +101,10 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     It won't `block` the main thread, which can be tested by trying to show
     completion items.
     """
-    for i in range(10):
-        ls.show_message('Counting down... {}'.format(10 - i))
-        await asyncio.sleep(1)
+    for i in range(COUNT_DOWN_START_IN_SECONDS):
+        ls.show_message('Counting down... {}'
+                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -126,7 +131,7 @@ async def show_python_path_async(ls: JsonLanguageServer, *args):
     """Gets python path from configuration and displays it."""
     try:
         config = await ls.get_configuration_async(ConfigurationParams([
-            ConfigurationItem('', 'jsonServer')
+            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
         ]))
 
         example_config = config[0].exampleConfiguration
@@ -155,7 +160,7 @@ def show_python_path_callback(ls: JsonLanguageServer, *args):
             ls.show_message_log('Error ocurred: {}'.format(e))
 
     ls.get_configuration(ConfigurationParams([
-        ConfigurationItem('', 'jsonServer')
+        ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
     ]), _config_callback)
 
 
@@ -165,7 +170,7 @@ def show_python_path_thread(ls: JsonLanguageServer, *args):
     """Gets python path from configuration and displays it."""
     try:
         config = ls.get_configuration(ConfigurationParams([
-            ConfigurationItem('', 'jsonServer')
+            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
         ])).result(2)
 
         example_config = config[0].exampleConfiguration
