@@ -16,7 +16,7 @@ Features
 
 -  cross-platform support
 -  TCP/IP and IO communication
--  run in asyncio event loop
+-  runs in asyncio event loop
 -  register LSP features and custom commands as:
 
    -  asynchronous functions (coroutines)
@@ -39,7 +39,7 @@ User Guide
    :maxdepth: 2
 
    pages/getting_started
-   pages/example_extension
+   pages/tutorial
    pages/advanced_usage
    pages/testing
 

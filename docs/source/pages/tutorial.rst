@@ -1,7 +1,7 @@
-.. _example-extension:
+.. _tutorial:
 
-Example extension
-=================
+Tutorial
+========
 
 In order to help you with *pygls* we have created simple, but yet well covered
 `Json Extension`_ example.
