@@ -3,7 +3,7 @@
 Testing
 =======
 
-Unit tests
+Unit Tests
 ----------
 
 Writing unit tests for registered features and commands are easy and you don't
@@ -13,7 +13,7 @@ section for more details.
 
 Json Extension example's `unit tests`_ might be helpful.
 
-Integration tests
+Integration Tests
 -----------------
 
 

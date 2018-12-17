@@ -8,14 +8,14 @@ pygls
 
 *pygls* (pronounced like “spy glass”) is generic implementation of
 `Language Server Protocol`_ written in Python programming language. It
-allows you to write your own `Language Server`_ in just few lines of
+allows you to write your own `language server`_ in just few lines of
 code.
 
 Features
 --------
 
 -  cross-platform support
--  TCP/IP and IO communication
+-  TCP/IP and STDIO communication
 -  runs in asyncio event loop
 -  register LSP features and custom commands as:
 
@@ -27,7 +27,7 @@ Features
 -  in-memory workspace with incremental document updates
 -  good test coverage
 
-Python versions
+Python Versions
 ---------------
 
 *pygls* works with Python 3.5+.
@@ -45,4 +45,4 @@ User Guide
 
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
-.. _Language Server: https://langserver.org/
+.. _Language server: https://langserver.org/
