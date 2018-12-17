@@ -1,9 +1,9 @@
 .. _advanced-usage:
 
-Advanced usage
+Advanced Usage
 ==============
 
-Language server
+Language Server
 ---------------
 
 Language server is responsible for receiving and sending messages over
@@ -13,18 +13,18 @@ protocol <https://www.jsonrpc.org/specification>`__.
 Connections
 ~~~~~~~~~~~
 
-*pygls* supports **TCP** and socket **IO** types of connections.
+*pygls* supports **TCP** and socket **STDIO** types of connections.
 
 TCP
 ^^^
 
-TCP connections are usually used while developing the Language server.
+TCP connections are usually used while developing the language server.
 This way server can be started in *debug* mode separately and wait for
 client connection.
 
 .. note:: Server should be started **before** the client.
 
-Code snippet bellow shows how to start the server in *TCP* mode.
+Code snippet below shows how to start the server in *TCP* mode.
 
 .. code:: python
 
@@ -34,13 +34,13 @@ Code snippet bellow shows how to start the server in *TCP* mode.
 
     server.start_tcp('localhost', 8080)
 
-IO
-^^
+STDIO
+^^^^^
 
-IO connections are useful when client is starting the server as a child
+STDIO connections are useful when client is starting the server as a child
 process and usually this is the way to go in production.
 
-Code snippet bellow shows how to start the server in *IO* mode.
+Code snippet below shows how to start the server in *STDIO* mode.
 
 .. code:: python
 
@@ -61,7 +61,7 @@ before server is started.
 
 Official documentation about logging in python can be found
 `here <https://docs.python.org/3/howto/logging-cookbook.html>`__, and
-bellow is the minimal setup to setup logging in *pygls*:
+below is the minimal setup to setup logging in *pygls*:
 
 .. code:: python
 
@@ -78,7 +78,7 @@ bellow is the minimal setup to setup logging in *pygls*:
 Features
 --------
 
-What is a feature in *pygls*? In terms of Language servers and
+What is a feature in *pygls*? In terms of language servers and
 ``Language Server Protocol``, by feature we mean one of the predefined
 methods from LSP
 `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
@@ -86,7 +86,7 @@ such as: *code completion*, *formatting*, *code lens*, etc. Features
 that are available can be found in `pygls.features <../features>`__
 module.
 
-*Built-in* features
+*Built-In* Features
 ~~~~~~~~~~~~~~~~~~~
 
 *pygls* comes with following predefined set of
@@ -132,7 +132,7 @@ API
 
 This section contains *in-depth* explanation how to use *pygls* API.
 
-*Feature* and *command* advanced registration
+*Feature* and *Command* Advanced Registration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *pygls* is a language server which relies on *asyncio event loop*. It is
@@ -150,13 +150,13 @@ following the `instructions <../examples/README.md>`__.
 
 .. note:: *Built-in* features must not be overridden, instead, register feature with the same name and it will be called immediately after the corresponding built-in feature.
 
-*asynchronous* functions (*coroutines*)
+*Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *pygls* supports ``python 3.5+`` which has a keyword ``async`` to
 specify coroutines.
 
-Code snippet bellow shows how to register a command as a coroutine:
+Code snippet below shows how to register a command as a coroutine:
 
 .. code:: python
 
@@ -179,7 +179,7 @@ Support <https://microsoft.github.io/language-server-protocol/specification#canc
 
 .. warning:: Using computation intensive operations will *block* the main thread and should be *avoided* inside coroutines. Take a look at `threaded functions <#threaded-functions>`__ for more details.
 
-*synchronous* functions
+*Synchronous* Functions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Synchronous functions are regular functions which *blocks* the *main*
@@ -189,7 +189,7 @@ thread until they are executed.
 functions to ensure correct state of language server initialization and
 workspace.
 
-Code snippet bellow shows how to register a command as a regular
+Code snippet below shows how to register a command as a regular
 function:
 
 .. code:: python
@@ -202,7 +202,7 @@ Registering *feature* as a regular function is exactly the same.
 
 .. warning:: Using computation intensive operations will *block* the main thread and should be *avoided* inside regular functions. Take a look at `threaded functions <#threaded-functions>`__ for more details.
 
-*threaded* functions
+*Threaded* Functions
 ^^^^^^^^^^^^^^^^^^^^
 
 *Threaded* functions are just regular functions, but marked with
@@ -217,7 +217,7 @@ Registering *feature* as a regular function is exactly the same.
         # Omitted
 
 *pygls* uses its own *thread pool* to execute above function in *daemon*
-thread and it is *lazy* initialized first time when function market with
+thread and it is *lazy* initialized first time when function marked with
 ``thread`` decorator is fired.
 
 Use *threaded* functions to run blocking operations, but make sure that
@@ -227,7 +227,7 @@ messing with threads.
 
 .. _passing-instance:
 
-Passing language server instance
+Passing Language Server Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Using language server methods inside registered features and commands are quite
@@ -285,7 +285,7 @@ is collected, the client sends data as a notification to the server.
 
 .. note:: Although ``configuration`` is a ``request``, it is explained in this section because the client sends back the ``notification`` object.
 
-Code snippet bellow shows how to send configuration to the client:
+Code snippet below shows how to send configuration to the client:
 
 .. code:: python
 
@@ -323,7 +323,7 @@ client, depending on way how the function is registered (described
     # .result() will block the thread
     config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')])).result()
 
-Show message
+Show Message
 ^^^^^^^^^^^^
 
 `Show
@@ -331,7 +331,7 @@ message <https://microsoft.github.io/language-server-protocol/specification#wind
 is notification that is sent from the server to the client to display
 text message.
 
-Code snippet bellow shows how to send show message notification:
+Code snippet below shows how to send show message notification:
 
 .. code:: python
 
@@ -342,7 +342,7 @@ Code snippet bellow shows how to send show message notification:
             ls.workspace.show_message("Counting down... {}".format(10 - i))
             await asyncio.sleep(1)
 
-Show message log
+Show Message Log
 ^^^^^^^^^^^^^^^^
 
 `Show message
@@ -350,7 +350,7 @@ log <https://microsoft.github.io/language-server-protocol/specification#window_l
 is notification that is sent from the server to the client to display
 text message in the output channel.
 
-Code snippet bellow shows how to send show message log notification:
+The code snippet below shows how to send show message log notification:
 
 .. code:: python
 
@@ -361,7 +361,7 @@ Code snippet bellow shows how to send show message log notification:
             ls.workspace.show_message_log("Counting down... {}".format(10 - i))
             await asyncio.sleep(1)
 
-Publish diagnostics
+Publish Diagnostics
 ^^^^^^^^^^^^^^^^^^^
 
 `Publish
@@ -392,10 +392,10 @@ document content change, e.g.:
         # Send diagnostics
         ls.workspace.publish_diagnostics(text_doc.uri, [diagnostic])
 
-Custom notifications
+Custom Notifications
 ^^^^^^^^^^^^^^^^^^^^
 
-*pygls* supports sending custom notifications to the client and bellow
+*pygls* supports sending custom notifications to the client and below
 is method declaration for this functionality:
 
 .. code:: python

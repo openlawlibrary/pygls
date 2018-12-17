@@ -22,12 +22,12 @@ installed:
     for the *pygls* project.
 
 
-Running the example
+Running the Example
 -------------------
 
 For a step-by-step guide on how to run the example follow `README`_.
 
-Hacking the extension
+Hacking the Extension
 ---------------------
 
 When you have successfully setup and run the extension, open `server.py`_ and
@@ -46,7 +46,7 @@ We have implemented following capabilities:
 Since you already run the extension in *debug* mode, set breakpoints to see
 when  each of above mentioned actions gets triggered.
 
-Blocking command test
+Blocking Command Test
 ~~~~~~~~~~~~~~~~~~~~~
 
 1. Press **F1**, find and run ``Count down 10 seconds [Blocking]`` command.
@@ -57,7 +57,7 @@ Language server is **blocked** and the reason is ``time.sleep`` which is a
 
 .. hint::
     To make this command **non blocking**, add ``@json_server.thread()``
-    decorator, like in code bellow:
+    decorator, like in code below:
 
     .. code-block:: python
 
@@ -70,7 +70,7 @@ Language server is **blocked** and the reason is ``time.sleep`` which is a
     ``thread`` decorator.
 
 
-Non Blocking command test
+Non-Blocking Command Test
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Press **F1**, find and run ``Count down 10 seconds [Non Blocking]`` command.

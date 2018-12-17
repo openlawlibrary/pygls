@@ -1,4 +1,4 @@
-Getting started
+Getting Started
 ===============
 
 This document explains how to install *pygls* and get started writing Language
@@ -6,7 +6,7 @@ servers that are based on it.
 
 .. note::
 
-    Before getting any further, if you are not familiar with *Language Servers*
+    Before getting any further, if you are not familiar with *language servers*
     and *Language Server Protocol*, we recommend reading following articles:
 
         - `Language Server Protocol Overview <https://microsoft.github.io/language-server-protocol/overview>`_
@@ -30,10 +30,10 @@ page and installed with following command:
 
    python setup.py install
 
-Quick start
+Quick Start
 -----------
 
-Spin the server up
+Spin the Server Up
 ~~~~~~~~~~~~~~~~~~
 
 *pygls* is a language server framework that can be started without
@@ -50,7 +50,7 @@ writing any additional code:
 After running the code above, server will start listening for incoming
 ``Json RPC`` requests on ``http://localhost:8080``.
 
-Register features and commands
+Register Features and Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *pygls* comes with API for registering additional features like
@@ -83,7 +83,7 @@ Advanced usage
 --------------
 
 To reveal the full potential of *pygls* (``thread management``,
-``coroutines``, ``multi-root workspace``, ``TCP/IO communication`` etc.)
+``coroutines``, ``multi-root workspace``, ``TCP/STDIO communication`` etc.)
 keep on reading the docs.
 
 Tutorial
