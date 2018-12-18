@@ -6,9 +6,9 @@
 pygls
 =====
 
-*pygls* (pronounced like “spy glass”) is generic implementation of
-`Language Server Protocol`_ written in Python programming language. It
-allows you to write your own `language server`_ in just few lines of
+`pygls`_ (pronounced like “spy glass”) is a generic implementation of
+the `Language Server Protocol`_ written in the Python programming language. It
+allows you to write your own `language server`_ in just a few lines of
 code.
 
 Features
@@ -46,3 +46,4 @@ User Guide
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language server: https://langserver.org/
+.. _pygls: https://github.com/openlawlibrary/pygls

@@ -43,8 +43,8 @@ We have implemented following capabilities:
 - ``textDocument/didClose`` feature
 - ``textDocument/didOpen`` feature
 
-Since you already run the extension in *debug* mode, set breakpoints to see
-when  each of above mentioned actions gets triggered.
+When running the extension in *debug* mode, you can set breakpoints to see
+when each of above mentioned actions gets triggered.
 
 Blocking Command Test
 ~~~~~~~~~~~~~~~~~~~~~
@@ -76,8 +76,8 @@ Non-Blocking Command Test
 1. Press **F1**, find and run ``Count down 10 seconds [Non Blocking]`` command.
 2. Try to show *code completions* while counter is still ticking.
 
-Language server is **not blocked** because we used ``asyncio.sleep`` this time,
-while it's still executing *just* in the *main* thread.
+The language server is **not blocked** because we used ``asyncio.sleep`` this
+time, while it's still executing *just* in the *main* thread.
 
 
 .. _Json Extension: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension
