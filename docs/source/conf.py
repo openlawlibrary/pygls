@@ -20,13 +20,16 @@
 # -- Project information -----------------------------------------------------
 
 project = 'pygls'
-copyright = '2018, Open Law Library'
+copyright = 'Open Law Library'
 author = 'Open Law Library'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
 release = ''
+
+title = 'pygls Documentation'
+description = 'a pythonic generic language server'
 
 
 # -- General configuration ---------------------------------------------------
@@ -128,8 +131,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pygls.tex', 'pygls Documentation',
-     'Open Law Library', 'manual'),
+    (master_doc, 'pygls.tex', title,
+     author, 'manual'),
 ]
 
 
@@ -138,8 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pygls', 'pygls Documentation',
-     [author], 1)
+    (master_doc, 'pygls', description, [author], 1)
 ]
 
 
@@ -149,9 +151,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pygls', 'pygls Documentation',
-     author, 'pygls', 'One line description of project.',
-     'Miscellaneous'),
+    (master_doc, 'pygls', title, author,
+     'pygls', description, 'Miscellaneous'),
 ]
 
 

@@ -6,7 +6,7 @@ Advanced Usage
 Language Server
 ---------------
 
-Language server is responsible for receiving and sending messages over
+The language server is responsible for receiving and sending messages over
 the ``Language Server Protocol`` which is based on `Json RPC
 protocol <https://www.jsonrpc.org/specification>`__.
 
@@ -24,7 +24,7 @@ client connection.
 
 .. note:: Server should be started **before** the client.
 
-Code snippet below shows how to start the server in *TCP* mode.
+The code snippet below shows how to start the server in *TCP* mode.
 
 .. code:: python
 
@@ -40,7 +40,7 @@ STDIO
 STDIO connections are useful when client is starting the server as a child
 process and usually this is the way to go in production.
 
-Code snippet below shows how to start the server in *STDIO* mode.
+The code snippet below shows how to start the server in *STDIO* mode.
 
 .. code:: python
 
@@ -78,10 +78,9 @@ below is the minimal setup to setup logging in *pygls*:
 Features
 --------
 
-What is a feature in *pygls*? In terms of language servers and
-``Language Server Protocol``, by feature we mean one of the predefined
-methods from LSP
-`specification <https://microsoft.github.io/language-server-protocol/specification>`__,
+What is a feature in *pygls*? In terms of language servers and the
+``Language Server Protocol``, a feature is one of the predefined methods from
+LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
 that are available can be found in `pygls.features <../features>`__
 module.
@@ -130,8 +129,6 @@ not covered by LSP specification, but needs to be implemented.
 API
 ---
 
-This section contains *in-depth* explanation how to use *pygls* API.
-
 *Feature* and *Command* Advanced Registration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -146,9 +143,9 @@ in three different ways.
 To make sure that you fully understand what is happening under the hood,
 please take a look at the example
 `server <../examples/json-extension/server/server.py>`__ and test it
-following the `instructions <../examples/README.md>`__.
+following these `instructions <../examples/README.md>`__.
 
-.. note:: *Built-in* features must not be overridden, instead, register feature with the same name and it will be called immediately after the corresponding built-in feature.
+.. note:: *Built-in* features in most cases should *not* overridden. Instead, register feature with the same name and it will be called immediately after the corresponding built-in feature.
 
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -156,7 +153,7 @@ following the `instructions <../examples/README.md>`__.
 *pygls* supports ``python 3.5+`` which has a keyword ``async`` to
 specify coroutines.
 
-Code snippet below shows how to register a command as a coroutine:
+The code snippet below shows how to register a command as a coroutine:
 
 .. code:: python
 
@@ -164,7 +161,7 @@ Code snippet below shows how to register a command as a coroutine:
     async def count_down_10_seconds_non_blocking(ls, *args):
         # Omitted
 
-Registering *feature* as a coroutine is exactly the same.
+Registering a *feature* as a coroutine is exactly the same.
 
 Coroutines are functions that are executed as tasks in *pygls*'s *event
 loop*. They should contain at least one *await* expression (more about
@@ -189,7 +186,7 @@ thread until they are executed.
 functions to ensure correct state of language server initialization and
 workspace.
 
-Code snippet below shows how to register a command as a regular
+The code snippet below shows how to register a command as a regular
 function:
 
 .. code:: python
@@ -220,10 +217,10 @@ Registering *feature* as a regular function is exactly the same.
 thread and it is *lazy* initialized first time when function marked with
 ``thread`` decorator is fired.
 
-Use *threaded* functions to run blocking operations, but make sure that
-you understand python's ``multithreading`` and
-`GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__ before
-messing with threads.
+*Threaded* functions can be used to run blocking operations. If it has been a
+while or you are new to threading in Python, check out Python's
+``multithreading`` and `GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__
+before messing with threads.
 
 .. _passing-instance:
 
@@ -231,8 +228,8 @@ Passing Language Server Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Using language server methods inside registered features and commands are quite
-often and, in that case, we recommend adding language server as a
-**first parameter** of a registered function.
+common. We recommend adding language server as a **first parameter** of a
+registered function.
 
 There are two ways of doing this:
 
@@ -250,8 +247,8 @@ the language server instance.
 
 - add **type** to first parameter
 
-Add **LanguageServer** or any class derived from it as a type to first
-parameter of a function
+Add the **LanguageServer** class or any class derived from it as a type to
+first parameter of a function
 
 .. code-block:: python
 
@@ -272,20 +269,20 @@ not* reply to it. This means that, if your language server received the
 notification, even if you return result inside your handler function,
 the result won't be passed to the client.
 
-``Language Server Protocol``, unlike ``Json RPC``, allows bidirectional
+The ``Language Server Protocol``, unlike ``Json RPC``, allows bidirectional
 communication between the server and the client.
 
 Configuration
 ^^^^^^^^^^^^^
 
-`Configuration <https://microsoft.github.io/language-server-protocol/specification#workspace_configuration>`__
+The `configuration <https://microsoft.github.io/language-server-protocol/specification#workspace_configuration>`__
 request is sent from the server to the client in order to fetch
 configuration settings from the client. When the requested configuration
 is collected, the client sends data as a notification to the server.
 
 .. note:: Although ``configuration`` is a ``request``, it is explained in this section because the client sends back the ``notification`` object.
 
-Code snippet below shows how to send configuration to the client:
+The code snippet below shows how to send configuration to the client:
 
 .. code:: python
 
@@ -331,7 +328,7 @@ message <https://microsoft.github.io/language-server-protocol/specification#wind
 is notification that is sent from the server to the client to display
 text message.
 
-Code snippet below shows how to send show message notification:
+The code snippet below shows how to send show message notification:
 
 .. code:: python
 
@@ -403,7 +400,7 @@ is method declaration for this functionality:
     def send_notification(self, method: str, params: object = None) -> None:
         # Omitted
 
-And method invocation sample:
+And method invocation example:
 
 .. code:: python
 

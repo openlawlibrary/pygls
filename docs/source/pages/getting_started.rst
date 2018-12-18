@@ -6,7 +6,7 @@ servers that are based on it.
 
 .. note::
 
-    Before getting any further, if you are not familiar with *language servers*
+    Before going any further, if you are not familiar with *language servers*
     and *Language Server Protocol*, we recommend reading following articles:
 
         - `Language Server Protocol Overview <https://microsoft.github.io/language-server-protocol/overview>`_
@@ -36,8 +36,8 @@ Quick Start
 Spin the Server Up
 ~~~~~~~~~~~~~~~~~~
 
-*pygls* is a language server framework that can be started without
-writing any additional code:
+*pygls* is a language server that can be started without writing any additional
+code:
 
 .. code:: python
 
