@@ -18,17 +18,19 @@
         },
         {
             "name": "Launch JsonExtension Server",
-            "module": "server",
             "type": "python",
-            "pythonPath": "${config:python.pythonPath}",
             "request": "launch",
-            "stopOnEntry": false,
             "console": "none",
-            "program": "${workspaceFolder}",
+            "module": "server",
             "args": [
                 "--tcp"
             ],
-            "cwd": "${workspaceFolder}/examples/json-extension/"
+            "debugStdLib": true,
+            "pythonPath": "${config:python.pythonPath}",
+            "cwd": "${workspaceFolder}/examples/json-extension",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/examples/json-extension"
+            }
         }
     ]
 }
