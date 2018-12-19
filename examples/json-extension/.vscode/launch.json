@@ -7,12 +7,12 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}/examples/json-extension/vscode-client"
+                "--extensionDevelopmentPath=${workspaceRoot}/vscode-client"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/examples/json-extension/vscode-client/out/src/**/*.js"
+                "${workspaceRoot}/vscode-client/out/src/**/*.js"
             ],
             "preLaunchTask": "json-extension-watch:client"
         },
@@ -27,9 +27,9 @@
             ],
             "debugStdLib": true,
             "pythonPath": "${config:python.pythonPath}",
-            "cwd": "${workspaceFolder}/examples/json-extension",
+            "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/examples/json-extension"
+                "PYTHONPATH": "${workspaceFolder}"
             }
         }
     ]

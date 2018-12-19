@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/Users/daniel/.virtualenvs/pygls/bin/python",
+    "restructuredtext.confPath": "${workspaceFolder}/docs/source"
+}
