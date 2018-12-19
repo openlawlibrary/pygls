@@ -22,7 +22,7 @@ function isStartedInDebugMode() {
   return false;
 }
 
-function startLangServerTCP(addr: number, documentSelector: string[]): LanguageClient {
+function startLangServerTCP(addr: number): LanguageClient {
   const serverOptions: ServerOptions = () => {
     return new Promise((resolve, reject) => {
       const clientSocket = new net.Socket();
@@ -38,7 +38,7 @@ function startLangServerTCP(addr: number, documentSelector: string[]): LanguageC
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector,
+    documentSelector: [ { scheme: "file", language: "json"} ],
     outputChannelName: "JsonLanguageServer",
     synchronize: {
       // Notify the server about file changes to '.clientrc files contain in the workspace
@@ -53,7 +53,7 @@ function startLangServerTCP(addr: number, documentSelector: string[]): LanguageC
 }
 
 function startLangServer(
-  command: string, args: string[], cwd: string, documentSelector: string[],
+  command: string, args: string[], cwd: string,
 ): LanguageClient {
   const serverOptions: ServerOptions = {
     args,
@@ -64,7 +64,7 @@ function startLangServer(
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector,
+    documentSelector: [ { scheme: "file", language: "json"} ],
     outputChannelName: "JsonLanguageServer",
     synchronize: {
       // In the past this told the client to actively synchronize settings. Since the
@@ -81,7 +81,7 @@ function startLangServer(
 export function activate(context: ExtensionContext) {
   if (isStartedInDebugMode()) {
     // Development - Run the server manually
-    client = startLangServerTCP(2087, ["json"]);
+    client = startLangServerTCP(2087);
   } else {
     // Production - Client is going to run the server (for use within `.vsix` package;
     // the `server` folder needs to be copied into `vscode-client/`).
@@ -92,7 +92,7 @@ export function activate(context: ExtensionContext) {
       throw new Error("`python.pythonPath` is not set");
     }
 
-    client = startLangServer(pythonPath, ["-m", "server"], cwd, ["json"]);
+    client = startLangServer(pythonPath, ["-m", "server"], cwd);
   }
 
   context.subscriptions.push(client.start());
