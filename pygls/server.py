@@ -194,11 +194,13 @@ class LanguageServer(Server):
     registered commands/features.
 
     Args:
+        protocol_cls(LanguageServerProtocol): LSP or any subclass of it
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
     """
 
-    def __init__(self, loop=None, max_workers: int = 2):
+    def __init__(self, loop=None, protocol_cls=LanguageServerProtocol, max_workers: int = 2):
+        assert issubclass(protocol_cls, LanguageServerProtocol)
         super().__init__(LanguageServerProtocol, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
@@ -225,7 +227,8 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, **options)
 
-    def get_configuration(self, params: ConfigurationParams, callback: ConfigCallbackType = None) -> Future:
+    def get_configuration(self, params: ConfigurationParams,
+                          callback: ConfigCallbackType = None) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
