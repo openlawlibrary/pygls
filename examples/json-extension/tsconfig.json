@@ -9,7 +9,7 @@
         "sourceMap": true
     },
     "exclude": [
-        "node_modules",
-        "server"
+        "./vscode-client/node_modules",
+        "./vscode-client/server"
     ]
 }
