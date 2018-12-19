@@ -35,7 +35,7 @@ NumType = Union[int, float]
 
 
 class ApplyWorkspaceEditParams:
-    def __init__(self, edit: 'WorkspaceEditCapability', label: Optional[str]):
+    def __init__(self, edit: 'WorkspaceEdit', label: Optional[str] = None):
         self.edit = edit
         self.label = label
 
