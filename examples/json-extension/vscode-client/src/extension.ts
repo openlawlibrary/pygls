@@ -38,7 +38,10 @@ function startLangServerTCP(addr: number): LanguageClient {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [ { scheme: "file", language: "json"} ],
+    documentSelector: [
+      { scheme: "file", language: "json" },
+      { scheme: "untitled", language: "json" },
+    ],
     outputChannelName: "JsonLanguageServer",
     synchronize: {
       // Notify the server about file changes to '.clientrc files contain in the workspace
@@ -64,7 +67,10 @@ function startLangServer(
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [ { scheme: "file", language: "json"} ],
+    documentSelector: [
+      { scheme: "file", language: "json" },
+      { scheme: "untitled", language: "json" },
+    ],
     outputChannelName: "JsonLanguageServer",
     synchronize: {
       // In the past this told the client to actively synchronize settings. Since the
