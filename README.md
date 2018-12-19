@@ -14,7 +14,6 @@ If you are using virtual environment (VE), then follow next steps:
 
 1. Open terminal, create and activate VE ([see how](https://docs.python.org/3/tutorial/venv.html))
 2. In the same terminal, navigate to project root directory and run `pip install .` command (be sure that VE is activated)
-3. In project's root in `.vscode/settings.json` set `python.pythonPath` to point to your VE's python executable
 
 ### Run tests
 

@@ -29,7 +29,7 @@ install:
   - C:\Python36-x64\python.exe -m pip install --upgrade pip          # upgrade pip
 
   - ps: >-
-      $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\vscode-client\package.json | ConvertFrom-Json);
+      $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\package.json | ConvertFrom-Json);
       $prefixed_version = "v" + $json_extension_client_json.version;
 
       # if we are building a tag, then replace the package version with the tag name
@@ -54,7 +54,7 @@ install:
 
       # update the package files so that vsce will pick up the altered version number
 
-      $json_extension_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\json-extension\vscode-client\package.json;
+      $json_extension_client_json | ConvertTo-Json -Depth 20 | Set-Content examples\json-extension\package.json;
 
       # update it with Appveyor
       # from this point on, version numbers should always include the "v" prefix
@@ -87,16 +87,16 @@ install:
 
 # Create a Visual Studio Code Extension
 build_script:
-  - cd examples\json-extension\vscode-client
+  - cd examples\json-extension
   # install extension-wide js dependencies
   - npm install --save-dev
   # run tslint
-  - .\node_modules\.bin\tslint src\*.ts
+  - .\node_modules\.bin\tslint client\src\*.ts
   # install our dependencies
   - npm install                                                  # TODO: replace with `yarn install`
   - tsc -p .
 
-  - cd ..\..\..\
+  - cd ..\..\
 
 test_script:
   - C:\Python36-x64\Scripts\pytest.exe
@@ -114,13 +114,9 @@ after_test:
 
   # package up the json-extension client example VS Code extension
   - ps: cd examples/json-extension/
-  # copy server.py into client for distribution
-  - ps: cp -r server/ vscode-client/server
-  - ps: cd vscode-client/
   # check to see if key files will be in the `.vsix` package to be built
   - vsce ls > packages.txt               rem list files to be packaged
   # files/folders to be checked
-  - ps: CheckInVsixPackage "CHANGELOG.md"
   - ps: CheckInVsixPackage "package.json"
   - ps: CheckInVsixPackage "out/extension.js"
   - ps: CheckInVsixPackage "server/__init__.py"
@@ -132,10 +128,10 @@ after_test:
   # passed the basic checks, should be good-to-go
   - vsce package                         rem "normal" command line is on purpose
 
-  - ps: cd ../../../
+  - ps: cd ../
 
 # Create extensions artifacts
 artifacts:
-  - path: examples/json-extension/vscode-client/json-extension-$(unprefixed_version).vsix
+  - path: examples/json-extension/json-extension-$(unprefixed_version).vsix
     name: json-extension-example-$(unprefixed_version).vsix
     type: file

@@ -1,7 +1,7 @@
 {
     "extends": "tslint:recommended",
     "rulesDirectory": [
-        "./vscode-client/node_modules/tslint-microsoft-contrib"
+        "./node_modules/tslint-microsoft-contrib"
     ],
     "rules": {
         "max-line-length": {

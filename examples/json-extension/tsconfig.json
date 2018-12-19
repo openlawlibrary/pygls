@@ -2,14 +2,13 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es6",
-        "outDir": "./vscode-client/out",
+        "outDir": "out",
         "lib": [
             "es6"
         ],
         "sourceMap": true
     },
     "exclude": [
-        "./vscode-client/node_modules",
-        "./vscode-client/server"
+        "node_modules"
     ]
 }
