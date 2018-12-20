@@ -7,20 +7,20 @@ Language Server
 ---------------
 
 The language server is responsible for receiving and sending messages over
-the ``Language Server Protocol`` which is based on `Json RPC
+the ``LanguageServerProtocol`` which is based on the `Json RPC
 protocol <https://www.jsonrpc.org/specification>`__.
 
 Connections
 ~~~~~~~~~~~
 
-*pygls* supports **TCP** and socket **STDIO** types of connections.
+*pygls* supports **TCP** and socket **STDIO** connections.
 
 TCP
 ^^^
 
 TCP connections are usually used while developing the language server.
-This way server can be started in *debug* mode separately and wait for the
-client connection.
+This way the server can be started in *debug* mode separately and wait
+for the client connection.
 
 .. note:: Server should be started **before** the client.
 
@@ -38,7 +38,7 @@ STDIO
 ^^^^^
 
 STDIO connections are useful when client is starting the server as a child
-process and usually this is the way to go in production.
+process. This is the way to go in production.
 
 The code snippet below shows how to start the server in *STDIO* mode.
 
@@ -60,8 +60,8 @@ measuring time needed to return results to the client.
 before server is started.
 
 Official documentation about logging in python can be found
-`here <https://docs.python.org/3/howto/logging-cookbook.html>`__, and
-below is the minimal setup to setup logging in *pygls*:
+`here <https://docs.python.org/3/howto/logging-cookbook.html>`__. Below
+is the minimal setup to setup logging in *pygls*:
 
 .. code:: python
 
@@ -75,18 +75,18 @@ below is the minimal setup to setup logging in *pygls*:
 
     server.start_io()
 
-Overriding Language Server Protocol
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Overriding ``LanguageServerProtocol``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you have any reason to override existing *Language Server Protocol* class,
-you can do that by inheriting the class and passing it to language server
+If you have a reason to override the existing ``LanguageServerProtocol`` class,
+you can do that by inheriting the class and passing it to the ``LanguageServer``
 constructor.
 
 Features
 --------
 
 What is a feature in *pygls*? In terms of language servers and the
-``Language Server Protocol``, a feature is one of the predefined methods from
+``LanguageServerProtocol``, a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
 that are available can be found in `pygls.features <../features>`__
@@ -98,33 +98,33 @@ module.
 *pygls* comes with following predefined set of
 ``Language Server Protocol`` (LSP) features:
 
--  `initialize <https://microsoft.github.io/language-server-protocol/specification#initialize>`__
+-  The `initialize <https://microsoft.github.io/language-server-protocol/specification#initialize>`__
    request is sent as a first request from client to the server to setup
    their communication. *pygls* automatically computes registered LSP
    capabilities and sends them as part of ``InitializeResult`` response.
 
--  `shutdown <https://microsoft.github.io/language-server-protocol/specification#shutdown>`__
+-  The `shutdown <https://microsoft.github.io/language-server-protocol/specification#shutdown>`__
    request is sent from the client to the server to ask the server to
    shutdown.
 
--  `exit <https://microsoft.github.io/language-server-protocol/specification#exit>`__
+-  The `exit <https://microsoft.github.io/language-server-protocol/specification#exit>`__
    notification is sent from client to the server to ask the server to
    exit the process. *pygls* automatically releases all resources and
    stops the process.
 
--  `textDocument/didOpen <https://microsoft.github.io/language-server-protocol/specification#textDocument_didOpen>`__
+-  The `textDocument/didOpen <https://microsoft.github.io/language-server-protocol/specification#textDocument_didOpen>`__
    notification will tell *pygls* to create a document in the in-memory
    workspace which will exist as long as document is opened in editor.
 
--  `textDocument/didChange <https://microsoft.github.io/language-server-protocol/specification#textDocument_didChange>`__
+-  The `textDocument/didChange <https://microsoft.github.io/language-server-protocol/specification#textDocument_didChange>`__
    notification will tell *pygls* to update the document text. For now,
    *pygls* supports **only** incremental document changes.
 
--  `textDocument/didClose <https://microsoft.github.io/language-server-protocol/specification#textDocument_didClose>`__
+-  The `textDocument/didClose <https://microsoft.github.io/language-server-protocol/specification#textDocument_didClose>`__
    notification will tell *pygls* to remove a document from the
    in-memory workspace.
 
--  `workspace/didChangeWorkspaceFolders <https://microsoft.github.io/language-server-protocol/specification#workspace_didChangeWorkspaceFolders>`__
+-  The `workspace/didChangeWorkspaceFolders <https://microsoft.github.io/language-server-protocol/specification#workspace_didChangeWorkspaceFolders>`__
    notification will tell *pygls* to update in-memory workspace folders.
 
 Commands
@@ -153,8 +153,8 @@ please take a look at the :ref:`tutorial <tutorial>`.
 .. note::
 
     *Built-in* features in most cases should *not* be overridden.
-    Instead, register feature with the same name and it will be called
-    immediately after the corresponding built-in feature.
+    Instead, register the feature with the same name and it will be
+    called immediately after the corresponding built-in feature.
 
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -173,11 +173,11 @@ The code snippet below shows how to register a command as a coroutine:
 Registering a *feature* as a coroutine is exactly the same.
 
 Coroutines are functions that are executed as tasks in *pygls*'s *event
-loop*. They should contain at least one *await* expression (more about
-`awaitables <https://docs.python.org/3.5/glossary.html#term-awaitable>`__)
-which tells event loop to switch to another task while waiting. This
-allows *pygls* to listen for client requests in a *non blocking* way,
-while still only running in the *main* thread.
+loop*. They should contain at least one *await* expression (see
+`awaitables <https://docs.python.org/3.5/glossary.html#term-awaitable>`__
+for details) which tells event loop to switch to another task while
+waiting. This allows *pygls* to listen for client requests in a
+*non blocking* way, while still only running in the *main* thread.
 
 Tasks can be canceled by the client if they didn't start executing (see
 `Cancellation
@@ -281,9 +281,9 @@ writing unit :ref:`tests <testing>` more difficult.
 Notifications
 ~~~~~~~~~~~~~
 
-Notification is a request message without ``id`` field and server *must
-not* reply to it. This means that, if your language server received the
-notification, even if you return result inside your handler function,
+A *notification* is a request message without the ``id`` field and server
+*must not* reply to it. This means that, if your language server received the
+notification, even if you return the result inside your handler function,
 the result won't be passed to the client.
 
 The ``Language Server Protocol``, unlike ``Json RPC``, allows bidirectional
