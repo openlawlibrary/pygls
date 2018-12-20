@@ -1,11 +1,15 @@
 # pygls Change Log
 
+## 0.7.0
+
+- Open source  `pygls`
+
 ## 0.6.0
 
 - Modules/functions/methods reorganization
-- Added more features/commands to json-extension example
-- Added unit tests to json-extension example
-- Updated appveyor
+- Add more features/commands to json-extension example
+- Add unit tests to json-extension example
+- Update `appveyor.yml`
 - Small bug fixes
 
 ## 0.5.0
