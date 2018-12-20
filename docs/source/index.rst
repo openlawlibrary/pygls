@@ -6,7 +6,7 @@
 pygls
 =====
 
-`pygls`_ (pronounced like “spy glass”) is a generic implementation of
+`pygls`_ (pronounced like “pie glass”) is a generic implementation of
 the `Language Server Protocol`_ written in the Python programming language. It
 allows you to write your own `language server`_ in just a few lines of
 code.
@@ -25,6 +25,7 @@ Features
 
 -  thread management
 -  in-memory workspace with incremental document updates
+-  no third-party libraries
 -  good test coverage
 
 Python Versions
