@@ -53,8 +53,8 @@ After running the code above, server will start listening for incoming
 Register Features and Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*pygls* comes with API for registering additional features like
-``code completion``, ``find all references``, ``go to definition``, etc…
+*pygls* comes with an API for registering additional features like
+``code completion``, ``find all references``, ``go to definition``, etc.
 
 .. code:: python
 
@@ -82,16 +82,14 @@ classes can be found in `pygls.types`_ module.
 Advanced usage
 --------------
 
-To reveal the full potential of *pygls* (``thread management``,
-``coroutines``, ``multi-root workspace``, ``TCP/STDIO communication`` etc.)
-keep on reading the docs.
+To reveal the full potential of *pygls* (``thread management``, ``coroutines``,
+``multi-root workspace``, ``TCP/STDIO communication``, etc.) keep reading.
 
 Tutorial
 --------
 
-We suggest following up the :ref:`tutorial <tutorial>` before getting any
-further with the documentation, specially if you haven't worked with
-language servers before.
+We recommend completing the :ref:`tutorial <tutorial>`, especially if you
+haven't worked with language servers before.
 
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
