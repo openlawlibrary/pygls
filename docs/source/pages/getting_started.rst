@@ -1,7 +1,7 @@
 Getting Started
 ===============
 
-This document explains how to install *pygls* and get started writing Language
+This document explains how to install *pygls* and get started writing language
 servers that are based on it.
 
 .. note::
