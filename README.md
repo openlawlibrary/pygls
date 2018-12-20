@@ -1,6 +1,6 @@
 # pygls
 
-## a pythonic generic language server _(pronounce like "spy glass")_
+## a pythonic generic language server _(pronounced like "pie glass")_
 
 A generic implementation of the [Language Server Protocol][1] for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.).
 
