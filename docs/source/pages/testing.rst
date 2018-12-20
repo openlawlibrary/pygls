@@ -16,5 +16,13 @@ Json Extension example's `unit tests`_ might be helpful.
 Integration Tests
 -----------------
 
+Integration tests cover include the whole flow, from sending the client
+request, to getting the result from the server.
+Since *Language Server Protocol* defines bidirectional communication between
+the client and the server, we used *pygls* to simulate the client and send
+desired requests to the server. To get better understanding of how setup it,
+take a look at our test `fixtures`_.
+
 
 .. _unit tests: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension/server/tests/unit
+.. _fixtures: https://github.com/openlawlibrary/pygls/blob/master/tests/conftest.py#L29
