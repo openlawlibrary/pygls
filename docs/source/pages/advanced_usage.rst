@@ -19,7 +19,7 @@ TCP
 ^^^
 
 TCP connections are usually used while developing the language server.
-This way server can be started in *debug* mode separately and wait for
+This way server can be started in *debug* mode separately and wait for the
 client connection.
 
 .. note:: Server should be started **before** the client.
@@ -74,6 +74,13 @@ below is the minimal setup to setup logging in *pygls*:
     server = LanguageServer()
 
     server.start_io()
+
+Overriding Language Server Protocol
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you have any reason to override existing *Language Server Protocol* class,
+you can do that by inheriting the class and passing it to language server
+constructor.
 
 Features
 --------
@@ -141,11 +148,13 @@ Depending on the use case, *features* and *commands* can be registered
 in three different ways.
 
 To make sure that you fully understand what is happening under the hood,
-please take a look at the example
-`server <../examples/json-extension/server/server.py>`__ and test it
-following these `instructions <../examples/README.md>`__.
+please take a look at the :ref:`tutorial <tutorial>`.
 
-.. note:: *Built-in* features in most cases should *not* overridden. Instead, register feature with the same name and it will be called immediately after the corresponding built-in feature.
+.. note::
+
+    *Built-in* features in most cases should *not* be overridden.
+    Instead, register feature with the same name and it will be called
+    immediately after the corresponding built-in feature.
 
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -174,7 +183,11 @@ Tasks can be canceled by the client if they didn't start executing (see
 `Cancellation
 Support <https://microsoft.github.io/language-server-protocol/specification#cancelRequest>`__).
 
-.. warning:: Using computation intensive operations will *block* the main thread and should be *avoided* inside coroutines. Take a look at `threaded functions <#threaded-functions>`__ for more details.
+.. warning::
+
+    Using computation intensive operations will *block* the main thread and
+    should be *avoided* inside coroutines. Take a look at
+    `threaded functions <#threaded-functions>`__ for more details.
 
 *Synchronous* Functions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -182,7 +195,7 @@ Support <https://microsoft.github.io/language-server-protocol/specification#canc
 Synchronous functions are regular functions which *blocks* the *main*
 thread until they are executed.
 
-`Built-in features <#Built-in-features>`__ are registered as regular
+`Built-in features <#built-in-features>`__ are registered as regular
 functions to ensure correct state of language server initialization and
 workspace.
 
@@ -197,7 +210,11 @@ function:
 
 Registering *feature* as a regular function is exactly the same.
 
-.. warning:: Using computation intensive operations will *block* the main thread and should be *avoided* inside regular functions. Take a look at `threaded functions <#threaded-functions>`__ for more details.
+.. warning::
+
+    Using computation intensive operations will *block* the main thread and
+    should be *avoided* inside regular functions. Take a look at
+    `threaded functions <#threaded-functions>`__ for more details.
 
 *Threaded* Functions
 ^^^^^^^^^^^^^^^^^^^^
@@ -280,7 +297,10 @@ request is sent from the server to the client in order to fetch
 configuration settings from the client. When the requested configuration
 is collected, the client sends data as a notification to the server.
 
-.. note:: Although ``configuration`` is a ``request``, it is explained in this section because the client sends back the ``notification`` object.
+.. note::
+
+    Although ``configuration`` is a ``request``, it is explained in this
+    section because the client sends back the ``notification`` object.
 
 The code snippet below shows how to send configuration to the client:
 
@@ -294,7 +314,7 @@ The code snippet below shows how to send configuration to the client:
 
 *pygls* has three ways for handling configuration notification from the
 client, depending on way how the function is registered (described
-`here <#Feature-and-command-advanced-registration>`__):
+`here <#feature-and-command-advanced-registration>`__):
 
 -  *asynchronous* functions (*coroutines*)
 
@@ -409,9 +429,9 @@ And method invocation example:
 Workspace
 ~~~~~~~~~
 
-`Workspace <../pygls/workspace.py>`__ is a python object that holds
-information about workspace folders, opened documents and has the logic
-for updating document content.
+`Workspace <https://github.com/openlawlibrary/pygls/blob/master/pygls/workspace.py>`__
+is a python object that holds information about workspace folders, opened
+documents and has the logic for updating document content.
 
 *pygls* automatically take care about mentioned features of the
 workspace.
