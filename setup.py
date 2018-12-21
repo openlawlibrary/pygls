@@ -17,6 +17,11 @@ print('packages:', packages)
 
 package_root_dir = os.path.abspath(os.path.dirname(__file__))
 
+docs_require = [
+    "sphinx==1.8.2",
+    "sphinx_rtd_theme==0.4.2"
+]
+
 tests_require = [
     "pytest==3.6.1",
     "pytest-asyncio==0.9.0",
@@ -48,6 +53,7 @@ setup(
     zip_safe=False,
     install_requires=[],
     extras_require={
+        'docs': docs_require,
         'test': tests_require,
     },
     tests_require=tests_require,

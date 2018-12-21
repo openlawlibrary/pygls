@@ -127,8 +127,8 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
-async def show_python_path_async(ls: JsonLanguageServer, *args):
-    """Gets python path from configuration and displays it."""
+async def show_configuration_async(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using coroutines."""
     try:
         config = await ls.get_configuration_async(ConfigurationParams([
             ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
@@ -145,8 +145,8 @@ async def show_python_path_async(ls: JsonLanguageServer, *args):
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
-def show_python_path_callback(ls: JsonLanguageServer, *args):
-    """Gets python path from configuration and displays it."""
+def show_configuration_callback(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using callback."""
     def _config_callback(config):
         try:
             example_config = config[0].exampleConfiguration
@@ -166,8 +166,8 @@ def show_python_path_callback(ls: JsonLanguageServer, *args):
 
 @json_server.thread()
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
-def show_python_path_thread(ls: JsonLanguageServer, *args):
-    """Gets python path from configuration and displays it."""
+def show_configuration_thread(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using thread pool."""
     try:
         config = ls.get_configuration(ConfigurationParams([
             ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
