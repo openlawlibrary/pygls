@@ -1,14 +1,29 @@
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
+from setuptools import find_packages, setup
 import os
 
-from setuptools import find_packages, setup
-
 PACKAGE_NAME = 'pygls'
-VERSION = '0.6.0'
+VERSION = '0.7.0'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
-DESCRIPTION = 'Python Generic Language Server (pronounced like "spy glass").'
-KEYWORDS = 'python generic language server protocol'
-LICENSE = 'All rights reserved'
+DESCRIPTION = 'a pythonic generic language server (pronounced like "pie glass").'
+KEYWORDS = 'python pythonic generic language server protocol'
+LICENSE = 'Apache 2.0'
 URL = 'https://github.com/openlawlibrary/pygls/tree/master/'
 
 packages = find_packages()
@@ -58,12 +73,16 @@ setup(
     },
     tests_require=tests_require,
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ]
 )

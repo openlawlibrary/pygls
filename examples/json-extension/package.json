@@ -3,8 +3,8 @@
   "description": "Simple json extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
-  "license": "All rights reserved",
-  "version": "0.6.0",
+  "license": "Apache 2.0",
+  "version": "0.7.0",
   "publisher": "openlawlibrary",
   "engines": {
     "vscode": "^1.30.1"

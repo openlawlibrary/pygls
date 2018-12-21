@@ -1,8 +1,8 @@
-# pygls - Python Generic Language Server
+# pygls
 
-(Pronounced like "spy glass".)
+## a pythonic generic language server _(pronounced like "pie glass")_
 
-A generic implementation of the [Language Server Protocol][1] for use as a foundation for writing non-Python language servers (e.g. XML).
+A generic implementation of the [Language Server Protocol][1] for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.).
 
 [1]: https://microsoft.github.io/language-server-protocol/
 
@@ -19,3 +19,5 @@ If you are using virtual environment (VE), then follow next steps:
 
 1. `pip install .[test]`
 2. Open terminal, navigate to tests directory and run `pytest` command
+
+#### _[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library)._
