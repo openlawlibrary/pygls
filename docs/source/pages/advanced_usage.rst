@@ -7,13 +7,13 @@ Language Server
 ---------------
 
 The language server is responsible for receiving and sending messages over
-the ``LanguageServerProtocol`` which is based on the `Json RPC
-protocol <https://www.jsonrpc.org/specification>`__.
+the `Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__
+which is based on the `Json RPC protocol <https://www.jsonrpc.org/specification>`__.
 
 Connections
 ~~~~~~~~~~~
 
-*pygls* supports **TCP** and socket **STDIO** connections.
+*pygls* supports *TCP* and socket *STDIO* connections.
 
 TCP
 ^^^
@@ -86,7 +86,8 @@ Features
 --------
 
 What is a feature in *pygls*? In terms of language servers and the
-``LanguageServerProtocol``, a feature is one of the predefined methods from
+`Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__,
+a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
 that are available can be found in `pygls.features <../features>`__
@@ -96,7 +97,8 @@ module.
 ~~~~~~~~~~~~~~~~~~~
 
 *pygls* comes with following predefined set of
-``Language Server Protocol`` (LSP) features:
+`Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__
+(LSP) features:
 
 -  The `initialize <https://microsoft.github.io/language-server-protocol/specification#initialize>`__
    request is sent as a first request from client to the server to setup
