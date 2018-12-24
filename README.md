@@ -20,4 +20,8 @@ If you are using virtual environment (VE), then follow next steps:
 1. `pip install .[test]`
 2. Open terminal, navigate to tests directory and run `pytest` command
 
-#### _[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library)._
+## Let us know how you are using `pygls`
+
+Submit a Pull Request (PR) with your information against [this](Implementations.md) document.
+
+### _[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library)._
