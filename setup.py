@@ -32,6 +32,9 @@ print('packages:', packages)
 
 package_root_dir = os.path.abspath(os.path.dirname(__file__))
 
+with open(os.path.join(package_root_dir, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 docs_require = [
     "sphinx==1.8.2",
     "sphinx_rtd_theme==0.4.2"
@@ -50,6 +53,8 @@ setup(
     name=PACKAGE_NAME,
     version=VERSION,
     description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url=URL,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
