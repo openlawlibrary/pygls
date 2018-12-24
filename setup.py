@@ -38,7 +38,7 @@ docs_require = [
 ]
 
 tests_require = [
-    "pytest==3.6.1",
+    "pytest==4.0.2",
     "pytest-asyncio==0.9.0",
     "mock==2.0.0"
 ]
