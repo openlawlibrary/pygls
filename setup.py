@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from setuptools import find_packages, setup
 import os
+
+from setuptools import find_packages, setup
 
 PACKAGE_NAME = 'pygls'
 VERSION = '0.7.0'
