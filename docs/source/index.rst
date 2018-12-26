@@ -8,8 +8,7 @@ pygls
 
 `pygls`_ (pronounced like “pie glass”) is a generic implementation of
 the `Language Server Protocol`_ written in the Python programming language. It
-allows you to write your own `language server`_ in just a few lines of
-code.
+allows you to write your own `language server`_ in just a few lines of code.
 
 Features
 --------

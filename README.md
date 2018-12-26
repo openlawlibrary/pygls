@@ -1,27 +1,61 @@
-# pygls
+pygls
+=====
 
-## a pythonic generic language server _(pronounced like "pie glass")_
+[![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![build-status](https://img.shields.io/appveyor/ci/oll-team/pygls.svg)](https://ci.appveyor.com/project/oll-team/pygls) ![pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
 
-A generic implementation of the [Language Server Protocol][1] for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.).
+pygls is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
 
-[1]: https://microsoft.github.io/language-server-protocol/
+Quick Intro
+-----------
 
-## Setup
+Here's how to create a server and register code a completion feature:
 
-Install `pygls` using following command `pip install .` from the project's root.
+```python
+from pygls.features import COMPLETION
+from pygls.server import LanguageServer
+from pygls.types import CompletionItem, CompletionList, CompletionParams
 
-If you are using virtual environment (VE), then follow next steps:
+server = LanguageServer()
 
-1. Open terminal, create and activate VE ([see how](https://docs.python.org/3/tutorial/venv.html))
-2. In the same terminal, navigate to project root directory and run `pip install .` command (be sure that VE is activated)
+@server.feature(COMPLETION, trigger_characters=[','])
+def completions(params: CompletionParams):
+"""Returns completion items."""
+    return CompletionList(False, [
+        CompletionItem('"'),
+        CompletionItem('['),
+        CompletionItem(']'),
+        CompletionItem('{'),
+        CompletionItem('}')
+    ])
 
-### Run tests
+server.start_tcp('localhost', 8080)
+```
 
-1. `pip install .[test]`
-2. Open terminal, navigate to tests directory and run `pytest` command
+Show completion list on the client:
 
-## Let us know how you are using `pygls`
+![completions](/assets/img/readme/completion-list.png)
 
-Submit a Pull Request (PR) with your information against [this](Implementations.md) document.
+Docs and Tutorials
+------------------
 
-### _[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library)._
+The full documentation and a tutorial is available at <https://pygls.readthedocs.io/en/latest/>.
+
+Let Us Know How You Are Using pygls
+-----------------------------------
+
+Submit a Pull Request (PR) with your information against the [implementations](Implementations.md) document.
+
+License
+-------
+
+Apache-2.0
+
+Contributing
+------------
+
+Your contributions to `pygls` are welcome! Please review the _[Contributing](CONTRIBUTING.md)_ and _[Code of Conduct](CODE_OF_CONDUCT.md)_ documents for how to get started.
+
+Donation
+--------
+
+[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization.Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library).
