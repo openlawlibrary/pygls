@@ -1,9 +1,9 @@
-pygls
-=====
+_pygls_
+=======
 
 [![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![build-status](https://img.shields.io/appveyor/ci/oll-team/pygls.svg)](https://ci.appveyor.com/project/oll-team/pygls) ![pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
 
-pygls _(pronounced like "pie glass")_ is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
+_pygls_ (pronounced like "pie glass") is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
 
 Quick Intro
 -----------
@@ -19,7 +19,7 @@ server = LanguageServer()
 
 @server.feature(COMPLETION, trigger_characters=[','])
 def completions(params: CompletionParams):
-"""Returns completion items."""
+    """Returns completion items."""
     return CompletionList(False, [
         CompletionItem('"'),
         CompletionItem('['),
@@ -40,8 +40,8 @@ Docs and Tutorial
 
 The full documentation and a tutorial is available at <https://pygls.readthedocs.io/en/latest/>.
 
-Let Us Know How You Are Using pygls
------------------------------------
+Let Us Know How You Are Using _pygls_
+-------------------------------------
 
 Submit a Pull Request (PR) with your information against the [implementations](Implementations.md) document.
 
@@ -53,7 +53,7 @@ Apache-2.0
 Contributing
 ------------
 
-Your contributions to `pygls` are welcome! Please review the _[Contributing](CONTRIBUTING.md)_ and _[Code of Conduct](CODE_OF_CONDUCT.md)_ documents for how to get started.
+Your contributions to _pygls_ are welcome! Please review the _[Contributing](CONTRIBUTING.md)_ and _[Code of Conduct](CODE_OF_CONDUCT.md)_ documents for how to get started.
 
 Donation
 --------
