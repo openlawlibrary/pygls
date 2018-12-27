@@ -19,7 +19,7 @@ import os
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = 'pygls'
-VERSION = '0.7.0'
+VERSION = '0.7.1'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
 DESCRIPTION = 'a pythonic generic language server (pronounced like "pie glass").'
@@ -48,6 +48,7 @@ tests_require = [
 ]
 
 # pip install pygls
+# pip install pygls pygls[docs]
 # pip install pygls pygls[test]
 
 setup(
