@@ -3,12 +3,12 @@ pygls
 
 [![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![build-status](https://img.shields.io/appveyor/ci/oll-team/pygls.svg)](https://ci.appveyor.com/project/oll-team/pygls) ![pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
 
-pygls is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
+pygls _(pronounced like "pie glass")_ is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
 
 Quick Intro
 -----------
 
-Here's how to create a server and register code a completion feature:
+Here's how to create a server and register a code completion feature:
 
 ```python
 from pygls.features import COMPLETION
@@ -35,8 +35,8 @@ Show completion list on the client:
 
 ![completions](/assets/img/readme/completion-list.png)
 
-Docs and Tutorials
-------------------
+Docs and Tutorial
+-----------------
 
 The full documentation and a tutorial is available at <https://pygls.readthedocs.io/en/latest/>.
 
