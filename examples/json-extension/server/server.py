@@ -53,17 +53,18 @@ def _validate(ls, params):
 
     text_doc = ls.workspace.get_document(params.textDocument.uri)
 
-    diagnostics = _validate_json(text_doc)
+    source = text_doc.source
+    diagnostics = _validate_json(source) if source else []
 
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
-def _validate_json(doc):
+def _validate_json(source):
     """Validates json file."""
     diagnostics = []
 
     try:
-        json.loads(doc.source)
+        json.loads(source)
     except JSONDecodeError as err:
         msg = err.msg
         col = err.colno
