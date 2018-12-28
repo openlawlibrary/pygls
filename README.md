@@ -33,7 +33,7 @@ server.start_tcp('localhost', 8080)
 
 Show completion list on the client:
 
-![completions](/assets/img/readme/completion-list.png)
+![completions](https://raw.githubusercontent.com/openlawlibrary/pygls/master/assets/img/readme/completion-list.png)
 
 Docs and Tutorial
 -----------------
@@ -43,7 +43,7 @@ The full documentation and a tutorial is available at <https://pygls.readthedocs
 Let Us Know How You Are Using _pygls_
 -------------------------------------
 
-Submit a Pull Request (PR) with your information against the [implementations](Implementations.md) document.
+Submit a Pull Request (PR) with your information against the [implementations](https://github.com/openlawlibrary/pygls/blob/master/Implementations.md) document.
 
 License
 -------
@@ -53,7 +53,7 @@ Apache-2.0
 Contributing
 ------------
 
-Your contributions to _pygls_ are welcome! Please review the _[Contributing](CONTRIBUTING.md)_ and _[Code of Conduct](CODE_OF_CONDUCT.md)_ documents for how to get started.
+Your contributions to _pygls_ are welcome! Please review the _[Contributing](https://github.com/openlawlibrary/pygls/blob/master/CONTRIBUTING.md)_ and _[Code of Conduct](https://github.com/openlawlibrary/pygls/blob/master/CODE_OF_CONDUCT.md)_ documents for how to get started.
 
 Donation
 --------
