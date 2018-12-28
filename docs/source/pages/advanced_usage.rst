@@ -358,7 +358,7 @@ The code snippet below shows how to send show message notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message notification to the client
-            ls.workspace.show_message("Counting down... {}".format(10 - i))
+            ls.show_message("Counting down... {}".format(10 - i))
             await asyncio.sleep(1)
 
 Show Message Log
@@ -377,7 +377,7 @@ The code snippet below shows how to send show message log notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message log notification to the client's output channel
-            ls.workspace.show_message_log("Counting down... {}".format(10 - i))
+            ls.show_message_log("Counting down... {}".format(10 - i))
             await asyncio.sleep(1)
 
 Publish Diagnostics
@@ -396,8 +396,8 @@ document content change, e.g.:
     @json_server.feature(TEXT_DOCUMENT_DID_OPEN)
     async def did_open(ls, params: DidOpenTextDocumentParams):
         """Text document did open notification."""
-        ls.workspace.show_message("Text Document Did Open")
-        ls.workspace.show_message_log("Validating json...")
+        ls.show_message("Text Document Did Open")
+        ls.show_message_log("Validating json...")
 
         # Get document from workspace
         text_doc = ls.workspace.get_document(params.textDocument.uri)
@@ -409,7 +409,7 @@ document content change, e.g.:
                      )
 
         # Send diagnostics
-        ls.workspace.publish_diagnostics(text_doc.uri, [diagnostic])
+        ls.publish_diagnostics(text_doc.uri, [diagnostic])
 
 Custom Notifications
 ^^^^^^^^^^^^^^^^^^^^

@@ -24,7 +24,7 @@ from threading import Event
 from typing import Any, Callable, Dict, List, Optional
 
 from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
-                         MessageType, WorkspaceEdit)
+                         Diagnostic, MessageType, WorkspaceEdit)
 
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
@@ -247,6 +247,10 @@ class LanguageServer(Server):
     def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration_async(params)
+
+    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
+        """Sends diagnostic notification to the client."""
+        self.lsp.publish_diagnostics(doc_uri, diagnostics)
 
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""

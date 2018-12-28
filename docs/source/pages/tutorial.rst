@@ -126,7 +126,7 @@ settings.
 
 .. note::
 
-    pygls' *builtin coroutines* are suffixed with *async* word, which means that
+    *pygls*' built-in coroutines are suffixed with *async* word, which means that
     you have to use the *await* keyword in order to get the result (instead of
     *asyncio.Future* object).
 
@@ -142,8 +142,8 @@ settings.
 
 We already saw that we *don't* want to block the main thread. Sending the
 configuration request to the client will result with the response from it, but
-we don't know when. You have to pass *callback* function which will be triggered
-once response from the client is received.
+we don't know when. You have to pass *callback* function which will be
+triggered once response from the client is received.
 
 .. code-block:: python
 

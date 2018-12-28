@@ -1,8 +1,15 @@
-# pygls Change Log
+# _pygls_ Change Log
+
+## 0.7.1
+
+- Add `publish_diagnostics` to LanguageServer
+- Fix validation function in json example
+- Correct advanced usage doc page
+- "pygls" -> _pygls_ everywhere in the docs
 
 ## 0.7.0
 
-- Open source  `pygls`
+- Open source  _pygls_
 
 ## 0.6.0
 
@@ -29,13 +36,13 @@
 
 - Async functions (coroutines) support
 - Mark function to execute it in a thread pool
-- Added `lsp` types
+- Added _lsp_ types
 - New example
 - Fixed `appveyor.yml`
 
 ## 0.2.0
 
-- Added classes for textDocument/completion method response
+- Added classes for `textDocument/completion` method response
 
 ## 0.1.0
 

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pygls
-=====
+*pygls*
+=======
 
 `pygls`_ (pronounced like “pie glass”) is a generic implementation of
 the `Language Server Protocol`_ written in the Python programming language. It
