@@ -15,8 +15,8 @@
 # limitations under the License.                                           #
 ############################################################################
 import json
-import pytest
 
+import pytest
 from mock import Mock
 from pygls.types import (DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                          TextDocumentIdentifier, TextDocumentItem)
@@ -33,7 +33,8 @@ class FakeServer():
 
 
 fake_document_uri = 'file://fake_doc.txt'
-fake_document = Document(fake_document_uri, '')
+fake_document_content = 'text'
+fake_document = Document(fake_document_uri, fake_document_content)
 
 
 server = FakeServer()
@@ -76,18 +77,16 @@ def test_did_close():
 async def test_did_open():
     _reset_mocks()
 
-    # Document content
-    doc_content = ''
     expected_msg = None
 
     # Get expected error message
     try:
-        json.loads(doc_content)
+        json.loads(fake_document_content)
     except json.JSONDecodeError as err:
         expected_msg = err.msg
 
     params = DidOpenTextDocumentParams(
-        TextDocumentItem(fake_document_uri, '', 1, doc_content))
+        TextDocumentItem(fake_document_uri, 'json', 1, fake_document_content))
 
     await did_open(server, params)
 
