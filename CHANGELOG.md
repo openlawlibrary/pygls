@@ -1,5 +1,9 @@
 # _pygls_ Change Log
 
+## 0.7.2
+
+- Fix README to use absolute paths for GitHub urls (needed for PyPi)
+
 ## 0.7.1
 
 - Add `publish_diagnostics` to LanguageServer
