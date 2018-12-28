@@ -2,7 +2,7 @@
   "name": "json-extension-client",
   "description": "Simple json extension example",
   "author": "Open Law Library",
-  "license": "All rights reserved",
+  "license": "Apache-2.0",
   "version": "0.7.2",
   "publisher": "openlawlibrary",
   "repository": {

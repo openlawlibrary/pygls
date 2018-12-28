@@ -3,7 +3,7 @@
   "description": "Simple json extension example",
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "version": "0.7.2",
   "publisher": "openlawlibrary",
   "engines": {
