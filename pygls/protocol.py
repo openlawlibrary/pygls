@@ -510,8 +510,10 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         client_capabilities = params.capabilities
         root_uri = params.rootUri
         root_path = params.rootPath
-        workspace_folders = params.workspaceFolders or []
-
+        try:
+            workspace_folders = params.workspaceFolders or []
+        except AttributeError:
+            workspace_folders = []
         if root_uri is None:
             root_uri = from_fs_path(root_path) if root_path is not None else ''
 
