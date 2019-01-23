@@ -48,6 +48,21 @@ def test_bf_initialize(client_server):
     assert hasattr(response, 'capabilities')
 
 
+def test_bf_initialize_spec(client_server):
+    client, _ = client_server
+    # Use a dictionary to send only the elements marked
+    # as required
+    response = client.lsp.send_request(
+        INITIALIZE,
+        {
+            "process_id": 1234,
+            "root_path": os.path.dirname(__file__)
+        }
+    ).result(timeout=CALL_TIMEOUT)
+
+    assert hasattr(response, 'capabilities')
+
+
 def test_bf_text_document_did_open(client_server):
     client, server = client_server
 
