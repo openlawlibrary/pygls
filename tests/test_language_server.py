@@ -55,8 +55,9 @@ def test_bf_initialize_spec(client_server):
     response = client.lsp.send_request(
         INITIALIZE,
         {
-            "process_id": 1234,
-            "root_path": os.path.dirname(__file__)
+            "processId": 1234,
+            "rootUri": os.path.dirname(__file__),
+            "capabilities": None
         }
     ).result(timeout=CALL_TIMEOUT)
 

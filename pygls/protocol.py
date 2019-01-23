@@ -509,7 +509,16 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         client_capabilities = params.capabilities
         root_uri = params.rootUri
-        root_path = params.rootPath
+
+        try:
+            root_path = params.rootPath
+        except AttributeError:
+           root_path = None
+
+        try:
+            client_capabilities = params.capabilities
+        except AttributeError:
+            client_capabilities = None
         try:
             workspace_folders = params.workspaceFolders or []
         except AttributeError:
