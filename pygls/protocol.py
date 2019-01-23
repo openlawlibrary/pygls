@@ -275,7 +275,7 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _handle_notification(self, method_name, params):
         """Handles a notification from the client."""
         if method_name == JsonRPCProtocol.CANCEL_REQUEST:
-            self._handle_cancel_notification(params.get('id'))
+            self._handle_cancel_notification(params.id)
             return
 
         try:
