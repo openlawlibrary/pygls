@@ -1,17 +1,28 @@
-# _pygls_ Change Log
+# Changelog
 
-## 0.7.2
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog][keepachangelog],
+and this project adheres to [Semantic Versioning][semver].
+
+## [Unreleased]
+
+### Changed
+
+- Start using [Keep a Changelog][keepachangelog] format.
+
+## 0.7.2 - 12/28/2018
 
 - Fix README to use absolute paths for GitHub urls (needed for PyPi)
 
-## 0.7.1
+## 0.7.1 - 12/28/2018
 
 - Add `publish_diagnostics` to LanguageServer
 - Fix validation function in json example
 - Correct advanced usage doc page
 - "pygls" -> _pygls_ everywhere in the docs
 
-## 0.7.0
+## 0.7.0 - 12/21/2018
 
 - Open source  _pygls_
 
@@ -51,3 +62,6 @@
 ## 0.1.0
 
 - Initial Version
+
+[keepachangelog]: https://keepachangelog.com/en/1.0.0/
+[semver]: https://semver.org/spec/v2.0.0.html
