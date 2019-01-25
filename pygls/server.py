@@ -213,7 +213,7 @@ class LanguageServer(Server):
 
     def __init__(self, loop=None, protocol_cls=LanguageServerProtocol, max_workers: int = 2):
         assert issubclass(protocol_cls, LanguageServerProtocol)
-        super().__init__(LanguageServerProtocol, loop, max_workers)
+        super().__init__(protocol_cls, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
