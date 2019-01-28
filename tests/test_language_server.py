@@ -26,6 +26,7 @@ from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
                          InitializeParams, TextDocumentItem)
 from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
                    FEATURE_SYNC, FEATURE_THREAD)
+import pathlib
 
 CALL_TIMEOUT = 2
 
@@ -33,22 +34,8 @@ CALL_TIMEOUT = 2
 def _initialize_server(server):
     server.lsp.bf_initialize(InitializeParams(
         process_id=1234,
-        root_path=os.path.dirname(__file__)
+        root_uri=pathlib.Path(__file__).parent.as_uri(),
     ))
-
-
-def test_bf_initialize(client_server):
-    client, _ = client_server
-
-    response = client.lsp.send_request(
-        INITIALIZE,
-        InitializeParams(
-            process_id=1234,
-            root_path=os.path.dirname(__file__)
-        )
-    ).result(timeout=CALL_TIMEOUT)
-
-    assert hasattr(response, 'capabilities')
 
 
 def test_bf_initialize_spec(client_server):
@@ -59,7 +46,7 @@ def test_bf_initialize_spec(client_server):
         INITIALIZE,
         {
             "processId": 1234,
-            "rootUri": os.path.dirname(__file__),
+            "rootUri": pathlib.Path(__file__).parent.as_uri(),
             "capabilities": None
         }
     ).result(timeout=CALL_TIMEOUT)

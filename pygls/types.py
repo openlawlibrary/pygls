@@ -668,7 +668,7 @@ class InitializeParams:
         self.initializationOptions = initialization_options
         self.capabilities = capabilities
         self.trace = trace
-        self.workspaceFolders = workspace_folders
+        self.workspaceFolders = workspace_folders or []
 
 
 class InitializeResult:
