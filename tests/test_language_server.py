@@ -17,8 +17,11 @@
 import os
 from time import sleep
 
+import pytest
 from pygls.features import (INITIALIZE, TEXT_DOCUMENT_DID_OPEN,
                             WORKSPACE_EXECUTE_COMMAND)
+from pygls.protocol import LanguageServerProtocol
+from pygls.server import LanguageServer
 from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
                          InitializeParams, TextDocumentItem)
 from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
@@ -150,3 +153,20 @@ def test_command_thread(client_server):
 
     assert is_called
     assert thread_id != server.thread_id
+
+
+def test_allow_custom_protocol_derived_from_lsp():
+    class CustomProtocol(LanguageServerProtocol):
+        pass
+
+    server = LanguageServer(protocol_cls=CustomProtocol)
+
+    assert isinstance(server.lsp, CustomProtocol)
+
+
+def test_forbid_custom_protocol_not_derived_from_lsp():
+    class CustomProtocol:
+        pass
+
+    with pytest.raises(AssertionError) as e:
+        LanguageServer(protocol_cls=CustomProtocol)
