@@ -42,7 +42,7 @@ from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse,
                     ExecuteCommandParams, InitializeParams, InitializeResult,
                     LogMessageParams, MessageType, PublishDiagnosticsParams,
                     ServerCapabilities, ShowMessageParams, WorkspaceEdit)
-from .uris import from_fs_path
+from .uris import from_fs_path, to_fs_path
 from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -509,13 +509,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         client_capabilities = params.capabilities
         root_uri = params.rootUri
-        root_path = params.rootPath
-        workspace_folders = params.workspaceFolders or []
-
-        if root_uri is None:
-            root_uri = from_fs_path(root_path) if root_path is not None else ''
-
-        self.workspace = Workspace(root_uri, self)
+        root_path = getattr(params, 'rootPath', None)
+        workspace_folders = getattr(params, 'workspaceFolders', [])
+        if root_path is None and root_uri is not None:
+            root_path = to_fs_path(root_uri)
+        self.workspace = Workspace(root_uri or from_fs_path(root_path), self)
 
         for folder in workspace_folders:
             self.workspace.add_folder(folder)
