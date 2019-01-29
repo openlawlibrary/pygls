@@ -511,7 +511,6 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         root_uri = params.rootUri
         root_path = getattr(params, 'rootPath', None)
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        client_capabilities = getattr(params, 'capabilities', None)
         if root_path is None and root_uri is not None:
             root_path = to_fs_path(root_uri)
         self.workspace = Workspace(root_uri or from_fs_path(root_path), self)
