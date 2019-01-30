@@ -42,9 +42,11 @@ docs_require = [
 ]
 
 tests_require = [
+    "bandit==1.5.1",  # Run locally: bandit -r ./pygls
+    "flake8==3.7.1",  # Run locally: flake8
+    "mock==2.0.0",
     "pytest==4.0.2",
-    "pytest-asyncio==0.9.0",
-    "mock==2.0.0"
+    "pytest-asyncio==0.9.0"
 ]
 
 # pip install pygls

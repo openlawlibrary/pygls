@@ -42,7 +42,7 @@ init:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - C:\Python36-x64\python.exe -m pip install --upgrade pip          # upgrade pip
+  - C:\Python35-x64\python.exe -m pip install --upgrade pip          # upgrade pip
 
   - ps: >-
       $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\package.json | ConvertFrom-Json);
@@ -86,6 +86,10 @@ install:
       }
       echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
 
+  # install pygls and dev dependencies
+  - C:\Python35-x64\Scripts\pip.exe install .[test]
+  - C:\Python35-x64\Scripts\pip.exe install -e .
+
   # point to tsc 3.2.1
   - npm install -g typescript@3.2.1
   - tsc --version
@@ -96,10 +100,6 @@ install:
   # Output useful info for debugging.
   - node --version
   - npm --version
-
-  # install pygls and dev dependencies
-  - C:\Python36-x64\Scripts\pip.exe install .[test]
-  - C:\Python36-x64\Scripts\pip.exe install -e .
 
 # Create a Visual Studio Code Extension
 build_script:
@@ -115,7 +115,9 @@ build_script:
   - cd ..\..\
 
 test_script:
-  - C:\Python36-x64\Scripts\pytest.exe
+  - C:\Python35-x64\Scripts\flake8.exe
+  - C:\Python35-x64\Scripts\bandit.exe -r ./pygls
+  - C:\Python35-x64\Scripts\pytest.exe
 
 after_test:
   # check function
