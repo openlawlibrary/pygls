@@ -87,6 +87,7 @@ install:
       echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
 
   # install pygls and dev dependencies
+  - C:\Python35-x64\Scripts\pip.exe install .[dev]
   - C:\Python35-x64\Scripts\pip.exe install .[test]
   - C:\Python35-x64\Scripts\pip.exe install -e .
 
