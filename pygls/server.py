@@ -21,7 +21,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from re import findall
 from threading import Event
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List
 
 from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
                          Diagnostic, MessageType, WorkspaceEdit)
@@ -105,7 +105,8 @@ class Server:
     """
 
     def __init__(self, protocol_cls, loop=None, max_workers=2):
-        assert issubclass(protocol_cls, asyncio.Protocol)
+        if not issubclass(protocol_cls, asyncio.Protocol):
+            raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
         self._max_workers = max_workers
         self._server = None
@@ -212,7 +213,8 @@ class LanguageServer(Server):
     """
 
     def __init__(self, loop=None, protocol_cls=LanguageServerProtocol, max_workers: int = 2):
-        assert issubclass(protocol_cls, LanguageServerProtocol)
+        if not issubclass(protocol_cls, LanguageServerProtocol):
+            raise TypeError('Protocol class should be subclass of LanguageServerProtocol')
         super().__init__(protocol_cls, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:

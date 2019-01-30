@@ -42,7 +42,7 @@ from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse,
                     ExecuteCommandParams, InitializeParams, InitializeResult,
                     LogMessageParams, MessageType, PublishDiagnosticsParams,
                     ServerCapabilities, ShowMessageParams, WorkspaceEdit)
-from .uris import from_fs_path, to_fs_path
+from .uris import from_fs_path
 from .workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -59,8 +59,12 @@ def call_user_feature(base_func, method_name):
         try:
             user_func = self.fm.features[method_name]
             self._execute_notification(user_func, *args, **kwargs)
-        except Exception:
+        except KeyError:
             pass
+        except Exception:
+            logger.exception(
+                'Failed to handle *user defined* notification {}: {}'
+                .format(method_name, args))
 
         return ret_val
 
@@ -93,10 +97,10 @@ def to_lsp_name(method_name):
     m_replaced = []
 
     for i, ch in enumerate(m_chars):
-        if ch is '_':
+        if ch == '_':
             continue
 
-        if m_chars[i-1] is '_':
+        if m_chars[i-1] == '_':
             m_replaced.append(ch.capitalize())
             continue
 
@@ -233,7 +237,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                 self._send_response(
                     msg_id,
                     error=JsonRpcRequestCancelled(
-                        f"Request with id {msg_id} is canceled"))
+                        'Request with id {} is canceled'.format(msg_id)))
             self._client_request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
@@ -507,24 +511,26 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         logger.info('Language server initialized {}'.format(params))
 
+        self._server.process_id = params.processId
+
+        # Initialize server capabilities
         client_capabilities = params.capabilities
-        root_uri = params.rootUri
-        root_path = getattr(params, 'rootPath', None)
-        workspace_folders = getattr(params, 'workspaceFolders', [])
-        if root_path is None and root_uri is not None:
-            root_path = to_fs_path(root_uri)
-        self.workspace = Workspace(root_uri or from_fs_path(root_path), self)
-
-        for folder in workspace_folders:
-            self.workspace.add_folder(folder)
-
         server_capabilities = ServerCapabilities(self.fm.features.keys(),
                                                  self.fm.feature_options,
                                                  self.fm.commands,
                                                  client_capabilities)
-
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
+
+        root_path = getattr(params, 'rootPath',  None)
+        root_uri = params.rootUri or from_fs_path(root_path)
+
+        # Initialize the workspace
+        self.workspace = Workspace(root_uri, self)
+
+        workspace_folders = getattr(params, 'workspaceFolders', [])
+        for folder in workspace_folders:
+            self.workspace.add_folder(folder)
 
         return InitializeResult(server_capabilities)
 

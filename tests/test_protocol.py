@@ -14,7 +14,15 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+
+import pytest
 from pygls.protocol import to_lsp_name
+from pygls.types import InitializeResult
+
+
+class dictToObj:
+    def __init__(self, entries):
+        self.__dict__.update(**entries)
 
 
 def test_to_lsp_name():
@@ -22,3 +30,46 @@ def test_to_lsp_name():
     name = 'textDocument/didOpen'
 
     assert to_lsp_name(f_name) == name
+
+
+def test_initialize_without_capabilities_should_raise_error(client_server):
+    _, server = client_server
+    params = dictToObj({
+        "processId": 1234,
+        "rootUri": None
+    })
+    with pytest.raises(Exception):
+        server.lsp.bf_initialize(params)
+
+
+def test_initialize_without_process_id_should_raise_error(client_server):
+    _, server = client_server
+    params = dictToObj({
+        "capabilities": {},
+        "rootUri": None
+    })
+    with pytest.raises(Exception):
+        server.lsp.bf_initialize(params)
+
+
+def test_initialize_without_root_uri_should_raise_error(client_server):
+    _, server = client_server
+    params = dictToObj({
+        "capabilities": {},
+        "processId": 1234,
+    })
+    with pytest.raises(Exception):
+        server.lsp.bf_initialize(params)
+
+
+def test_initialize_should_return_server_capabilities(client_server):
+    _, server = client_server
+    params = dictToObj({
+        "capabilities": {},
+        "processId": 1234,
+        "rootUri": None
+    })
+
+    server_capabilities = server.lsp.bf_initialize(params)
+
+    assert isinstance(server_capabilities, InitializeResult)

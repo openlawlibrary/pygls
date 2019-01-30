@@ -24,7 +24,7 @@ from typing import List
 
 from .types import (NumType, Position, TextDocumentContentChangeEvent,
                     TextDocumentItem, WorkspaceFolder)
-from .uris import to_fs_path, urlparse
+from .uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
@@ -131,7 +131,7 @@ class Workspace(object):
     def __init__(self, root_uri, lsp):
         self._root_uri = root_uri
         self._lsp = lsp
-        self._root_uri_scheme = urlparse(self._root_uri)[0]
+        self._root_uri_scheme = uri_scheme(self._root_uri)
         self._root_path = to_fs_path(self._root_uri)
         self._folders = {}
         self._docs = {}

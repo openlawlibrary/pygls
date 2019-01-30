@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import os
+import pathlib
 from time import sleep
 
 import pytest
@@ -24,9 +24,9 @@ from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
 from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
                          InitializeParams, TextDocumentItem)
+
 from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
                    FEATURE_SYNC, FEATURE_THREAD)
-import pathlib
 
 CALL_TIMEOUT = 2
 
@@ -35,22 +35,26 @@ def _initialize_server(server):
     server.lsp.bf_initialize(InitializeParams(
         process_id=1234,
         root_uri=pathlib.Path(__file__).parent.as_uri(),
+        capabilities=None
     ))
 
 
-def test_bf_initialize_spec(client_server):
-    client, _ = client_server
-    # Use a dictionary to send only the elements marked
-    # as required
+def test_bf_initialize(client_server):
+    client, server = client_server
+    root_uri = pathlib.Path(__file__).parent.as_uri()
+    process_id = 1234
+
     response = client.lsp.send_request(
         INITIALIZE,
         {
-            "processId": 1234,
-            "rootUri": pathlib.Path(__file__).parent.as_uri(),
+            "processId": process_id,
+            "rootUri": root_uri,
             "capabilities": None
         }
     ).result(timeout=CALL_TIMEOUT)
 
+    assert server.process_id == process_id
+    assert server.workspace.root_uri == root_uri
     assert hasattr(response, 'capabilities')
 
 
@@ -155,5 +159,5 @@ def test_forbid_custom_protocol_not_derived_from_lsp():
     class CustomProtocol:
         pass
 
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(TypeError):
         LanguageServer(protocol_cls=CustomProtocol)

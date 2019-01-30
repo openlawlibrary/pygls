@@ -59,9 +59,9 @@ class ApplyWorkspaceEditResponse:
 
 class ClientCapabilities:
     def __init__(self,
-                 workspace: 'WorkspaceClientCapabilities',
-                 text_document: 'TextDocumentClientCapabilities',
-                 experimental: Any):
+                 workspace: Optional['WorkspaceClientCapabilities'] = None,
+                 text_document: Optional['TextDocumentClientCapabilities'] = None,
+                 experimental: Optional[Any] = None):
         self.workspace = workspace
         self.textDocument = text_document
         self.experimental = experimental
@@ -655,13 +655,13 @@ class HoverAbstract:
 
 class InitializeParams:
     def __init__(self,
-                 process_id: int = None,
-                 root_path: str = None,
+                 process_id: int,
+                 capabilities: ClientCapabilities,
                  root_uri: str = None,
-                 initialization_options: Any = None,
-                 capabilities: ClientCapabilities = None,
-                 trace: 'Trace' = 'off',
-                 workspace_folders: List['WorkspaceFolder'] = None):
+                 root_path: Optional[str] = None,
+                 initialization_options: Optional[Any] = None,
+                 trace: Optional['Trace'] = 'off',
+                 workspace_folders: Optional[List['WorkspaceFolder']] = None):
         self.processId = process_id
         self.rootPath = root_path
         self.rootUri = root_uri
