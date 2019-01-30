@@ -106,8 +106,7 @@ class Server:
 
     def __init__(self, protocol_cls, loop=None, max_workers=2):
         if not issubclass(protocol_cls, asyncio.Protocol):
-            raise TypeError(
-                'Protocol class should be subclass of asyncio.Protocol')
+            raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
         self._max_workers = max_workers
         self._server = None
@@ -215,8 +214,7 @@ class LanguageServer(Server):
 
     def __init__(self, loop=None, protocol_cls=LanguageServerProtocol, max_workers: int = 2):
         if not issubclass(protocol_cls, LanguageServerProtocol):
-            raise TypeError(
-                'Protocol class should be subclass of LanguageServerProtocol')
+            raise TypeError('Protocol class should be subclass of LanguageServerProtocol')
         super().__init__(protocol_cls, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:

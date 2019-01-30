@@ -29,9 +29,6 @@ RE_DRIVE_LETTER_PATH = re.compile(r'^\/[a-zA-Z]:')
 
 
 def _normalize_win_path(path):
-    if path is None:
-        return None
-
     netloc = ''
 
     # normalize to fwd-slashes on windows,
@@ -69,7 +66,7 @@ def from_fs_path(path):
         params, query, fragment = '', '', ''
         path, netloc = _normalize_win_path(path)
         return urlunparse((scheme, netloc, path, params, query, fragment))
-    except TypeError:
+    except (AttributeError, TypeError):
         return None
 
 
