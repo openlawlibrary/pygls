@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import os
 import pathlib
 from time import sleep
 
@@ -156,5 +155,5 @@ def test_forbid_custom_protocol_not_derived_from_lsp():
     class CustomProtocol:
         pass
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError):
         LanguageServer(protocol_cls=CustomProtocol)

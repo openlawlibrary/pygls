@@ -97,10 +97,10 @@ def to_lsp_name(method_name):
     m_replaced = []
 
     for i, ch in enumerate(m_chars):
-        if ch is '_':
+        if ch == '_':
             continue
 
-        if m_chars[i-1] is '_':
+        if m_chars[i-1] == '_':
             m_replaced.append(ch.capitalize())
             continue
 

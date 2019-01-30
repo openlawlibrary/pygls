@@ -21,7 +21,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from re import findall
 from threading import Event
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List
 
 from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
                          Diagnostic, MessageType, WorkspaceEdit)
