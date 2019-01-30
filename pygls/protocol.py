@@ -237,7 +237,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                 self._send_response(
                     msg_id,
                     error=JsonRpcRequestCancelled(
-                        f"Request with id {msg_id} is canceled"))
+                        'Request with id {} is canceled'.format(msg_id)))
             self._client_request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
