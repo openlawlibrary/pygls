@@ -15,6 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import os
+import pathlib
 from time import sleep
 
 import pytest
@@ -24,9 +25,9 @@ from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
 from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
                          InitializeParams, TextDocumentItem)
+
 from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
                    FEATURE_SYNC, FEATURE_THREAD)
-import pathlib
 
 CALL_TIMEOUT = 2
 
@@ -155,5 +156,5 @@ def test_forbid_custom_protocol_not_derived_from_lsp():
     class CustomProtocol:
         pass
 
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(TypeError) as e:
         LanguageServer(protocol_cls=CustomProtocol)

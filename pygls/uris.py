@@ -29,6 +29,9 @@ RE_DRIVE_LETTER_PATH = re.compile(r'^\/[a-zA-Z]:')
 
 
 def _normalize_win_path(path):
+    if path is None:
+        return None
+
     netloc = ''
 
     # normalize to fwd-slashes on windows,
@@ -61,10 +64,13 @@ def _normalize_win_path(path):
 
 def from_fs_path(path):
     """Returns a URI for the given filesystem path."""
-    scheme = 'file'
-    params, query, fragment = '', '', ''
-    path, netloc = _normalize_win_path(path)
-    return urlunparse((scheme, netloc, path, params, query, fragment))
+    try:
+        scheme = 'file'
+        params, query, fragment = '', '', ''
+        path, netloc = _normalize_win_path(path)
+        return urlunparse((scheme, netloc, path, params, query, fragment))
+    except TypeError:
+        return None
 
 
 def to_fs_path(uri):
@@ -75,25 +81,35 @@ def to_fs_path(uri):
     path for invalid characters and semantics.
     Will *not* look at the scheme of this URI.
     """
-    # scheme://netloc/path;parameters?query#fragment
-    scheme, netloc, path, _params, _query, _fragment = urlparse(uri)
+    try:
+        # scheme://netloc/path;parameters?query#fragment
+        scheme, netloc, path, _params, _query, _fragment = urlparse(uri)
 
-    if netloc and path and scheme == 'file':
-        # unc path: file://shares/c$/far/boo
-        value = '//{}{}'.format(netloc, path)
+        if netloc and path and scheme == 'file':
+            # unc path: file://shares/c$/far/boo
+            value = '//{}{}'.format(netloc, path)
 
-    elif RE_DRIVE_LETTER_PATH.match(path):
-        # windows drive letter: file:///C:/far/boo
-        value = path[1].lower() + path[2:]
+        elif RE_DRIVE_LETTER_PATH.match(path):
+            # windows drive letter: file:///C:/far/boo
+            value = path[1].lower() + path[2:]
 
-    else:
-        # Other path
-        value = path
+        else:
+            # Other path
+            value = path
 
-    if IS_WIN:
-        value = value.replace('/', '\\')
+        if IS_WIN:
+            value = value.replace('/', '\\')
 
-    return value
+        return value
+    except TypeError:
+        return None
+
+
+def uri_scheme(uri):
+    try:
+        return urlparse(uri)[0]
+    except (TypeError, IndexError):
+        return None
 
 
 def uri_with(uri, scheme=None, netloc=None, path=None, params=None, query=None, fragment=None):
