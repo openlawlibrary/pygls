@@ -51,6 +51,8 @@ Please remember to do the following:
 
 * [ ] Simplify your code around the issue to better isolate the problem
 
+* [ ] If you are committing a PR, please update the [changelog] and [contributors] documents, as appropriate. For the [changelog], only _notable_ changes should be added following the _[Keep a Changelog][keepachangelog]_ format.
+
 Don't feel bad if the developers can't reproduce the issue right away. They will simply ask for more information!
 
 ## Thank You
@@ -60,3 +62,7 @@ Your contributions to open source, large or small, make great projects like this
 ## Attribution
 
 This _Contributing to pygls_ document is adapted from VS Code's _[Contributing to VS Code](https://github.com/Microsoft/vscode/blob/master/CONTRIBUTING.md)_.
+
+[changelog]: https://github.com/openlawlibrary/pygls/blob/master/CHANGELOG.md
+[contributors]: https://github.com/openlawlibrary/pygls/blob/master/CONTRIBUTORS.md
+[keepachangelog]: https://keepachangelog.com/en/1.0.0/
