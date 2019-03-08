@@ -29,8 +29,11 @@ class JsonRpcException(Exception):
         self.data = data
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__) and self.code == other.code
-                and self.message == other.message)
+        return (
+            isinstance(other, self.__class__) and
+            self.code == other.code and
+            self.message == other.message
+        )
 
     def __hash__(self):
         return hash((self.code, self.message))
@@ -53,7 +56,7 @@ class JsonRpcException(Exception):
             'message': self.message,
         }
         if self.data is not None:
-            exception_dict['data'] = str(self.data)
+            exception_dict['data'] = self.data
         return exception_dict
 
 
@@ -65,9 +68,10 @@ class JsonRpcInternalError(JsonRpcException):
     def of(cls, exc_info):
         exc_type, exc_value, exc_tb = exc_info
         return cls(
-            message=''.join(
-                traceback.format_exception_only(exc_type, exc_value)).strip(),
-            data={'traceback': traceback.format_tb(exc_tb)})
+            message=''.join(traceback.format_exception_only(
+                exc_type, exc_value)).strip(),
+            data={'traceback': traceback.format_tb(exc_tb)}
+        )
 
 
 class JsonRpcInvalidParams(JsonRpcException):
@@ -100,10 +104,12 @@ class JsonRpcRequestCancelled(JsonRpcException):
 
 
 class JsonRpcServerError(JsonRpcException):
+
     def __init__(self, message, code, data=None):
         if not _is_server_error_code(code):
             raise ValueError('Error code should be in range -32099 - -32000')
-        super().__init__(message=message, code=code, data=data)
+        super().__init__(
+            message=message, code=code, data=data)
 
     @classmethod
     def supports_code(cls, code):
@@ -138,6 +144,7 @@ class ThreadDecoratorError(Exception):
 
 
 class ValidationError(Exception):
+
     def __init__(self, errors=None):
         self.errors = errors or []
 
