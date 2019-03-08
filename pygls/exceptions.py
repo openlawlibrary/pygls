@@ -56,7 +56,7 @@ class JsonRpcException(Exception):
             'message': self.message,
         }
         if self.data is not None:
-            exception_dict['data'] = self.data
+            exception_dict['data'] = str(self.data)
         return exception_dict
 
 

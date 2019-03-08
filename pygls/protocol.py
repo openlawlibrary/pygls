@@ -529,8 +529,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self.workspace = Workspace(root_uri, self)
 
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        for folder in workspace_folders:
-            self.workspace.add_folder(folder)
+        if workspace_folders is not None:
+            for folder in workspace_folders:
+                self.workspace.add_folder(folder)
 
         return InitializeResult(server_capabilities)
 
