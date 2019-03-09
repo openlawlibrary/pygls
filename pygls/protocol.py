@@ -526,12 +526,8 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         root_uri = params.rootUri or from_fs_path(root_path)
 
         # Initialize the workspace
-        self.workspace = Workspace(root_uri, self)
-
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        if workspace_folders is not None:
-            for folder in workspace_folders:
-                self.workspace.add_folder(folder)
+        self.workspace = Workspace(root_uri, self, workspace_folders)
 
         return InitializeResult(server_capabilities)
 

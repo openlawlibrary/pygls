@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Fix initialization failure when no workspace is open
+
 ## [0.7.3] - 01/30/2019
 
 ### Added
