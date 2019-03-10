@@ -527,7 +527,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize the workspace
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        self.workspace = Workspace(root_uri, self, workspace_folders)
+        self.workspace = Workspace(root_uri, workspace_folders)
 
         return InitializeResult(server_capabilities)
 

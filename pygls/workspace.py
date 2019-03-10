@@ -128,7 +128,7 @@ class Document(object):
 
 class Workspace(object):
 
-    def __init__(self, root_uri, workspace_folders=[]):
+    def __init__(self, root_uri, workspace_folders=None):
         self._root_uri = root_uri
         self._root_uri_scheme = uri_scheme(self._root_uri)
         self._root_path = to_fs_path(self._root_uri)
