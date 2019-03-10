@@ -21,7 +21,6 @@ import os
 from threading import Thread
 
 import pytest
-from mock import Mock
 from pygls import features, uris
 from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
@@ -91,4 +90,4 @@ def feature_manager():
 @pytest.fixture
 def workspace(tmpdir):
     """Return a workspace."""
-    return Workspace(uris.from_fs_path(str(tmpdir)), Mock())
+    return Workspace(uris.from_fs_path(str(tmpdir)))

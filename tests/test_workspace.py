@@ -18,7 +18,7 @@
 ############################################################################
 import os
 
-from pygls import uris
+from pygls import uris, Workspace
 from pygls.types import TextDocumentItem, WorkspaceFolder
 
 
@@ -66,3 +66,12 @@ def test_remove_document(workspace):
     assert workspace.get_document(DOC_URI).source == DOC_TEXT
     workspace.remove_document(DOC_URI)
     assert workspace.get_document(DOC_URI)._source is None
+
+def test_workspace_folders():
+    wf1 = WorkspaceFolder('/ws/f1', 'ws1')
+    wf2 = WorkspaceFolder('/ws/f2', 'ws2')
+
+    workspace = Workspace('/ws', [wf1, wf2])
+
+    assert workspace.folders['/ws/f1'] is wf1
+    assert workspace.folders['/ws/f2'] is wf2
