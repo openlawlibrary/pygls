@@ -17,7 +17,7 @@
 import json
 
 import pytest
-from mock import Mock
+from unittest.mock import Mock
 from pygls.types import (DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                          TextDocumentIdentifier, TextDocumentItem)
 from pygls.workspace import Document, Workspace
