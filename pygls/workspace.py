@@ -128,13 +128,16 @@ class Document(object):
 
 class Workspace(object):
 
-    def __init__(self, root_uri, lsp):
+    def __init__(self, root_uri, workspace_folders=None):
         self._root_uri = root_uri
-        self._lsp = lsp
         self._root_uri_scheme = uri_scheme(self._root_uri)
         self._root_path = to_fs_path(self._root_uri)
         self._folders = {}
         self._docs = {}
+
+        if workspace_folders is not None:
+            for folder in workspace_folders:
+                self.add_folder(folder)
 
     def _create_document(self,
                          doc_uri: str,
