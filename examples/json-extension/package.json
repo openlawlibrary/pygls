@@ -7,7 +7,7 @@
   "version": "0.7.3",
   "publisher": "openlawlibrary",
   "engines": {
-    "vscode": "^1.30.1"
+    "vscode": "^1.32.3"
   },
   "categories": [
     "Other"
@@ -60,13 +60,13 @@
   },
   "devDependencies": {
     "@types/node": "^8.9.4",
-    "tslint": "^5.12.0",
-    "tslint-microsoft-contrib": "^6.0.0",
-    "tsutils": "^3.5.2",
-    "typescript": "^3.2.2"
+    "tslint": "^5.14.0",
+    "tslint-microsoft-contrib": "^6.1.0",
+    "tsutils": "^3.9.1",
+    "typescript": "^3.3.4000",
+    "vscode": "^1.1.32"
   },
   "dependencies": {
-    "vscode": "^1.1.26",
     "vscode-languageclient": "^5.2.1"
   }
 }

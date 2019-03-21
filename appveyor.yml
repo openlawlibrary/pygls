@@ -91,12 +91,12 @@ install:
   - C:\Python35-x64\Scripts\pip.exe install .[test]
   - C:\Python35-x64\Scripts\pip.exe install -e .
 
-  # point to tsc 3.2.1
-  - npm install -g typescript@3.2.1
+  # point to the same version as in `examples/json-extension/package.json`
+  - npm install -g typescript@3.3.4000
   - tsc --version
 
   # install vsce module (for packaging our extension into a .vsix file)
-  - npm install -g vsce@1.51.0
+  - npm install -g vsce@1.58.0
 
   # Output useful info for debugging.
   - node --version
