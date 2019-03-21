@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+## [0.7.4] - 03/21/2019
+
 ### Added
 
 - Add Pull Request template ([#54])
@@ -14,10 +16,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 
 - Update dependencies ([#53])
-- Fix initialization failure when no workspace is open
+- Fix initialization failure when no workspace is open ([#51])
 
 [#54]: https://github.com/openlawlibrary/pygls/pull/54
 [#53]: https://github.com/openlawlibrary/pygls/pull/53
+[#51]: https://github.com/openlawlibrary/pygls/pull/51
 
 ## [0.7.3] - 01/30/2019
 
@@ -87,5 +90,6 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.7.4...HEAD
+[0.7.4]: https://github.com/openlawlibrary/pygls/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/openlawlibrary/pygls/compare/v0.7.2...v0.7.3
