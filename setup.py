@@ -38,18 +38,18 @@ with open(os.path.join(package_root_dir, 'README.md'), encoding='utf-8') as f:
 
 development = [
     "bandit==1.5.1",  # Run locally: bandit -r ./pygls
-    "flake8==3.7.1",  # Run locally: flake8
+    "flake8==3.7.7",  # Run locally: flake8
 ]
 
 docs_require = [
-    "sphinx==1.8.2",
-    "sphinx_rtd_theme==0.4.2"
+    "sphinx==1.8.5",
+    "sphinx_rtd_theme==0.4.3"
 ]
 
 tests_require = [
     "mock==2.0.0",
-    "pytest==4.0.2",
-    "pytest-asyncio==0.9.0"
+    "pytest==4.3.1",
+    "pytest-asyncio==0.10.0"
 ]
 
 # pip install pygls
