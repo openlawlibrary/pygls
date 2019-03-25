@@ -20,6 +20,7 @@ import pytest
 from pygls.protocol import to_lsp_name, deserialize_message
 from pygls.types import InitializeResult
 
+
 class dictToObj:
     def __init__(self, entries):
         self.__dict__.update(**entries)
