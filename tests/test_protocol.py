@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import json
 
 import pytest
-from pygls.protocol import to_lsp_name
+from pygls.protocol import to_lsp_name, deserialize_message
 from pygls.types import InitializeResult
 
 
@@ -73,3 +74,19 @@ def test_initialize_should_return_server_capabilities(client_server):
     server_capabilities = server.lsp.bf_initialize(params)
 
     assert isinstance(server_capabilities, InitializeResult)
+
+
+def test_deserialize_message_with_reserved_words_should_pass_without_errors(client_server):
+    params_with_reserved_word = '''
+    {
+        "jsonrpc": "2.0",
+        "method": "initialized",
+        "params": {
+            "__dummy__": true
+        }
+    }
+    '''
+    obj = json.loads(params_with_reserved_word,
+                     object_hook=deserialize_message)
+    assert isinstance(obj, object)
+    assert "_0" in dir(obj.params)

@@ -82,8 +82,7 @@ def deserialize_message(data):
         else:
             return JsonRPCNotification(**data)
 
-    return namedtuple('Object',
-                      data.keys())(*data.values())
+    return namedtuple('Object', data.keys(), rename=True)(*data.values())
 
 
 def to_lsp_name(method_name):

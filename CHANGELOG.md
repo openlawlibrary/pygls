@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Fix handling parameters whose names are reserved by Python ([#56])
+
+[#56]: https://github.com/openlawlibrary/pygls/pull/56
+
 ## [0.7.4] - 03/21/2019
 
 ### Added
