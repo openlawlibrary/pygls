@@ -17,7 +17,9 @@
 import json
 
 import pytest
-from pygls.protocol import to_lsp_name, deserialize_message
+from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage,
+                            JsonRPCResponseMessage, deserialize_message,
+                            to_lsp_name)
 from pygls.types import InitializeResult
 
 
@@ -26,11 +28,85 @@ class dictToObj:
         self.__dict__.update(**entries)
 
 
-def test_to_lsp_name():
-    f_name = 'text_document__did_open'
-    name = 'textDocument/didOpen'
+def test_deserialize_message_with_reserved_words_should_pass_without_errors(client_server):
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "method": "initialized",
+        "params": {
+            "__dummy__": true
+        }
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
 
-    assert to_lsp_name(f_name) == name
+    assert isinstance(result, JsonRPCNotification)
+    assert result.params._0 is True
+
+
+def test_deserialize_message_should_return_notification_message():
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "method": "test",
+        "params": "1"
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
+
+    assert isinstance(result, JsonRPCNotification)
+    assert result.jsonrpc == "2.0"
+    assert result.method == "test"
+    assert result.params == "1"
+
+
+def test_deserialize_message_without_jsonrpc_field__should_return_object():
+    params = '''
+    {
+        "random": "data",
+        "def": "def"
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
+
+    assert type(result).__name__ == 'Object'
+    assert result.random == "data"
+    assert result._1 == "def"
+
+
+def test_deserialize_message_should_return_response_message():
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "id": "id",
+        "result": "1"
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
+
+    assert isinstance(result, JsonRPCResponseMessage)
+    assert result.jsonrpc == "2.0"
+    assert result.id == "id"
+    assert result.result == "1"
+    assert result.error is None
+
+
+def test_deserialize_message_should_return_request_message():
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "id": "id",
+        "method": "test",
+        "params": "1"
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
+
+    assert isinstance(result, JsonRPCRequestMessage)
+    assert result.jsonrpc == "2.0"
+    assert result.id == "id"
+    assert result.method == "test"
+    assert result.params == "1"
 
 
 def test_initialize_without_capabilities_should_raise_error(client_server):
@@ -76,17 +152,8 @@ def test_initialize_should_return_server_capabilities(client_server):
     assert isinstance(server_capabilities, InitializeResult)
 
 
-def test_deserialize_message_with_reserved_words_should_pass_without_errors(client_server):
-    params_with_reserved_word = '''
-    {
-        "jsonrpc": "2.0",
-        "method": "initialized",
-        "params": {
-            "__dummy__": true
-        }
-    }
-    '''
-    obj = json.loads(params_with_reserved_word,
-                     object_hook=deserialize_message)
-    assert isinstance(obj, object)
-    assert "_0" in dir(obj.params)
+def test_to_lsp_name():
+    f_name = 'text_document__did_open'
+    name = 'textDocument/didOpen'
+
+    assert to_lsp_name(f_name) == name
