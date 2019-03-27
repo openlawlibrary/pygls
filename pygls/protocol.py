@@ -154,7 +154,8 @@ class JsonRPCResponseMessage:
         self.id = id
         self.jsonrpc = jsonrpc
         self.result = result
-        self.error = error
+        if error is not None:
+            self.error = error
 
 
 class JsonRPCProtocol(asyncio.Protocol):
