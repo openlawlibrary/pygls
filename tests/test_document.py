@@ -16,7 +16,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.types import Position, Range, TextDocumentContentChangeEvent
+from pygls.types import (Position, Range, TextDocumentContentChangeEvent,
+                         TextDocumentSyncKind)
 from pygls.workspace import Document
 
 from .conftest import DOC, DOC_URI
@@ -48,6 +49,22 @@ def test_document_end_of_file_edit():
     ]
 
 
+def test_document_full_edit():
+    old = [
+        "def hello(a, b):\n",
+        "    print a\n",
+        "    print b\n"
+    ]
+    doc = Document('file:///uri', u''.join(old), sync_kind=TextDocumentSyncKind.FULL)
+    change = TextDocumentContentChangeEvent(
+        Range(Position(1, 4), Position(2, 11)), 0, u'print a, b')
+    doc.apply_change(change)
+
+    assert doc.lines == [
+        "print a, b"
+    ]
+
+
 def test_document_line_edit():
     doc = Document('file:///uri', u'itshelloworld')
     change = TextDocumentContentChangeEvent(
@@ -67,7 +84,7 @@ def test_document_multiline_edit():
         "    print a\n",
         "    print b\n"
     ]
-    doc = Document('file:///uri', u''.join(old))
+    doc = Document('file:///uri', u''.join(old), sync_kind=TextDocumentSyncKind.INCREMENTAL)
     change = TextDocumentContentChangeEvent(
         Range(Position(1, 4), Position(2, 11)), 0, u'print a, b')
     doc.apply_change(change)
@@ -76,6 +93,20 @@ def test_document_multiline_edit():
         "def hello(a, b):\n",
         "    print a, b\n"
     ]
+
+
+def test_document_no_edit():
+    old = [
+        "def hello(a, b):\n",
+        "    print a\n",
+        "    print b\n"
+    ]
+    doc = Document('file:///uri', u''.join(old), sync_kind=TextDocumentSyncKind.NONE)
+    change = TextDocumentContentChangeEvent(
+        Range(Position(1, 4), Position(2, 11)), 0, u'print a, b')
+    doc.apply_change(change)
+
+    assert doc.lines == old
 
 
 def test_document_props(doc):
