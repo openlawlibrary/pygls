@@ -91,8 +91,13 @@ class Server:
     Args:
         protocol_cls(Protocol): Protocol implementation that must be derived
                                 from `asyncio.Protocol`
+        loop(AbstractEventLoop): asyncio event loop
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
+        sync_kind(TextDocumentSyncKind): Text document synchronization option
+            - NONE(0): no synchronization
+            - FULL(1): replace whole text
+            - INCREMENTAL(2): replace text within a given range
 
     Attributes:
         _max_workers(int): Number of workers for thread pool executor

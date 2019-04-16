@@ -101,6 +101,7 @@ class Document(object):
         self._source = change.text
 
     def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
+        """Apply change to a document, depending on synchronization kind."""
         try:
             self._sync_func(change)
         except TypeError:
