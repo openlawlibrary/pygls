@@ -71,7 +71,12 @@ def test_deserialize_message_without_jsonrpc_field__should_return_object():
 
     assert type(result).__name__ == 'Object'
     assert result.random == "data"
-    assert result._1 == "def"
+
+    # namedtuple does not guarantee field order
+    try:
+        assert result._0 == "def"
+    except AttributeError:
+        assert result._1 == "def"
 
 
 def test_deserialize_message_should_return_response_message():
