@@ -687,6 +687,18 @@ class Location:
         self.range = range
 
 
+class LocationLink:
+    def __init__(self,
+                 target_uri: str,
+                 target_range: 'Range',
+                 target_selection_range: 'Range',
+                 origin_selection_range: Optional['Range'] = None):
+        self.targetUri = target_uri
+        self.targetRange = target_range
+        self.targetSelectionRange = target_selection_range
+        self.originSelectionRange = origin_selection_range
+
+
 class LogMessageParams:
     def __init__(self, type: NumType, message: str):
         self.type = type
