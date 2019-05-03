@@ -156,6 +156,13 @@ class JsonRPCResponseMessage:
         self.result = result
         self.error = error
 
+    def without_none_fields(self):
+        if self.result:
+            del self.error
+        else:
+            del self.result
+        return self
+
 
 class JsonRPCProtocol(asyncio.Protocol):
     """Json RPC protocol implementation using on top of `asyncio.Protocol`.
@@ -386,7 +393,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                                           JsonRPCProtocol.VERSION,
                                           result,
                                           error)
-        self._send_data(response)
+        self._send_data(response.without_none_fields())
 
     def connection_made(self, transport: asyncio.Transport):
         """Method from base class, called when connection is established"""
