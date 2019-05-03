@@ -9,14 +9,18 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Full text document synchronization support ([#65])
 - Add more tests for `deserialize_message` function ([#61])
 
 ### Changed
 
+- Response object should contain result OR error field ([#64])
 - Fix handling parameters whose names are reserved by Python ([#56])
 
-[#56]: https://github.com/openlawlibrary/pygls/pull/56
+[#65]: https://github.com/openlawlibrary/pygls/pull/65
+[#64]: https://github.com/openlawlibrary/pygls/pull/64
 [#61]: https://github.com/openlawlibrary/pygls/pull/61
+[#56]: https://github.com/openlawlibrary/pygls/pull/56
 
 ## [0.7.4] - 03/21/2019
 

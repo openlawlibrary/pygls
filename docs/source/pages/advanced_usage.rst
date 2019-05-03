@@ -119,8 +119,8 @@ module.
    workspace which will exist as long as document is opened in editor.
 
 -  The `textDocument/didChange <https://microsoft.github.io/language-server-protocol/specification#textDocument_didChange>`__
-   notification will tell *pygls* to update the document text. For now,
-   *pygls* supports **only** incremental document changes.
+   notification will tell *pygls* to update the document text.
+   *pygls* supports _full_ and _incremental_ document changes.
 
 -  The `textDocument/didClose <https://microsoft.github.io/language-server-protocol/specification#textDocument_didClose>`__
    notification will tell *pygls* to remove a document from the

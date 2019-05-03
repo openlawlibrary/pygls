@@ -156,6 +156,13 @@ class JsonRPCResponseMessage:
         self.result = result
         self.error = error
 
+    def without_none_fields(self):
+        if self.result:
+            del self.error
+        else:
+            del self.result
+        return self
+
 
 class JsonRPCProtocol(asyncio.Protocol):
     """Json RPC protocol implementation using on top of `asyncio.Protocol`.
@@ -386,7 +393,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                                           JsonRPCProtocol.VERSION,
                                           result,
                                           error)
-        self._send_data(response)
+        self._send_data(response.without_none_fields())
 
     def connection_made(self, transport: asyncio.Transport):
         """Method from base class, called when connection is established"""
@@ -517,6 +524,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         server_capabilities = ServerCapabilities(self.fm.features.keys(),
                                                  self.fm.feature_options,
                                                  self.fm.commands,
+                                                 self._server.sync_kind,
                                                  client_capabilities)
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
@@ -526,7 +534,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize the workspace
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        self.workspace = Workspace(root_uri, workspace_folders)
+        self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
         return InitializeResult(server_capabilities)
 

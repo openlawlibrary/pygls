@@ -24,7 +24,8 @@ from threading import Event
 from typing import Callable, Dict, List
 
 from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
-                         Diagnostic, MessageType, WorkspaceEdit)
+                         Diagnostic, MessageType, TextDocumentSyncKind,
+                         WorkspaceEdit)
 
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
@@ -90,8 +91,13 @@ class Server:
     Args:
         protocol_cls(Protocol): Protocol implementation that must be derived
                                 from `asyncio.Protocol`
+        loop(AbstractEventLoop): asyncio event loop
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
+        sync_kind(TextDocumentSyncKind): Text document synchronization option
+            - NONE(0): no synchronization
+            - FULL(1): replace whole text
+            - INCREMENTAL(2): replace text within a given range
 
     Attributes:
         _max_workers(int): Number of workers for thread pool executor
@@ -104,7 +110,8 @@ class Server:
                                                     - lazy instantiated
     """
 
-    def __init__(self, protocol_cls, loop=None, max_workers=2):
+    def __init__(self, protocol_cls, loop=None, max_workers=2,
+                 sync_kind=TextDocumentSyncKind.INCREMENTAL):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
@@ -113,6 +120,7 @@ class Server:
         self._stop_event = None
         self._thread_pool = None
         self._thread_pool_executor = None
+        self.sync_kind = sync_kind
 
         if IS_WIN:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())

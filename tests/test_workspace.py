@@ -19,8 +19,8 @@
 import os
 
 from pygls import uris
-from pygls.workspace import Workspace
 from pygls.types import TextDocumentItem, WorkspaceFolder
+from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)
 DOC_TEXT = '''test'''
@@ -72,7 +72,7 @@ def test_workspace_folders():
     wf1 = WorkspaceFolder('/ws/f1', 'ws1')
     wf2 = WorkspaceFolder('/ws/f2', 'ws2')
 
-    workspace = Workspace('/ws', [wf1, wf2])
+    workspace = Workspace('/ws', workspace_folders=[wf1, wf2])
 
     assert workspace.folders['/ws/f1'] is wf1
     assert workspace.folders['/ws/f2'] is wf2

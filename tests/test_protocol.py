@@ -71,7 +71,12 @@ def test_deserialize_message_without_jsonrpc_field__should_return_object():
 
     assert type(result).__name__ == 'Object'
     assert result.random == "data"
-    assert result._1 == "def"
+
+    # namedtuple does not guarantee field order
+    try:
+        assert result._0 == "def"
+    except AttributeError:
+        assert result._1 == "def"
 
 
 def test_deserialize_message_should_return_response_message():
@@ -150,6 +155,24 @@ def test_initialize_should_return_server_capabilities(client_server):
     server_capabilities = server.lsp.bf_initialize(params)
 
     assert isinstance(server_capabilities, InitializeResult)
+
+
+def test_response_object_fields():
+    # Result field set
+    response = JsonRPCResponseMessage(0, '2.0', 'result', None).without_none_fields()
+
+    assert hasattr(response, 'id')
+    assert hasattr(response, 'jsonrpc')
+    assert hasattr(response, 'result')
+    assert not hasattr(response, 'error')
+
+    # Error field set
+    response = JsonRPCResponseMessage(0, '2.0', None, 'error').without_none_fields()
+
+    assert hasattr(response, 'id')
+    assert hasattr(response, 'jsonrpc')
+    assert hasattr(response, 'error')
+    assert not hasattr(response, 'result')
 
 
 def test_to_lsp_name():
