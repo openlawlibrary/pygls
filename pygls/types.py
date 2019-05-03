@@ -881,8 +881,9 @@ class ServerCapabilities:
                  features,
                  feature_options,
                  commands,
+                 sync_kind,
                  client_capabilities):
-        self.textDocumentSync = TextDocumentSyncKind.INCREMENTAL
+        self.textDocumentSync = sync_kind
         self.hoverProvider = HOVER in features
 
         if COMPLETION in features:

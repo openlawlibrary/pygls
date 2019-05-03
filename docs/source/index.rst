@@ -23,7 +23,7 @@ Features
    -  functions that will be executed in separate thread
 
 -  thread management
--  in-memory workspace with incremental document updates
+-  in-memory workspace with _full_ and _incremental_ document updates
 -  no third-party libraries
 -  good test coverage
 

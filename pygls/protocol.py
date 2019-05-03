@@ -524,6 +524,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         server_capabilities = ServerCapabilities(self.fm.features.keys(),
                                                  self.fm.feature_options,
                                                  self.fm.commands,
+                                                 self._server.sync_kind,
                                                  client_capabilities)
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
@@ -533,7 +534,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize the workspace
         workspace_folders = getattr(params, 'workspaceFolders', [])
-        self.workspace = Workspace(root_uri, workspace_folders)
+        self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
         return InitializeResult(server_capabilities)
 

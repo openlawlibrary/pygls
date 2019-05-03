@@ -23,7 +23,7 @@ import re
 from typing import List
 
 from .types import (NumType, Position, TextDocumentContentChangeEvent,
-                    TextDocumentItem, WorkspaceFolder)
+                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
 from .uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -35,7 +35,8 @@ log = logging.getLogger(__name__)
 
 class Document(object):
 
-    def __init__(self, uri, source=None, version=None, local=True,):
+    def __init__(self, uri, source=None, version=None, local=True,
+                 sync_kind=TextDocumentSyncKind.INCREMENTAL):
         self.uri = uri
         self.version = version
         self.path = to_fs_path(uri)
@@ -44,11 +45,16 @@ class Document(object):
         self._local = local
         self._source = source
 
+        self._sync_func = {
+            TextDocumentSyncKind.FULL: self._apply_full_change,
+            TextDocumentSyncKind.INCREMENTAL: self._apply_incremental_change
+        }.get(sync_kind, None)
+
     def __str__(self):
         return str(self.uri)
 
-    def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply a change to the document."""
+    def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
+        """Apply an incremental text change to the document."""
         text = change.text
         change_range = change.range
 
@@ -90,6 +96,18 @@ class Document(object):
 
         self._source = new.getvalue()
 
+    def _apply_full_change(self, change: TextDocumentContentChangeEvent) -> None:
+        """Apply a full text change to the document."""
+        self._source = change.text
+
+    def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
+        """Apply change to a document, depending on synchronization kind."""
+        try:
+            self._sync_func(change)
+        except TypeError:
+            # Don't sync document if sync kind is TextDocumentSyncKind.NONE
+            pass
+
     @property
     def lines(self) -> List[str]:
         return self.source.splitlines(True)
@@ -128,10 +146,11 @@ class Document(object):
 
 class Workspace(object):
 
-    def __init__(self, root_uri, workspace_folders=None):
+    def __init__(self, root_uri, sync_kind=None, workspace_folders=None):
         self._root_uri = root_uri
         self._root_uri_scheme = uri_scheme(self._root_uri)
         self._root_path = to_fs_path(self._root_uri)
+        self._sync_kind = sync_kind
         self._folders = {}
         self._docs = {}
 
@@ -143,7 +162,8 @@ class Workspace(object):
                          doc_uri: str,
                          source: str = None,
                          version: NumType = None) -> Document:
-        return Document(doc_uri, source=source, version=version)
+        return Document(doc_uri, source=source, version=version,
+                        sync_kind=self._sync_kind)
 
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
