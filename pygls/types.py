@@ -32,10 +32,10 @@ https://microsoft.github.io/language-server-protocol/specification#client_unregi
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
-                       COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT,
-                       DOCUMENT_LINK, DOCUMENT_LINK_RESOLVE, DOCUMENT_SYMBOL,
-                       FORMATTING, HOVER, ON_TYPE_FORMATTING, RANGE_FORMATTING,
-                       REFERENCES, RENAME, SIGNATURE_HELP, WORKSPACE_SYMBOL)
+                       COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK,
+                       DOCUMENT_LINK_RESOLVE, DOCUMENT_SYMBOL, FORMATTING, HOVER,
+                       ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME, SIGNATURE_HELP,
+                       WORKSPACE_SYMBOL)
 
 # Classes used for type hints.
 ConfigCallbackType = Optional[Callable[[List[Any]], None]]
@@ -837,7 +837,7 @@ class Registration:
         self.registerOptions = register_options
 
 
-class RegistrationOptions:
+class RegistrationParams:
     def __init__(self, registrations: List[Registration]):
         self.registrations = registrations
 
@@ -1282,8 +1282,8 @@ class Unregistration:
 
 
 class UnregistrationParams:
-    def __init__(self, unregistrations: List[Unregistration]):
-        self.unregistration = unregistrations
+    def __init__(self, unregisterations: List[Unregistration]):
+        self.unregisterations = unregisterations
 
 
 class VersionedTextDocumentIdentifier(TextDocumentIdentifier):

@@ -23,8 +23,8 @@ from re import findall
 from threading import Event
 from typing import Callable, Dict, List
 
-from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType,
-                         Diagnostic, MessageType, TextDocumentSyncKind,
+from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, Diagnostic, MessageType,
+                         RegistrationParams, TextDocumentSyncKind, UnregistrationParams,
                          WorkspaceEdit)
 
 from . import IS_WIN
@@ -255,12 +255,20 @@ class LanguageServer(Server):
         return self.lsp.get_configuration(params, callback)
 
     def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
-        """Gets the configuration settings from the client."""
+        """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""
         self.lsp.publish_diagnostics(doc_uri, diagnostics)
+
+    def register_capability(self, params: RegistrationParams, callback):
+        """Register a new capability on the client."""
+        return self.lsp.register_capability(params, callback)
+
+    def register_capability_async(self, params: RegistrationParams):
+        """Register a new capability on the client. Should be called with `await`"""
+        return self.lsp.register_capability_async(params)
 
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
@@ -277,6 +285,14 @@ class LanguageServer(Server):
     def thread(self) -> Callable:
         """Decorator that mark function to execute it in a thread."""
         return self.lsp.thread()
+
+    def unregister_capability(self, params: UnregistrationParams, callback):
+        """Unregister a new capability on the client."""
+        return self.lsp.unregister_capability(params, callback)
+
+    def unregister_capability_async(self, params: UnregistrationParams):
+        """Unregister a new capability on the client. Should be called with `await`"""
+        return self.lsp.unregister_capability_async(params)
 
     @property
     def workspace(self) -> Workspace:
