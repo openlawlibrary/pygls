@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Add new types and features from LSP v3.14.0 ([#67])
 - Add API to dynamically register/unregister client capability ([#67])
 - Full text document synchronization support ([#65])
 - Add more tests for `deserialize_message` function ([#61])
