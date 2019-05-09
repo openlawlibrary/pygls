@@ -22,8 +22,8 @@ import os
 import re
 from typing import List
 
-from .types import (NumType, Position, TextDocumentContentChangeEvent,
-                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
+from .types import (NumType, Position, TextDocumentContentChangeEvent, TextDocumentItem,
+                    TextDocumentSyncKind, WorkspaceFolder)
 from .uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers

@@ -26,6 +26,10 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
+        "command": "registerCompletions",
+        "title": "Register completions"
+      },
+      {
         "command": "showConfigurationAsync",
         "title": "Show Json Example Configuration [Async]"
       },
@@ -36,6 +40,10 @@
       {
         "command": "showConfigurationThread",
         "title": "Show Json Example Configuration [Thread]"
+      },
+      {
+        "command": "unregisterCompletions",
+        "title": "Unregister completions"
       }
     ],
     "configuration": {

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Add new types and features from LSP v3.14.0 ([#67])
+- Add API to dynamically register/unregister client capability ([#67])
 - Full text document synchronization support ([#65])
 - Add more tests for `deserialize_message` function ([#61])
 
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning][semver].
 - Response object should contain result OR error field ([#64])
 - Fix handling parameters whose names are reserved by Python ([#56])
 
+[#67]: https://github.com/openlawlibrary/pygls/pull/67
 [#65]: https://github.com/openlawlibrary/pygls/pull/65
 [#64]: https://github.com/openlawlibrary/pygls/pull/64
 [#61]: https://github.com/openlawlibrary/pygls/pull/61

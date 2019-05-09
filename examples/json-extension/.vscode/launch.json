@@ -1,39 +1,47 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "extensionHost",
-      "request": "launch",
-      "name": "Launch Client",
-      "runtimeExecutable": "${execPath}",
-      "sourceMaps": true,
-      "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-      "outFiles": ["${workspaceRoot}/client/out/**/*.js"],
-      "preLaunchTask": "json-extension-watch:client",
-      "env": {
-        "VSCODE_DEBUG_MODE": "true"
-      }
-    },
-    {
-      "name": "Launch Server",
-      "type": "python",
-      "request": "launch",
-      "console": "none",
-      "module": "server",
-      "args": ["--tcp"],
-      "debugStdLib": true,
-      "pythonPath": "${config:python.pythonPath}",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      }
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Server + Client",
-      "configurations": ["Launch Server", "Launch Client"]
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "extensionHost",
+            "request": "launch",
+            "name": "Launch Client",
+            "runtimeExecutable": "${execPath}",
+            "sourceMaps": true,
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}"
+            ],
+            "outFiles": [
+                "${workspaceRoot}/client/out/**/*.js"
+            ],
+            "preLaunchTask": "json-extension-watch:client",
+            "env": {
+                "VSCODE_DEBUG_MODE": "true"
+            }
+        },
+        {
+            "name": "Launch Server",
+            "type": "python",
+            "request": "launch",
+            "module": "server",
+            "args": [
+                "--tcp"
+            ],
+            "justMyCode": false,
+            "pythonPath": "${config:python.pythonPath}",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Server + Client",
+            "configurations": [
+                "Launch Server",
+                "Launch Client"
+            ]
+        }
+    ]
 }
