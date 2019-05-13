@@ -19,7 +19,7 @@ import os
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = 'pygls'
-VERSION = '0.7.4'
+VERSION = '0.8.0'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
 DESCRIPTION = 'a pythonic generic language server (pronounced like "pie glass").'
@@ -37,18 +37,18 @@ with open(os.path.join(package_root_dir, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 development = [
-    "bandit==1.5.1",  # Run locally: bandit -r ./pygls
+    "bandit==1.6.0",  # Run locally: bandit -r ./pygls
     "flake8==3.7.7",  # Run locally: flake8
 ]
 
 docs_require = [
-    "sphinx==1.8.5",
+    "sphinx==2.0.1",
     "sphinx_rtd_theme==0.4.3"
 ]
 
 tests_require = [
-    "mock==2.0.0",
-    "pytest==4.3.1",
+    "mock==3.0.5",
+    "pytest==4.5.0",
     "pytest-asyncio==0.10.0"
 ]
 

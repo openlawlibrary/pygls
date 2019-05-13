@@ -3,14 +3,14 @@
   "description": "Simple json extension example",
   "author": "Open Law Library",
   "license": "Apache-2.0",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "publisher": "openlawlibrary",
   "repository": {
     "type": "git",
     "url": "https://github.com/openlawlibrary/pygls"
   },
   "engines": {
-    "vscode": "^1.32.3"
+    "vscode": "^1.33.1"
   },
   "scripts": {
     "update-vscode": "vscode-install",
@@ -20,6 +20,6 @@
     "vscode-languageclient": "^5.2.1"
   },
   "devDependencies": {
-    "vscode": "^1.1.32"
+    "vscode": "^1.1.34"
   }
 }
