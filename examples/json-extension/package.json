@@ -26,6 +26,14 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
+        "command": "printClientCapabilities",
+        "title": "Print client capabilities to the output channel"
+      },
+      {
+        "command": "printServerCapabilities",
+        "title": "Print server capabilities to the output channel"
+      },
+      {
         "command": "registerCompletions",
         "title": "Register completions"
       },

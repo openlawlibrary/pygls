@@ -23,9 +23,9 @@ from re import findall
 from threading import Event
 from typing import Callable, Dict, List
 
-from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, Diagnostic, MessageType,
-                         RegistrationParams, TextDocumentSyncKind, UnregistrationParams,
-                         WorkspaceEdit)
+from pygls.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
+                         Diagnostic, MessageType, RegistrationParams, ServerCapabilities,
+                         TextDocumentSyncKind, UnregistrationParams, WorkspaceEdit)
 
 from . import IS_WIN
 from .protocol import LanguageServerProtocol
@@ -229,6 +229,11 @@ class LanguageServer(Server):
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 
+    @property
+    def client_capabilities(self) -> ClientCapabilities:
+        """Return client capabilities saved on initialize request."""
+        return self.lsp.client_capabilities
+
     def command(self, command_name: str) -> Callable:
         """Decorator used to register custom commands.
 
@@ -273,6 +278,11 @@ class LanguageServer(Server):
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
         self.lsp.notify(method, params)
+
+    @property
+    def server_capabilities(self) -> ServerCapabilities:
+        """Return server capabilities calculated on initialize request."""
+        return self.lsp.server_capabilities
 
     def show_message(self, message, msg_type=MessageType.Info) -> None:
         """Sends message to the client to display message."""

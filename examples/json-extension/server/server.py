@@ -31,6 +31,8 @@ from pygls.types import (CompletionItem, CompletionList, CompletionParams,
                          RegistrationParams, Unregistration,
                          UnregistrationParams)
 
+from .utils import namedtuple_to_dict, obj_to_json
+
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
@@ -38,6 +40,8 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
+    CMD_PRINT_CLIENT_CAPABILITIES = 'printClientCapabilities'
+    CMD_PRINT_SERVER_CAPABILITIES = 'printServerCapabilities'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
     CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
@@ -142,6 +146,20 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
     _validate(ls, params)
+
+
+@json_server.command(JsonLanguageServer.CMD_PRINT_CLIENT_CAPABILITIES)
+def print_client_capabilities(ls: JsonLanguageServer, *args):
+    """Prints client capabilities to the output channel."""
+    ls.show_message_log("Client capabilities:\n{}\n\n".format(
+        obj_to_json(namedtuple_to_dict(ls.client_capabilities))))
+
+
+@json_server.command(JsonLanguageServer.CMD_PRINT_SERVER_CAPABILITIES)
+def print_server_capabilities(ls: JsonLanguageServer, *args):
+    """Prints server capabilities to the output channel."""
+    ls.show_message_log("Server capabilities:\n{}\n\n".format(
+        (obj_to_json(ls.server_capabilities))))
 
 
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)

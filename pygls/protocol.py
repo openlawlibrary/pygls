@@ -539,14 +539,14 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self._server.process_id = params.processId
 
         # Initialize server capabilities
-        client_capabilities = params.capabilities
-        server_capabilities = ServerCapabilities(self.fm.features.keys(),
-                                                 self.fm.feature_options,
-                                                 self.fm.commands,
-                                                 self._server.sync_kind,
-                                                 client_capabilities)
+        self.client_capabilities = params.capabilities
+        self.server_capabilities = ServerCapabilities(self.fm.features.keys(),
+                                                      self.fm.feature_options,
+                                                      self.fm.commands,
+                                                      self._server.sync_kind,
+                                                      self.client_capabilities)
         logger.debug('Server capabilities: {}'
-                     .format(server_capabilities.__dict__))
+                     .format(self.server_capabilities.__dict__))
 
         root_path = getattr(params, 'rootPath',  None)
         root_uri = params.rootUri or from_fs_path(root_path)
@@ -555,7 +555,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = getattr(params, 'workspaceFolders', [])
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        return InitializeResult(server_capabilities)
+        return InitializeResult(self.server_capabilities)
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""
@@ -625,7 +625,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(WORKSPACE_CONFIGURATION, params, callback)
 
-    def get_configuration_async(self, params):
+    async def get_configuration_async(self, params):
         """Calls `get_configuration` method but designed to use with coroutines
 
         Args:
@@ -633,7 +633,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         Returns:
             asyncio.Future that can be awaited
         """
-        return asyncio.wrap_future(self.get_configuration(params, None))
+        return await asyncio.wrap_future(self.get_configuration(params, None))
 
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""
@@ -653,7 +653,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(CLIENT_REGISTER_CAPABILITY, params, callback)
 
-    def register_capability_async(self, params: RegistrationParams):
+    async def register_capability_async(self, params: RegistrationParams):
         """Register a new capability on the client.
 
         Args:
@@ -664,7 +664,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             asyncio.Future object that will be resolved once a
             response has been received
         """
-        return asyncio.wrap_future(self.register_capability(params, None))
+        return await asyncio.wrap_future(self.register_capability(params, None))
 
     def show_message(self, message, msg_type=MessageType.Info):
         """Sends message to the client to display message."""
@@ -687,7 +687,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(CLIENT_UNREGISTER_CAPABILITY, params, callback)
 
-    def unregister_capability_async(self, params: UnregistrationParams):
+    async def unregister_capability_async(self, params: UnregistrationParams):
         """Unregister a new capability on the client.
 
         Args:
@@ -698,4 +698,4 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             asyncio.Future object that will be resolved once a
             response has been received
         """
-        return asyncio.wrap_future(self.unregister_capability(params, None))
+        return await asyncio.wrap_future(self.unregister_capability(params, None))
