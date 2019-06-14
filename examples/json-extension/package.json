@@ -67,11 +67,11 @@
     "vscode": "npm run vscode:prepublish && VSCODE=$(which code-insiders || which code || echo echo ERROR: neither the code nor code-insiders vscode executable is installed); USER=dummy-dont-share-vscode-instance $VSCODE --user-data-dir=$PWD/.vscode-dev/user-data --extensionHomePath=$PWD/.vscode-dev/extensions --extensionDevelopmentPath=$PWD $*"
   },
   "devDependencies": {
-    "@types/node": "^8.9.4",
-    "tslint": "^5.16.0",
-    "tslint-microsoft-contrib": "^6.1.1",
-    "tsutils": "^3.10.0",
-    "typescript": "^3.4.5",
+    "@types/node": "^8.10.49",
+    "tslint": "^5.17.0",
+    "tslint-microsoft-contrib": "^6.2.0",
+    "tsutils": "^3.14.0",
+    "typescript": "^3.5.2",
     "vscode": "^1.1.34"
   },
   "dependencies": {
