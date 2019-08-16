@@ -1,0 +1,35 @@
+{
+    "name": "json-langserver-compiled",
+    "description": "JSON language server (compiled).",
+    "author": "Tiemen Schuijbroek",
+    "repository": "https://github.com/openlawlibrary/pygls",
+    "license": "Apache-2.0",
+    "version": "0.1.0",
+    "publisher": "openlawlibrary",
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "json"
+    ],
+    "engines": {
+        "vscode": "^1.23.0"
+    },
+    "activationEvents": [
+        "onLanguage:json"
+    ],
+    "main": "./client/out/extension",
+    "scripts": {
+        "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+        "compile": "tsc -b",
+        "watch": "tsc -b -w",
+        "postinstall": "cd client && npm install && cd ..",
+        "test": "sh ./scripts/e2e.sh"
+    },
+    "devDependencies": {
+        "@types/mocha": "^5.2.0",
+        "@types/node": "^8.0.0",
+        "tslint": "^5.16.0",
+        "typescript": "^3.5.1"
+    }
+}
