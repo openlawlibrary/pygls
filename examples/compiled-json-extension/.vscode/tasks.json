@@ -31,7 +31,7 @@
             "label": "server",
             "group": "build",
             "type": "shell",
-            "command": "C:\\miniconda3-windows\\Scripts\\activate.bat ratio && make clean && make server"
+            "command": "make clean && make server"
         },
         {
             "label": "Build Client+Server",

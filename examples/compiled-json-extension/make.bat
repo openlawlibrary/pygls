@@ -31,10 +31,11 @@ goto end
 
 :debug
 ./dist/json_server/json_server --tcp --port=2087
+goto end
 
 :debug-py
 python ./json_server.py --tcp --port=2087
-
+goto end
 
 :end
 popd
