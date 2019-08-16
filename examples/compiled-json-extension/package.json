@@ -31,5 +31,53 @@
         "@types/node": "^8.0.0",
         "tslint": "^5.16.0",
         "typescript": "^3.5.1"
+    },
+    "contributes": {
+        "commands": [
+            {
+                "command": "countDownBlocking",
+                "title": "Count down 10 seconds [Blocking]"
+            },
+            {
+                "command": "countDownNonBlocking",
+                "title": "Count down 10 seconds [Non Blocking]"
+            },
+            {
+                "command": "registerCompletions",
+                "title": "Register completions"
+            },
+            {
+                "command": "showConfigurationAsync",
+                "title": "Show Json Example Configuration [Async]"
+            },
+            {
+                "command": "showConfigurationCallback",
+                "title": "Show Json Example Configuration [Callback]"
+            },
+            {
+                "command": "showConfigurationThread",
+                "title": "Show Json Example Configuration [Thread]"
+            },
+            {
+                "command": "unregisterCompletions",
+                "title": "Unregister completions"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "JSON Language Server Configuration",
+            "properties": {
+                "jsonServer.serverPath": {
+                    "scope": "resource",
+                    "type": "string",
+                    "default": "json_server"
+                },
+                "jsonServer.serverArgs": {
+                    "scope": "resource",
+                    "type": "array",
+                    "default": []
+                }
+            }
+        }
     }
 }

@@ -2,10 +2,11 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, workspace } from "vscode";
+import { ExtensionContext, workspace, window, WorkspaceConfiguration } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient";
 
 let client: LanguageClient;
+let editor = window.activeTextEditor;
 
 function getClientOptions(): LanguageClientOptions {
     return {
@@ -50,17 +51,28 @@ function startLangServer(
     return new LanguageClient(command, serverOptions, getClientOptions());
 }
 
+function getConfig(key: string): WorkspaceConfiguration {
+    return workspace.getConfiguration(key, editor ? editor.document.uri : null)
+}
+
 
 export function activate(context: ExtensionContext) {
     let tcpPort = process.env.DebugTCP
+    let config = getConfig("elephant")
     if (!tcpPort) {
         // No debug port: run server executable from (set) path.
         const cwd = path.join(__dirname, "../");
-        let serverPath = workspace.getConfiguration("jsonServer").get<string>("serverPath");
+        let serverPath = config.get<string>("serverPath");
         if (!serverPath) {
             serverPath = "json_server"; // Let it up to the user to put it on PATH.
         }
-        client = startLangServer(serverPath, [], cwd);
+
+        let serverArgs = config.get<string[]>("serverArgs");
+        if (!serverArgs) {
+            serverArgs = []
+        }
+
+        client = startLangServer(serverPath, serverArgs, cwd);
     } else {
         // Debug port: server is running externally on specified port.
         client = startLangServerTCP(parseInt(tcpPort))
