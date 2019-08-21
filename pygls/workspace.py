@@ -54,14 +54,25 @@ class Document(object):
         return str(self.uri)
 
     def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply an incremental text change to the document."""
+        """Apply an either INCREMENTAL or FULL text change to the document
+
+        Note on INCREMENTAL versus FULL:
+            Even if a server accepts INCREMENTAL SyncKinds, clients may request
+            a FULL SyncKind. In LSP 3.x, clients make this request by omitting
+            both Range and RangeLength from their request. Consequently, the
+            attributes "range" and "range_length" will be missing from FULL
+            content update client requests in the pygls Python library.
+        """
+        if (
+            not hasattr(change, 'range') and
+            not hasattr(change, 'range_length')
+        ):
+            # Client requests a full content change
+            self._apply_full_change(change)
+            return
+
         text = change.text
         change_range = change.range
-
-        if not change_range:
-            # The whole file has changed
-            self._source = text
-            return
 
         start_line = change_range.start.line
         start_col = change_range.start.character
