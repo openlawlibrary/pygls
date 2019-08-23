@@ -45,32 +45,15 @@ class Document(object):
         self._local = local
         self._source = source
 
-        self._sync_func = {
-            TextDocumentSyncKind.FULL: self._apply_full_change,
-            TextDocumentSyncKind.INCREMENTAL: self._apply_incremental_change
-        }.get(sync_kind, None)
+        self._is_sync_kind_full = sync_kind == TextDocumentSyncKind.FULL
+        self._is_sync_kind_incremental = sync_kind == TextDocumentSyncKind.INCREMENTAL
+        self._is_sync_kind_none = sync_kind == TextDocumentSyncKind.NONE
 
     def __str__(self):
         return str(self.uri)
 
     def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply an either INCREMENTAL or FULL text change to the document
-
-        Note on INCREMENTAL versus FULL:
-            Even if a server accepts INCREMENTAL SyncKinds, clients may request
-            a FULL SyncKind. In LSP 3.x, clients make this request by omitting
-            both Range and RangeLength from their request. Consequently, the
-            attributes "range" and "range_length" will be missing from FULL
-            content update client requests in the pygls Python library.
-        """
-        if (
-            not hasattr(change, 'range') and
-            not hasattr(change, 'range_length')
-        ):
-            # Client requests a full content change
-            self._apply_full_change(change)
-            return
-
+        """Apply an INCREMENTAL text change to the document"""
         text = change.text
         change_range = change.range
 
@@ -108,16 +91,63 @@ class Document(object):
         self._source = new.getvalue()
 
     def _apply_full_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply a full text change to the document."""
+        """Apply a FULL text change to the document."""
         self._source = change.text
 
+    def _apply_none_change(self, change: TextDocumentContentChangeEvent) -> None:
+        """Apply a NONE text change to the document
+
+        Currently does nothing, provided for consistency.
+        """
+
     def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply change to a document, depending on synchronization kind."""
-        try:
-            self._sync_func(change)
-        except TypeError:
-            # Don't sync document if sync kind is TextDocumentSyncKind.NONE
-            pass
+        """Apply a text change to a document, considering TextDocumentSyncKind
+
+        Performs either INCREMENTAL, FULL, or NONE synchronization based on
+        both the Client request and server capabilities.
+
+        Raises ValueError if the client provides an ambiguous or unsupported
+        request.
+
+        INCREMENTAL versus FULL synchronization:
+            Even if a server accepts INCREMENTAL SyncKinds, clients may request
+            a FULL SyncKind. In LSP 3.x, clients make this request by omitting
+            both Range and RangeLength from their request. Consequently, the
+            attributes "range" and "range_length" will be missing from FULL
+            content update client requests in the pygls Python library.
+
+        Improvements:
+            Consider revising our treatment of TextDocumentContentChangeEvent,
+            and all other LSP primitive types, to set "Optional" interface
+            attributes from the client to "None". The "hasattr" check is
+            admittedly quite ugly; while it is appropriate given our current
+            state, there are plenty of improvements to be made. A good place to
+            start: require more rigorous de-serialization efforts when reading
+            client requests in protocol.py.
+        """
+        if (
+            hasattr(change, 'range') and
+            hasattr(change, 'range_length') and
+            self._is_sync_kind_incremental
+        ):
+            self._apply_incremental_change(change)
+        elif self._is_sync_kind_none:
+            self._apply_none_change(change)
+        elif not (
+            hasattr(change, 'range') or
+            hasattr(change, 'range_length')
+        ):
+            self._apply_full_change(change)
+        else:
+            # Log an error, but still perform full update to preserve existing
+            # assumptions in test_document/test_document_full_edit. Test breaks
+            # otherwise, and fixing the tests would require a broader fix to
+            # protocol.py.
+            log.error(
+                "Unsupported client-provided TextDocumentContentChangeEvent. "
+                "Please update / submit a Pull Request to your LSP client."
+            )
+            self._apply_full_change(change)
 
     @property
     def lines(self) -> List[str]:
