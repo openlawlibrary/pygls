@@ -170,7 +170,6 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     This class provides bidirectional communication which is needed for LSP.
     """
-    BODY_PATTERN = re.compile(rb'^Content-Length: (\d+)\r\n\r\n(.*)')
 
     CANCEL_REQUEST = '$/cancelRequest'
 
@@ -188,6 +187,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         self.fm = FeatureManager(server)
         self.transport = None
+        self._message_buf = []
 
     def __call__(self):
         return self
@@ -397,25 +397,40 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Method from base class, called when connection is established"""
         self.transport = transport
 
+    MESSAGE_PATTERN = re.compile(
+        rb'^(?:[^\r\n]+\r\n)*Content-Length: (?P<length>\d+)\r\n(?:[^\r\n]+\r\n)*\r\n(?P<body>{.*)',
+        re.DOTALL,
+    )
+
     def data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
         logger.debug('Received {}'.format(data))
 
         while len(data):
-            try:
-                m = JsonRPCProtocol.BODY_PATTERN.search(data)
-                if m:
-                    length = int(m.group(1))
-                    body = m.group(2)[0:length]
-                    data = body[length:]
-                else:
-                    body = data
-                    data = ''
-                self._procedure_handler(
-                    json.loads(body.decode(self.CHARSET),
-                               object_hook=deserialize_message))
-            except IndexError:
-                pass
+            # Append the incoming chunk to the message buffer
+            self._message_buf.append(data)
+
+            # Look for the body of the message
+            message = b''.join(self._message_buf)
+            found = JsonRPCProtocol.MESSAGE_PATTERN.fullmatch(message)
+
+            body = found.group('body') if found else b''
+            length = int(found.group('length')) if found else 1
+
+            if len(body) < length:
+                # Message is incomplete; bail until more data arrives
+                return
+
+            # Message is complete;
+            # extract the body and any remaining data,
+            # and reset the buffer for the next message
+            body, data = body[:length], body[length:]
+            self._message_buf = []
+
+            # Parse the body
+            self._procedure_handler(
+                json.loads(body.decode(self.CHARSET),
+                            object_hook=deserialize_message))
 
     def notify(self, method: str, params=None):
         """Sends a JSON RPC notification to the client."""
