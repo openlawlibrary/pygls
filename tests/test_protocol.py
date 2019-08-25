@@ -126,7 +126,7 @@ def test_data_received_without_content_type_should_handle_message(client_server)
         '',
         body,
     ))
-    data = dummy_message()
+    data = bytes(message, 'utf-8')
     server.lsp.data_received(data)
 
 
@@ -143,11 +143,11 @@ def test_data_received_content_type_first_should_handle_message(client_server):
         '',
         body,
     ))
-    data = dummy_message()
+    data = bytes(message, 'utf-8')
     server.lsp.data_received(data)
 
 
-def dummy_message(param = 1):
+def dummy_message(param=1):
     body = json.dumps({
         "jsonrpc": "2.0",
         "method": "test",

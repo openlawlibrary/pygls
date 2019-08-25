@@ -398,7 +398,10 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.transport = transport
 
     MESSAGE_PATTERN = re.compile(
-        rb'^(?:[^\r\n]+\r\n)*Content-Length: (?P<length>\d+)\r\n(?:[^\r\n]+\r\n)*\r\n(?P<body>{.*)',
+        rb'^(?:[^\r\n]+\r\n)*' +
+        rb'Content-Length: (?P<length>\d+)\r\n' +
+        rb'(?:[^\r\n]+\r\n)*\r\n' +
+        rb'(?P<body>{.*)',
         re.DOTALL,
     )
 
@@ -430,7 +433,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             # Parse the body
             self._procedure_handler(
                 json.loads(body.decode(self.CHARSET),
-                            object_hook=deserialize_message))
+                           object_hook=deserialize_message))
 
     def notify(self, method: str, params=None):
         """Sends a JSON RPC notification to the client."""
