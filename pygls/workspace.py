@@ -106,9 +106,6 @@ class Document(object):
         Performs either INCREMENTAL, FULL, or NONE synchronization based on
         both the Client request and server capabilities.
 
-        Raises ValueError if the client provides an ambiguous or unsupported
-        request.
-
         INCREMENTAL versus FULL synchronization:
             Even if a server accepts INCREMENTAL SyncKinds, clients may request
             a FULL SyncKind. In LSP 3.x, clients make this request by omitting
