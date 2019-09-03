@@ -175,6 +175,15 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     CHARSET = 'utf-8'
     CONTENT_TYPE = 'application/vscode-jsonrpc'
+
+    MESSAGE_PATTERN = re.compile(
+        rb'^(?:[^\r\n]+\r\n)*' +
+        rb'Content-Length: (?P<length>\d+)\r\n' +
+        rb'(?:[^\r\n]+\r\n)*\r\n' +
+        rb'(?P<body>{.*)',
+        re.DOTALL,
+    )
+
     VERSION = '2.0'
 
     def __init__(self, server):
@@ -396,14 +405,6 @@ class JsonRPCProtocol(asyncio.Protocol):
     def connection_made(self, transport: asyncio.Transport):
         """Method from base class, called when connection is established"""
         self.transport = transport
-
-    MESSAGE_PATTERN = re.compile(
-        rb'^(?:[^\r\n]+\r\n)*' +
-        rb'Content-Length: (?P<length>\d+)\r\n' +
-        rb'(?:[^\r\n]+\r\n)*\r\n' +
-        rb'(?P<body>{.*)',
-        re.DOTALL,
-    )
 
     def data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
