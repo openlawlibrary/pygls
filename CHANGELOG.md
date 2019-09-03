@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 - Response object should contain result OR error field ([#64])
 - Fix handling parameters whose names are reserved by Python ([#56])
+- Fix parsing of partial messages and those with Content-Length keyword ([#80])
 
 [#67]: https://github.com/openlawlibrary/pygls/pull/67
 [#65]: https://github.com/openlawlibrary/pygls/pull/65
