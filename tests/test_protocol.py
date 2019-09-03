@@ -114,6 +114,75 @@ def test_deserialize_message_should_return_request_message():
     assert result.params == "1"
 
 
+def test_data_received_without_content_type_should_handle_message(client_server):
+    _, server = client_server
+    body = json.dumps({
+        "jsonrpc": "2.0",
+        "method": "test",
+        "params": 1,
+    })
+    message = '\r\n'.join((
+        'Content-Length: ' + str(len(body)),
+        '',
+        body,
+    ))
+    data = bytes(message, 'utf-8')
+    server.lsp.data_received(data)
+
+
+def test_data_received_content_type_first_should_handle_message(client_server):
+    _, server = client_server
+    body = json.dumps({
+        "jsonrpc": "2.0",
+        "method": "test",
+        "params": 1,
+    })
+    message = '\r\n'.join((
+        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
+        'Content-Length: ' + str(len(body)),
+        '',
+        body,
+    ))
+    data = bytes(message, 'utf-8')
+    server.lsp.data_received(data)
+
+
+def dummy_message(param=1):
+    body = json.dumps({
+        "jsonrpc": "2.0",
+        "method": "test",
+        "params": param,
+    })
+    message = '\r\n'.join((
+        'Content-Length: ' + str(len(body)),
+        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
+        '',
+        body,
+    ))
+    return bytes(message, 'utf-8')
+
+
+def test_data_received_single_message_should_handle_message(client_server):
+    _, server = client_server
+    data = dummy_message()
+    server.lsp.data_received(data)
+
+
+def test_data_received_partial_message_should_handle_message(client_server):
+    _, server = client_server
+    data = dummy_message()
+    partial = len(data) - 5
+    server.lsp.data_received(data[:partial])
+    server.lsp.data_received(data[partial:])
+
+
+def test_data_received_multi_message_should_handle_messages(client_server):
+    _, server = client_server
+    messages = (dummy_message(i) for i in range(3))
+    data = b''.join(messages)
+    server.lsp.data_received(data)
+
+
 def test_initialize_without_capabilities_should_raise_error(client_server):
     _, server = client_server
     params = dictToObj({

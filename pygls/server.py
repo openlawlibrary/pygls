@@ -16,10 +16,10 @@
 ############################################################################
 import asyncio
 import logging
+import re
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
-from re import findall
 from threading import Event
 from typing import Callable, Dict, List
 
@@ -37,33 +37,38 @@ logger = logging.getLogger(__name__)
 
 async def aio_readline(loop, executor, stop_event, rfile, proxy):
     """Reads data from stdin in separate thread (asynchronously)."""
+
+    CONTENT_LENGTH_PATTERN = re.compile(rb'^Content-Length: (\d+)\r\n$')
+
+    # Initialize message buffer
+    message = []
+    content_length = 0
+
     while not stop_event.is_set():
-        # Read line
-        line = await loop.run_in_executor(executor, rfile.readline)
+        # Read a header line
+        header = await loop.run_in_executor(executor, rfile.readline)
+        message.append(header)
 
-        if not line:
-            continue
+        # Extract content length if possible
+        if not content_length:
+            match = CONTENT_LENGTH_PATTERN.fullmatch(header)
+            if match:
+                content_length = int(match.group(1))
+                logger.debug('Content length: {}'.format(content_length))
 
-        # Extract content length from line
-        try:
-            content_length = int(findall(rb'\b\d+\b', line)[0])
-            logger.debug('Content length: {}'.format(content_length))
-        except IndexError:
-            continue
+        # Check if all headers have been read (as indicated by an empty line \r\n)
+        if content_length and not header.strip():
 
-        # Throw away empty lines
-        while line and line.strip():
-            line = await loop.run_in_executor(executor, rfile.readline)
+            # Read body
+            body = await loop.run_in_executor(executor, rfile.read, content_length)
+            message.append(body)
 
-        if not line:
-            continue
+            # Pass message to language server protocol
+            proxy(b''.join(message))
 
-        # Read body
-        body = await loop.run_in_executor(executor, rfile.read, content_length)
-
-        # Pass body to language server protocol
-        if body:
-            proxy(body)
+            # Reset the buffer
+            message = []
+            content_length = 0
 
 
 class StdOutTransportAdapter:
