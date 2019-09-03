@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 
 - Fix parsing of partial messages and those with Content-Length keyword ([#80])
+- Fix Full SyncKind for servers accepting Incremental SyncKind ([#78])
+
+[#80]: https://github.com/openlawlibrary/pygls/pull/80
+[#78]: https://github.com/openlawlibrary/pygls/pull/78
 
 ## [0.8.0] - 05/13/2019
 
