@@ -1126,7 +1126,7 @@ class TextDocumentClientCapabilities:
 class TextDocumentContentChangeEvent:
     def __init__(self, range: 'Range', range_length: NumType, text: str):
         self.range = range
-        self.range_length = range_length
+        self.rangeLength = range_length
         self.text = text
 
 
