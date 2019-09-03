@@ -110,7 +110,7 @@ class Document(object):
             Even if a server accepts INCREMENTAL SyncKinds, clients may request
             a FULL SyncKind. In LSP 3.x, clients make this request by omitting
             both Range and RangeLength from their request. Consequently, the
-            attributes "range" and "range_length" will be missing from FULL
+            attributes "range" and "rangeLength" will be missing from FULL
             content update client requests in the pygls Python library.
 
         Improvements:
@@ -124,7 +124,7 @@ class Document(object):
         """
         if (
             hasattr(change, 'range') and
-            hasattr(change, 'range_length') and
+            hasattr(change, 'rangeLength') and
             self._is_sync_kind_incremental
         ):
             self._apply_incremental_change(change)
@@ -132,7 +132,7 @@ class Document(object):
             self._apply_none_change(change)
         elif not (
             hasattr(change, 'range') or
-            hasattr(change, 'range_length')
+            hasattr(change, 'rangeLength')
         ):
             self._apply_full_change(change)
         else:
