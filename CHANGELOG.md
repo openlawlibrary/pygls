@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+## [0.8.1] - 09/05/2019
+
 ### Changed
 
 - Fix parsing of partial messages and those with Content-Length keyword ([#80])
@@ -118,7 +120,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/openlawlibrary/pygls/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/openlawlibrary/pygls/compare/v0.7.4...v0.8.0
 [0.7.4]: https://github.com/openlawlibrary/pygls/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/openlawlibrary/pygls/compare/v0.7.2...v0.7.3

@@ -19,7 +19,7 @@ import os
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = 'pygls'
-VERSION = '0.8.0'
+VERSION = '0.8.1'
 AUTHOR = 'Open Law Library'
 AUTHOR_EMAIL = 'info@openlawlib.org'
 DESCRIPTION = 'a pythonic generic language server (pronounced like "pie glass").'
