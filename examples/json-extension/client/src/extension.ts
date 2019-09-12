@@ -20,11 +20,11 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, workspace, window, WorkspaceConfiguration } from "vscode";
+import { ExtensionContext, window, workspace, WorkspaceConfiguration } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions } from "vscode-languageclient";
 
 let client: LanguageClient;
-let editor = window.activeTextEditor;
+const editor = window.activeTextEditor;
 
 function getClientOptions(): LanguageClientOptions {
     return {
@@ -74,19 +74,19 @@ function startLangServer(
 }
 
 function getConfig(key: string): WorkspaceConfiguration {
-    return workspace.getConfiguration(key, editor ? editor.document.uri : null)
+    return workspace.getConfiguration(key, editor ? editor.document.uri : null);
 }
 
 function getPython(): string {
-    return getConfig("python").get<string>("pythonPath")
+    return getConfig("python").get<string>("pythonPath");
 }
 
 export function activate(context: ExtensionContext) {
-    let debugPort = process.env.DebugTCP
-    let config = getConfig("jsonServer")
+    const debugPort = process.env.DebugTCP;
+    const config = getConfig("jsonServer");
     if (debugPort) {
         // Debug port: server should be running externally on specified port.
-        client = startLangServerTCP(parseInt(debugPort))
+        client = startLangServerTCP(Number(debugPort));
     } else {
         // No debug port: run server executable.
         const cwd = path.join(__dirname, "../");
@@ -95,11 +95,10 @@ export function activate(context: ExtensionContext) {
         let serverArgs = config.get<string[]>("serverArgs");
         if (!serverPath) {
             serverPath = getPython() || "python";
-            serverArgs = ["-m", "server"]
+            serverArgs = ["-m", "server"];
         }
         client = startLangServer(serverPath, serverArgs, cwd);
     }
-
 
     context.subscriptions.push(client.start());
 }
