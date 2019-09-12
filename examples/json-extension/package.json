@@ -50,10 +50,15 @@
       "type": "object",
       "title": "Json Server Configuration",
       "properties": {
-        "jsonServer.exampleConfiguration": {
+        "jsonServer.serverPath": {
           "scope": "resource",
           "type": "string",
-          "default": "You can override this message."
+          "default": ""
+        },
+        "jsonServer.serverArgs": {
+          "scope": "resource",
+          "type": "array",
+          "default": []
         }
       }
     }

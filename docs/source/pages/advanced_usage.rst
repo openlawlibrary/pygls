@@ -456,3 +456,31 @@ Workspace methods that can be used for user defined features are:
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         # Omitted
 
+Compilation
+-----------
+
+It is possible to distribute a compiled version of your language server as opposed to
+the Python scripts. There are several tools available, of which `Nuitka
+<https://nuitka.net/doc/user-manual.html>`_ is one. Nuitka compiles all dependencies and
+puts them in a directory with a runnable executable. The benefit of distributing such a
+directory instead of a Python package is that end-users do not need a working Python
+distribution on their machines.
+
+Make sure to follow Nuitka's `installation instructions
+<https://nuitka.net/doc/user-manual.html#installation>`_ first.
+
+To compile the JSON server example, you would have to run the following within the
+``json-extension`` directory:
+
+.. code:: bash
+
+   python -m nuitka ./server/__main__.py --output-dir=./build --standalone --follow-imports --show-progress
+
+Which results in a ``build/`` directory with two subdirectories: ``__main__.build/`` and
+``__main__.dist/``. You can now rename ``__main__.dist/`` and the ``__main__``
+executable inside to your liking (i.e. ``json_server``). Take it for a testdrive
+by changing the ``jsonServer.serverPath`` setting in the VS Code extension to the
+executable's path!
+
+Note that Nuitka compiles scripts into runnable executables for your current operating
+system only, which you need to think about for your end-user distribution.
