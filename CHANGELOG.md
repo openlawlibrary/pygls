@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Fixed `@command`, `@feature` and `@thread` decorators to retain type of wrapped functions ([#89])
+
+[#89]: https://github.com/openlawlibrary/pygls/pull/89
+
 ### Added
 
 - Add comparisons and repr support to Range and Location types ([#90])
