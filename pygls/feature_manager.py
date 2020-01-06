@@ -137,7 +137,7 @@ class FeatureManager:
         """Decorator used to register LSP features.
 
         Example:
-            @ls.feature('textDocument/completion', triggerCharacters=['.'])
+            @ls.feature('textDocument/completion', trigger_characters=['.'])
         """
         def decorator(f):
             # Validate

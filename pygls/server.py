@@ -248,7 +248,7 @@ class LanguageServer(Server):
         """Decorator used to register LSP features.
 
         Example:
-            @ls.feature('textDocument/completion', triggerCharacters=['.'])
+            @ls.feature('textDocument/completion', trigger_characters=['.'])
             def completions(ls, params: CompletionRequest):
                 return CompletionList(False, [CompletionItem("Completion 1")])
         """
