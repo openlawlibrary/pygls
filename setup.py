@@ -74,7 +74,8 @@ setup(
             './CHANGELOG.md',
             './LICENSE.txt',
             './README.md',
-            'ThirdPartyNotices.txt'
+            'ThirdPartyNotices.txt',
+            './pygls/py.typed'
         ])
     ],
     zip_safe=False,
