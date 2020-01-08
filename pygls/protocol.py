@@ -410,7 +410,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                                           error)
         self._send_data(response.without_none_fields())
 
-    def connection_made(self, transport: asyncio.Transport):
+    def connection_made(self, transport: asyncio.BaseTransport):
         """Method from base class, called when connection is established"""
         self.transport = transport
 
