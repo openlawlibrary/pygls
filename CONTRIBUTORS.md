@@ -3,6 +3,7 @@
 - [@augb](https://github.com/augb)
 - [Daniel Elero](https://github.com/danixeee)
 - [Denis Loginov](https://github.com/dinvlad)
+- [Jérome Perrin](https://github.com/perrinjerome)
 - [Max O'Cull](https://github.com/Maxattax97)
 - [Samuel Roeca](https://github.com/pappasam)
 - [Tomoya Tanjo](https://github.com/tom-tan)

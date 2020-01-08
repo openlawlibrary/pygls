@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Added
+
+- Add comparisons and repr support to Range and Location types ([#90])
+
+[#90]: https://github.com/openlawlibrary/pygls/pull/90
+
 ## [0.8.1] - 09/05/2019
 
 ### Changed
