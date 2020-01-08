@@ -416,7 +416,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
-        logger.debug('Received {}'.format(data))
+        logger.debug('Received {!r}'.format(data))
 
         while len(data):
             # Append the incoming chunk to the message buffer
