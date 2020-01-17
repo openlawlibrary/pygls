@@ -29,6 +29,8 @@ https://microsoft.github.io/language-server-protocol/specification#client_unregi
 """
 
 
+import enum
+import sys
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
@@ -97,7 +99,7 @@ class CodeActionContext:
         self.only = only
 
 
-class CodeActionKind:
+class CodeActionKind(str, enum.Enum):
     QuickFix = 'quickfix'
     Refactor = 'refactor'
     RefactorExtract = 'refactor.extract'
@@ -220,7 +222,7 @@ class CompletionContext:
 class CompletionItem:
     def __init__(self,
                  label: str,
-                 kind: int = None,
+                 kind: 'CompletionItemKind' = None,
                  detail: str = None,
                  documentation: Union[str, 'MarkupContent'] = None,
                  deprecated: bool = False,
@@ -265,7 +267,7 @@ class CompletionItemAbstract:
         self.preselectedSupport = preselected_support
 
 
-class CompletionItemKind:
+class CompletionItemKind(enum.IntEnum):
     Text = 1
     Method = 2
     Function = 3
@@ -321,7 +323,7 @@ class CompletionRegistrationOptions:
         self.triggerCharacters = trigger_characters
 
 
-class CompletionTriggerKind:
+class CompletionTriggerKind(enum.IntEnum):
     Invoked = 1
     TriggerCharacter = 2
     TriggerForIncompleteCompletions = 3
@@ -370,11 +372,18 @@ class DeleteFileOptions:
         self.ignore_if_exists = ignore_if_exists
 
 
+class DiagnosticSeverity(enum.IntEnum):
+    Error = 1
+    Warning = 2
+    Information = 3
+    Hint = 4
+
+
 class Diagnostic:
     def __init__(self,
                  range: 'Range',
                  message: str,
-                 severity: 'DiagnosticSeverity' = 1,
+                 severity: DiagnosticSeverity = DiagnosticSeverity.Error,
                  code: str = None,
                  source: str = None,
                  related_information: 'DiagnosticRelatedInformation' = None):
@@ -390,13 +399,6 @@ class DiagnosticRelatedInformation:
     def __init__(self, location: 'Location', message: str):
         self.location = location
         self.message = message
-
-
-class DiagnosticSeverity:
-    Error = 1
-    Warning = 2
-    Information = 3
-    Hint = 4
 
 
 class DidChangeConfigurationParams:
@@ -466,16 +468,16 @@ class DocumentFormattingParams:
         self.options = options
 
 
-class DocumentHighlight:
-    def __init__(self, range: 'Range', kind: int = 1):
-        self.range = range
-        self.kind = kind
-
-
-class DocumentHighlightKind:
+class DocumentHighlightKind(enum.IntEnum):
     Text = 1
     Read = 2
     Write = 3
+
+
+class DocumentHighlight:
+    def __init__(self, range: 'Range', kind: DocumentHighlightKind = DocumentHighlightKind.Text):
+        self.range = range
+        self.kind = kind
 
 
 class DocumentLink:
@@ -528,7 +530,7 @@ class DocumentRangeFormattingParams:
 class DocumentSymbol:
     def __init__(self,
                  name: str,
-                 kind: int,
+                 kind: 'SymbolKind',
                  range: 'Range',
                  selection_range: 'Range',
                  detail: str = None,
@@ -569,14 +571,14 @@ class ExecuteCommandOptions:
         self.commands = commands
 
 
-class FailureHandlingKind:
+class FailureHandlingKind(str, enum.Enum):
     Abort = 'abort'
     Transactional = 'transactional'
     TextOnlyTransactional = 'textOnlyTransactional'
     FailureHandlingKind = 'undo'
 
 
-class FileChangeType:
+class FileChangeType(enum.IntEnum):
     Created = 1
     Changed = 2
     Deleted = 3
@@ -588,8 +590,25 @@ class FileEvent:
         self.type = type
 
 
+if sys.version_info >= (3, 6):
+    class WatchKind(enum.IntFlag):
+        Create = 1
+        Change = 2
+        Delete = 4
+    _WatchKindType = WatchKind
+else:
+    # BBB python 3.5 does not have enum.IntFlag
+    class WatchKind:
+        Create = 1
+        Change = 2
+        Delete = 4
+    _WatchKindType = int
+
+
 class FileSystemWatcher:
-    def __init__(self, glob_pattern: str, kind: int = 7):
+    def __init__(self,
+                 glob_pattern: str,
+                 kind: _WatchKindType = WatchKind.Create | WatchKind.Change | WatchKind.Delete):
         self.globPattern = glob_pattern
         self.kind = kind
 
@@ -600,7 +619,7 @@ class FoldingRange:
                  start_character: int,
                  end_line: int,
                  end_character: int,
-                 kind: str = None):
+                 kind: 'FoldingRangeKind' = None):
         self.startLine = start_line
         self.startCharacter = start_character
         self.endLine = end_line
@@ -618,7 +637,7 @@ class FoldingRangeAbstract:
         self.lineFoldingOnly = line_folding_only
 
 
-class FoldingRangeKind:
+class FoldingRangeKind(str, enum.Enum):
     Comment = 'comment'
     Imports = 'imports'
     Region = 'region'
@@ -653,6 +672,12 @@ class HoverAbstract:
         self.contentFormat = content_format
 
 
+class Trace(str, enum.Enum):
+    Off = 'off'
+    Messages = 'messages'
+    Verbose = 'verbose'
+
+
 class InitializeParams:
     def __init__(self,
                  process_id: int,
@@ -660,8 +685,8 @@ class InitializeParams:
                  root_uri: str = None,
                  root_path: Optional[str] = None,
                  initialization_options: Optional[Any] = None,
-                 trace: Optional['Trace'] = 'off',
-                 workspace_folders: Optional[List['WorkspaceFolder']] = None):
+                 trace: Optional[Trace] = Trace.Off,
+                 workspace_folders: Optional[List['WorkspaceFolder']] = None) -> None:
         self.processId = process_id
         self.rootPath = root_path
         self.rootUri = root_uri
@@ -676,7 +701,7 @@ class InitializeResult:
         self.capabilities = capabilities
 
 
-class InsertTextFormat:
+class InsertTextFormat(enum.IntEnum):
     PlainText = 1
     Snippet = 2
 
@@ -720,7 +745,7 @@ class MarkupContent:
         self.value = value
 
 
-class MarkupKind:
+class MarkupKind(str, enum.Enum):
     PlainText = 'plaintext'
     Markdown = 'markdown'
 
@@ -730,7 +755,7 @@ class MessageActionItem:
         self.title = title
 
 
-class MessageType:
+class MessageType(enum.IntEnum):
     Error = 1
     Warning = 2
     Info = 3
@@ -896,7 +921,7 @@ class RenameParams:
         self.newName = new_name
 
 
-class ResourceOperationKind:
+class ResourceOperationKind(str, enum.Enum):
     Create = 'create'
     Rename = 'rename'
     Delete = 'delete'
@@ -1062,7 +1087,7 @@ class SymbolInformation:
         self.deprecated = deprecated
 
 
-class SymbolKind:
+class SymbolKind(enum.IntEnum):
     File = 1
     Module = 2
     Namespace = 3
@@ -1256,13 +1281,13 @@ class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
         self.includeText = include_text
 
 
-class TextDocumentSaveReason:
+class TextDocumentSaveReason(enum.IntEnum):
     Manual = 1
     AfterDelay = 2
     FocusOut = 3
 
 
-class TextDocumentSyncKind:
+class TextDocumentSyncKind(enum.IntEnum):
     NONE = 0
     FULL = 1
     INCREMENTAL = 2
@@ -1271,7 +1296,7 @@ class TextDocumentSyncKind:
 class TextDocumentSyncOptions:
     def __init__(self,
                  open_close: bool = False,
-                 change: int = TextDocumentSyncKind.NONE,
+                 change: TextDocumentSyncKind = TextDocumentSyncKind.NONE,
                  will_save: bool = False,
                  will_save_wait_until: bool = False,
                  save: SaveOptions = None):
@@ -1286,12 +1311,6 @@ class TextEdit:
     def __init__(self, range: Range, new_text: str):
         self.range = range
         self.newText = new_text
-
-
-class Trace:
-    Off = 'off'
-    Messages = 'messages'
-    Verbose = 'verbose'
 
 
 class Unregistration:
@@ -1309,12 +1328,6 @@ class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
     def __init__(self, uri: str, version: NumType):
         super().__init__(uri)
         self.version = version
-
-
-class WatchKind:
-    Create = 1
-    Change = 2
-    Delete = 4
 
 
 class WillSaveTextDocumentParams:
