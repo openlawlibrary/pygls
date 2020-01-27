@@ -575,7 +575,7 @@ class FailureHandlingKind(str, enum.Enum):
     Abort = 'abort'
     Transactional = 'transactional'
     TextOnlyTransactional = 'textOnlyTransactional'
-    FailureHandlingKind = 'undo'
+    Undo = 'undo'
 
 
 class FileChangeType(enum.IntEnum):
