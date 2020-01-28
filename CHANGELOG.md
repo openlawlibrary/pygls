@@ -10,8 +10,10 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 
 - Fixed `@command`, `@feature` and `@thread` decorators to retain type of wrapped functions ([#89])
+- Fixed missing `Undo` member from `FailureHandlingKind` in types ([#98])
 
 [#89]: https://github.com/openlawlibrary/pygls/pull/89
+[#98]: https://github.com/openlawlibrary/pygls/pull/98
 
 ### Added
 
