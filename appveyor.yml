@@ -32,8 +32,31 @@ on_failure:
         if ($fileobj) { cat $fileobj; };
       }
 
-image:
-  - Visual Studio 2017
+stack: python %PYTHON%
+
+environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.5"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.6"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.7"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON: "3.8"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "3.5"
+      PATH: C:\Python35-x64;C:\Python35-x64\Scripts\;%PATH%
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "3.6"
+      PATH: C:\Python36-x64;C:\Python36-x64\Scripts\;%PATH%
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "3.7"
+      PATH: C:\Python37-x64;C:\Python37-x64\Scripts\;%PATH%
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PYTHON: "3.8"
+      PATH: C:\Python38-x64;C:\Python38-x64\Scripts\;%PATH%
 
 # Configure the GitHub username and email for accessing the `pygls` release
 init:
@@ -42,8 +65,23 @@ init:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - C:\Python35-x64\python.exe -m pip install --upgrade pip          # upgrade pip
+  - python -m pip install --upgrade pip
+  - pip install tox
 
+  # point to the same version as in `examples/json-extension/package.json`
+  - npm install -g typescript@3.5.2
+  - tsc --version
+
+  # install vsce module (for packaging our extension into a .vsix file)
+  - npm install -g vsce@1.63.0
+
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+  - python --version
+
+# Create a Visual Studio Code Extension (only on windows)
+build_script:
   - ps: >-
       $json_extension_client_json = (Get-Content -Raw -Path examples\json-extension\package.json | ConvertFrom-Json);
       $prefixed_version = "v" + $json_extension_client_json.version;
@@ -86,39 +124,18 @@ install:
       }
       echo "APPVEYOR_BUILD_VERSION - $env:APPVEYOR_BUILD_VERSION";
 
-  # install pygls and dev dependencies
-  - C:\Python35-x64\Scripts\pip.exe install .[dev]
-  - C:\Python35-x64\Scripts\pip.exe install .[test]
-  - C:\Python35-x64\Scripts\pip.exe install -e .
-
-  # point to the same version as in `examples/json-extension/package.json`
-  - npm install -g typescript@3.5.2
-  - tsc --version
-
-  # install vsce module (for packaging our extension into a .vsix file)
-  - npm install -g vsce@1.63.0
-
-  # Output useful info for debugging.
-  - node --version
-  - npm --version
-
-# Create a Visual Studio Code Extension
-build_script:
-  - cd examples\json-extension
+  - cd examples/json-extension
   # install extension-wide js dependencies
   - npm install --save-dev
   # run tslint
-  - .\node_modules\.bin\tslint client\src\*.ts
+  - ./node_modules/.bin/tslint client/src/*.ts
   # install our dependencies
-  - npm install                                                  # TODO: replace with `yarn install`
+  - npm install # TODO: replace with `yarn install`
   - tsc -p .
-
-  - cd ..\..\
+  - cd ../../
 
 test_script:
-  - C:\Python35-x64\Scripts\flake8.exe
-  - C:\Python35-x64\Scripts\bandit.exe -r ./pygls
-  - C:\Python35-x64\Scripts\pytest.exe
+  - tox -e py
 
 after_test:
   # check function
@@ -132,9 +149,9 @@ after_test:
       }
 
   # package up the json-extension client example VS Code extension
-  - ps: cd examples/json-extension/
+  - cd examples/json-extension/
   # check to see if key files will be in the `.vsix` package to be built
-  - vsce ls > packages.txt               rem list files to be packaged
+  - vsce ls > packages.txt
   # files/folders to be checked
   - ps: CheckInVsixPackage "package.json"
   - ps: CheckInVsixPackage "out/extension.js"
@@ -143,11 +160,10 @@ after_test:
   - ps: CheckInVsixPackage "server/server.py"
   # clean-up after ourselves (so these files don't end up in our `.vsix` package)
   - rm packages.txt
-  - rm results.txt
+  - ps: rm results.txt
   # passed the basic checks, should be good-to-go
-  - vsce package                         rem "normal" command line is on purpose
-
-  - ps: cd ../
+  - vsce package
+  - cd ..
 
 # Create extensions artifacts
 artifacts:
