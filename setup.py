@@ -39,6 +39,7 @@ with open(os.path.join(package_root_dir, 'README.md'), encoding='utf-8') as f:
 development = [
     "bandit==1.6.0",  # Run locally: bandit -r ./pygls
     "flake8==3.7.7",  # Run locally: flake8
+    "mypy==0.761",    # Run locally: mypy .
 ]
 
 docs_require = [
