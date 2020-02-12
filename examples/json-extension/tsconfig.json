@@ -1,14 +1,18 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "target": "es6",
-        "outDir": "out",
+        "module": "commonjs",
+        "sourceMap": true,
+        "strict": true,
+        "rootDir": "client/src",
+        "outDir": "client/out",
         "lib": [
             "es6"
         ],
-        "sourceMap": true
+        "types": [],
+        "skipLibCheck": true,
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
     ]
 }

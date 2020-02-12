@@ -9,19 +9,27 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
-- Fixed `@command`, `@feature` and `@thread` decorators to retain type of wrapped functions ([#89])
 - Fixed missing `Undo` member from `FailureHandlingKind` in types ([#98])
-
-[#89]: https://github.com/openlawlibrary/pygls/pull/89
-[#98]: https://github.com/openlawlibrary/pygls/pull/98
+- Fixed `@command`, `@feature` and `@thread` decorators to retain type of wrapped functions ([#89])
 
 ### Added
 
-- Add comparisons and repr support to Range and Location types ([#90])
+- _Azure Pipelines_ build script ([#100] and [#103])
+- Run tests and linters on multiple python versions with _tox_ ([#100])
 - Use python enums in types module ([#92])
+- Add comparisons and repr support to Range and Location types ([#90])
 
-[#90]: https://github.com/openlawlibrary/pygls/pull/90
+### Removed
+
+- _appveyor_ build script ([#103])
+
+
+[#103]: https://github.com/openlawlibrary/pygls/pull/103
+[#100]: https://github.com/openlawlibrary/pygls/pull/100
+[#98]: https://github.com/openlawlibrary/pygls/pull/98
 [#92]: https://github.com/openlawlibrary/pygls/pull/92
+[#90]: https://github.com/openlawlibrary/pygls/pull/90
+[#89]: https://github.com/openlawlibrary/pygls/pull/89
 
 ## [0.8.1] - 09/05/2019
 
