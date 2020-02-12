@@ -1,16 +1,18 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "json-extension-watch:client",
-            "type": "typescript",
-            "tsconfig": "tsconfig.json",
-            "option": "watch",
-            "problemMatcher": [
-                "$tsc-watch"
-            ]
-        }
+            "label": "compile:client",
+            "type": "shell",
+            "command": "tsc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "panel": "shared",
+                "reveal": "silent",
+            },
+        },
     ]
 }

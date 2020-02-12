@@ -1,13 +1,10 @@
 .vscode
 .gitignore
-
-client
-
+client/out/*.map
+client/src/
 tsconfig.json
 tslint.json
-
-out/*.map
-
 package.json
 package-lock.json
 
+.pytest_cache

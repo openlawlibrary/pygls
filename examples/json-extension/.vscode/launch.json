@@ -3,9 +3,9 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Client",
             "type": "extensionHost",
             "request": "launch",
-            "name": "Launch Client",
             "runtimeExecutable": "${execPath}",
             "sourceMaps": true,
             "args": [
@@ -14,7 +14,7 @@
             "outFiles": [
                 "${workspaceRoot}/client/out/**/*.js"
             ],
-            "preLaunchTask": "json-extension-watch:client",
+            "preLaunchTask": "compile:client",
             "env": {
                 "VSCODE_DEBUG_MODE": "true"
             }

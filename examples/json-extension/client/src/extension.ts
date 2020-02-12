@@ -78,7 +78,7 @@ export function activate(context: ExtensionContext) {
     client = startLangServerTCP(2087);
   } else {
     // Production - Client is going to run the server (for use within `.vsix` package)
-    const cwd = path.join(__dirname, "../");
+    const cwd = path.join(__dirname, "..", "..");
     const pythonPath = workspace.getConfiguration("python").get<string>("pythonPath");
 
     if (!pythonPath) {
@@ -92,8 +92,5 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> {
-  if (!client) {
-    return undefined;
-  }
-  return client.stop();
+  return client ? client.stop() : Promise.resolve();
 }
