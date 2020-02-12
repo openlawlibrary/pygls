@@ -1,6 +1,8 @@
 .vscode/settings.json
 .idea
 
+*.vsix
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -105,3 +107,6 @@ venv.bak/
 
 # OS files
 .DS_Store
+
+# mypy
+.mypy_cache
