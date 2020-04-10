@@ -230,7 +230,7 @@ class CompletionItem:
                  sort_text: str = None,
                  filter_text: str = None,
                  insert_text: str = None,
-                 insert_text_format: str = None,
+                 insert_text_format: int = 1,
                  text_edit: 'TextEdit' = None,
                  additional_text_edits: List['TextEdit'] = None,
                  commit_characters: List[str] = None,
@@ -291,6 +291,11 @@ class CompletionItemKind(enum.IntEnum):
 class CompletionItemKindAbstract:
     def __init__(self, value_set: List['CompletionItemKind']):
         self.valueSet = value_set
+
+
+class InsertTextFormat(enum.IntEnum):
+    PlainText = 1
+    Snippet = 2
 
 
 class CompletionList:
