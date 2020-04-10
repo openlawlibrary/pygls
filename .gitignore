@@ -1,5 +1,6 @@
 .vscode/settings.json
 .idea
+.dir-locals.el
 
 *.vsix
 
