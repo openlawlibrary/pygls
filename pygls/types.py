@@ -706,11 +706,6 @@ class InitializeResult:
         self.capabilities = capabilities
 
 
-class InsertTextFormat(enum.IntEnum):
-    PlainText = 1
-    Snippet = 2
-
-
 class Location:
     def __init__(self, uri: str, range: 'Range'):
         self.uri = uri
