@@ -230,7 +230,7 @@ class CompletionItem:
                  sort_text: str = None,
                  filter_text: str = None,
                  insert_text: str = None,
-                 insert_text_format: str = None,
+                 insert_text_format: 'InsertTextFormat' = None,
                  text_edit: 'TextEdit' = None,
                  additional_text_edits: List['TextEdit'] = None,
                  commit_characters: List[str] = None,
