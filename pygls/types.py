@@ -293,11 +293,6 @@ class CompletionItemKindAbstract:
         self.valueSet = value_set
 
 
-class InsertTextFormat(enum.IntEnum):
-    PlainText = 1
-    Snippet = 2
-
-
 class CompletionList:
     def __init__(self,
                  is_incomplete: bool,
@@ -704,6 +699,11 @@ class InitializeParams:
 class InitializeResult:
     def __init__(self, capabilities: 'ServerCapabilities'):
         self.capabilities = capabilities
+
+
+class InsertTextFormat(enum.IntEnum):
+    PlainText = 1
+    Snippet = 2
 
 
 class Location:
