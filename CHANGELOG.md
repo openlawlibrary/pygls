@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+## [0.9.0] - 04/20/2020
+
 ### Changed
 
 - Fixed missing `Undo` member from `FailureHandlingKind` in types ([#98])
@@ -22,7 +24,6 @@ and this project adheres to [Semantic Versioning][semver].
 ### Removed
 
 - _appveyor_ build script ([#103])
-
 
 [#103]: https://github.com/openlawlibrary/pygls/pull/103
 [#100]: https://github.com/openlawlibrary/pygls/pull/100
@@ -102,7 +103,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## 0.7.0 - 12/21/2018
 
-- Open source  _pygls_
+- Open source _pygls_
 
 ## 0.6.0
 
@@ -144,7 +145,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/openlawlibrary/pygls/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/openlawlibrary/pygls/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/openlawlibrary/pygls/compare/v0.7.4...v0.8.0
 [0.7.4]: https://github.com/openlawlibrary/pygls/compare/v0.7.3...v0.7.4
