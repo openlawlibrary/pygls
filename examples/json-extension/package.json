@@ -26,8 +26,8 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
-        "command": "registerCompletions",
-        "title": "Register completions"
+        "command": "changeTriggerChars",
+        "title": "Change completion trigger characters"
       },
       {
         "command": "showConfigurationAsync",
@@ -54,6 +54,13 @@
           "scope": "resource",
           "type": "string",
           "default": "You can override this message."
+        },
+        "jsonServer.triggerCharacters": {
+          "scope": "resource",
+          "type": "array",
+          "default": [
+            ","
+          ]
         }
       }
     }

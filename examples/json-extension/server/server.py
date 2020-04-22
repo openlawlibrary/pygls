@@ -20,7 +20,8 @@ import time
 import uuid
 from json import JSONDecodeError
 
-from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
+from pygls.exceptions import FeatureAlreadyRegisteredError
+from pygls.features import (COMPLETION, INITIALIZED, TEXT_DOCUMENT_DID_CHANGE,
                             TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
 from pygls.server import LanguageServer
 from pygls.types import (CompletionItem, CompletionList, CompletionParams,
@@ -36,9 +37,9 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
 class JsonLanguageServer(LanguageServer):
+    CMD_CHANGE_TRIGGER_CHARS = 'changeTriggerChars'
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
-    CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
     CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
     CMD_SHOW_CONFIGURATION_THREAD = 'showConfigurationThread'
@@ -46,8 +47,54 @@ class JsonLanguageServer(LanguageServer):
 
     CONFIGURATION_SECTION = 'jsonServer'
 
+    COMPLETION_ID = str(uuid.uuid4())
+
     def __init__(self):
         super().__init__()
+
+    async def re_register_completions(self):
+        """Unregister and register completions with new options."""
+        config = await self.get_configuration_async(ConfigurationParams([
+            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        ]))
+
+        trigger_chars = config[0].triggerCharacters
+        # register completions
+        await self.re_register_feature(
+            self.COMPLETION_ID,
+            self.completions,
+            COMPLETION,
+            **dict(triggerCharacters=trigger_chars)
+        )
+        self.show_message("Completion trigger characters are: {}"
+                          .format(" ".join(trigger_chars)))
+
+    async def re_register_feature(self, f_id, f, feature_name, **options):
+        """Unregister and register feature with new options."""
+        # unregister
+        params = UnregistrationParams([Unregistration(f_id, feature_name)])
+        await self.unregister_capability_async(params)
+        # register
+        params = RegistrationParams([Registration(f_id, feature_name, options)])
+        response = await self.register_capability_async(params)
+        if response is None:
+            try:
+                self.feature(feature_name)(f)
+            except FeatureAlreadyRegisteredError:
+                pass
+        else:
+            # error
+            pass
+
+    def completions(self, params: CompletionParams = None):
+        """Returns completion items."""
+        return CompletionList(False, [
+            CompletionItem('"'),
+            CompletionItem('['),
+            CompletionItem(']'),
+            CompletionItem('{'),
+            CompletionItem('}')
+        ])
 
 
 json_server = JsonLanguageServer()
@@ -89,16 +136,10 @@ def _validate_json(source):
     return diagnostics
 
 
-@json_server.feature(COMPLETION, trigger_characters=[','])
-def completions(params: CompletionParams = None):
-    """Returns completion items."""
-    return CompletionList(False, [
-        CompletionItem('"'),
-        CompletionItem('['),
-        CompletionItem(']'),
-        CompletionItem('{'),
-        CompletionItem('}')
-    ])
+@json_server.command(JsonLanguageServer.CMD_CHANGE_TRIGGER_CHARS)
+async def change_trigger_chars(ls: JsonLanguageServer, *args):
+    """Change completions trigger characters based on settings"""
+    await ls.re_register_completions()
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
@@ -144,17 +185,10 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     _validate(ls, params)
 
 
-@json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
-async def register_completions(ls: JsonLanguageServer, *args):
-    """Register completions method on the client."""
-    params = RegistrationParams([Registration(str(uuid.uuid4()), COMPLETION,
-                                              {"triggerCharacters": "[':']"})])
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message('Successfully registered completions method')
-    else:
-        ls.show_message('Error happened during completions registration.',
-                        MessageType.Error)
+@json_server.feature(INITIALIZED)
+async def initialized(ls: JsonLanguageServer, *args, **kwargs):
+    """Register features that could be changed in the future."""
+    await ls.re_register_completions()
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
