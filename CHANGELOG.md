@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Fixed issue where `py.typed` was not copied into setuptools-built package
+
 ## [0.9.0] - 04/20/2020
 
 ### Changed

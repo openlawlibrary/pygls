@@ -69,6 +69,7 @@ setup(
     keywords=KEYWORDS,
     license=LICENSE,
     packages=packages,
+    package_data={'': ['py.typed']},
     include_package_data=True,
     data_files=[
         ('lib/site-packages/pygls', [
