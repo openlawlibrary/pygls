@@ -125,6 +125,9 @@ def test_offset_at_position(doc):
     assert doc.offset_at_position(Position(1, 5)) == 14
     assert doc.offset_at_position(Position(2, 0)) == 13
     assert doc.offset_at_position(Position(2, 4)) == 17
+    assert doc.offset_at_position(Position(3, 6)) == 27
+    assert doc.offset_at_position(Position(3, 7)) == 27
+    assert doc.offset_at_position(Position(3, 8)) == 28
     assert doc.offset_at_position(Position(4, 0)) == 39
     assert doc.offset_at_position(Position(5, 0)) == 39
 
