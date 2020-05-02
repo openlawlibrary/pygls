@@ -151,8 +151,25 @@ class Document(object):
         return self.source.splitlines(True)
 
     def offset_at_position(self, position: Position) -> int:
-        """Return the byte-offset pointed at by the given position."""
-        return position.character + len(''.join(self.lines[:position.line]))
+        """Return the character offset pointed at by the given position.
+
+        A position inside a document is expressed as a zero-based line and
+        character offset. The offsets are based on a UTF-16 string representation.
+
+        This method converts UTF-16 character offsets to UTF-32.
+
+        The offset of the closing quotation mark in x="😋" is
+        - 5 in UTF-16 representation
+        - 4 in UTF-32 representation
+        """
+        column = 0
+        if position.line < len(self.lines):
+            column = position.character
+            for ch in self.lines[position.line][:position.character]:
+                if ord(ch) > 0xFFFF:
+                    column -= 1
+
+        return column + sum(len(line) for line in self.lines[:position.line])
 
     @property
     def source(self) -> str:
@@ -170,6 +187,9 @@ class Document(object):
 
         line = self.lines[position.line]
         i = position.character
+        for ch in line[:position.character]:
+            if ord(ch) > 0xFFFF:
+                i -= 1
         # Split word in two
         start = line[:i]
         end = line[i:]

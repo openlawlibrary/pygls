@@ -74,7 +74,7 @@ def test_document_line_edit():
 
 
 def test_document_lines(doc):
-    assert len(doc.lines) == 3
+    assert len(doc.lines) == 4
     assert doc.lines[0] == 'document\n'
 
 
@@ -125,7 +125,8 @@ def test_offset_at_position(doc):
     assert doc.offset_at_position(Position(1, 5)) == 14
     assert doc.offset_at_position(Position(2, 0)) == 13
     assert doc.offset_at_position(Position(2, 4)) == 17
-    assert doc.offset_at_position(Position(4, 0)) == 21
+    assert doc.offset_at_position(Position(4, 0)) == 39
+    assert doc.offset_at_position(Position(5, 0)) == 39
 
 
 def test_word_at_position(doc):
@@ -136,4 +137,5 @@ def test_word_at_position(doc):
     assert doc.word_at_position(Position(0, 1000)) == 'document'
     assert doc.word_at_position(Position(1, 5)) == 'for'
     assert doc.word_at_position(Position(2, 0)) == 'testing'
+    assert doc.word_at_position(Position(3, 10)) == 'unicode'
     assert doc.word_at_position(Position(4, 0)) == ''
