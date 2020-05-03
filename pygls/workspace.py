@@ -57,10 +57,8 @@ class Document(object):
         text = change.text
         change_range = change.range
 
-        start_line = change_range.start.line
-        start_col = change_range.start.character
-        end_line = change_range.end.line
-        end_col = change_range.end.character
+        start_line, start_col = self.position_to_rowcol(change_range.start)
+        end_line, end_col = self.position_to_rowcol(change_range.end)
 
         # Check for an edit occuring at the very end of the file
         if start_line == len(self.lines):
@@ -150,26 +148,60 @@ class Document(object):
     def lines(self) -> List[str]:
         return self.source.splitlines(True)
 
-    def offset_at_position(self, position: Position) -> int:
-        """Return the character offset pointed at by the given position.
+    def position_to_rowcol(self, position: Position) -> tuple:
+        """Convert a LSP position into a row, column pair.
 
-        A position inside a document is expressed as a zero-based line and
-        character offset. The offsets are based on a UTF-16 string representation.
-
-        This method converts UTF-16 character offsets to UTF-32.
+        This method converts the Position's character offset
+        from UTF-16 code units to UTF-32 code points.
 
         The offset of the closing quotation mark in x="😋" is
         - 5 in UTF-16 representation
         - 4 in UTF-32 representation
-        """
-        column = 0
-        if position.line < len(self.lines):
-            column = position.character
-            for ch in self.lines[position.line][:position.character]:
-                if ord(ch) > 0xFFFF:
-                    column -= 1
 
-        return column + sum(len(line) for line in self.lines[:position.line])
+        A python application can't use the character memeber of `Position`
+        directly as per specification it is represented as a zero-based line and
+        character offset based based on a UTF-16 string representation.
+
+        All characters whose codepoint exeeds the Basic Multilingual Plane are
+        represented by 2 UTF-16 code units.
+
+        see: https://github.com/microsoft/language-server-protocol/issues/376
+        """
+        row = len(self.lines)
+        col = 0
+        if row > position.line:
+            row = position.line
+            col = position.character
+            for ch in self.lines[row][:position.character]:
+                if ord(ch) > 0xFFFF:
+                    col -= 1
+        return (row, col)
+
+    def rowcol_to_position(self, row: int, col: int) -> Position:
+        """Convert a row, column pair into a LSP Position.
+
+        This method converts the `col` argument from UTF-32 code points to
+        to UTF-16 code units and returns a `Position` object.
+
+        A python application can't use the character memeber of `Position`
+        directly as per specification it is represented as a zero-based line and
+        character offset based based on a UTF-16 string representation.
+
+        All characters whose codepoint exeeds the Basic Multilingual Plane are
+        represented by 2 UTF-16 code units.
+        """
+        line = len(self.lines)
+        character = 0
+        if line > row:
+            line = row
+            character = sum(1 + int(ord(ch) > 0xFFFF) for ch in self.lines[line][:col])
+
+        return Position(line, character)
+
+    def offset_at_position(self, position: Position) -> int:
+        """Return the character offset pointed at by the given position."""
+        row, col = self.position_to_rowcol(position)
+        return col + sum(len(line) for line in self.lines[:row])
 
     @property
     def source(self) -> str:
@@ -185,14 +217,11 @@ class Document(object):
         if position.line >= len(self.lines):
             return ''
 
-        line = self.lines[position.line]
-        i = position.character
-        for ch in line[:position.character]:
-            if ord(ch) > 0xFFFF:
-                i -= 1
+        row, col = self.position_to_rowcol(position)
+        line = self.lines[row]
         # Split word in two
-        start = line[:i]
-        end = line[i:]
+        start = line[:col]
+        end = line[col:]
 
         # Take end of start and start of end to find word
         # These are guaranteed to match, even if they match the empty string
