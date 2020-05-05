@@ -177,7 +177,7 @@ class Server:
                              self._stop_event,
                              stdin or sys.stdin.buffer,
                              self.lsp.data_received))
-        except SystemExit:
+        except (KeyboardInterrupt, SystemExit):
             pass
         finally:
             self._stop_event.set()
@@ -192,7 +192,7 @@ class Server:
         )
         try:
             self.loop.run_forever()
-        except SystemExit:
+        except (KeyboardInterrupt, SystemExit):
             pass
         finally:
             self.shutdown()
