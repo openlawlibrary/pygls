@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Exit server normally when `ctrl+c` is pressed in command shell.
+
+
 ## [0.9.0] - 04/20/2020
 
 ### Changed
