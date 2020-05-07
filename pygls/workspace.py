@@ -33,6 +33,58 @@ RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
 log = logging.getLogger(__name__)
 
 
+def position_to_rowcol(lines: List[str], position: Position) -> tuple:
+    """Convert a LSP position into a row, column pair.
+
+    This method converts the Position's character offset
+    from UTF-16 code units to UTF-32 code points.
+
+    The offset of the closing quotation mark in x="😋" is
+    - 5 in UTF-16 representation
+    - 4 in UTF-32 representation
+
+    A python application can't use the character memeber of `Position`
+    directly as per specification it is represented as a zero-based line and
+    character offset based based on a UTF-16 string representation.
+
+    All characters whose codepoint exeeds the Basic Multilingual Plane are
+    represented by 2 UTF-16 code units.
+
+    see: https://github.com/microsoft/language-server-protocol/issues/376
+    """
+    row = len(lines)
+    col = 0
+    if row > position.line:
+        row = position.line
+        col = position.character
+        for ch in lines[row][:position.character]:
+            if ord(ch) > 0xFFFF:
+                col -= 1
+    return (row, col)
+
+
+def rowcol_to_position(lines: List[str], row: int, col: int) -> Position:
+    """Convert a row, column pair into a LSP Position.
+
+    This method converts the `col` argument from UTF-32 code points to
+    to UTF-16 code units and returns a `Position` object.
+
+    A python application can't use the character memeber of `Position`
+    directly as per specification it is represented as a zero-based line and
+    character offset based based on a UTF-16 string representation.
+
+    All characters whose codepoint exeeds the Basic Multilingual Plane are
+    represented by 2 UTF-16 code units.
+    """
+    line = len(lines)
+    character = 0
+    if line > row:
+        line = row
+        character = sum(1 + int(ord(ch) > 0xFFFF) for ch in lines[line][:col])
+
+    return Position(line, character)
+
+
 class Document(object):
 
     def __init__(self, uri, source=None, version=None, local=True,
@@ -54,14 +106,15 @@ class Document(object):
 
     def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
         """Apply an INCREMENTAL text change to the document"""
+        lines = self.lines
         text = change.text
         change_range = change.range
 
-        start_line, start_col = self.position_to_rowcol(change_range.start)
-        end_line, end_col = self.position_to_rowcol(change_range.end)
+        start_line, start_col = position_to_rowcol(lines, change_range.start)
+        end_line, end_col = position_to_rowcol(lines, change_range.end)
 
         # Check for an edit occuring at the very end of the file
-        if start_line == len(self.lines):
+        if start_line == len(lines):
             self._source = self.source + text
             return
 
@@ -70,7 +123,7 @@ class Document(object):
         # Iterate over the existing document until we hit the edit range,
         # at which point we write the new text, then loop until we hit
         # the end of the range and continue writing.
-        for i, line in enumerate(self.lines):
+        for i, line in enumerate(lines):
             if i < start_line:
                 new.write(line)
                 continue
@@ -149,59 +202,16 @@ class Document(object):
         return self.source.splitlines(True)
 
     def position_to_rowcol(self, position: Position) -> tuple:
-        """Convert a LSP position into a row, column pair.
-
-        This method converts the Position's character offset
-        from UTF-16 code units to UTF-32 code points.
-
-        The offset of the closing quotation mark in x="😋" is
-        - 5 in UTF-16 representation
-        - 4 in UTF-32 representation
-
-        A python application can't use the character memeber of `Position`
-        directly as per specification it is represented as a zero-based line and
-        character offset based based on a UTF-16 string representation.
-
-        All characters whose codepoint exeeds the Basic Multilingual Plane are
-        represented by 2 UTF-16 code units.
-
-        see: https://github.com/microsoft/language-server-protocol/issues/376
-        """
-        row = len(self.lines)
-        col = 0
-        if row > position.line:
-            row = position.line
-            col = position.character
-            for ch in self.lines[row][:position.character]:
-                if ord(ch) > 0xFFFF:
-                    col -= 1
-        return (row, col)
+        return position_to_rowcol(self.lines, position)
 
     def rowcol_to_position(self, row: int, col: int) -> Position:
-        """Convert a row, column pair into a LSP Position.
-
-        This method converts the `col` argument from UTF-32 code points to
-        to UTF-16 code units and returns a `Position` object.
-
-        A python application can't use the character memeber of `Position`
-        directly as per specification it is represented as a zero-based line and
-        character offset based based on a UTF-16 string representation.
-
-        All characters whose codepoint exeeds the Basic Multilingual Plane are
-        represented by 2 UTF-16 code units.
-        """
-        line = len(self.lines)
-        character = 0
-        if line > row:
-            line = row
-            character = sum(1 + int(ord(ch) > 0xFFFF) for ch in self.lines[line][:col])
-
-        return Position(line, character)
+        return rowcol_to_position(self.lines, row, col)
 
     def offset_at_position(self, position: Position) -> int:
         """Return the character offset pointed at by the given position."""
-        row, col = self.position_to_rowcol(position)
-        return col + sum(len(line) for line in self.lines[:row])
+        lines = self.lines
+        row, col = position_to_rowcol(lines, position)
+        return col + sum(len(line) for line in lines[:row])
 
     @property
     def source(self) -> str:
@@ -214,11 +224,12 @@ class Document(object):
         """
         Get the word under the cursor returning the start and end positions.
         """
-        if position.line >= len(self.lines):
+        lines = self.lines
+        if position.line >= len(lines):
             return ''
 
-        row, col = self.position_to_rowcol(position)
-        line = self.lines[row]
+        row, col = position_to_rowcol(lines, position)
+        line = lines[row]
         # Split word in two
         start = line[:col]
         end = line[col:]
