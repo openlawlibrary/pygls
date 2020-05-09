@@ -389,8 +389,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                 len(body), self.CONTENT_TYPE, self.CHARSET
             ).encode(self.CHARSET)
 
-            self.transport.write(header)
-            self.transport.write(body)
+            self.transport.write(header + body)
         except Exception:
             logger.error(traceback.format_exc())
 
