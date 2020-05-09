@@ -22,8 +22,8 @@ import os
 import re
 from typing import List
 
-from .types import (NumType, Position, TextDocumentContentChangeEvent, TextDocumentItem,
-                    TextDocumentSyncKind, WorkspaceFolder)
+from .types import (NumType, Position, Range, TextDocumentContentChangeEvent,
+                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
 from .uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -33,16 +33,56 @@ RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
 log = logging.getLogger(__name__)
 
 
-def position_to_rowcol(lines: List[str], position: Position) -> tuple:
-    """Convert a LSP position into a row, column pair.
+def utf16_unit_offset(chars: str):
+    """Calculate the number of characters which need two utf-16 code units.
 
-    This method converts the Position's character offset
-    from UTF-16 code units to UTF-32 code points.
+    Arguments:
+        chars (str): The string to count occurrences of utf-16 code units for.
+    """
+    return sum(ord(ch) > 0xFFFF for ch in chars)
+
+
+def utf16_num_units(chars: str):
+    """Calculate the length of `str` in utf-16 code units.
+
+    Arguments:
+        chars (str): The string to return the length in utf-16 code units for.
+    """
+    return len(chars) + utf16_unit_offset(chars)
+
+
+def position_from_utf16(lines: List[str], position: Position) -> Position:
+    """Convert the position.character from utf-16 code units to utf-32.
+
+    A python application can't use the character memeber of `Position`
+    directly as per specification it is represented as a zero-based line and
+    character offset based based on a UTF-16 string representation.
+
+    All characters whose codepoint exeeds the Basic Multilingual Plane are
+    represented by 2 UTF-16 code units.
 
     The offset of the closing quotation mark in x="😋" is
     - 5 in UTF-16 representation
     - 4 in UTF-32 representation
 
+    see: https://github.com/microsoft/language-server-protocol/issues/376
+
+    Arguments:
+        lines (list):
+            The content of the document which the position referes to.
+        position (Position):
+            The line and character offset in utf-16 code units.
+
+    Returns:
+        The position with `character` being converted to utf-32 code units.
+    """
+    position.character -= utf16_unit_offset(lines[position.line][:position.character])
+    return position
+
+
+def position_to_utf16(lines: List[str], position: Position) -> Position:
+    """Convert the position.character from utf-32 to utf-16 code units.
+
     A python application can't use the character memeber of `Position`
     directly as per specification it is represented as a zero-based line and
     character offset based based on a UTF-16 string representation.
@@ -50,39 +90,77 @@ def position_to_rowcol(lines: List[str], position: Position) -> tuple:
     All characters whose codepoint exeeds the Basic Multilingual Plane are
     represented by 2 UTF-16 code units.
 
+    The offset of the closing quotation mark in x="😋" is
+    - 5 in UTF-16 representation
+    - 4 in UTF-32 representation
+
     see: https://github.com/microsoft/language-server-protocol/issues/376
+
+    Arguments:
+        lines (list):
+            The content of the document which the position referes to.
+        position (Position):
+            The line and character offset in utf-32 code units.
+
+    Returns:
+        The position with `character` being converted to utf-16 code units.
     """
+    position.character += utf16_unit_offset(lines[position.line][:position.character])
+    return position
+
+
+def range_from_utf16(lines: List[str], range: Range) -> Range:
+    """Convert range.[start|end].character from utf-16 code units to utf-32.
+
+    Arguments:
+        lines (list):
+            The content of the document which the range referes to.
+        range (Range):
+            The line and character offset in utf-32 code units.
+
+    Returns:
+        The range with `character` offsets being converted to utf-16 code units.
+    """
+    position_from_utf16(lines, range.start)
+    position_from_utf16(lines, range.end)
+    return range
+
+
+def range_to_utf16(lines: List[str], range: Range) -> Range:
+    """Convert range.[start|end].character from utf-32 to utf-16 code units.
+
+    Arguments:
+        lines (list):
+            The content of the document which the range referes to.
+        range (Range):
+            The line and character offset in utf-16 code units.
+
+    Returns:
+        The range with `character` offsets being converted to utf-32 code units.
+    """
+    position_to_utf16(lines, range.start)
+    position_to_utf16(lines, range.end)
+    return range
+
+
+def position_to_rowcol(lines: List[str], position: Position) -> tuple:
+    """Convert a LSP position into a row, column pair."""
     row = len(lines)
     col = 0
     if row > position.line:
         row = position.line
         col = position.character
-        for ch in lines[row][:position.character]:
-            if ord(ch) > 0xFFFF:
-                col -= 1
+        col -= utf16_unit_offset(lines[row][:col])
+
     return (row, col)
 
 
 def rowcol_to_position(lines: List[str], row: int, col: int) -> Position:
-    """Convert a row, column pair into a LSP Position.
-
-    This method converts the `col` argument from UTF-32 code points to
-    to UTF-16 code units and returns a `Position` object.
-
-    A python application can't use the character memeber of `Position`
-    directly as per specification it is represented as a zero-based line and
-    character offset based based on a UTF-16 string representation.
-
-    All characters whose codepoint exeeds the Basic Multilingual Plane are
-    represented by 2 UTF-16 code units.
-    """
-    line = len(lines)
-    character = 0
-    if line > row:
-        line = row
-        character = sum(1 + int(ord(ch) > 0xFFFF) for ch in lines[line][:col])
-
-    return Position(line, character)
+    """Convert a row, column pair into a LSP Position."""
+    rows = len(lines)
+    if row < rows:
+        return Position(row, col + utf16_unit_offset(lines[row][:col]))
+    return Position(rows, 0)
 
 
 class Document(object):
@@ -200,12 +278,6 @@ class Document(object):
     @property
     def lines(self) -> List[str]:
         return self.source.splitlines(True)
-
-    def position_to_rowcol(self, position: Position) -> tuple:
-        return position_to_rowcol(self.lines, position)
-
-    def rowcol_to_position(self, row: int, col: int) -> Position:
-        return rowcol_to_position(self.lines, row, col)
 
     def offset_at_position(self, position: Position) -> int:
         """Return the character offset pointed at by the given position."""
