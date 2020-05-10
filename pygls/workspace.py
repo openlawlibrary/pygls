@@ -76,8 +76,13 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
     Returns:
         The position with `character` being converted to utf-32 code units.
     """
-    position.character -= utf16_unit_offset(lines[position.line][:position.character])
-    return position
+    try:
+        return Position(
+            position.line,
+            position.character - utf16_unit_offset(lines[position.line][:position.character])
+        )
+    except IndexError:
+        return Position(len(lines), 0)
 
 
 def position_to_utf16(lines: List[str], position: Position) -> Position:
@@ -105,8 +110,13 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
     Returns:
         The position with `character` being converted to utf-16 code units.
     """
-    position.character += utf16_unit_offset(lines[position.line][:position.character])
-    return position
+    try:
+        return Position(
+            position.line,
+            position.character + utf16_unit_offset(lines[position.line][:position.character])
+        )
+    except IndexError:
+        return Position(len(lines), 0)
 
 
 def range_from_utf16(lines: List[str], range: Range) -> Range:
@@ -121,9 +131,10 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
     Returns:
         The range with `character` offsets being converted to utf-16 code units.
     """
-    position_from_utf16(lines, range.start)
-    position_from_utf16(lines, range.end)
-    return range
+    return Range(
+        position_from_utf16(lines, range.start),
+        position_from_utf16(lines, range.end)
+    )
 
 
 def range_to_utf16(lines: List[str], range: Range) -> Range:
@@ -138,29 +149,10 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
     Returns:
         The range with `character` offsets being converted to utf-32 code units.
     """
-    position_to_utf16(lines, range.start)
-    position_to_utf16(lines, range.end)
-    return range
-
-
-def position_to_rowcol(lines: List[str], position: Position) -> tuple:
-    """Convert a LSP position into a row, column pair."""
-    row = len(lines)
-    col = 0
-    if row > position.line:
-        row = position.line
-        col = position.character
-        col -= utf16_unit_offset(lines[row][:col])
-
-    return (row, col)
-
-
-def rowcol_to_position(lines: List[str], row: int, col: int) -> Position:
-    """Convert a row, column pair into a LSP Position."""
-    rows = len(lines)
-    if row < rows:
-        return Position(row, col + utf16_unit_offset(lines[row][:col]))
-    return Position(rows, 0)
+    return Range(
+        position_to_utf16(lines, range.start),
+        position_to_utf16(lines, range.end)
+    )
 
 
 class Document(object):
@@ -188,8 +180,7 @@ class Document(object):
         text = change.text
         change_range = change.range
 
-        start_line, start_col = position_to_rowcol(lines, change_range.start)
-        end_line, end_col = position_to_rowcol(lines, change_range.end)
+        (start_line, start_col), (end_line, end_col) = range_from_utf16(lines, change_range)
 
         # Check for an edit occuring at the very end of the file
         if start_line == len(lines):
@@ -282,7 +273,7 @@ class Document(object):
     def offset_at_position(self, position: Position) -> int:
         """Return the character offset pointed at by the given position."""
         lines = self.lines
-        row, col = position_to_rowcol(lines, position)
+        row, col = position_from_utf16(lines, position)
         return col + sum(len(line) for line in lines[:row])
 
     @property
@@ -300,7 +291,7 @@ class Document(object):
         if position.line >= len(lines):
             return ''
 
-        row, col = position_to_rowcol(lines, position)
+        row, col = position_from_utf16(lines, position)
         line = lines[row]
         # Split word in two
         start = line[:col]

@@ -19,8 +19,7 @@
 from pygls.types import (Position, Range, TextDocumentContentChangeEvent,
                          TextDocumentSyncKind)
 from pygls.workspace import (
-    Document, position_from_utf16, position_to_utf16, range_from_utf16,
-    range_to_utf16, rowcol_to_position, position_to_rowcol
+    Document, position_from_utf16, position_to_utf16, range_from_utf16, range_to_utf16
 )
 
 from .conftest import DOC, DOC_URI
@@ -123,23 +122,13 @@ def test_document_source_unicode():
     assert isinstance(document_mem.source, type(document_disk.source))
 
 
-def test_rowcol_to_position():
-    assert rowcol_to_position(['x="😋"'], 0, 3) == Position(0, 3)
-    assert rowcol_to_position(['x="😋"'], 0, 4) == Position(0, 5)
-
-
-def test_position_to_rowcol():
-    assert position_to_rowcol(['x="😋"'], Position(0, 3)) == (0, 3)
-    assert position_to_rowcol(['x="😋"'], Position(0, 5)) == (0, 4)
-
-
 def test_position_from_utf16():
     assert position_from_utf16(['x="😋"'], Position(0, 3)) == Position(0, 3)
     assert position_from_utf16(['x="😋"'], Position(0, 5)) == Position(0, 4)
 
     position = Position(0, 5)
     position_from_utf16(['x="😋"'], position)
-    assert position == Position(0, 4)
+    assert position == Position(0, 5)
 
 
 def test_position_to_utf16():
@@ -148,7 +137,7 @@ def test_position_to_utf16():
 
     position = Position(0, 4)
     position_to_utf16(['x="😋"'], position)
-    assert position == Position(0, 5)
+    assert position == Position(0, 4)
 
 
 def test_range_from_utf16():
@@ -158,7 +147,7 @@ def test_range_from_utf16():
 
     range = Range(Position(0, 3), Position(0, 5))
     range_from_utf16(['x="😋"'], range)
-    assert range == Range(Position(0, 3), Position(0, 4))
+    assert range == Range(Position(0, 3), Position(0, 5))
 
 
 def test_range_to_utf16():
@@ -168,7 +157,7 @@ def test_range_to_utf16():
 
     range = Range(Position(0, 3), Position(0, 4))
     range_to_utf16(['x="😋"'], range)
-    assert range == Range(Position(0, 3), Position(0, 5))
+    assert range == Range(Position(0, 3), Position(0, 4))
 
 
 def test_offset_at_position(doc):
