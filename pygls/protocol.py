@@ -195,7 +195,6 @@ class JsonRPCProtocol(asyncio.Protocol):
     VERSION = '2.0'
 
     def __init__(self, server):
-        self._pool = None  # Lazy initialized
         self._server = server
         self._shutdown = False
 
@@ -579,7 +578,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
 
-        root_path = getattr(params, 'rootPath',  None)
+        root_path = getattr(params, 'rootPath', None)
         root_uri = params.rootUri or from_fs_path(root_path)
 
         # Initialize the workspace

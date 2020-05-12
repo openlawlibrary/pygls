@@ -77,8 +77,8 @@ def _validate_json(source):
 
         d = Diagnostic(
             Range(
-                Position(line-1, col-1),
-                Position(line-1, col)
+                Position(line - 1, col - 1),
+                Position(line - 1, col)
             ),
             msg,
             source=type(json_server).__name__
