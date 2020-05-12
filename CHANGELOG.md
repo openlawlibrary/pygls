@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Changed
+
+- Exit server normally when `ctrl+c` is pressed in command shell.
+- Optimize json-rpc message serialization ([#120])
+
+[#120]: https://github.com/openlawlibrary/pygls/pull/120
+
 ## [0.9.0] - 04/20/2020
 
 ### Changed
