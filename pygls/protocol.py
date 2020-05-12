@@ -378,20 +378,17 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         try:
             body = json.dumps(data, default=default_serializer)
-            content_length = len(body.encode(self.CHARSET)) if body else 0
-
-            response = (
-                'Content-Length: {}\r\n'
-                'Content-Type: {}; charset={}\r\n\r\n'
-                '{}'.format(content_length,
-                            self.CONTENT_TYPE,
-                            self.CHARSET,
-                            body)
-            )
-
             logger.info('Sending data: {}'.format(body))
 
-            self.transport.write(response.encode(self.CHARSET))
+            body = body.encode(self.CHARSET)
+            header = (
+                'Content-Length: {}\r\n'
+                'Content-Type: {}; charset={}\r\n\r\n'
+            ).format(
+                len(body), self.CONTENT_TYPE, self.CHARSET
+            ).encode(self.CHARSET)
+
+            self.transport.write(header + body)
         except Exception:
             logger.error(traceback.format_exc())
 
