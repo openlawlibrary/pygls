@@ -219,6 +219,7 @@ class Document(object):
 
         Currently does nothing, provided for consistency.
         """
+        pass
 
     def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind
@@ -232,30 +233,11 @@ class Document(object):
             both Range and RangeLength from their request. Consequently, the
             attributes "range" and "rangeLength" will be missing from FULL
             content update client requests in the pygls Python library.
-
-        Improvements:
-            Consider revising our treatment of TextDocumentContentChangeEvent,
-            and all other LSP primitive types, to set "Optional" interface
-            attributes from the client to "None". The "hasattr" check is
-            admittedly quite ugly; while it is appropriate given our current
-            state, there are plenty of improvements to be made. A good place to
-            start: require more rigorous de-serialization efforts when reading
-            client requests in protocol.py.
         """
-        if (
-            hasattr(change, 'range') and
-            hasattr(change, 'rangeLength') and
-            self._is_sync_kind_incremental
-        ):
-            self._apply_incremental_change(change)
-        elif self._is_sync_kind_none:
-            self._apply_none_change(change)
-        elif not (
-            hasattr(change, 'range') or
-            hasattr(change, 'rangeLength')
-        ):
-            self._apply_full_change(change)
-        else:
+        if hasattr(change, 'range'):
+            if self._is_sync_kind_incremental:
+                self._apply_incremental_change(change)
+                return
             # Log an error, but still perform full update to preserve existing
             # assumptions in test_document/test_document_full_edit. Test breaks
             # otherwise, and fixing the tests would require a broader fix to
@@ -264,6 +246,10 @@ class Document(object):
                 "Unsupported client-provided TextDocumentContentChangeEvent. "
                 "Please update / submit a Pull Request to your LSP client."
             )
+
+        if self._is_sync_kind_none:
+            self._apply_none_change(change)
+        else:
             self._apply_full_change(change)
 
     @property

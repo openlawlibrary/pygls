@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 
 - Exit server normally when `ctrl+c` is pressed in command shell.
+- Mark deprecated `rangeLength` optional in `TextDocumentContentChangeEvent` ([#123])
 - Optimize json-rpc message serialization ([#120])
 
+[#123]: https://github.com/openlawlibrary/pygls/pull/123
 [#120]: https://github.com/openlawlibrary/pygls/pull/120
 [#117]: https://github.com/openlawlibrary/pygls/pull/117
 
