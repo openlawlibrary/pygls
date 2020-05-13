@@ -54,11 +54,11 @@ def utf16_num_units(chars: str):
 def position_from_utf16(lines: List[str], position: Position) -> Position:
     """Convert the position.character from utf-16 code units to utf-32.
 
-    A python application can't use the character memeber of `Position`
+    A python application can't use the character member of `Position`
     directly as per specification it is represented as a zero-based line and
-    character offset based based on a UTF-16 string representation.
+    character offset based on a UTF-16 string representation.
 
-    All characters whose codepoint exeeds the Basic Multilingual Plane are
+    All characters whose code point exceeds the Basic Multilingual Plane are
     represented by 2 UTF-16 code units.
 
     The offset of the closing quotation mark in x="😋" is
@@ -69,7 +69,7 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
 
     Arguments:
         lines (list):
-            The content of the document which the position referes to.
+            The content of the document which the position refers to.
         position (Position):
             The line and character offset in utf-16 code units.
 
@@ -88,11 +88,11 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
 def position_to_utf16(lines: List[str], position: Position) -> Position:
     """Convert the position.character from utf-32 to utf-16 code units.
 
-    A python application can't use the character memeber of `Position`
+    A python application can't use the character member of `Position`
     directly as per specification it is represented as a zero-based line and
-    character offset based based on a UTF-16 string representation.
+    character offset based on a UTF-16 string representation.
 
-    All characters whose codepoint exeeds the Basic Multilingual Plane are
+    All characters whose code point exceeds the Basic Multilingual Plane are
     represented by 2 UTF-16 code units.
 
     The offset of the closing quotation mark in x="😋" is
@@ -103,7 +103,7 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
 
     Arguments:
         lines (list):
-            The content of the document which the position referes to.
+            The content of the document which the position refers to.
         position (Position):
             The line and character offset in utf-32 code units.
 
@@ -124,7 +124,7 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
 
     Arguments:
         lines (list):
-            The content of the document which the range referes to.
+            The content of the document which the range refers to.
         range (Range):
             The line and character offset in utf-32 code units.
 
@@ -142,7 +142,7 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
 
     Arguments:
         lines (list):
-            The content of the document which the range referes to.
+            The content of the document which the range refers to.
         range (Range):
             The line and character offset in utf-16 code units.
 
@@ -182,7 +182,7 @@ class Document(object):
 
         (start_line, start_col), (end_line, end_col) = range_from_utf16(lines, change_range)
 
-        # Check for an edit occuring at the very end of the file
+        # Check for an edit occurring at the very end of the file
         if start_line == len(lines):
             self._source = self.source + text
             return
