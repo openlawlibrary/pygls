@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 
+### Added
+
+- Functions to convert positions from and to utf-16 code units ([#117])
+
 ### Changed
 
 - Exit server normally when `ctrl+c` is pressed in command shell.
 - Optimize json-rpc message serialization ([#120])
 
 [#120]: https://github.com/openlawlibrary/pygls/pull/120
+[#117]: https://github.com/openlawlibrary/pygls/pull/117
 
 ## [0.9.0] - 04/20/2020
 

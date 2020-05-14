@@ -839,6 +839,12 @@ class Position:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __hash__(self):
+        return hash((self.line, self.character))
+
+    def __iter__(self):
+        return iter((self.line, self.character))
+
     def __repr__(self):
         return '{}:{}'.format(self.line, self.character)
 
@@ -864,6 +870,12 @@ class Range:
             isinstance(other, Range)
             and self.start == other.start
             and self.end == other.end)
+
+    def __hash__(self):
+        return hash((self.start, self.end))
+
+    def __iter__(self):
+        return iter((self.start, self.end))
 
     def __repr__(self):
         return '{}-{}'.format(self.start, self.end)

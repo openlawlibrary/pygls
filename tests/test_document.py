@@ -18,7 +18,9 @@
 ############################################################################
 from pygls.types import (Position, Range, TextDocumentContentChangeEvent,
                          TextDocumentSyncKind)
-from pygls.workspace import Document
+from pygls.workspace import (
+    Document, position_from_utf16, position_to_utf16, range_from_utf16, range_to_utf16
+)
 
 from .conftest import DOC, DOC_URI
 
@@ -74,7 +76,7 @@ def test_document_line_edit():
 
 
 def test_document_lines(doc):
-    assert len(doc.lines) == 3
+    assert len(doc.lines) == 4
     assert doc.lines[0] == 'document\n'
 
 
@@ -120,12 +122,54 @@ def test_document_source_unicode():
     assert isinstance(document_mem.source, type(document_disk.source))
 
 
+def test_position_from_utf16():
+    assert position_from_utf16(['x="😋"'], Position(0, 3)) == Position(0, 3)
+    assert position_from_utf16(['x="😋"'], Position(0, 5)) == Position(0, 4)
+
+    position = Position(0, 5)
+    position_from_utf16(['x="😋"'], position)
+    assert position == Position(0, 5)
+
+
+def test_position_to_utf16():
+    assert position_to_utf16(['x="😋"'], Position(0, 3)) == Position(0, 3)
+    assert position_to_utf16(['x="😋"'], Position(0, 4)) == Position(0, 5)
+
+    position = Position(0, 4)
+    position_to_utf16(['x="😋"'], position)
+    assert position == Position(0, 4)
+
+
+def test_range_from_utf16():
+    assert range_from_utf16(
+        ['x="😋"'], Range(Position(0, 3), Position(0, 5))
+    ) == Range(Position(0, 3), Position(0, 4))
+
+    range = Range(Position(0, 3), Position(0, 5))
+    range_from_utf16(['x="😋"'], range)
+    assert range == Range(Position(0, 3), Position(0, 5))
+
+
+def test_range_to_utf16():
+    assert range_to_utf16(
+        ['x="😋"'], Range(Position(0, 3), Position(0, 4))
+    ) == Range(Position(0, 3), Position(0, 5))
+
+    range = Range(Position(0, 3), Position(0, 4))
+    range_to_utf16(['x="😋"'], range)
+    assert range == Range(Position(0, 3), Position(0, 4))
+
+
 def test_offset_at_position(doc):
     assert doc.offset_at_position(Position(0, 8)) == 8
     assert doc.offset_at_position(Position(1, 5)) == 14
     assert doc.offset_at_position(Position(2, 0)) == 13
     assert doc.offset_at_position(Position(2, 4)) == 17
-    assert doc.offset_at_position(Position(4, 0)) == 21
+    assert doc.offset_at_position(Position(3, 6)) == 27
+    assert doc.offset_at_position(Position(3, 7)) == 27
+    assert doc.offset_at_position(Position(3, 8)) == 28
+    assert doc.offset_at_position(Position(4, 0)) == 39
+    assert doc.offset_at_position(Position(5, 0)) == 39
 
 
 def test_word_at_position(doc):
@@ -136,4 +180,5 @@ def test_word_at_position(doc):
     assert doc.word_at_position(Position(0, 1000)) == 'document'
     assert doc.word_at_position(Position(1, 5)) == 'for'
     assert doc.word_at_position(Position(2, 0)) == 'testing'
+    assert doc.word_at_position(Position(3, 10)) == 'unicode'
     assert doc.word_at_position(Position(4, 0)) == ''

@@ -32,6 +32,7 @@ CALL_TIMEOUT = 2
 DOC = """document
 for
 testing
+with "😋" unicode.
 """
 DOC_URI = uris.from_fs_path(__file__)
 

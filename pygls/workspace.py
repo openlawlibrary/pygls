@@ -22,8 +22,8 @@ import os
 import re
 from typing import List
 
-from .types import (NumType, Position, TextDocumentContentChangeEvent, TextDocumentItem,
-                    TextDocumentSyncKind, WorkspaceFolder)
+from .types import (NumType, Position, Range, TextDocumentContentChangeEvent,
+                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
 from .uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -31,6 +31,128 @@ RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
 RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
 
 log = logging.getLogger(__name__)
+
+
+def utf16_unit_offset(chars: str):
+    """Calculate the number of characters which need two utf-16 code units.
+
+    Arguments:
+        chars (str): The string to count occurrences of utf-16 code units for.
+    """
+    return sum(ord(ch) > 0xFFFF for ch in chars)
+
+
+def utf16_num_units(chars: str):
+    """Calculate the length of `str` in utf-16 code units.
+
+    Arguments:
+        chars (str): The string to return the length in utf-16 code units for.
+    """
+    return len(chars) + utf16_unit_offset(chars)
+
+
+def position_from_utf16(lines: List[str], position: Position) -> Position:
+    """Convert the position.character from utf-16 code units to utf-32.
+
+    A python application can't use the character member of `Position`
+    directly as per specification it is represented as a zero-based line and
+    character offset based on a UTF-16 string representation.
+
+    All characters whose code point exceeds the Basic Multilingual Plane are
+    represented by 2 UTF-16 code units.
+
+    The offset of the closing quotation mark in x="😋" is
+    - 5 in UTF-16 representation
+    - 4 in UTF-32 representation
+
+    see: https://github.com/microsoft/language-server-protocol/issues/376
+
+    Arguments:
+        lines (list):
+            The content of the document which the position refers to.
+        position (Position):
+            The line and character offset in utf-16 code units.
+
+    Returns:
+        The position with `character` being converted to utf-32 code units.
+    """
+    try:
+        return Position(
+            position.line,
+            position.character - utf16_unit_offset(lines[position.line][:position.character])
+        )
+    except IndexError:
+        return Position(len(lines), 0)
+
+
+def position_to_utf16(lines: List[str], position: Position) -> Position:
+    """Convert the position.character from utf-32 to utf-16 code units.
+
+    A python application can't use the character member of `Position`
+    directly as per specification it is represented as a zero-based line and
+    character offset based on a UTF-16 string representation.
+
+    All characters whose code point exceeds the Basic Multilingual Plane are
+    represented by 2 UTF-16 code units.
+
+    The offset of the closing quotation mark in x="😋" is
+    - 5 in UTF-16 representation
+    - 4 in UTF-32 representation
+
+    see: https://github.com/microsoft/language-server-protocol/issues/376
+
+    Arguments:
+        lines (list):
+            The content of the document which the position refers to.
+        position (Position):
+            The line and character offset in utf-32 code units.
+
+    Returns:
+        The position with `character` being converted to utf-16 code units.
+    """
+    try:
+        return Position(
+            position.line,
+            position.character + utf16_unit_offset(lines[position.line][:position.character])
+        )
+    except IndexError:
+        return Position(len(lines), 0)
+
+
+def range_from_utf16(lines: List[str], range: Range) -> Range:
+    """Convert range.[start|end].character from utf-16 code units to utf-32.
+
+    Arguments:
+        lines (list):
+            The content of the document which the range refers to.
+        range (Range):
+            The line and character offset in utf-32 code units.
+
+    Returns:
+        The range with `character` offsets being converted to utf-16 code units.
+    """
+    return Range(
+        position_from_utf16(lines, range.start),
+        position_from_utf16(lines, range.end)
+    )
+
+
+def range_to_utf16(lines: List[str], range: Range) -> Range:
+    """Convert range.[start|end].character from utf-32 to utf-16 code units.
+
+    Arguments:
+        lines (list):
+            The content of the document which the range refers to.
+        range (Range):
+            The line and character offset in utf-16 code units.
+
+    Returns:
+        The range with `character` offsets being converted to utf-32 code units.
+    """
+    return Range(
+        position_to_utf16(lines, range.start),
+        position_to_utf16(lines, range.end)
+    )
 
 
 class Document(object):
@@ -54,16 +176,14 @@ class Document(object):
 
     def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
         """Apply an INCREMENTAL text change to the document"""
+        lines = self.lines
         text = change.text
         change_range = change.range
 
-        start_line = change_range.start.line
-        start_col = change_range.start.character
-        end_line = change_range.end.line
-        end_col = change_range.end.character
+        (start_line, start_col), (end_line, end_col) = range_from_utf16(lines, change_range)
 
-        # Check for an edit occuring at the very end of the file
-        if start_line == len(self.lines):
+        # Check for an edit occurring at the very end of the file
+        if start_line == len(lines):
             self._source = self.source + text
             return
 
@@ -72,7 +192,7 @@ class Document(object):
         # Iterate over the existing document until we hit the edit range,
         # at which point we write the new text, then loop until we hit
         # the end of the range and continue writing.
-        for i, line in enumerate(self.lines):
+        for i, line in enumerate(lines):
             if i < start_line:
                 new.write(line)
                 continue
@@ -151,8 +271,10 @@ class Document(object):
         return self.source.splitlines(True)
 
     def offset_at_position(self, position: Position) -> int:
-        """Return the byte-offset pointed at by the given position."""
-        return position.character + len(''.join(self.lines[:position.line]))
+        """Return the character offset pointed at by the given position."""
+        lines = self.lines
+        row, col = position_from_utf16(lines, position)
+        return col + sum(len(line) for line in lines[:row])
 
     @property
     def source(self) -> str:
@@ -165,14 +287,15 @@ class Document(object):
         """
         Get the word under the cursor returning the start and end positions.
         """
-        if position.line >= len(self.lines):
+        lines = self.lines
+        if position.line >= len(lines):
             return ''
 
-        line = self.lines[position.line]
-        i = position.character
+        row, col = position_from_utf16(lines, position)
+        line = lines[row]
         # Split word in two
-        start = line[:i]
-        end = line[i:]
+        start = line[:col]
+        end = line[col:]
 
         # Take end of start and start of end to find word
         # These are guaranteed to match, even if they match the empty string
