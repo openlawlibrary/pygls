@@ -681,7 +681,7 @@ class Trace(str, enum.Enum):
 
 
 class ClientInfo:
-    def __init__(self, name: str = 'unknown', version: str = None):
+    def __init__(self, name: str = 'unknown', version: Optional[str] = None):
         self.name = name
         self.version = version
 
@@ -689,8 +689,8 @@ class ClientInfo:
 class InitializeParams:
     def __init__(self,
                  process_id: int,
-                 client_info: ClientInfo,
                  capabilities: ClientCapabilities,
+                 client_info: Optional[ClientInfo] = None,
                  root_uri: str = None,
                  root_path: Optional[str] = None,
                  initialization_options: Optional[Any] = None,
