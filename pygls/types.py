@@ -1139,7 +1139,7 @@ class SymbolKind(enum.IntEnum):
 
 
 class SymbolKindAbstract:
-    def __init__(self, value_set: SymbolKind):
+    def __init__(self, value_set: List[SymbolKind]):
         self.valueSet = value_set
 
 

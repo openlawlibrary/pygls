@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 - Exit server normally when `ctrl+c` is pressed in command shell.
 - Optimize json-rpc message serialization ([#120])
-- Fixes `__init__()` constructors in several interface types ([#125])
+- Fix `__init__()` constructors in several interface types ([#125])
+- Fix valueSet type in `SymbolKindAbstract` ([#125])
 
 [#125]: https://github.com/openlawlibrary/pygls/pull/125
 [#120]: https://github.com/openlawlibrary/pygls/pull/120
