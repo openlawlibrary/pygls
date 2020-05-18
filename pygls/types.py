@@ -1253,11 +1253,11 @@ class CompletionParams(TextDocumentPositionParams):
 
 class HoverParams(TextDocumentPositionParams):
     def __init__(self,
-                 textDocument: 'TextDocumentIdentifier',
+                 text_document: 'TextDocumentIdentifier',
                  position: 'Position',
-                 workDoneToken: Optional[str] = None):
-        super().__init__(textDocument, position)
-        self.workDoneToken = workDoneToken
+                 work_done_token: Optional[str] = None):
+        super().__init__(text_document, position)
+        self.workDoneToken = work_done_token
 
 
 class ReferenceParams(TextDocumentPositionParams):
