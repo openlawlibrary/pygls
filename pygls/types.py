@@ -84,10 +84,10 @@ class CodeAction:
 
 
 class CodeActionAbstract:
-    def __init(self,
-               dynamic_registration: bool,
-               code_action_literal_support:
-               'CodeActionLiteralSupportAbstract'):
+    def __init__(self,
+                 dynamic_registration: bool,
+                 code_action_literal_support:
+                 'CodeActionLiteralSupportAbstract'):
         self.dynamicRegistration = dynamic_registration
         self.codeActionLiteralSupport = code_action_literal_support
 
@@ -475,7 +475,9 @@ class DocumentHighlightKind(enum.IntEnum):
 
 
 class DocumentHighlight:
-    def __init__(self, range: 'Range', kind: DocumentHighlightKind = DocumentHighlightKind.Text):
+    def __init__(self,
+                 range: 'Range',
+                 kind: DocumentHighlightKind = DocumentHighlightKind.Text):
         self.range = range
         self.kind = kind
 
@@ -628,10 +630,10 @@ class FoldingRange:
 
 
 class FoldingRangeAbstract:
-    def __init(self,
-               dynamic_registration: bool,
-               range_limit: NumType,
-               line_folding_only: bool):
+    def __init__(self,
+                 dynamic_registration: bool,
+                 range_limit: NumType,
+                 line_folding_only: bool):
         self.dynamicRegistration = dynamic_registration
         self.rangeLimit = range_limit
         self.lineFoldingOnly = line_folding_only
@@ -678,16 +680,24 @@ class Trace(str, enum.Enum):
     Verbose = 'verbose'
 
 
+class ClientInfo:
+    def __init__(self, name: str = 'unknown', version: Optional[str] = None):
+        self.name = name
+        self.version = version
+
+
 class InitializeParams:
     def __init__(self,
                  process_id: int,
                  capabilities: ClientCapabilities,
+                 client_info: Optional[ClientInfo] = None,
                  root_uri: str = None,
                  root_path: Optional[str] = None,
                  initialization_options: Optional[Any] = None,
                  trace: Optional[Trace] = Trace.Off,
                  workspace_folders: Optional[List['WorkspaceFolder']] = None) -> None:
         self.processId = process_id
+        self.clientInfo = client_info
         self.rootPath = root_path
         self.rootUri = root_uri
         self.initializationOptions = initialization_options
@@ -850,7 +860,7 @@ class Position:
 
 
 class PublishDiagnosticsAbstract:
-    def __init(self, related_information: bool):
+    def __init__(self, related_information: bool):
         self.relatedInformation = related_information
 
 
@@ -899,7 +909,7 @@ class RegistrationParams:
 
 
 class RenameAbstract:
-    def __init(self, dynamic_registration: bool, prepare_support: bool):
+    def __init__(self, dynamic_registration: bool, prepare_support: bool):
         self.dynamicRegistration = dynamic_registration
         self.prepareSupport = prepare_support
 
@@ -1129,7 +1139,7 @@ class SymbolKind(enum.IntEnum):
 
 
 class SymbolKindAbstract:
-    def __init__(self, value_set: SymbolKind):
+    def __init__(self, value_set: List[SymbolKind]):
         self.valueSet = value_set
 
 
@@ -1207,15 +1217,20 @@ class TextDocumentIdentifier:
         self.uri = uri
 
 
-class TextDocumentItem:
+class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
+    def __init__(self, uri: str, version: NumType):
+        super().__init__(uri)
+        self.version = version
+
+
+class TextDocumentItem(VersionedTextDocumentIdentifier):
     def __init__(self,
                  uri: str,
                  language_id: str,
                  version: NumType,
                  text: str):
-        self.uri = uri
+        super().__init__(uri, version)
         self.languageId = language_id
-        self.version = version
         self.text = text
 
 
@@ -1234,6 +1249,13 @@ class CompletionParams(TextDocumentPositionParams):
                  context: CompletionContext):
         super().__init__(text_document, position)
         self.context = context
+
+
+class HoverParams(TextDocumentPositionParams):
+    def __init__(self,
+                 text_document: 'TextDocumentIdentifier',
+                 position: 'Position'):
+        super().__init__(text_document, position)
 
 
 class ReferenceParams(TextDocumentPositionParams):
@@ -1286,9 +1308,9 @@ class RenameRegistrationOptions(TextDocumentRegistrationOptions):
 
 
 class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
-    def __init(self,
-               document_selector: DocumentSelectorType = None,
-               trigger_characters: List[str] = None):
+    def __init__(self,
+                 document_selector: DocumentSelectorType = None,
+                 trigger_characters: List[str] = None):
         super().__init__(document_selector)
         self.triggerCharacters = trigger_characters
 
@@ -1342,12 +1364,6 @@ class Unregistration:
 class UnregistrationParams:
     def __init__(self, unregisterations: List[Unregistration]):
         self.unregisterations = unregisterations
-
-
-class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    def __init__(self, uri: str, version: NumType):
-        super().__init__(uri)
-        self.version = version
 
 
 class WillSaveTextDocumentParams:
