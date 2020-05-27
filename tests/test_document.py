@@ -67,7 +67,7 @@ def test_document_full_edit():
     ]
 
     doc = Document('file:///uri', u''.join(old), sync_kind=TextDocumentSyncKind.FULL)
-    change = TextDocumentContentChangeEvent(text=u'print a, b')
+    change = TextDocumentContentChangeEvent(range=None, text=u'print a, b')
     doc.apply_change(change)
 
     assert doc.lines == [
