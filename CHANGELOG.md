@@ -10,13 +10,17 @@ and this project adheres to [Semantic Versioning][semver].
 ### Added
 
 - Functions to convert positions from and to utf-16 code units ([#117])
+- Type definitions for `ClientInfo` and `HoverParams` ([#125])
 
 ### Changed
 
 - Exit server normally when `ctrl+c` is pressed in command shell.
 - Mark deprecated `rangeLength` optional in `TextDocumentContentChangeEvent` ([#123])
 - Optimize json-rpc message serialization ([#120])
+- Fix `__init__()` constructors in several interface types ([#125])
+- Fix valueSet type in `SymbolKindAbstract` ([#125])
 
+[#125]: https://github.com/openlawlibrary/pygls/pull/125
 [#123]: https://github.com/openlawlibrary/pygls/pull/123
 [#120]: https://github.com/openlawlibrary/pygls/pull/120
 [#117]: https://github.com/openlawlibrary/pygls/pull/117
