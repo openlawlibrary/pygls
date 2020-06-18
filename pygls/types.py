@@ -50,6 +50,51 @@ T = TypeVar('T')
 ProgressToken = Union[int, str]
 
 
+class WorkDoneProgressBegin:
+    def __init__(self,
+                 title: str,
+                 cancellable: Optional[bool] = False,
+                 message: Optional[str] = None,
+                 percentage: Optional[NumType] = None):
+        self.kind = 'begin'
+        self.title = title
+        self.cancellable = cancellable
+        self.message = message
+        self.percentage = percentage
+
+
+class WorkDoneProgressReport:
+    def __init__(self,
+                 cancellable: Optional[bool] = False,
+                 message: Optional[str] = None,
+                 percentage: Optional[NumType] = None):
+        self.kind = 'report'
+        self.cancellable = cancellable
+        self.message = message
+        self.percentage = percentage
+
+
+class WorkDoneProgressEnd:
+    def __init__(self, message: Optional[str] = None):
+        self.kind = 'end'
+        self.message = message
+
+
+class WorkDoneProgressParams:
+    def __init__(self, work_done_token: Optional[bool] = None):
+        self.workDoneToken = work_done_token
+
+
+class WorkDoneProgressOptions:
+    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
+        self.workDoneProgress = work_done_progress
+
+
+class PartialResultParams:
+    def __init__(self, partial_result_token: Optional[ProgressToken] = None):
+        self.partialResultToken = partial_result_token
+
+
 class ApplyWorkspaceEditParams:
     def __init__(self, edit: 'WorkspaceEdit', label: Optional[str] = None):
         self.edit = edit
@@ -195,7 +240,7 @@ class ColorProviderOptions:
 
 
 class Command:
-    def __init__(self, title: str, command: str, arguments: List[Any] = None):
+    def __init__(self, title: str, command: str, arguments: Optional[List[Any]] = None):
         self.title = title
         self.command = command
         self.arguments = arguments
@@ -345,7 +390,7 @@ class ConfigurationParams:
 
 
 class CreateFile:
-    def __init__(self, uri: str, options: 'CreateFileOptions' = None):
+    def __init__(self, uri: str, options: Optional['CreateFileOptions'] = None):
         self.kind = 'create'
         self.uri = uri
         self.options = options
@@ -353,14 +398,14 @@ class CreateFile:
 
 class CreateFileOptions:
     def __init__(self,
-                 overwrite: bool = False,
-                 ignore_if_exists: bool = False):
+                 overwrite: Optional[bool] = False,
+                 ignore_if_exists: Optional[bool] = False):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
 
 
 class DeleteFile:
-    def __init__(self, uri: str, options: 'DeleteFileOptions'):
+    def __init__(self, uri: str, options: Optional['DeleteFileOptions']):
         self.kind = 'delete'
         self.uri = uri
         self.options = options
@@ -461,9 +506,9 @@ class DocumentColorParams:
 
 class DocumentFilter:
     def __init__(self,
-                 language: str = None,
-                 scheme: str = None,
-                 pattern: str = None):
+                 language: Optional[str] = None,
+                 scheme: Optional[str] = None,
+                 pattern: Optional[str] = None):
         self.language = language
         self.scheme = scheme
         self.pattern = pattern
@@ -695,7 +740,7 @@ class ClientInfo:
         self.version = version
 
 
-class InitializeParams:
+class InitializeParams(Work):
     def __init__(self,
                  process_id: int,
                  capabilities: ClientCapabilities,
@@ -933,17 +978,17 @@ class RenameFile:
     def __init__(self,
                  old_uri: str,
                  new_uri: str,
-                 options: 'RenameFileOptions' = None):
+                 options: Optional['RenameFileOptions'] = None):
         self.kind = 'rename'
-        self.old_uri = old_uri
-        self.new_uri = new_uri
+        self.oldUri = old_uri
+        self.newUri = new_uri
         self.options = options
 
 
 class RenameFileOptions:
     def __init__(self,
-                 overwrite: bool = False,
-                 ignore_if_exists: bool = False):
+                 overwrite: Optional[bool] = False,
+                 ignore_if_exists: Optional[bool] = False):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
 
@@ -1098,7 +1143,7 @@ class SignatureInformationAbstract:
 
 
 class StaticRegistrationOptions:
-    def __init__(self, id: str):
+    def __init__(self, id: Optional[str] = None):
         self.id = id
 
 
@@ -1236,7 +1281,7 @@ class TextDocumentIdentifier:
 
 
 class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    def __init__(self, uri: str, version: NumType):
+    def __init__(self, uri: str, version: Union[NumType, None]):
         super().__init__(uri)
         self.version = version
 
@@ -1286,7 +1331,7 @@ class ReferenceParams(TextDocumentPositionParams):
 
 
 class TextDocumentRegistrationOptions:
-    def __init__(self, document_selector: DocumentSelectorType = None):
+    def __init__(self, document_selector: Optional[DocumentSelectorType] = None):
         self.documentSelector = document_selector
 
 
@@ -1412,17 +1457,17 @@ class WorkspaceClientCapabilities:
 
 class WorkspaceEdit:
     def __init__(self,
-                 changes: Dict[str, List[TextEdit]] = None,
-                 document_changes: DocumentChangesType = None):
+                 changes: Optional[Dict[str, List[TextEdit]]] = None,
+                 document_changes: Optional[DocumentChangesType] = None):
         self.changes = changes
         self.documentChanges = document_changes
 
 
-class WorkspaceEditCapability:
+class WorkspaceEditClientCapabilities:
     def __init__(self,
-                 document_changes: bool,
-                 resource_operations: List[ResourceOperationKind],
-                 failure_handling: FailureHandlingKind):
+                 document_changes: Optional[bool] = False,
+                 resource_operations: Optional[List[ResourceOperationKind]] = None,
+                 failure_handling: Optional[FailureHandlingKind] = None):
         self.documentChanges = document_changes
         self.resourceOperations = resource_operations
         self.failureHandling = failure_handling
