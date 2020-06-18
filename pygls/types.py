@@ -110,9 +110,11 @@ class ClientCapabilities:
     def __init__(self,
                  workspace: Optional['WorkspaceClientCapabilities'] = None,
                  text_document: Optional['TextDocumentClientCapabilities'] = None,
+                 window: Optional['WindowClientCapabilities'] = None,
                  experimental: Optional[Any] = None):
         self.workspace = workspace
         self.textDocument = text_document
+        self.window = window
         self.experimental = experimental
 
 
@@ -404,6 +406,14 @@ class CreateFileOptions:
         self.ignoreIfExists = ignore_if_exists
 
 
+class DeclarationClientCapabilities:
+    def __init__(self,
+                 dynamic_registration: Optional[bool] = False,
+                 link_support: Optional[bool] = False):
+        self.dynamicRegistration = dynamic_registration
+        self.linkSupport = link_support
+
+
 class DeleteFile:
     def __init__(self, uri: str, options: Optional['DeleteFileOptions']):
         self.kind = 'delete'
@@ -455,6 +465,11 @@ class DiagnosticTag(enum.IntEnum):
     Deprecated = 2
 
 
+class DidChangeConfigurationClientCapabilities:
+    def __init__(self, dynamic_registration: Optional[bool] = False):
+        self.dynamicRegistration = dynamic_registration
+
+
 class DidChangeConfigurationParams:
     def __init__(self, settings: Any):
         self.settings = settings
@@ -471,6 +486,11 @@ class DidChangeTextDocumentParams:
 class DidChangeWatchedFiles:
     def __init__(self, changes: List['FileEvent']):
         self.changes = changes
+
+
+class DidChangeWatchedFilesClientCapabilities:
+    def __init__(self, dynamic_registration: Optional[bool] = False):
+        self.dynamicRegistration = dynamic_registration
 
 
 class DidChangeWatchedFilesRegistrationOptions:
@@ -627,6 +647,11 @@ class ExecuteCommandOptions:
         self.commands = commands
 
 
+class ExecuteCommandClientCapabilities:
+    def __init__(self, dynamic_registration: Optional[bool] = False):
+        self.dynamicRegistration = dynamic_registration
+
+
 class FailureHandlingKind(str, enum.Enum):
     Abort = 'abort'
     Transactional = 'transactional'
@@ -740,16 +765,18 @@ class ClientInfo:
         self.version = version
 
 
-class InitializeParams(Work):
+class InitializeParams(WorkDoneProgressParams):
     def __init__(self,
-                 process_id: int,
+                 process_id: Union[int, None],
                  capabilities: ClientCapabilities,
                  client_info: Optional[ClientInfo] = None,
-                 root_uri: str = None,
+                 root_uri: Union[str, None] = None,
                  root_path: Optional[str] = None,
                  initialization_options: Optional[Any] = None,
                  trace: Optional[Trace] = Trace.Off,
-                 workspace_folders: Optional[List['WorkspaceFolder']] = None) -> None:
+                 workspace_folders: Optional[List['WorkspaceFolder']] = None,
+                 work_done_token: Optional[bool] = None) -> None:
+        super().__init__(work_done_token)
         self.processId = process_id
         self.clientInfo = client_info
         self.rootPath = root_path
@@ -761,8 +788,11 @@ class InitializeParams(Work):
 
 
 class InitializeResult:
-    def __init__(self, capabilities: 'ServerCapabilities'):
+    def __init__(self,
+                 capabilities: 'ServerCapabilities',
+                 server_info: Optional[ServerInfo] = None):
         self.capabilities = capabilities
+        self.serverInfo = server_info
 
 
 class InsertTextFormat(enum.IntEnum):
@@ -1087,6 +1117,11 @@ class ServerCapabilities:
         return '{}( {} )'.format(type(self).__name__, self.__dict__)
 
 
+class SelectionRangeClientCapabilities:
+    def __init__(self, dynamic_registration: Optional[bool] = False):
+        self.dynamicRegistration = dynamic_registration
+
+
 class ShowMessageParams:
     def __init__(self, type: MessageType, message: str):
         self.type = type
@@ -1115,7 +1150,7 @@ class SignatureHelp:
 
 class SignatureHelpAbstract:
     def __init__(self,
-                 dynamic_registration: bool = False,
+                 dynamic_registration: Optional[bool] = False,
                  signature_information: List[MarkupKind] = None):
         self.dynamicRegistration = dynamic_registration
         self.signatureInformation = signature_information
@@ -1199,7 +1234,7 @@ class SymbolKind(enum.IntEnum):
 
 
 class SymbolKindAbstract:
-    def __init__(self, value_set: List[SymbolKind]):
+    def __init__(self, value_set: Optional[List[SymbolKind]] = None):
         self.valueSet = value_set
 
 
@@ -1213,48 +1248,51 @@ class SynchronizationAbstract:
 
 
 class TextDocumentClientCapabilities:
-
     def __init__(self,
-                 synchronization: SynchronizationAbstract,
-                 completion: CompletionAbstract,
-                 hover: HoverAbstract,
-                 signature_help: SignatureHelpAbstract,
-                 references: DynamicRegistrationAbstract,
-                 document_highlight: DynamicRegistrationAbstract,
-                 document_symbol: DocumentSymbolAbstract,
-                 formatting: DynamicRegistrationAbstract,
-                 range_formatting: DynamicRegistrationAbstract,
-                 on_type_formatting: DynamicRegistrationAbstract,
-                 definition: DynamicRegistrationAbstract,
-                 type_definition: DynamicRegistrationAbstract,
-                 implementation: DynamicRegistrationAbstract,
-                 code_action: CodeActionAbstract,
-                 code_lens: DynamicRegistrationAbstract,
-                 document_link: DynamicRegistrationAbstract,
-                 color_provider: DynamicRegistrationAbstract,
-                 rename: RenameAbstract,
-                 publish_diagnostics: PublishDiagnosticsAbstract,
-                 folding_range: FoldingRangeAbstract):
+                 synchronization: Optional[SynchronizationAbstract] = None,
+                 completion: Optional[CompletionAbstract] = None,
+                 hover: Optional[HoverAbstract] = None,
+                 signature_help: Optional[SignatureHelpAbstract] = None,
+                 declaration: Optional[DeclarationClientCapabilities] = None,
+                 definition: Optional[DynamicRegistrationAbstract] = None,
+                 type_definition: Optional[DynamicRegistrationAbstract] = None,
+                 implementation: Optional[DynamicRegistrationAbstract] = None,
+                 references: Optional[DynamicRegistrationAbstract] = None,
+                 document_highlight: Optional[DynamicRegistrationAbstract] = None,
+                 document_symbol: Optional[DocumentSymbolAbstract] = None,
+                 code_action: Optional[CodeActionAbstract] = None,
+                 code_lens: Optional[DynamicRegistrationAbstract] = None,
+                 document_link: Optional[DynamicRegistrationAbstract] = None,
+                 color_provider: Optional[DynamicRegistrationAbstract] = None,
+                 formatting: Optional[DynamicRegistrationAbstract] = None,
+                 range_formatting: Optional[DynamicRegistrationAbstract] = None,
+                 on_type_formatting: Optional[DynamicRegistrationAbstract] = None,
+                 rename: Optional[RenameAbstract] = None,
+                 publish_diagnostics: Optional[PublishDiagnosticsAbstract] = None,
+                 folding_range: Optional[FoldingRangeAbstract] = None,
+                 selection_range: Optional[SelectionRangeClientCapabilities] = None):
         self.synchronization = synchronization
         self.completion = completion
         self.hover = hover
         self.signatureHelp = signature_help
-        self.references = references
-        self.documentHighlight = document_highlight
-        self.documentSymbol = document_symbol
-        self.formatting = formatting
-        self.rangeFormatting = range_formatting
-        self.onTypeFormatting = on_type_formatting
+        self.declaration = declaration
         self.definition = definition
         self.typeDefinition = type_definition
         self.implementation = implementation
+        self.references = references
+        self.documentHighlight = document_highlight
+        self.documentSymbol = document_symbol
         self.codeAction = code_action
         self.codeLens = code_lens
         self.documentLink = document_link
         self.colorProvider = color_provider
+        self.formatting = formatting
+        self.rangeFormatting = range_formatting
+        self.onTypeFormatting = on_type_formatting
         self.rename = rename
         self.publishDiagnostics = publish_diagnostics
         self.foldingRange = folding_range
+        self.selectionRange = selection_range
 
 
 class TextDocumentContentChangeEvent:
@@ -1370,6 +1408,12 @@ class RenameRegistrationOptions(TextDocumentRegistrationOptions):
         self.prepareProvider = prepare_provider
 
 
+class ServerInfo:
+    def __init__(self, name: str = 'unknown', version: Optional[str] = None):
+        self.name = name
+        self.version = version
+
+
 class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
@@ -1435,16 +1479,21 @@ class WillSaveTextDocumentParams:
         self.reason = reason
 
 
+class WindowClientCapabilities:
+    def __init__(self, work_done_progress: Optional[bool] = False):
+        self.workDoneProgress = work_done_progress
+
+
 class WorkspaceClientCapabilities:
     def __init__(self,
-                 apply_edit: bool,
-                 workspace_edit: 'WorkspaceEditCapability',
-                 did_change_configuration: DynamicRegistrationAbstract,
-                 did_change_watched_files: DynamicRegistrationAbstract,
-                 symbol: SymbolAbstract,
-                 execute_command: DynamicRegistrationAbstract,
-                 workspace_folders: bool,
-                 configuration: bool):
+                 apply_edit: Optional[bool] = False,
+                 workspace_edit: Optional['WorkspaceEditClientCapabilities'] = None,
+                 did_change_configuration: Optional[DidChangeConfigurationClientCapabilities] = None,
+                 did_change_watched_files: Optional[DidChangeWatchedFilesClientCapabilities] = None,
+                 symbol: Optional[WorkspaceSymbolClientCapabilities] = None,
+                 execute_command: Optional[ExecuteCommandClientCapabilities] = None,
+                 workspace_folders: Optional[bool] = False,
+                 configuration: Optional[bool] = False):
         self.applyEdit = apply_edit
         self.workspaceEdit = workspace_edit
         self.didChangeConfiguration = did_change_configuration
@@ -1485,6 +1534,14 @@ class WorkspaceFoldersChangeEvent:
                  removed: List[WorkspaceFolder]):
         self.added = added
         self.removed = removed
+
+
+class WorkspaceSymbolClientCapabilities:
+    def __init__(self,
+                 dynamic_registration: Optional[bool] = False,
+                 symbol_kind: Optional[SymbolKindAbstract] = None):
+        self.dynamicRegistration = dynamic_registration
+        self.symbolKind = symbol_kind
 
 
 class WorkspaceSymbolParams:
