@@ -31,13 +31,13 @@ https://microsoft.github.io/language-server-protocol/specification#client_unregi
 
 import enum
 import sys
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union
 
-from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
-                       COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK,
-                       DOCUMENT_LINK_RESOLVE, DOCUMENT_SYMBOL, FORMATTING, HOVER,
-                       ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME, SIGNATURE_HELP,
-                       WORKSPACE_SYMBOL)
+from pygls.features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
+                            COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK,
+                            DOCUMENT_LINK_RESOLVE, DOCUMENT_SYMBOL, FORMATTING, HOVER,
+                            ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME,
+                            SIGNATURE_HELP, WORKSPACE_SYMBOL)
 
 # Classes used for type hints.
 ConfigCallbackType = Optional[Callable[[List[Any]], None]]
@@ -46,6 +46,8 @@ DocumentChangesType = Union[List['TextDocumentEdit'],
                             'CreateFile', 'RenameFile', 'DeleteFile']
 DocumentSelectorType = List['DocumentFilter']
 NumType = Union[int, float]
+T = TypeVar('T')
+ProgressToken = Union[int, str]
 
 
 class ApplyWorkspaceEditParams:
@@ -372,6 +374,30 @@ class DeleteFileOptions:
         self.ignore_if_exists = ignore_if_exists
 
 
+class Diagnostic:
+    def __init__(self,
+                 range: 'Range',
+                 message: str,
+                 severity: Optional['DiagnosticSeverity'] = None,
+                 code: Optional[Union[int, str]] = None,
+                 source: Optional[str] = None,
+                 related_information: Optional[List['DiagnosticRelatedInformation']] = None,
+                 tags: Optional[List['DiagnosticTag']] = None):
+        self.range = range
+        self.message = message
+        self.severity = severity
+        self.code = code
+        self.source = source
+        self.relatedInformation = related_information
+        self.tags = tags
+
+
+class DiagnosticRelatedInformation:
+    def __init__(self, location: 'Location', message: str):
+        self.location = location
+        self.message = message
+
+
 class DiagnosticSeverity(enum.IntEnum):
     Error = 1
     Warning = 2
@@ -379,26 +405,9 @@ class DiagnosticSeverity(enum.IntEnum):
     Hint = 4
 
 
-class Diagnostic:
-    def __init__(self,
-                 range: 'Range',
-                 message: str,
-                 severity: DiagnosticSeverity = DiagnosticSeverity.Error,
-                 code: str = None,
-                 source: str = None,
-                 related_information: 'DiagnosticRelatedInformation' = None):
-        self.range = range
-        self.message = message
-        self.severity = severity
-        self.code = code
-        self.source = source
-        self.relatedInformation = related_information
-
-
-class DiagnosticRelatedInformation:
-    def __init__(self, location: 'Location', message: str):
-        self.location = location
-        self.message = message
+class DiagnosticTag(enum.IntEnum):
+    Unnecessary = 1
+    Deprecated = 2
 
 
 class DidChangeConfigurationParams:
@@ -868,6 +877,12 @@ class PublishDiagnosticsParams:
     def __init__(self, uri: str, diagnostics: List[Diagnostic]):
         self.uri = uri
         self.diagnostics = diagnostics
+
+
+class ProgressParams(Generic[T]):
+    def __init__(self, token: ProgressToken, value: T):
+        self.token = token
+        self.value = value
 
 
 class Range:
