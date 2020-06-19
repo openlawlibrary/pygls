@@ -1,17 +1,7 @@
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from typing import Any, List, Optional, Union
 
-from pygls.types.common import CodeActionKind, TextDocumentSyncKind
-from pygls.types.work_done_progress import WorkDoneProgressOptions
-
-# Classes used for type hints.
-ConfigCallbackType = Optional[Callable[[List[Any]], None]]
-DocumentChangesType = Union[List['TextDocumentEdit'],
-                            'TextDocumentEdit',
-                            'CreateFile', 'RenameFile', 'DeleteFile']
-DocumentSelectorType = List['DocumentFilter']
-NumType = Union[int, float]
-T = TypeVar('T')
-ProgressToken = Union[int, str]
+from pygls.types.common import (CodeActionKind, DocumentSelectorType, NumType, ProgressToken,
+                                TextDocumentSyncKind, WorkDoneProgressOptions)
 
 
 class StaticRegistrationOptions:

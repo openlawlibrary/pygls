@@ -50,51 +50,6 @@ T = TypeVar('T')
 ProgressToken = Union[int, str]
 
 
-class WorkDoneProgressBegin:
-    def __init__(self,
-                 title: str,
-                 cancellable: Optional[bool] = False,
-                 message: Optional[str] = None,
-                 percentage: Optional[NumType] = None):
-        self.kind = 'begin'
-        self.title = title
-        self.cancellable = cancellable
-        self.message = message
-        self.percentage = percentage
-
-
-class WorkDoneProgressReport:
-    def __init__(self,
-                 cancellable: Optional[bool] = False,
-                 message: Optional[str] = None,
-                 percentage: Optional[NumType] = None):
-        self.kind = 'report'
-        self.cancellable = cancellable
-        self.message = message
-        self.percentage = percentage
-
-
-class WorkDoneProgressEnd:
-    def __init__(self, message: Optional[str] = None):
-        self.kind = 'end'
-        self.message = message
-
-
-class WorkDoneProgressParams:
-    def __init__(self, work_done_token: Optional[bool] = None):
-        self.workDoneToken = work_done_token
-
-
-class WorkDoneProgressOptions:
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        self.workDoneProgress = work_done_progress
-
-
-class PartialResultParams:
-    def __init__(self, partial_result_token: Optional[ProgressToken] = None):
-        self.partialResultToken = partial_result_token
-
-
 class ApplyWorkspaceEditParams:
     def __init__(self, edit: 'WorkspaceEdit', label: Optional[str] = None):
         self.edit = edit
@@ -104,18 +59,6 @@ class ApplyWorkspaceEditParams:
 class ApplyWorkspaceEditResponse:
     def __init__(self, applied: bool):
         self.applied = applied
-
-
-class ClientCapabilities:
-    def __init__(self,
-                 workspace: Optional['WorkspaceClientCapabilities'] = None,
-                 text_document: Optional['TextDocumentClientCapabilities'] = None,
-                 window: Optional['WindowClientCapabilities'] = None,
-                 experimental: Optional[Any] = None):
-        self.workspace = workspace
-        self.textDocument = text_document
-        self.window = window
-        self.experimental = experimental
 
 
 class CodeAction:
@@ -132,30 +75,11 @@ class CodeAction:
         self.command = command
 
 
-class CodeActionAbstract:
-    def __init__(self,
-                 dynamic_registration: bool,
-                 code_action_literal_support:
-                 'CodeActionLiteralSupportAbstract'):
-        self.dynamicRegistration = dynamic_registration
-        self.codeActionLiteralSupport = code_action_literal_support
-
-
 class CodeActionContext:
     def __init__(self, diagnostics: List['Diagnostic'],
                  only: List['CodeActionKind'] = None):
         self.diagnostics = diagnostics
         self.only = only
-
-
-class CodeActionKind(str, enum.Enum):
-    QuickFix = 'quickfix'
-    Refactor = 'refactor'
-    RefactorExtract = 'refactor.extract'
-    RefactorInline = 'refactor.inline'
-    RefactorRewrite = 'refactor.rewrite'
-    Source = 'source'
-    SourceOrganizeImports = 'source.organizeImports'
 
 
 class CodeActionKindAbstract:
@@ -248,18 +172,6 @@ class Command:
         self.arguments = arguments
 
 
-class CompletionAbstract:
-    def __init__(self,
-                 dynamic_registration: bool,
-                 completion_item: 'CompletionItemAbstract',
-                 completion_item_kind: 'CompletionItemKindAbstract',
-                 context_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.completionItem = completion_item
-        self.completionItemKind = completion_item_kind
-        self.contextSupport = context_support
-
-
 class CompletionContext:
     def __init__(self,
                  trigger_kind: 'CompletionTriggerKind',
@@ -302,46 +214,6 @@ class CompletionItem:
         self.data = data
 
 
-class CompletionItemAbstract:
-    def __init__(self,
-                 snippet_support: bool,
-                 commit_character_support: bool,
-                 documentation_format: List['MarkupKind'],
-                 deprecated_support: bool,
-                 preselected_support: bool):
-        self.snippetSupport = snippet_support
-        self.commitCharacterSupport = commit_character_support
-        self.documentationFormat = documentation_format
-        self.deprecatedSupport = deprecated_support
-        self.preselectedSupport = preselected_support
-
-
-class CompletionItemKind(enum.IntEnum):
-    Text = 1
-    Method = 2
-    Function = 3
-    Constructor = 4
-    Field = 5
-    Variable = 6
-    Class = 7
-    Interface = 8
-    Module = 9
-    Property = 10
-    Unit = 11
-    Value = 12
-    Enum = 13
-    Keyword = 14
-    Snippet = 15
-    Color = 16
-    File = 17
-    Reference = 18
-
-
-class CompletionItemKindAbstract:
-    def __init__(self, value_set: List['CompletionItemKind']):
-        self.valueSet = value_set
-
-
 class CompletionList:
     def __init__(self,
                  is_incomplete: bool,
@@ -356,26 +228,12 @@ class CompletionList:
         self.items.extend(completion_items)
 
 
-class CompletionOptions:
-    def __init__(self,
-                 resolve_provider: bool = False,
-                 trigger_characters: List[str] = None):
-        self.resolveProvider = resolve_provider
-        self.triggerCharacters = trigger_characters
-
-
 class CompletionRegistrationOptions:
     def __init__(self,
                  resolve_provider: bool = False,
                  trigger_characters: List[str] = None):
         self.resolveProvider = resolve_provider
         self.triggerCharacters = trigger_characters
-
-
-class CompletionTriggerKind(enum.IntEnum):
-    Invoked = 1
-    TriggerCharacter = 2
-    TriggerForIncompleteCompletions = 3
 
 
 class ConfigurationItem:
@@ -404,14 +262,6 @@ class CreateFileOptions:
                  ignore_if_exists: Optional[bool] = False):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
-
-
-class DeclarationClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 link_support: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.linkSupport = link_support
 
 
 class DeleteFile:
@@ -453,23 +303,6 @@ class DiagnosticRelatedInformation:
         self.message = message
 
 
-class DiagnosticSeverity(enum.IntEnum):
-    Error = 1
-    Warning = 2
-    Information = 3
-    Hint = 4
-
-
-class DiagnosticTag(enum.IntEnum):
-    Unnecessary = 1
-    Deprecated = 2
-
-
-class DidChangeConfigurationClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-
-
 class DidChangeConfigurationParams:
     def __init__(self, settings: Any):
         self.settings = settings
@@ -486,11 +319,6 @@ class DidChangeTextDocumentParams:
 class DidChangeWatchedFiles:
     def __init__(self, changes: List['FileEvent']):
         self.changes = changes
-
-
-class DidChangeWatchedFilesClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
 
 
 class DidChangeWatchedFilesRegistrationOptions:
@@ -540,12 +368,6 @@ class DocumentFormattingParams:
                  options: 'FormattingOptions'):
         self.textDocument = text_document
         self.options = options
-
-
-class DocumentHighlightKind(enum.IntEnum):
-    Text = 1
-    Read = 2
-    Write = 3
 
 
 class DocumentHighlight:
@@ -621,17 +443,6 @@ class DocumentSymbol:
         self.deprecated = deprecated
 
 
-class DocumentSymbolAbstract:
-    def __init__(self,
-                 dynamic_registration: bool,
-                 symbol_kind: 'SymbolKindAbstract',
-                 hierarchical_document_symbol_support: bool):
-        self.dynamicRegistration = dynamic_registration,
-        self.symbolKind = symbol_kind
-        self.hierarchicalDocumentSymbolSupport = \
-            hierarchical_document_symbol_support
-
-
 class DocumentSymbolParams:
     def __init__(self, text_document: 'TextDocumentIdentifier'):
         self.textDocument = text_document
@@ -647,43 +458,13 @@ class ExecuteCommandOptions:
         self.commands = commands
 
 
-class ExecuteCommandClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-
-
-class FailureHandlingKind(str, enum.Enum):
-    Abort = 'abort'
-    Transactional = 'transactional'
-    TextOnlyTransactional = 'textOnlyTransactional'
-    Undo = 'undo'
-
-
-class FileChangeType(enum.IntEnum):
-    Created = 1
-    Changed = 2
-    Deleted = 3
+c
 
 
 class FileEvent:
     def __init__(self, uri: str, type: FileChangeType):
         self.uri = uri
         self.type = type
-
-
-if sys.version_info >= (3, 6):
-    class WatchKind(enum.IntFlag):
-        Create = 1
-        Change = 2
-        Delete = 4
-    _WatchKindType = WatchKind
-else:
-    # BBB python 3.5 does not have enum.IntFlag
-    class WatchKind:
-        Create = 1
-        Change = 2
-        Delete = 4
-    _WatchKindType = int
 
 
 class FileSystemWatcher:
@@ -708,22 +489,6 @@ class FoldingRange:
         self.kind = kind
 
 
-class FoldingRangeAbstract:
-    def __init__(self,
-                 dynamic_registration: bool,
-                 range_limit: NumType,
-                 line_folding_only: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.rangeLimit = range_limit
-        self.lineFoldingOnly = line_folding_only
-
-
-class FoldingRangeKind(str, enum.Enum):
-    Comment = 'comment'
-    Imports = 'imports'
-    Region = 'region'
-
-
 class FoldingRangeParams:
     def __init__(self, text_document: 'TextDocumentIdentifier'):
         self.textDocument = text_document
@@ -744,19 +509,6 @@ class Hover:
     def __init__(self, contents: Any, range: 'Range' = None):
         self.contents = contents
         self.range = range
-
-
-class HoverAbstract:
-    def __init__(self, dynamic_registration,
-                 content_format: List['MarkupKind']):
-        self.dynamicRegistration = dynamic_registration
-        self.contentFormat = content_format
-
-
-class Trace(str, enum.Enum):
-    Off = 'off'
-    Messages = 'messages'
-    Verbose = 'verbose'
 
 
 class ClientInfo:
@@ -793,11 +545,6 @@ class InitializeResult:
                  server_info: Optional[ServerInfo] = None):
         self.capabilities = capabilities
         self.serverInfo = server_info
-
-
-class InsertTextFormat(enum.IntEnum):
-    PlainText = 1
-    Snippet = 2
 
 
 class Location:
@@ -839,21 +586,9 @@ class MarkupContent:
         self.value = value
 
 
-class MarkupKind(str, enum.Enum):
-    PlainText = 'plaintext'
-    Markdown = 'markdown'
-
-
 class MessageActionItem:
     def __init__(self, title: str):
         self.title = title
-
-
-class MessageType(enum.IntEnum):
-    Error = 1
-    Warning = 2
-    Info = 3
-    Log = 4
 
 
 class ExecuteCommandParams:
@@ -998,12 +733,6 @@ class RegistrationParams:
         self.registrations = registrations
 
 
-class RenameAbstract:
-    def __init__(self, dynamic_registration: bool, prepare_support: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.prepareSupport = prepare_support
-
-
 class RenameFile:
     def __init__(self,
                  old_uri: str,
@@ -1033,88 +762,83 @@ class RenameParams:
         self.newName = new_name
 
 
-class ResourceOperationKind(str, enum.Enum):
-    Create = 'create'
-    Rename = 'rename'
-    Delete = 'delete'
-
-
-class SaveOptions:
-    def __init__(self, include_text: bool = False):
-        self.includeText = include_text
-
-
-class ServerCapabilities:
+class X(WorkDoneProgressOptions):
     def __init__(self,
-                 features,
-                 feature_options,
-                 commands,
-                 sync_kind,
-                 client_capabilities):
-        self.textDocumentSync = sync_kind
-        self.hoverProvider = HOVER in features
+                 work_done_progress: Optional[ProgressToken] = None):
+        super().__init__(work_done_progress)
 
-        if COMPLETION in features:
-            self.completionProvider = CompletionOptions(
-                resolve_provider=COMPLETION_ITEM_RESOLVE in features,
-                trigger_characters=feature_options.get(
-                    COMPLETION, {}).get('trigger_characters', [])
-            )
 
-        if SIGNATURE_HELP in features:
-            self.signatureHelpProvider = SignatureHelpOptions(
-                trigger_characters=feature_options.get(
-                    SIGNATURE_HELP, {}).get('trigger_characters', [])
-            )
+# class ServerCapabilities:
+#     def __init__(self,
+#                  features,
+#                  feature_options,
+#                  commands,
+#                  sync_kind,
+#                  client_capabilities):
+#         self.textDocumentSync = sync_kind
+#         self.hoverProvider = HOVER in features
 
-        self.definitionProvider = DEFINITION in features
+#         if COMPLETION in features:
+#             self.completionProvider = CompletionOptions(
+#                 resolve_provider=COMPLETION_ITEM_RESOLVE in features,
+#                 trigger_characters=feature_options.get(
+#                     COMPLETION, {}).get('trigger_characters', [])
+#             )
 
-        self.referencesProvider = REFERENCES in features
-        self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
-        self.documentSymbolProvider = DOCUMENT_SYMBOL in features
-        self.workspaceSymbolProvider = WORKSPACE_SYMBOL in features
-        self.codeActionProvider = CODE_ACTION in features
+#         if SIGNATURE_HELP in features:
+#             self.signatureHelpProvider = SignatureHelpOptions(
+#                 trigger_characters=feature_options.get(
+#                     SIGNATURE_HELP, {}).get('trigger_characters', [])
+#             )
 
-        if CODE_LENS in features:
-            self.codeLensProvider = CodeLensOptions(
-                resolve_provider=CODE_LENS_RESOLVE in features
-            )
+#         self.definitionProvider = DEFINITION in features
 
-        self.documentFormattingProvider = FORMATTING in features
-        self.documentRangeFormattingProvider = RANGE_FORMATTING in features
+#         self.referencesProvider = REFERENCES in features
+#         self.documentHighlightProvider = DOCUMENT_HIGHLIGHT in features
+#         self.documentSymbolProvider = DOCUMENT_SYMBOL in features
+#         self.workspaceSymbolProvider = WORKSPACE_SYMBOL in features
+#         self.codeActionProvider = CODE_ACTION in features
 
-        if FORMATTING in features:
-            self.documentOnTypeFormattingProvider = \
-                DocumentOnTypeFormattingOptions(
-                    first_trigger_character=feature_options.get(
-                        ON_TYPE_FORMATTING, {})
-                    .get('first_trigger_character', ''),
+#         if CODE_LENS in features:
+#             self.codeLensProvider = CodeLensOptions(
+#                 resolve_provider=CODE_LENS_RESOLVE in features
+#             )
 
-                    more_trigger_character=feature_options.get(
-                        ON_TYPE_FORMATTING, {})
-                    .get('more_trigger_character', [])
-                )
+#         self.documentFormattingProvider = FORMATTING in features
+#         self.documentRangeFormattingProvider = RANGE_FORMATTING in features
 
-        self.renameProvider = RENAME in features
+#         if FORMATTING in features:
+#             self.documentOnTypeFormattingProvider = \
+#                 DocumentOnTypeFormattingOptions(
+#                     first_trigger_character=feature_options.get(
+#                         ON_TYPE_FORMATTING, {})
+#                     .get('first_trigger_character', ''),
 
-        if DOCUMENT_LINK in features:
-            self.documentLinkProvider = DocumentLinkOptions(
-                resolve_provider=DOCUMENT_LINK_RESOLVE in features
-            )
+#                     more_trigger_character=feature_options.get(
+#                         ON_TYPE_FORMATTING, {})
+#                     .get('more_trigger_character', [])
+#                 )
 
-        self.executeCommandProvider = ExecuteCommandOptions(
-            commands=list(commands.keys())
-        )
+#         self.renameProvider = RENAME in features
 
-        self.workspace = {
-            'workspaceFolders': {
-                'supported': True,
-                'changeNotifications': True
-            }
-        }
+#         if DOCUMENT_LINK in features:
+#             self.documentLinkProvider = DocumentLinkOptions(
+#                 resolve_provider=DOCUMENT_LINK_RESOLVE in features
+#             )
 
-    def __repr__(self):
-        return '{}( {} )'.format(type(self).__name__, self.__dict__)
+#         self.executeCommandProvider = ExecuteCommandOptions(
+#             commands=list(commands.keys())
+#         )
+
+#         self.workspace = {
+#             'workspaceFolders': {
+#                 'supported': True,
+#                 'changeNotifications': True
+#             }
+#         }
+
+#     def __repr__(self):
+#         return '{}( {} )'.format(type(self).__name__, self.__dict__)
 
 
 class SelectionRangeClientCapabilities:
@@ -1148,20 +872,6 @@ class SignatureHelp:
         self.activeParameter = active_parameter
 
 
-class SignatureHelpAbstract:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 signature_information: List[MarkupKind] = None):
-        self.dynamicRegistration = dynamic_registration
-        self.signatureInformation = signature_information
-
-
-class SignatureHelpOptions:
-    def __init__(self,
-                 trigger_characters: List[str]):
-        self.triggerCharacters = trigger_characters
-
-
 class SignatureInformation:
     def __init__(self,
                  label: str,
@@ -1175,11 +885,6 @@ class SignatureInformation:
 class SignatureInformationAbstract:
     def __init__(self, documentation_format: List[MarkupKind]):
         self.documentationFormat = documentation_format
-
-
-class StaticRegistrationOptions:
-    def __init__(self, id: Optional[str] = None):
-        self.id = id
 
 
 class SymbolAbstract:
@@ -1202,97 +907,6 @@ class SymbolInformation:
         self.location = location
         self.containerName = container_name
         self.deprecated = deprecated
-
-
-class SymbolKind(enum.IntEnum):
-    File = 1
-    Module = 2
-    Namespace = 3
-    Package = 4
-    Class = 5
-    Method = 6
-    Property = 7
-    Field = 8
-    Constructor = 9
-    Enum = 10
-    Interface = 11
-    Function = 12
-    Variable = 13
-    Constant = 14
-    String = 15
-    Number = 16
-    Boolean = 17
-    Array = 18
-    Object = 19
-    Key = 20
-    Null = 21
-    EnumMember = 22
-    Struct = 23
-    Event = 24
-    Operator = 25
-    TypeParameter = 26
-
-
-class SymbolKindAbstract:
-    def __init__(self, value_set: Optional[List[SymbolKind]] = None):
-        self.valueSet = value_set
-
-
-class SynchronizationAbstract:
-    def __init__(self, dynamic_registration: bool, will_save: bool,
-                 will_save_wait_until: bool, did_save: bool):
-        self.dynamicRegistration = dynamic_registration
-        self.willSave = will_save
-        self.willSaveWaitUntil = will_save_wait_until
-        self.didSave = did_save
-
-
-class TextDocumentClientCapabilities:
-    def __init__(self,
-                 synchronization: Optional[SynchronizationAbstract] = None,
-                 completion: Optional[CompletionAbstract] = None,
-                 hover: Optional[HoverAbstract] = None,
-                 signature_help: Optional[SignatureHelpAbstract] = None,
-                 declaration: Optional[DeclarationClientCapabilities] = None,
-                 definition: Optional[DynamicRegistrationAbstract] = None,
-                 type_definition: Optional[DynamicRegistrationAbstract] = None,
-                 implementation: Optional[DynamicRegistrationAbstract] = None,
-                 references: Optional[DynamicRegistrationAbstract] = None,
-                 document_highlight: Optional[DynamicRegistrationAbstract] = None,
-                 document_symbol: Optional[DocumentSymbolAbstract] = None,
-                 code_action: Optional[CodeActionAbstract] = None,
-                 code_lens: Optional[DynamicRegistrationAbstract] = None,
-                 document_link: Optional[DynamicRegistrationAbstract] = None,
-                 color_provider: Optional[DynamicRegistrationAbstract] = None,
-                 formatting: Optional[DynamicRegistrationAbstract] = None,
-                 range_formatting: Optional[DynamicRegistrationAbstract] = None,
-                 on_type_formatting: Optional[DynamicRegistrationAbstract] = None,
-                 rename: Optional[RenameAbstract] = None,
-                 publish_diagnostics: Optional[PublishDiagnosticsAbstract] = None,
-                 folding_range: Optional[FoldingRangeAbstract] = None,
-                 selection_range: Optional[SelectionRangeClientCapabilities] = None):
-        self.synchronization = synchronization
-        self.completion = completion
-        self.hover = hover
-        self.signatureHelp = signature_help
-        self.declaration = declaration
-        self.definition = definition
-        self.typeDefinition = type_definition
-        self.implementation = implementation
-        self.references = references
-        self.documentHighlight = document_highlight
-        self.documentSymbol = document_symbol
-        self.codeAction = code_action
-        self.codeLens = code_lens
-        self.documentLink = document_link
-        self.colorProvider = color_provider
-        self.formatting = formatting
-        self.rangeFormatting = range_formatting
-        self.onTypeFormatting = on_type_formatting
-        self.rename = rename
-        self.publishDiagnostics = publish_diagnostics
-        self.foldingRange = folding_range
-        self.selectionRange = selection_range
 
 
 class TextDocumentContentChangeEvent:
@@ -1368,11 +982,6 @@ class ReferenceParams(TextDocumentPositionParams):
         self.context = context
 
 
-class TextDocumentRegistrationOptions:
-    def __init__(self, document_selector: Optional[DocumentSelectorType] = None):
-        self.documentSelector = document_selector
-
-
 class CodeLensRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
@@ -1389,8 +998,7 @@ class DocumentLinkRegistrationOptions(TextDocumentRegistrationOptions):
         self.resolveProvider = resolve_provider
 
 
-class DocumentOnTypeFormattingRegistrationOptions(
-        TextDocumentRegistrationOptions):
+class DocumentOnTypeFormattingRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
                  first_trigger_character: str = None,
@@ -1430,32 +1038,6 @@ class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
         self.includeText = include_text
 
 
-class TextDocumentSaveReason(enum.IntEnum):
-    Manual = 1
-    AfterDelay = 2
-    FocusOut = 3
-
-
-class TextDocumentSyncKind(enum.IntEnum):
-    NONE = 0
-    FULL = 1
-    INCREMENTAL = 2
-
-
-class TextDocumentSyncOptions:
-    def __init__(self,
-                 open_close: bool = False,
-                 change: TextDocumentSyncKind = TextDocumentSyncKind.NONE,
-                 will_save: bool = False,
-                 will_save_wait_until: bool = False,
-                 save: SaveOptions = None):
-        self.openClose = open_close
-        self.change = change
-        self.willSave = will_save
-        self.willSaveWaitUntil = will_save_wait_until
-        self.save = save
-
-
 class TextEdit:
     def __init__(self, range: Range, new_text: str):
         self.range = range
@@ -1479,47 +1061,12 @@ class WillSaveTextDocumentParams:
         self.reason = reason
 
 
-class WindowClientCapabilities:
-    def __init__(self, work_done_progress: Optional[bool] = False):
-        self.workDoneProgress = work_done_progress
-
-
-class WorkspaceClientCapabilities:
-    def __init__(self,
-                 apply_edit: Optional[bool] = False,
-                 workspace_edit: Optional['WorkspaceEditClientCapabilities'] = None,
-                 did_change_configuration: Optional[DidChangeConfigurationClientCapabilities] = None,
-                 did_change_watched_files: Optional[DidChangeWatchedFilesClientCapabilities] = None,
-                 symbol: Optional[WorkspaceSymbolClientCapabilities] = None,
-                 execute_command: Optional[ExecuteCommandClientCapabilities] = None,
-                 workspace_folders: Optional[bool] = False,
-                 configuration: Optional[bool] = False):
-        self.applyEdit = apply_edit
-        self.workspaceEdit = workspace_edit
-        self.didChangeConfiguration = did_change_configuration
-        self.didChangeWatched = did_change_watched_files
-        self.symbol = symbol
-        self.executeCommand = execute_command
-        self.workspace_folders = workspace_folders
-        self.configuration = configuration
-
-
 class WorkspaceEdit:
     def __init__(self,
                  changes: Optional[Dict[str, List[TextEdit]]] = None,
                  document_changes: Optional[DocumentChangesType] = None):
         self.changes = changes
         self.documentChanges = document_changes
-
-
-class WorkspaceEditClientCapabilities:
-    def __init__(self,
-                 document_changes: Optional[bool] = False,
-                 resource_operations: Optional[List[ResourceOperationKind]] = None,
-                 failure_handling: Optional[FailureHandlingKind] = None):
-        self.documentChanges = document_changes
-        self.resourceOperations = resource_operations
-        self.failureHandling = failure_handling
 
 
 class WorkspaceFolder:
@@ -1534,14 +1081,6 @@ class WorkspaceFoldersChangeEvent:
                  removed: List[WorkspaceFolder]):
         self.added = added
         self.removed = removed
-
-
-class WorkspaceSymbolClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 symbol_kind: Optional[SymbolKindAbstract] = None):
-        self.dynamicRegistration = dynamic_registration
-        self.symbolKind = symbol_kind
 
 
 class WorkspaceSymbolParams:
