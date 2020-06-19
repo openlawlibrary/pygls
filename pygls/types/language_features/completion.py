@@ -36,7 +36,7 @@ from pygls.types.basic_structures import (Command, MarkupContent, MarkupKind, Pa
 class CompletionClientCapabilities:
     def __init__(self,
                  dynamic_registration: Optional[bool] = False,
-                 completion_item: Optional[CompletionItemClientCapabilities] = None,
+                 completion_item: Optional['CompletionItemClientCapabilities'] = None,
                  completion_item_kind: Optional['CompletionItemKindClientCapabilities'] = None,
                  context_support: Optional[bool] = False):
         self.dynamicRegistration = dynamic_registration
@@ -46,12 +46,12 @@ class CompletionClientCapabilities:
 
 
 class CompletionItemKindClientCapabilities:
-    def __init__(self, value_set: Optional[List[CompletionItemKind]] = None):
+    def __init__(self, value_set: Optional[List['CompletionItemKind']] = None):
         self.valueSet = value_set
 
 
 class CompletionTagSupportClientCapabilities:
-    def __init__(self, value_set: Optional[List[CompletionItemTag]] = None):
+    def __init__(self, value_set: Optional[List['CompletionItemTag']] = None):
         self.valueSet = value_set
 
 
@@ -87,7 +87,7 @@ class CompletionParams(TextDocumentPositionParams, WorkDoneProgressParams, Parti
     def __init__(self,
                  text_document: TextDocumentIdentifier,
                  position: Position,
-                 context: Optional[CompletionContext] = None,
+                 context: Optional['CompletionContext'] = None,
                  work_done_token: Optional[bool] = None,
                  partial_result_token: Optional[ProgressToken] = None):
         TextDocumentPositionParams.__init__(self, text_document, position)
@@ -113,7 +113,7 @@ class CompletionContext:
 class CompletionList:
     def __init__(self,
                  is_incomplete: bool,
-                 items: List[CompletionItem] = None):
+                 items: List['CompletionItem'] = None):
         self.isIncomplete = is_incomplete
         self.items = items if items else []
 
@@ -136,7 +136,7 @@ class CompletionItemTag(enum.IntEnum):
 class CompletionItem:
     def __init__(self,
                  label: str,
-                 kind: Optional[CompletionItemKind] = None,
+                 kind: Optional['CompletionItemKind'] = None,
                  tags: Optional[List[CompletionItemTag]] = None,
                  detail: Optional[str] = None,
                  documentation: Optional[Union[str, MarkupContent]] = None,

@@ -24,14 +24,17 @@ https://microsoft.github.io/language-server-protocol/specification
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-import enum
-from typing import Any, List, Optional, Union
+from typing import Any, Optional
 
-from pygls.types.basic_structures import (Command, Diagnostic, MarkupContent, MarkupKind,
-                                          PartialResultParams, Position, ProgressToken, Range,
-                                          TextDocumentIdentifier, TextDocumentPositionParams,
-                                          WorkDoneProgressOptions, WorkDoneProgressParams,
-                                          WorkspaceEdit)
+from pygls.types.basic_structures import (
+    Command,
+    PartialResultParams,
+    ProgressToken,
+    Range,
+    TextDocumentIdentifier,
+    WorkDoneProgressOptions,
+    WorkDoneProgressParams
+)
 
 
 class CodeLensClientCapabilities:

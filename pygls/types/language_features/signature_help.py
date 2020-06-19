@@ -25,10 +25,10 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from pygls.types.basic_structures import (MarkupContent, MarkupKind, NumType, Position,
-                                          ProgressToken, Range, TextDocumentIdentifier,
+                                          ProgressToken, TextDocumentIdentifier,
                                           TextDocumentPositionParams, WorkDoneProgressOptions,
                                           WorkDoneProgressParams)
 
@@ -97,7 +97,7 @@ class SignatureHelpContext:
 
 class SignatureHelp:
     def __init__(self,
-                 signatures: List[SignatureInformation],
+                 signatures: List['SignatureInformation'],
                  active_signature: Optional[NumType] = None,
                  active_parameter: Optional[NumType] = None):
         self.signatures = signatures

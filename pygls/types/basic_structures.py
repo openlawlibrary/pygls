@@ -25,7 +25,6 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-import sys
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 NumType = Union[int, float]
@@ -158,7 +157,7 @@ class Diagnostic:
     def __init__(self,
                  range: Range,
                  message: str,
-                 severity: Optional[DiagnosticSeverity] = None,
+                 severity: Optional['DiagnosticSeverity'] = None,
                  code: Optional[Union[int, str]] = None,
                  source: Optional[str] = None,
                  related_information: Optional[List['DiagnosticRelatedInformation']] = None,
@@ -275,8 +274,8 @@ class WorkspaceEdit:
 class WorkspaceEditClientCapabilities:
     def __init__(self,
                  document_changes: Optional[bool] = False,
-                 resource_operations: Optional[List[ResourceOperationKind]] = None,
-                 failure_handling: Optional[FailureHandlingKind] = None):
+                 resource_operations: Optional[List['ResourceOperationKind']] = None,
+                 failure_handling: Optional['FailureHandlingKind'] = None):
         self.documentChanges = document_changes
         self.resourceOperations = resource_operations
         self.failureHandling = failure_handling

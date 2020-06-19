@@ -72,7 +72,7 @@ class DidChangeConfigurationParams:
 
 
 class ConfigurationParams:
-    def __init__(self, items: List[ConfigurationItem]):
+    def __init__(self, items: List['ConfigurationItem']):
         self.items = items
 
 
@@ -90,16 +90,8 @@ class DidChangeWatchedFilesClientCapabilities:
 
 
 class DidChangeWatchedFilesRegistrationOptions:
-    def __init__(self, watchers: List[FileSystemWatcher]):
+    def __init__(self, watchers: List['FileSystemWatcher']):
         self.watchers = watchers
-
-
-class FileSystemWatcher:
-    def __init__(self,
-                 glob_pattern: str,
-                 kind: Optional[WatchKindType] = WatchKind.Create | WatchKind.Change | WatchKind.Delete):
-        self.globPattern = glob_pattern
-        self.kind = kind
 
 
 if sys.version_info >= (3, 6):
@@ -117,8 +109,16 @@ else:
     WatchKindType = int
 
 
+class FileSystemWatcher:
+    def __init__(self,
+                 glob_pattern: str,
+                 kind: Optional[WatchKindType] = WatchKind.Create | WatchKind.Change | WatchKind.Delete):
+        self.globPattern = glob_pattern
+        self.kind = kind
+
+
 class DidChangeWatchedFilesParams:
-    def __init__(self, changes: List[FileEvent]):
+    def __init__(self, changes: List['FileEvent']):
         self.changes = changes
 
 
@@ -209,7 +209,7 @@ class DidOpenTextDocumentParams:
 class DidChangeTextDocumentParams:
     def __init__(self,
                  text_document: VersionedTextDocumentIdentifier,
-                 content_changes: List[TextDocumentContentChangeEvent]):
+                 content_changes: List['TextDocumentContentChangeEvent']):
         self.textDocument = text_document
         self.contentChanges = content_changes
 

@@ -25,7 +25,7 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, List, Optional, Union
+from typing import List, Optional
 
 from pygls.types.basic_structures import NumType, ProgressToken
 
@@ -47,7 +47,7 @@ class ShowMessageRequestParams:
     def __init__(self,
                  type: MessageType,
                  message: str,
-                 actions: Optional[List[MessageActionItem]] = None):
+                 actions: Optional[List['MessageActionItem']] = None):
         self.type = type
         self.message = message
         self.actions = actions

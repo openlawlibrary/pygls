@@ -25,11 +25,10 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, List, Optional, Union
+from typing import List, Optional
 
-from pygls.types.basic_structures import (MarkupContent, MarkupKind, PartialResultParams, Position,
-                                          ProgressToken, Range, TextDocumentIdentifier,
-                                          TextDocumentPositionParams, WorkDoneProgressOptions,
+from pygls.types.basic_structures import (Location, PartialResultParams, ProgressToken, Range,
+                                          TextDocumentIdentifier, WorkDoneProgressOptions,
                                           WorkDoneProgressParams)
 
 
@@ -99,7 +98,7 @@ class DocumentSymbol:
                  range: Range,
                  selection_range: Range,
                  detail: Optional[str] = None,
-                 children: Optional[List[DocumentSymbol]] = None,
+                 children: Optional[List['DocumentSymbol']] = None,
                  deprecated: Optional[bool] = False):
         self.name = name
         self.kind = kind

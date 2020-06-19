@@ -27,58 +27,109 @@ that.
 import enum
 from typing import Any, List, Optional, Union
 
-from pygls.types.basic_structures import (NumType, WorkDoneProgressParams,
-                                          WorkspaceEditClientCapabilities)
+from pygls.types.basic_structures import (
+    NumType,
+    WorkDoneProgressParams,
+    WorkspaceEditClientCapabilities
+)
 from pygls.types.diagnostics import PublishDiagnosticsClientCapabilities
-from pygls.types.language_features.code_action import (CodeActionClientCapabilities,
-                                                       CodeActionOptions)
-from pygls.types.language_features.code_lens import CodeLensClientCapabilities, CodeLensOptions
-from pygls.types.language_features.completion import (CompletionClientCapabilities,
-                                                      CompletionOptions)
-from pygls.types.language_features.declaration import (DeclarationClientCapabilities,
-                                                       DeclarationOptions,
-                                                       DeclarationRegistrationOptions)
-from pygls.types.language_features.definition import (DefinitionClientCapabilities,
-                                                      DefinitionOptions)
-from pygls.types.language_features.document_color import (DocumentColorClientCapabilities,
-                                                          DocumentColorOptions,
-                                                          DocumentColorRegistrationOptions)
-from pygls.types.language_features.document_highlight import (DocumentHighlightClientCapabilities,
-                                                              DocumentHighlightOptions)
-from pygls.types.language_features.document_link import (DocumentLinkClientCapabilities,
-                                                         DocumentLinkOptions)
-from pygls.types.language_features.document_symbol import (DocumentSymbolClientCapabilities,
-                                                           DocumentSymbolOptions)
-from pygls.types.language_features.folding_range import (FoldingRangeClientCapabilities,
-                                                         FoldingRangeOptions,
-                                                         FoldingRangeRegistrationOptions)
-from pygls.types.language_features.formatting import (DocumentFormattingClientCapabilities,
-                                                      DocumentFormattingOptions)
-from pygls.types.language_features.hover import HoverClientCapabilities, HoverOptions
-from pygls.types.language_features.implementation import (ImplementationClientCapabilities,
-                                                          ImplementationOptions,
-                                                          ImplementationRegistrationOptions)
+from pygls.types.language_features.code_action import (
+    CodeActionClientCapabilities,
+    CodeActionOptions
+)
+from pygls.types.language_features.code_lens import (
+    CodeLensClientCapabilities,
+    CodeLensOptions
+)
+from pygls.types.language_features.completion import (
+    CompletionClientCapabilities,
+    CompletionOptions
+)
+from pygls.types.language_features.declaration import (
+    DeclarationClientCapabilities,
+    DeclarationOptions,
+    DeclarationRegistrationOptions
+)
+from pygls.types.language_features.definition import (
+    DefinitionClientCapabilities,
+    DefinitionOptions
+)
+from pygls.types.language_features.document_color import (
+    DocumentColorClientCapabilities,
+    DocumentColorOptions,
+    DocumentColorRegistrationOptions
+)
+from pygls.types.language_features.document_highlight import (
+    DocumentHighlightClientCapabilities,
+    DocumentHighlightOptions
+)
+from pygls.types.language_features.document_link import (
+    DocumentLinkClientCapabilities,
+    DocumentLinkOptions
+)
+from pygls.types.language_features.document_symbol import (
+    DocumentSymbolClientCapabilities,
+    DocumentSymbolOptions
+)
+from pygls.types.language_features.folding_range import (
+    FoldingRangeClientCapabilities,
+    FoldingRangeOptions,
+    FoldingRangeRegistrationOptions
+)
+from pygls.types.language_features.formatting import (
+    DocumentFormattingClientCapabilities,
+    DocumentFormattingOptions
+)
+from pygls.types.language_features.hover import (
+    HoverClientCapabilities,
+    HoverOptions
+)
+from pygls.types.language_features.implementation import (
+    ImplementationClientCapabilities,
+    ImplementationOptions,
+    ImplementationRegistrationOptions
+)
 from pygls.types.language_features.on_type_formatting import (
-    DocumentOnTypeFormattingClientCapabilities, DocumentOnTypeFormattingOptions)
+    DocumentOnTypeFormattingClientCapabilities,
+    DocumentOnTypeFormattingOptions
+)
 from pygls.types.language_features.range_formatting import (
-    DocumentRangeFormattingClientCapabilities, DocumentRangeFormattingOptions)
-from pygls.types.language_features.references import ReferenceClientCapabilities, ReferenceOptions
-from pygls.types.language_features.rename import RenameClientCapabilities, RenameOptions
-from pygls.types.language_features.selection_range import (SelectionRangeClientCapabilities,
-                                                           SelectionRangeOptions,
-                                                           SelectionRangeRegistrationOptions)
-from pygls.types.language_features.signature_help import (SignatureHelpClientCapabilities,
-                                                          SignatureHelpOptions)
-from pygls.types.language_features.type_definition import (TypeDefinitionClientCapabilities,
-                                                           TypeDefinitionOptions,
-                                                           TypeDefinitionRegistrationOptions)
+    DocumentRangeFormattingClientCapabilities,
+    DocumentRangeFormattingOptions
+)
+from pygls.types.language_features.references import (
+    ReferenceClientCapabilities,
+    ReferenceOptions
+)
+from pygls.types.language_features.rename import (
+    RenameClientCapabilities,
+    RenameOptions
+)
+from pygls.types.language_features.selection_range import (
+    SelectionRangeClientCapabilities,
+    SelectionRangeOptions,
+    SelectionRangeRegistrationOptions
+)
+from pygls.types.language_features.signature_help import (
+    SignatureHelpClientCapabilities
+)
+from pygls.types.language_features.type_definition import (
+    TypeDefinitionClientCapabilities,
+    TypeDefinitionOptions,
+    TypeDefinitionRegistrationOptions
+)
 from pygls.types.text_synchronization import TextDocumentSyncKind
-from pygls.types.workspace import (DidChangeConfigurationClientCapabilities,
-                                   DidChangeWatchedFilesClientCapabilities,
-                                   ExecuteCommandClientCapabilities, ExecuteCommandOptions,
-                                   SaveOptions, TextDocumentSyncClientCapabilities,
-                                   WorkspaceFolder, WorkspaceFoldersServerCapabilities,
-                                   WorkspaceSymbolClientCapabilities)
+from pygls.types.workspace import (
+    DidChangeConfigurationClientCapabilities,
+    DidChangeWatchedFilesClientCapabilities,
+    ExecuteCommandClientCapabilities,
+    ExecuteCommandOptions,
+    SaveOptions,
+    TextDocumentSyncClientCapabilities,
+    WorkspaceFolder,
+    WorkspaceFoldersServerCapabilities,
+    WorkspaceSymbolClientCapabilities
+)
 
 
 class ClientInfo:

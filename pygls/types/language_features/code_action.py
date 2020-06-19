@@ -25,13 +25,11 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, List, Optional, Union
+from typing import List, Optional
 
-from pygls.types.basic_structures import (Command, Diagnostic, MarkupContent, MarkupKind,
-                                          PartialResultParams, Position, ProgressToken, Range,
-                                          TextDocumentIdentifier, TextDocumentPositionParams,
-                                          WorkDoneProgressOptions, WorkDoneProgressParams,
-                                          WorkspaceEdit)
+from pygls.types.basic_structures import (Command, Diagnostic, PartialResultParams, ProgressToken,
+                                          Range, TextDocumentIdentifier, WorkDoneProgressOptions,
+                                          WorkDoneProgressParams, WorkspaceEdit)
 from pygls.types.language_features.document_symbol import SymbolKind
 
 
@@ -58,7 +56,7 @@ class CodeActionLiteralSupportActionKindClientCapabilities:
 
 class CodeActionOptions(WorkDoneProgressOptions):
     def __init__(self,
-                 code_action_kinds: Optional[List[CodeActionKind]] = None,
+                 code_action_kinds: Optional[List['CodeActionKind']] = None,
                  work_done_progress: Optional[ProgressToken] = None):
         super().__init__(work_done_progress)
         self.codeActionKinds = code_action_kinds

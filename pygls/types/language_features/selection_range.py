@@ -24,14 +24,11 @@ https://microsoft.github.io/language-server-protocol/specification
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-import enum
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional
 
-from pygls.types.basic_structures import (DocumentSelector, MarkupContent, MarkupKind, NumType,
-                                          PartialResultParams, Position, ProgressToken, Range,
-                                          StaticRegistrationOptions, TextDocumentIdentifier,
-                                          TextDocumentPositionParams,
-                                          TextDocumentRegistrationOptions, TextEdit,
+from pygls.types.basic_structures import (DocumentSelector, PartialResultParams, Position,
+                                          ProgressToken, Range, StaticRegistrationOptions,
+                                          TextDocumentIdentifier, TextDocumentRegistrationOptions,
                                           WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
@@ -70,6 +67,6 @@ class SelectionRangeParams(WorkDoneProgressParams, PartialResultParams):
 
 
 class SelectionRange:
-    def __init__(self, range: Range, parent: Optional[SelectionRange] = None):
+    def __init__(self, range: Range, parent: Optional['SelectionRange'] = None):
         self.range = range
         self.parent = parent

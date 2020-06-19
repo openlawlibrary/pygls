@@ -24,12 +24,19 @@ https://microsoft.github.io/language-server-protocol/specification
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
-from pygls.types.basic_structures import (MarkupContent, MarkupKind, Position, ProgressToken,
-                                          Range, TextDocumentIdentifier,
-                                          TextDocumentPositionParams, WorkDoneProgressOptions,
-                                          WorkDoneProgressParams)
+from pygls.types.basic_structures import (
+    MarkupContent,
+    MarkupKind,
+    Position,
+    ProgressToken,
+    Range,
+    TextDocumentIdentifier,
+    TextDocumentPositionParams,
+    WorkDoneProgressOptions,
+    WorkDoneProgressParams
+)
 
 
 class HoverClientCapabilities:

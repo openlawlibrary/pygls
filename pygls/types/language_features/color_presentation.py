@@ -24,15 +24,16 @@ https://microsoft.github.io/language-server-protocol/specification
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-import enum
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional
 
-from pygls.types.basic_structures import (DocumentSelector, MarkupContent, MarkupKind, NumType,
-                                          PartialResultParams, Position, ProgressToken, Range,
-                                          StaticRegistrationOptions, TextDocumentIdentifier,
-                                          TextDocumentPositionParams,
-                                          TextDocumentRegistrationOptions, TextEdit,
-                                          WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.types.basic_structures import (
+    PartialResultParams,
+    ProgressToken,
+    Range,
+    TextDocumentIdentifier,
+    TextEdit,
+    WorkDoneProgressParams
+)
 from pygls.types.language_features.document_color import Color
 
 
