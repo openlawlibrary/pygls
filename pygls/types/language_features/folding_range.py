@@ -27,17 +27,10 @@ that.
 import enum
 from typing import Optional
 
-from pygls.types.basic_structures import (
-    DocumentSelector,
-    NumType,
-    PartialResultParams,
-    ProgressToken,
-    StaticRegistrationOptions,
-    TextDocumentIdentifier,
-    TextDocumentRegistrationOptions,
-    WorkDoneProgressOptions,
-    WorkDoneProgressParams
-)
+from pygls.types.basic_structures import (DocumentSelector, NumType, PartialResultParams,
+                                          ProgressToken, StaticRegistrationOptions,
+                                          TextDocumentIdentifier, TextDocumentRegistrationOptions,
+                                          WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
 class FoldingRangeClientCapabilities:
@@ -72,8 +65,8 @@ class FoldingRangeParams(WorkDoneProgressParams, PartialResultParams):
                  text_document: TextDocumentIdentifier,
                  work_done_progress: Optional[ProgressToken] = None,
                  partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(work_done_progress)
-        PartialResultParams.__init__(partial_result_token)
+        WorkDoneProgressParams.__init__(self, work_done_progress)
+        PartialResultParams.__init__(self, partial_result_token)
         self.textDocument = text_document
 
 

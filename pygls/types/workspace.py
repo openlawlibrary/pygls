@@ -32,6 +32,8 @@ from pygls.types.basic_structures import (NumType, PartialResultParams, Progress
                                           TextDocumentIdentifier, TextDocumentItem,
                                           VersionedTextDocumentIdentifier, WorkDoneProgressOptions,
                                           WorkDoneProgressParams, WorkspaceEdit)
+from pygls.types.language_features.document_symbol import (SymbolKind,
+                                                           WorkspaceCapabilitiesSymbolKind)
 
 
 class WorkspaceFoldersServerCapabilities:
@@ -156,8 +158,8 @@ class WorkspaceSymbolParams(WorkDoneProgressParams, PartialResultParams):
     def __init__(self, query: str,
                  work_done_progress: Optional[ProgressToken] = None,
                  partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(work_done_progress)
-        PartialResultParams.__init__(partial_result_token)
+        WorkDoneProgressParams.__init__(self, work_done_progress)
+        PartialResultParams.__init__(self, partial_result_token)
         self.query = query
 
 
@@ -174,9 +176,9 @@ class ExecuteCommandOptions(WorkDoneProgressOptions):
         self.commands = commands
 
 
-class ExecuteCommandRegistrationOptions(WorkDoneProgressOptions):
+class ExecuteCommandRegistrationOptions(ExecuteCommandOptions):
     def __init__(self, commands: List[str], work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(commands, work_done_progress=work_done_progress)
+        super().__init__(commands, work_done_progress)
 
 
 class ExecuteCommandParams(WorkDoneProgressParams):
@@ -209,18 +211,23 @@ class DidOpenTextDocumentParams:
 class DidChangeTextDocumentParams:
     def __init__(self,
                  text_document: VersionedTextDocumentIdentifier,
-                 content_changes: List['TextDocumentContentChangeEvent']):
+                 content_changes: Union[List['TextDocumentContentChangeEvent'], List['TextDocumentContentChangeTextEvent']]):
         self.textDocument = text_document
         self.contentChanges = content_changes
 
 
 class TextDocumentContentChangeEvent:
     def __init__(self,
-                 range: Optional[Range] = None,  # because of {'text': ''}
+                 range: Range,
                  range_length: Optional[NumType] = None,
                  text: str = ''):
         self.range = range
         self.rangeLength = range_length
+        self.text = text
+
+
+class TextDocumentContentChangeTextEvent:
+    def __init__(self, text: str):
         self.text = text
 
 

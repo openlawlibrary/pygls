@@ -390,7 +390,7 @@ class WorkDoneProgressEnd:
 
 
 class WorkDoneProgressParams:
-    def __init__(self, work_done_token: Optional[bool] = None):
+    def __init__(self, work_done_token: Optional[ProgressToken] = None):
         self.workDoneToken = work_done_token
 
 

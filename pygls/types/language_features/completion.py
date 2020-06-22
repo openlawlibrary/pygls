@@ -62,7 +62,7 @@ class CompletionItemClientCapabilities:
                  documentation_format: Optional[List[MarkupKind]] = None,
                  deprecated_support: Optional[bool] = False,
                  preselected_support: Optional[bool] = False,
-                 tag_support: Optional[CompletionTagSupportClientCapabilities] = False):
+                 tag_support: Optional[CompletionTagSupportClientCapabilities] = None):
         self.snippetSupport = snippet_support
         self.commitCharacterSupport = commit_character_support
         self.documentationFormat = documentation_format
