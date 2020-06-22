@@ -1,3 +1,4 @@
+# flake8: noqa
 from pygls.types.language_features.code_action import *
 from pygls.types.language_features.code_lens import *
 from pygls.types.language_features.color_presentation import *

@@ -1,3 +1,4 @@
+# flake8: noqa
 from pygls.types.basic_structures import *
 from pygls.types.client import *
 from pygls.types.diagnostics import *

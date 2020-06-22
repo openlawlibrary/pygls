@@ -32,8 +32,6 @@ from pygls.types.basic_structures import (NumType, PartialResultParams, Progress
                                           TextDocumentIdentifier, TextDocumentItem,
                                           VersionedTextDocumentIdentifier, WorkDoneProgressOptions,
                                           WorkDoneProgressParams, WorkspaceEdit)
-from pygls.types.language_features.document_symbol import (SymbolKind,
-                                                           WorkspaceCapabilitiesSymbolKind)
 
 
 class WorkspaceFoldersServerCapabilities:
