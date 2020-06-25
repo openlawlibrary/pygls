@@ -202,9 +202,29 @@ class InitializeResult:
         self.serverInfo = server_info
 
 
+class TextDocumentSyncOptionsServerCapabilities:
+    def __init__(self,
+                 open_close: Optional[bool] = False,
+                 change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE,
+                 will_save: Optional[bool] = False,
+                 will_save_wait_until: Optional[bool] = False,
+                 save: Optional[Union[bool, SaveOptions]] = None):
+        self.openClose = open_close
+        self.change = change
+        self.willSave = will_save
+        self.willSaveWaitUntil = will_save_wait_until
+        self.save = save
+
+
+class WorkspaceServerCapabilities:
+    def __init__(self,
+                 workspace_folders: Optional[List[WorkspaceFoldersServerCapabilities]] = None):
+        self.workspaceFolders = workspace_folders
+
+
 class ServerCapabilities:
     def __init__(self,
-                 text_document_sync: Optional[Union['TextDocumentSyncOptionsServerCapabilities', NumType]] = None,
+                 text_document_sync: Optional[Union[TextDocumentSyncOptionsServerCapabilities, NumType]] = None,
                  completion_provider: Optional[CompletionOptions] = None,
                  hover_provider: Optional[Union[bool, HoverOptions]] = None,
                  signature_help_provider: Optional[SignatureHelpOptions] = None,
@@ -227,7 +247,7 @@ class ServerCapabilities:
                  execute_command_provider: Optional[ExecuteCommandOptions] = None,
                  selection_range_provider: Optional[Union[bool, SelectionRangeOptions, SelectionRangeRegistrationOptions]] = None,
                  workspace_symbol_provider: Optional[bool] = None,
-                 workspace: Optional['WorkspaceServerCapabilities'] = None,
+                 workspace: Optional[WorkspaceServerCapabilities] = None,
                  experimental: Optional[Any] = None):
         self.textDocumentSync = text_document_sync
         self.completionProvider = completion_provider
@@ -254,26 +274,6 @@ class ServerCapabilities:
         self.workspaceSymbolProvider = workspace_symbol_provider
         self.workspace = workspace
         self.experimental = experimental
-
-
-class TextDocumentSyncOptionsServerCapabilities:
-    def __init__(self,
-                 open_close: Optional[bool] = False,
-                 change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE,
-                 will_save: Optional[bool] = False,
-                 will_save_wait_until: Optional[bool] = False,
-                 save: Optional[Union[bool, SaveOptions]] = None):
-        self.openClose = open_close
-        self.change = change
-        self.willSave = will_save
-        self.willSaveWaitUntil = will_save_wait_until
-        self.save = save
-
-
-class WorkspaceServerCapabilities:
-    def __init__(self,
-                 workspace_folders: Optional[List[WorkspaceFoldersServerCapabilities]] = None):
-        self.workspaceFolders = workspace_folders
 
 
 class InitializedParams:
