@@ -20,16 +20,16 @@ import time
 import uuid
 from json import JSONDecodeError
 
-from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
-                            TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
+from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
+                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
+from pygls.lsp.types import (CompletionItem, CompletionList, CompletionParams,
+                             ConfigurationItem, ConfigurationParams,
+                             Diagnostic, DidChangeTextDocumentParams,
+                             DidCloseTextDocumentParams,
+                             DidOpenTextDocumentParams, MessageType, Position,
+                             Range, Registration, RegistrationParams,
+                             Unregistration, UnregistrationParams)
 from pygls.server import LanguageServer
-from pygls.types import (CompletionItem, CompletionList, CompletionParams,
-                         ConfigurationItem, ConfigurationParams, Diagnostic,
-                         DidChangeTextDocumentParams,
-                         DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-                         MessageType, Position, Range, Registration,
-                         RegistrationParams, Unregistration,
-                         UnregistrationParams)
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1

@@ -18,15 +18,13 @@ import pathlib
 from time import sleep
 
 import pytest
-from pygls.features import (INITIALIZE, TEXT_DOCUMENT_DID_OPEN,
-                            WORKSPACE_EXECUTE_COMMAND)
+from pygls.lsp.methods import INITIALIZE, TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
+from pygls.lsp.types import (DidOpenTextDocumentParams, ExecuteCommandParams, InitializeParams,
+                             TextDocumentItem)
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
-from pygls.types import (DidOpenTextDocumentParams, ExecuteCommandParams,
-                         InitializeParams, TextDocumentItem)
 
-from tests import (CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC,
-                   FEATURE_SYNC, FEATURE_THREAD)
+from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, FEATURE_SYNC, FEATURE_THREAD
 
 CALL_TIMEOUT = 2
 

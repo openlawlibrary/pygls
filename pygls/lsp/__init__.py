@@ -16,8 +16,8 @@
 ############################################################################
 from typing import List, Union
 
-import pygls.lsp.methods as m
-import pygls.lsp.types as t
+from pygls.lsp.methods import *
+from pygls.lsp.types import *
 
 # Holds lsp methods and their appropriate types. It is used for type-checking.
 # {
@@ -32,9 +32,9 @@ import pygls.lsp.types as t
 #       def completions(params: CompletionParams = None) -> Union[List[CompletionItem], CompletionList, None]:
 #           """Returns completion items."""
 LSP_METHOD_MAP = {
-    m.COMPLETION: (
-        t.CompletionOptions,
-        t.CompletionParams,
-        Union[List[t.CompletionItem], t.CompletionList, None],
+    COMPLETION: (
+        CompletionOptions,
+        CompletionParams,
+        Union[List[CompletionItem], CompletionList, None],
     ),
 }

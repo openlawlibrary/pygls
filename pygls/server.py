@@ -21,16 +21,14 @@ import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from threading import Event
-from typing import Callable, Any, List, TypeVar
+from typing import Any, Callable, List, TypeVar
 
-from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, Diagnostic, MessageType,
-                         RegistrationParams, TextDocumentSyncKind, UnregistrationParams,
-                         WorkspaceEdit)
-
-from . import IS_WIN
-from .protocol import LanguageServerProtocol
-from .types import ConfigurationParams
-from .workspace import Workspace
+from pygls import IS_WIN
+from pygls.lsp.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, ConfigurationParams,
+                             Diagnostic, MessageType, RegistrationParams, TextDocumentSyncKind,
+                             UnregistrationParams, WorkspaceEdit)
+from pygls.protocol import LanguageServerProtocol
+from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 

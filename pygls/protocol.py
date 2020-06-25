@@ -29,20 +29,22 @@ from functools import partial
 from itertools import zip_longest
 from typing import List
 
-from .exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
-                         JsonRpcRequestCancelled)
-from .feature_manager import FeatureManager, is_thread_function
-from .features import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
-                       TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE, WINDOW_SHOW_MESSAGE,
-                       WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND)
-from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
-                    DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
-                    DidCloseTextDocumentParams, DidOpenTextDocumentParams, ExecuteCommandParams,
-                    InitializeParams, InitializeResult, LogMessageParams, MessageType,
-                    PublishDiagnosticsParams, RegistrationParams, ServerCapabilities,
-                    ShowMessageParams, UnregistrationParams, WorkspaceEdit)
-from .uris import from_fs_path
-from .workspace import Workspace
+from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
+                              JsonRpcRequestCancelled)
+from pygls.feature_manager import FeatureManager, is_thread_function
+from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
+                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
+                               WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
+                               WORKSPACE_EXECUTE_COMMAND)
+from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
+                             DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
+                             DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+                             ExecuteCommandParams, InitializeParams, InitializeResult,
+                             LogMessageParams, MessageType, PublishDiagnosticsParams,
+                             RegistrationParams, ServerCapabilities, ShowMessageParams,
+                             UnregistrationParams, WorkspaceEdit)
+from pygls.uris import from_fs_path
+from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 

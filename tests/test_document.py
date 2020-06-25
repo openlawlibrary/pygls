@@ -16,13 +16,11 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.types import (Position, Range, TextDocumentContentChangeEvent,
-                         TextDocumentSyncKind)
-from pygls.workspace import (
-    Document, position_from_utf16, position_to_utf16, range_from_utf16, range_to_utf16
-)
+from pygls.lsp.types import Position, Range, TextDocumentContentChangeEvent, TextDocumentSyncKind
+from pygls.workspace import (Document, position_from_utf16, position_to_utf16, range_from_utf16,
+                             range_to_utf16)
 
-from .conftest import DOC, DOC_URI
+from tests.conftest import DOC, DOC_URI
 
 
 def test_document_empty_edit():

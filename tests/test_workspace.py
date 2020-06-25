@@ -19,7 +19,7 @@
 import os
 
 from pygls import uris
-from pygls.types import TextDocumentItem, WorkspaceFolder
+from pygls.lsp.types import TextDocumentItem, WorkspaceFolder
 from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)

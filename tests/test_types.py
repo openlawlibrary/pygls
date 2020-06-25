@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.types import (Position, Range, Location)
+from pygls.lsp.types import Location, Position, Range
 
 
 def test_position():
@@ -45,5 +45,5 @@ def test_location():
     assert Location(uri="file:///document.txt", range=Range(Position(1, 2), Position(3, 4))) \
         != 'something else'
     assert "file:///document.txt:1:2-3:4" == repr(Location(
-                uri="file:///document.txt",
-                range=Range(Position(1, 2), Position(3, 4))))
+        uri="file:///document.txt",
+        range=Range(Position(1, 2), Position(3, 4))))

@@ -20,11 +20,13 @@ import asyncio
 import os
 from threading import Thread
 
+import pygls.lsp.methods
 import pytest
-from pygls import features, uris
+from pygls import uris
 from pygls.feature_manager import FeatureManager
 from pygls.server import LanguageServer
 from pygls.workspace import Document, Workspace
+
 from tests.ls_setup import setup_ls_features
 
 CALL_TIMEOUT = 2
@@ -72,9 +74,9 @@ def client_server():
     yield client, server
 
     shutdown_response = client.lsp.send_request(
-        features.SHUTDOWN).result(timeout=CALL_TIMEOUT)
+        pygls.lsp.methods.SHUTDOWN).result(timeout=CALL_TIMEOUT)
     assert shutdown_response is None
-    client.lsp.notify(features.EXIT)
+    client.lsp.notify(pygls.lsp.methods.EXIT)
 
 
 @pytest.fixture

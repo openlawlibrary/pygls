@@ -17,10 +17,9 @@
 import json
 
 import pytest
-from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage,
-                            JsonRPCResponseMessage, deserialize_message,
-                            to_lsp_name)
-from pygls.types import InitializeResult
+from pygls.lsp.types import InitializeResult
+from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
+                            deserialize_message, to_lsp_name)
 
 
 class dictToObj:

@@ -22,9 +22,9 @@ import os
 import re
 from typing import List
 
-from .types import (NumType, Position, Range, TextDocumentContentChangeEvent,
-                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
-from .uris import to_fs_path, uri_scheme
+from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
+                             TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
+from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')

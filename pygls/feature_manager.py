@@ -21,10 +21,10 @@ import itertools
 import logging
 from typing import Callable, Dict
 
-from .constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
-                        ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
-from .exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
-                         ThreadDecoratorError, ValidationError)
+from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
+                             ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
+from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
+                              ThreadDecoratorError, ValidationError)
 
 logger = logging.getLogger(__name__)
 
