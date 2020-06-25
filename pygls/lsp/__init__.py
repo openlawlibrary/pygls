@@ -19,6 +19,8 @@ from typing import Any, List, Union
 from pygls.lsp.methods import *
 from pygls.lsp.types import *
 
+__LSP_VERSION__ = "3.15"
+
 # Holds lsp methods and their appropriate types. It is used for type-checking.
 # {
 #   'COMPLETION': (CompletionOptions, CompletionParams, Union[List[CompletionItem], CompletionList, None])
