@@ -30,9 +30,9 @@ class JsonRpcException(Exception):
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.code == other.code and
-            self.message == other.message
+            isinstance(other, self.__class__)
+            and self.code == other.code
+            and self.message == other.message
         )
 
     def __hash__(self):

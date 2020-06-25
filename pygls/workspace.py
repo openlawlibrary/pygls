@@ -333,9 +333,10 @@ class Workspace(object):
         return self._docs.get(doc_uri) or self._create_document(doc_uri)
 
     def is_local(self):
-        return (self._root_uri_scheme == '' or
-                self._root_uri_scheme == 'file') and \
-            os.path.exists(self._root_path)
+        return (
+            self._root_uri_scheme == ''
+            or self._root_uri_scheme == 'file'
+        ) and os.path.exists(self._root_path)
 
     def put_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri

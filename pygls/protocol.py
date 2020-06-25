@@ -107,7 +107,7 @@ def to_lsp_name(method_name):
         if ch == '_':
             continue
 
-        if m_chars[i-1] == '_':
+        if m_chars[i - 1] == '_':
             m_replaced.append(ch.capitalize())
             continue
 
@@ -187,10 +187,10 @@ class JsonRPCProtocol(asyncio.Protocol):
     CONTENT_TYPE = 'application/vscode-jsonrpc'
 
     MESSAGE_PATTERN = re.compile(
-        rb'^(?:[^\r\n]+\r\n)*' +
-        rb'Content-Length: (?P<length>\d+)\r\n' +
-        rb'(?:[^\r\n]+\r\n)*\r\n' +
-        rb'(?P<body>{.*)',
+        rb'^(?:[^\r\n]+\r\n)*'
+        + rb'Content-Length: (?P<length>\d+)\r\n'
+        + rb'(?:[^\r\n]+\r\n)*\r\n'
+        + rb'(?P<body>{.*)',
         re.DOTALL,
     )
 
