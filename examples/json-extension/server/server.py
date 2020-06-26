@@ -22,9 +22,10 @@ from json import JSONDecodeError
 
 from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
-from pygls.lsp.types import (CompletionItem, CompletionList, CompletionParams,
-                             ConfigurationItem, ConfigurationParams,
-                             Diagnostic, DidChangeTextDocumentParams,
+from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
+                             CompletionParams, ConfigurationItem,
+                             ConfigurationParams, Diagnostic,
+                             DidChangeTextDocumentParams,
                              DidCloseTextDocumentParams,
                              DidOpenTextDocumentParams, MessageType, Position,
                              Range, Registration, RegistrationParams,
@@ -89,7 +90,7 @@ def _validate_json(source):
     return diagnostics
 
 
-@json_server.feature(COMPLETION, trigger_characters=[','])
+@json_server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
 def completions(params: CompletionParams = None):
     """Returns completion items."""
     return CompletionList(False, [

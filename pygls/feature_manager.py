@@ -19,12 +19,13 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
                              ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
 from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
                               ThreadDecoratorError, ValidationError)
+from pygls.lsp import LSP_METHODS_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +136,9 @@ class FeatureManager:
         """Returns registered custom commands."""
         return self._commands
 
-    def feature(self, feature_name: str, **options: Dict) -> Callable:
+    def feature(
+        self, feature_name: str, options: Optional[Any] = None,
+    ) -> Callable:
         """Decorator used to register LSP features.
 
         Example:
@@ -159,6 +162,10 @@ class FeatureManager:
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 
             if options:
+                options_type, _, _ = LSP_METHODS_MAP[feature_name]
+                if options_type and not isinstance(options, options_type):
+                    raise TypeError("Options should be instance of type {}"
+                                    .format(options_type))
                 self._feature_options[feature_name] = options
 
             logger.info('Registered {} with options {}'

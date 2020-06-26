@@ -21,7 +21,7 @@ import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from threading import Event
-from typing import Any, Callable, List, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
 from pygls import IS_WIN
 from pygls.lsp.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, ConfigurationParams,
@@ -244,7 +244,9 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.command(command_name)
 
-    def feature(self, feature_name: str, **options: Any) -> Callable[[F], F]:
+    def feature(
+        self, feature_name: str, options: Optional[Any] = None,
+    ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
         Example:
@@ -252,7 +254,7 @@ class LanguageServer(Server):
             def completions(ls, params: CompletionRequest):
                 return CompletionList(False, [CompletionItem("Completion 1")])
         """
-        return self.lsp.fm.feature(feature_name, **options)
+        return self.lsp.fm.feature(feature_name, options)
 
     def get_configuration(self, params: ConfigurationParams,
                           callback: ConfigCallbackType = None) -> Future:

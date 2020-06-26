@@ -21,6 +21,7 @@ from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegis
                               ValidationError)
 from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
 from pygls.lsp import methods
+from pygls.lsp.types import CompletionOptions
 
 
 def test_has_ls_param_or_annotation():
@@ -66,14 +67,9 @@ def test_register_commands(feature_manager):
     assert feature_manager.commands[cmd2_name] is cmd2
 
 
-def test_register_feature_with_options(feature_manager):
-
-    options = {
-        'opt1': 1,
-        'opt2': 2
-    }
-
-    @feature_manager.feature(methods.COMPLETION, **options)
+def test_register_feature_with_valid_options(feature_manager):
+    options = CompletionOptions(trigger_characters=['!'])
+    @feature_manager.feature(methods.COMPLETION, options)
     def completions():
         pass
 
@@ -84,7 +80,22 @@ def test_register_feature_with_options(feature_manager):
     assert methods.COMPLETION in reg_feature_options
 
     assert feature_manager.features[methods.COMPLETION] is completions
-    assert feature_manager.feature_options[methods.COMPLETION] == options
+    assert feature_manager.feature_options[methods.COMPLETION] is options
+
+
+def test_register_feature_with_wrong_options(feature_manager):
+
+    class Options:
+        pass
+
+    with pytest.raises(
+        TypeError,
+        match=("Options should be instance of type "
+               "<class 'pygls.lsp.types.language_features.completion.CompletionOptions'>")  # noqa
+    ):
+        @feature_manager.feature(methods.COMPLETION, Options())
+        def completions():
+            pass
 
 
 def test_register_features(feature_manager):
