@@ -27,6 +27,8 @@ that.
 import enum
 from typing import Optional
 
+from pygls.lsp.types import DocumentSelector, TextDocumentRegistrationOptions
+
 
 class TextDocumentSyncKind(enum.IntEnum):
     NONE = 0
@@ -40,3 +42,11 @@ class TextDocumentSyncOptions:
                  change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE):
         self.openClose = open_close
         self.change = change
+
+
+class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
+    def __init__(self,
+                 include_text: Optional[bool] = False,
+                 document_selector: Optional[DocumentSelector] = None):
+        super().__init__(document_selector)
+        self.includeText = include_text

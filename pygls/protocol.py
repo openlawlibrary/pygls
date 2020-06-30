@@ -29,6 +29,7 @@ from functools import partial
 from itertools import zip_longest
 from typing import List
 
+from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
                               JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
@@ -41,8 +42,8 @@ from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditRespons
                              DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                              ExecuteCommandParams, InitializeParams, InitializeResult,
                              LogMessageParams, MessageType, PublishDiagnosticsParams,
-                             RegistrationParams, ServerCapabilities, ShowMessageParams,
-                             UnregistrationParams, WorkspaceEdit)
+                             RegistrationParams, ShowMessageParams, UnregistrationParams,
+                             WorkspaceEdit)
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
@@ -572,11 +573,13 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize server capabilities
         client_capabilities = params.capabilities
-        server_capabilities = ServerCapabilities(self.fm.features.keys(),
-                                                 self.fm.feature_options,
-                                                 self.fm.commands,
-                                                 self._server.sync_kind,
-                                                 client_capabilities)
+        server_capabilities = ServerCapabilitiesBuilder(
+            client_capabilities,
+            self.fm.features.keys(),
+            self.fm.feature_options,
+            list(self.fm.commands.keys()),
+            self._server.sync_kind,
+        ).build()
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
 

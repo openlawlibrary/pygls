@@ -66,7 +66,11 @@ LSP_METHODS_MAP = {
     TEXT_DOCUMENT_DID_CHANGE: (None, DidChangeTextDocumentParams, None, ),
     TEXT_DOCUMENT_WILL_SAVE: (None, WillSaveTextDocumentParams, None, ),
     TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL: (None, WillSaveTextDocumentParams, None, ),
-    TEXT_DOCUMENT_DID_SAVE: (None, DidSaveTextDocumentParams, None, ),
+    TEXT_DOCUMENT_DID_SAVE: (
+        TextDocumentSaveRegistrationOptions,
+        DidSaveTextDocumentParams,
+        None,
+    ),
     TEXT_DOCUMENT_DID_CLOSE: (None, DidCloseTextDocumentParams, None, ),
     # Diagnostics notification
     TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS: (None, None, PublishDiagnosticsParams, ),

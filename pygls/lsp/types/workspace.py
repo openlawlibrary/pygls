@@ -176,7 +176,9 @@ class ExecuteCommandOptions(WorkDoneProgressOptions):
 
 
 class ExecuteCommandRegistrationOptions(ExecuteCommandOptions):
-    def __init__(self, commands: List[str], work_done_progress: Optional[ProgressToken] = None):
+    def __init__(self,
+                 commands: List[str],
+                 work_done_progress: Optional[ProgressToken] = None):
         super().__init__(commands, work_done_progress)
 
 
