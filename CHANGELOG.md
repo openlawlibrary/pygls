@@ -10,10 +10,14 @@ and this project adheres to [Semantic Versioning][semver].
 ### Added
 
 - Testing against Python 3.9 ([#186])
+- Websocket server implementation `start_websocket` for LSP ([#129])
 
 ### Changed
 
 ### Fixed
+
+[#186]: https://github.com/openlawlibrary/pygls/pull/186
+[#129]: https://github.com/openlawlibrary/pygls/pull/129
 
 ## [0.10.3] - 05/05/2021
 
