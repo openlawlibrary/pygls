@@ -50,6 +50,22 @@ The code snippet below shows how to start the server in *STDIO* mode.
 
     server.start_io()
 
+WEBSOCKET
+^^^^^^^^^
+
+WEBSOCKET connections are used when you want to expose language server to
+browser based editors.
+
+The code snippet below shows how to start the server in *WEBSOCKET* mode.
+
+.. code:: python
+
+    from pygls.server import LanguageServer
+
+    server = LanguageServer()
+
+    server.start_websocket('0.0.0.0', 1234)
+
 Logging
 ~~~~~~~
 
