@@ -40,7 +40,7 @@ from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagno
                     DidCloseTextDocumentParams, DidOpenTextDocumentParams, ExecuteCommandParams,
                     InitializeParams, InitializeResult, LogMessageParams, MessageType,
                     PublishDiagnosticsParams, RegistrationParams, ServerCapabilities,
-                    ShowMessageParams, UnregistrationParams, WorkspaceEdit)
+                    ShowMessageParams, UnregistrationParams, WorkspaceEdit, undefined)
 from .uris import from_fs_path
 from .workspace import Workspace
 
@@ -74,7 +74,11 @@ def default_serializer(o):
     """JSON serializer for complex objects."""
     if isinstance(o, enum.Enum):
         return o.value
-    return o.__dict__
+    d = {}
+    for k, v in o.__dict__.items():
+        if v is not undefined:
+            d[k] = v
+    return d
 
 
 def deserialize_message(data):

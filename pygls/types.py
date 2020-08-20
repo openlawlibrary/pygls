@@ -31,7 +31,7 @@ https://microsoft.github.io/language-server-protocol/specification#client_unregi
 
 import enum
 import sys
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 from .features import (CODE_ACTION, CODE_LENS, CODE_LENS_RESOLVE, COMPLETION,
                        COMPLETION_ITEM_RESOLVE, DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK,
@@ -47,23 +47,40 @@ DocumentChangesType = Union[List['TextDocumentEdit'],
 DocumentSelectorType = List['DocumentFilter']
 NumType = Union[int, float]
 
+T = TypeVar('T')
+
+class Undefined(enum.Enum):
+    '''Equivalent to Javascript's undefined'''
+    token = 0
+
+
+# https://www.typescriptlang.org/docs/handbook/interfaces.html#optional-properties
+OptionalProperty = Union[Undefined, T]
+
+undefined = Undefined.token
+
 
 class ApplyWorkspaceEditParams:
-    def __init__(self, edit: 'WorkspaceEdit', label: Optional[str] = None):
+    def __init__(self,
+                 edit: 'WorkspaceEdit',
+                 label: OptionalProperty[str] = undefined):
         self.edit = edit
         self.label = label
 
 
 class ApplyWorkspaceEditResponse:
-    def __init__(self, applied: bool):
+    def __init__(self,
+                 applied: bool,
+                 failure_reason: OptionalProperty[str]):
         self.applied = applied
+        self.failureReason = failure_reason
 
 
 class ClientCapabilities:
     def __init__(self,
-                 workspace: Optional['WorkspaceClientCapabilities'] = None,
-                 text_document: Optional['TextDocumentClientCapabilities'] = None,
-                 experimental: Optional[Any] = None):
+                 workspace: OptionalProperty['WorkspaceClientCapabilities'] = undefined,
+                 text_document: OptionalProperty['TextDocumentClientCapabilities'] = undefined,
+                 experimental: OptionalProperty[Any] = undefined):
         self.workspace = workspace
         self.textDocument = text_document
         self.experimental = experimental
@@ -72,15 +89,17 @@ class ClientCapabilities:
 class CodeAction:
     def __init__(self,
                  title: str,
-                 kind: 'CodeActionKind' = None,
-                 diagnostics: List['Diagnostic'] = None,
-                 edit: 'WorkspaceEdit' = None,
-                 command: 'Command' = None):
+                 kind: OptionalProperty['CodeActionKind'] = undefined,
+                 diagnostics: OptionalProperty[List['Diagnostic']] = undefined,
+                 edit: OptionalProperty['WorkspaceEdit'] = undefined,
+                 command: OptionalProperty['Command'] = undefined,
+                 is_preferred: OptionalProperty[bool] = undefined):
         self.title = title
         self.kind = kind
         self.diagnostics = diagnostics
         self.edit = edit
         self.command = command
+        self.isPreferred = is_preferred
 
 
 class CodeActionAbstract:
@@ -94,7 +113,7 @@ class CodeActionAbstract:
 
 class CodeActionContext:
     def __init__(self, diagnostics: List['Diagnostic'],
-                 only: List['CodeActionKind'] = None):
+                 only: OptionalProperty[List['CodeActionKind']] = undefined):
         self.diagnostics = diagnostics
         self.only = only
 
@@ -120,7 +139,9 @@ class CodeActionLiteralSupportAbstract:
 
 
 class CodeActionOptions:
-    def __init__(self, code_action_kinds: List[CodeActionKind] = None):
+    def __init__(self,
+                 code_action_kinds:
+                 OptionalProperty[List[CodeActionKind]] = undefined):
         self.codeActionKinds = code_action_kinds
 
 
@@ -137,15 +158,15 @@ class CodeActionParams:
 class CodeLens:
     def __init__(self,
                  range: 'Range',
-                 command: 'Command' = None,
-                 data: Any = None):
+                 command: OptionalProperty['Command'] = undefined,
+                 data: OptionalProperty[Any] = undefined):
         self.range = range
         self.command = command
         self.data = data
 
 
 class CodeLensOptions:
-    def __init__(self, resolve_provider: bool = False):
+    def __init__(self, resolve_provider: OptionalProperty[bool] = undefined):
         self.resolveProvider = resolve_provider
 
 
@@ -171,8 +192,9 @@ class ColorInformation:
 class ColorPresentation:
     def __init__(self,
                  label: str,
-                 text_edit: 'TextEdit' = None,
-                 additional_text_edits: List['TextEdit'] = None):
+                 text_edit: OptionalProperty['TextEdit'] = undefined,
+                 additional_text_edits:
+                 OptionalProperty[List['TextEdit']] = undefined):
         self.label = label
         self.textEdit = text_edit
         self.additionalTextEdits = additional_text_edits
@@ -193,7 +215,8 @@ class ColorProviderOptions:
 
 
 class Command:
-    def __init__(self, title: str, command: str, arguments: List[Any] = None):
+    def __init__(self, title: str, command: str,
+                 arguments: OptionalProperty[List[Any]] = undefined):
         self.title = title
         self.command = command
         self.arguments = arguments
@@ -214,7 +237,7 @@ class CompletionAbstract:
 class CompletionContext:
     def __init__(self,
                  trigger_kind: 'CompletionTriggerKind',
-                 trigger_character: str = None):
+                 trigger_character: OptionalProperty[str] = undefined):
         self.triggerKind = trigger_kind
         self.triggerCharacter = trigger_character
 
@@ -222,20 +245,23 @@ class CompletionContext:
 class CompletionItem:
     def __init__(self,
                  label: str,
-                 kind: 'CompletionItemKind' = None,
-                 detail: str = None,
-                 documentation: Union[str, 'MarkupContent'] = None,
-                 deprecated: bool = False,
-                 preselect: bool = False,
-                 sort_text: str = None,
-                 filter_text: str = None,
-                 insert_text: str = None,
-                 insert_text_format: 'InsertTextFormat' = None,
-                 text_edit: 'TextEdit' = None,
-                 additional_text_edits: List['TextEdit'] = None,
-                 commit_characters: List[str] = None,
-                 command: Command = None,
-                 data: Any = None):
+                 kind: OptionalProperty['CompletionItemKind'] = undefined,
+                 detail: OptionalProperty[str] = undefined,
+                 documentation:
+                 OptionalProperty[Union[str, 'MarkupContent']] = undefined,
+                 deprecated: OptionalProperty[bool] = undefined,
+                 preselect: OptionalProperty[bool] = undefined,
+                 sort_text: OptionalProperty[str] = undefined,
+                 filter_text: OptionalProperty[str] = undefined,
+                 insert_text: OptionalProperty[str] = undefined,
+                 insert_text_format:
+                 OptionalProperty['InsertTextFormat'] = undefined,
+                 text_edit: OptionalProperty['TextEdit'] = undefined,
+                 additional_text_edits:
+                 OptionalProperty[List['TextEdit']] = undefined,
+                 commit_characters: OptionalProperty[List[str]] = undefined,
+                 command: OptionalProperty[Command] = undefined,
+                 data: OptionalProperty[Any] = undefined):
         self.label = label
         self.kind = kind
         self.detail = detail
@@ -309,16 +335,19 @@ class CompletionList:
 
 class CompletionOptions:
     def __init__(self,
-                 resolve_provider: bool = False,
-                 trigger_characters: List[str] = None):
+                 resolve_provider: OptionalProperty[bool] = undefined,
+                 trigger_characters: OptionalProperty[List[str]] = undefined,
+                 all_commit_characters:
+                 OptionalProperty[List[str]] = undefined):
         self.resolveProvider = resolve_provider
         self.triggerCharacters = trigger_characters
+        self.allCommitCharacters = all_commit_characters
 
 
 class CompletionRegistrationOptions:
     def __init__(self,
-                 resolve_provider: bool = False,
-                 trigger_characters: List[str] = None):
+                 resolve_provider: OptionalProperty[bool] = undefined,
+                 trigger_characters: OptionalProperty[List[str]] = undefined):
         self.resolveProvider = resolve_provider
         self.triggerCharacters = trigger_characters
 
@@ -331,8 +360,8 @@ class CompletionTriggerKind(enum.IntEnum):
 
 class ConfigurationItem:
     def __init__(self,
-                 scope_uri: str = None,
-                 section: str = None):
+                 scope_uri: OptionalProperty[str] = undefined,
+                 section: OptionalProperty[str] = undefined):
         self.scopeUri = scope_uri
         self.section = section
 
@@ -343,7 +372,9 @@ class ConfigurationParams:
 
 
 class CreateFile:
-    def __init__(self, uri: str, options: 'CreateFileOptions' = None):
+    def __init__(self,
+                 uri: str,
+                 options: OptionalProperty['CreateFileOptions'] = undefined):
         self.kind = 'create'
         self.uri = uri
         self.options = options
@@ -351,14 +382,16 @@ class CreateFile:
 
 class CreateFileOptions:
     def __init__(self,
-                 overwrite: bool = False,
-                 ignore_if_exists: bool = False):
+                 overwrite: OptionalProperty[bool] = undefined,
+                 ignore_if_exists: OptionalProperty[bool] = undefined):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
 
 
 class DeleteFile:
-    def __init__(self, uri: str, options: 'DeleteFileOptions'):
+    def __init__(self,
+                 uri: str,
+                 options: OptionalProperty['DeleteFileOptions'] = undefined):
         self.kind = 'delete'
         self.uri = uri
         self.options = options
@@ -366,8 +399,8 @@ class DeleteFile:
 
 class DeleteFileOptions:
     def __init__(self,
-                 recursive: bool = False,
-                 ignore_if_exists: bool = False):
+                 recursive: OptionalProperty[bool] = undefined,
+                 ignore_if_exists: OptionalProperty[bool] = undefined):
         self.recursive = recursive
         self.ignore_if_exists = ignore_if_exists
 
@@ -383,10 +416,12 @@ class Diagnostic:
     def __init__(self,
                  range: 'Range',
                  message: str,
-                 severity: DiagnosticSeverity = DiagnosticSeverity.Error,
-                 code: str = None,
-                 source: str = None,
-                 related_information: 'DiagnosticRelatedInformation' = None):
+                 severity: OptionalProperty[DiagnosticSeverity] = undefined,
+                 code: OptionalProperty[str] = undefined,
+                 source: OptionalProperty[str] = undefined,
+                 related_information:
+                 OptionalProperty[List['DiagnosticRelatedInformation']] =
+                 undefined):
         self.range = range
         self.message = message
         self.severity = severity
@@ -452,9 +487,9 @@ class DocumentColorParams:
 
 class DocumentFilter:
     def __init__(self,
-                 language: str = None,
-                 scheme: str = None,
-                 pattern: str = None):
+                 language: OptionalProperty[str] = undefined,
+                 scheme: OptionalProperty[str] = undefined,
+                 pattern: OptionalProperty[str] = undefined):
         self.language = language
         self.scheme = scheme
         self.pattern = pattern
@@ -477,20 +512,23 @@ class DocumentHighlightKind(enum.IntEnum):
 class DocumentHighlight:
     def __init__(self,
                  range: 'Range',
-                 kind: DocumentHighlightKind = DocumentHighlightKind.Text):
+                 kind: OptionalProperty[DocumentHighlightKind] = undefined):
         self.range = range
         self.kind = kind
 
 
 class DocumentLink:
-    def __init__(self, range: 'Range', target: str = None, data: Any = None):
+    def __init__(self,
+                 range: 'Range',
+                 target: OptionalProperty[str] = undefined,
+                 data: OptionalProperty[Any] = undefined):
         self.range = range
         self.target = target
         self.data = data
 
 
 class DocumentLinkOptions:
-    def __init__(self, resolve_provider: bool = False):
+    def __init__(self, resolve_provider: OptionalProperty[bool] = undefined):
         self.resolveProvider = resolve_provider
 
 
@@ -502,7 +540,8 @@ class DocumentLinkParams:
 class DocumentOnTypeFormattingOptions:
     def __init__(self,
                  first_trigger_character: str,
-                 more_trigger_character: List[str] = None):
+                 more_trigger_character:
+                 OptionalProperty[List[str]] = undefined):
         self.firstTriggerCharacter = first_trigger_character
         self.moreTriggerCharacter = more_trigger_character
 
@@ -535,9 +574,10 @@ class DocumentSymbol:
                  kind: 'SymbolKind',
                  range: 'Range',
                  selection_range: 'Range',
-                 detail: str = None,
-                 children: List['DocumentSymbol'] = None,
-                 deprecated: bool = False):
+                 detail: OptionalProperty[str] = undefined,
+                 children:
+                 OptionalProperty[List['DocumentSymbol']] = undefined,
+                 deprecated: OptionalProperty[bool] = undefined):
         self.name = name
         self.kind = kind
         self.range = range
@@ -610,7 +650,7 @@ else:
 class FileSystemWatcher:
     def __init__(self,
                  glob_pattern: str,
-                 kind: _WatchKindType = WatchKind.Create | WatchKind.Change | WatchKind.Delete):
+                 kind: OptionalProperty[_WatchKindType] = undefined):
         self.globPattern = glob_pattern
         self.kind = kind
 
@@ -618,10 +658,10 @@ class FileSystemWatcher:
 class FoldingRange:
     def __init__(self,
                  start_line: int,
-                 start_character: int,
                  end_line: int,
-                 end_character: int,
-                 kind: 'FoldingRangeKind' = None):
+                 start_character: OptionalProperty[int] = undefined,
+                 end_character: OptionalProperty[int] = undefined,
+                 kind: OptionalProperty['FoldingRangeKind'] = undefined):
         self.startLine = start_line
         self.startCharacter = start_character
         self.endLine = end_line
@@ -662,7 +702,9 @@ class FormattingOptions:
 
 
 class Hover:
-    def __init__(self, contents: Any, range: 'Range' = None):
+    def __init__(self,
+                 contents: Any,
+                 range: OptionalProperty['Range'] = undefined):
         self.contents = contents
         self.range = range
 
@@ -681,21 +723,25 @@ class Trace(str, enum.Enum):
 
 
 class ClientInfo:
-    def __init__(self, name: str = 'unknown', version: Optional[str] = None):
+    def __init__(self,
+                 name: str = 'unknown',
+                 version: OptionalProperty[Optional[str]] = undefined):
         self.name = name
         self.version = version
 
 
 class InitializeParams:
     def __init__(self,
-                 process_id: int,
+                 process_id: Optional[int],
                  capabilities: ClientCapabilities,
-                 client_info: Optional[ClientInfo] = None,
-                 root_uri: str = None,
+                 client_info: OptionalProperty[ClientInfo] = undefined,
+                 root_uri: Optional[str] = None,
                  root_path: Optional[str] = None,
-                 initialization_options: Optional[Any] = None,
-                 trace: Optional[Trace] = Trace.Off,
-                 workspace_folders: Optional[List['WorkspaceFolder']] = None) -> None:
+                 initialization_options: OptionalProperty[Any] = undefined,
+                 trace: OptionalProperty[Trace] = undefined,
+                 workspace_folders:
+                 OptionalProperty[Optional[List['WorkspaceFolder']]] =
+                 undefined) -> None:
         self.processId = process_id
         self.clientInfo = client_info
         self.rootPath = root_path
@@ -703,7 +749,7 @@ class InitializeParams:
         self.initializationOptions = initialization_options
         self.capabilities = capabilities
         self.trace = trace
-        self.workspaceFolders = workspace_folders or []
+        self.workspaceFolders = workspace_folders
 
 
 class InitializeResult:
@@ -736,7 +782,8 @@ class LocationLink:
                  target_uri: str,
                  target_range: 'Range',
                  target_selection_range: 'Range',
-                 origin_selection_range: Optional['Range'] = None):
+                 origin_selection_range:
+                 OptionalProperty['Range'] = undefined):
         self.targetUri = target_uri
         self.targetRange = target_range
         self.targetSelectionRange = target_selection_range
@@ -773,7 +820,9 @@ class MessageType(enum.IntEnum):
 
 
 class ExecuteCommandParams:
-    def __init__(self, command: str, arguments: List[object] = None):
+    def __init__(self,
+                 command: str,
+                 arguments: OptionalProperty[List[object]] = undefined):
         self.command = command
         self.arguments = arguments
 
@@ -786,7 +835,8 @@ class ExecuteCommandRegistrationOptions:
 class ParameterInformation:
     def __init__(self,
                  label: str,
-                 documentation: Union[str, MarkupContent] = None):
+                 documentation:
+                 OptionalProperty[Union[str, MarkupContent]] = undefined):
         self.label = label
         self.documentation = documentation
 
@@ -897,7 +947,10 @@ class ReferenceContext:
 
 
 class Registration:
-    def __init__(self, id: str, method: str, register_options: Any = None):
+    def __init__(self,
+                 id: str,
+                 method: str,
+                 register_options: OptionalProperty[Any] = undefined):
         self.id = id
         self.method = method
         self.registerOptions = register_options
@@ -918,7 +971,7 @@ class RenameFile:
     def __init__(self,
                  old_uri: str,
                  new_uri: str,
-                 options: 'RenameFileOptions' = None):
+                 options: OptionalProperty['RenameFileOptions'] = undefined):
         self.kind = 'rename'
         self.old_uri = old_uri
         self.new_uri = new_uri
@@ -927,8 +980,8 @@ class RenameFile:
 
 class RenameFileOptions:
     def __init__(self,
-                 overwrite: bool = False,
-                 ignore_if_exists: bool = False):
+                 overwrite: OptionalProperty[bool] = undefined,
+                 ignore_if_exists: OptionalProperty[bool] = undefined):
         self.overwrite = overwrite
         self.ignoreIfExists = ignore_if_exists
 
@@ -950,7 +1003,7 @@ class ResourceOperationKind(str, enum.Enum):
 
 
 class SaveOptions:
-    def __init__(self, include_text: bool = False):
+    def __init__(self, include_text: OptionalProperty[bool] = undefined):
         self.includeText = include_text
 
 
@@ -1037,7 +1090,8 @@ class ShowMessageRequestParams:
     def __init__(self,
                  type: MessageType,
                  message: str,
-                 actions: List[MessageActionItem]):
+                 actions:
+                 OptionalProperty[List[MessageActionItem]] = undefined):
         self.type = type
         self.message = message
         self.actions = actions
@@ -1046,8 +1100,8 @@ class ShowMessageRequestParams:
 class SignatureHelp:
     def __init__(self,
                  signatures: List['SignatureInformation'],
-                 active_signature: int = 0,
-                 active_parameter: int = 0):
+                 active_signature: OptionalProperty[int] = undefined,
+                 active_parameter: OptionalProperty[int] = undefined):
         self.signatures = signatures
         self.activeSignature = active_signature
         self.activeParameter = active_parameter
@@ -1063,15 +1117,17 @@ class SignatureHelpAbstract:
 
 class SignatureHelpOptions:
     def __init__(self,
-                 trigger_characters: List[str]):
+                 trigger_characters: OptionalProperty[List[str]] = undefined):
         self.triggerCharacters = trigger_characters
 
 
 class SignatureInformation:
     def __init__(self,
                  label: str,
-                 documentation: Union[str, MarkupContent] = None,
-                 parameters: List[ParameterInformation] = None):
+                 documentation:
+                 OptionalProperty[Union[str, MarkupContent]] = undefined,
+                 parameters:
+                 OptionalProperty[List[ParameterInformation]] = undefined):
         self.label = label
         self.documentation = documentation
         self.parameters = parameters
@@ -1083,7 +1139,7 @@ class SignatureInformationAbstract:
 
 
 class StaticRegistrationOptions:
-    def __init__(self, id: str):
+    def __init__(self, id: OptionalProperty[str] = undefined):
         self.id = id
 
 
@@ -1100,8 +1156,8 @@ class SymbolInformation:
                  name: str,
                  kind: int,
                  location: 'Location',
-                 container_name: str = None,
-                 deprecated: bool = False):
+                 container_name: OptionalProperty[str] = undefined,
+                 deprecated: OptionalProperty[bool] = undefined):
         self.name = name
         self.kind = kind
         self.location = location
@@ -1200,7 +1256,7 @@ class TextDocumentClientCapabilities:
 class TextDocumentContentChangeEvent:
     def __init__(self,
                  range: 'Range',
-                 range_length: Optional[NumType] = None,
+                 range_length: OptionalProperty[NumType] = undefined,
                  text: str = ''):
         self.range = range
         self.rangeLength = range_length
@@ -1221,7 +1277,7 @@ class TextDocumentIdentifier:
 
 
 class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    def __init__(self, uri: str, version: NumType):
+    def __init__(self, uri: str, version: Optional[NumType] = None):
         super().__init__(uri)
         self.version = version
 
@@ -1249,7 +1305,7 @@ class CompletionParams(TextDocumentPositionParams):
     def __init__(self,
                  text_document: 'TextDocumentIdentifier',
                  position: Position,
-                 context: CompletionContext):
+                 context: OptionalProperty[CompletionContext] = undefined):
         super().__init__(text_document, position)
         self.context = context
 
@@ -1296,7 +1352,7 @@ class DocumentOnTypeFormattingRegistrationOptions(
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
                  first_trigger_character: str = None,
-                 more_trigger_characters: List[str] = None):
+                 more_trigger_characters: OptionalProperty[List[str]] = undefined):
         super().__init__(document_selector)
         self.firstTriggerCharacter = first_trigger_character
         self.moreTriggerCharacter = more_trigger_characters
@@ -1305,7 +1361,7 @@ class DocumentOnTypeFormattingRegistrationOptions(
 class RenameRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
-                 prepare_provider: bool = False):
+                 prepare_provider: OptionalProperty[bool] = undefined):
         super().__init__(document_selector)
         self.prepareProvider = prepare_provider
 
@@ -1313,7 +1369,7 @@ class RenameRegistrationOptions(TextDocumentRegistrationOptions):
 class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
-                 trigger_characters: List[str] = None):
+                 trigger_characters: OptionalProperty[List[str]] = undefined):
         super().__init__(document_selector)
         self.triggerCharacters = trigger_characters
 
@@ -1321,7 +1377,7 @@ class SignatureHelpRegistrationOptions(TextDocumentRegistrationOptions):
 class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
     def __init__(self,
                  document_selector: DocumentSelectorType = None,
-                 include_text: bool = False):
+                 include_text: OptionalProperty[bool] = undefined):
         super().__init__(document_selector)
         self.includeText = include_text
 
@@ -1340,11 +1396,11 @@ class TextDocumentSyncKind(enum.IntEnum):
 
 class TextDocumentSyncOptions:
     def __init__(self,
-                 open_close: bool = False,
-                 change: TextDocumentSyncKind = TextDocumentSyncKind.NONE,
-                 will_save: bool = False,
-                 will_save_wait_until: bool = False,
-                 save: SaveOptions = None):
+                 open_close: OptionalProperty[bool] = undefined,
+                 change: OptionalProperty[TextDocumentSyncKind] = undefined,
+                 will_save: OptionalProperty[bool] = undefined,
+                 will_save_wait_until: OptionalProperty[bool] = undefined,
+                 save: OptionalProperty[SaveOptions] = undefined):
         self.openClose = open_close
         self.change = change
         self.willSave = will_save
@@ -1397,8 +1453,10 @@ class WorkspaceClientCapabilities:
 
 class WorkspaceEdit:
     def __init__(self,
-                 changes: Dict[str, List[TextEdit]] = None,
-                 document_changes: DocumentChangesType = None):
+                 changes:
+                 OptionalProperty[Dict[str, List[TextEdit]]] = undefined,
+                 document_changes:
+                 OptionalProperty[DocumentChangesType] = undefined):
         self.changes = changes
         self.documentChanges = document_changes
 
