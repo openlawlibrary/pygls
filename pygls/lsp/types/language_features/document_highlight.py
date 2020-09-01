@@ -27,30 +27,22 @@ that.
 import enum
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (PartialResultParams, Position, ProgressToken, Range,
-                                              TextDocumentIdentifier, TextDocumentPositionParams,
-                                              WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Position, ProgressToken,
+                                              Range, TextDocumentIdentifier,
+                                              TextDocumentPositionParams, WorkDoneProgressOptions,
+                                              WorkDoneProgressParams)
 
 
-class DocumentHighlightClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class DocumentHighlightClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class DocumentHighlightOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class DocumentHighlightParams(TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
+    pass
 
 
 class DocumentHighlightKind(enum.IntEnum):
@@ -59,9 +51,6 @@ class DocumentHighlightKind(enum.IntEnum):
     Write = 3
 
 
-class DocumentHighlight:
-    def __init__(self,
-                 range: Range,
-                 kind: Optional[DocumentHighlightKind] = DocumentHighlightKind.Text):
-        self.range = range
-        self.kind = kind
+class DocumentHighlight(Model):
+    range: Range
+    kind: Optional[DocumentHighlightKind] = DocumentHighlightKind.Text

@@ -27,13 +27,12 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import NumType, ProgressToken
+from pygls.lsp.types.basic_structures import Model, NumType, ProgressToken
 
 
-class ShowMessageParams:
-    def __init__(self, type: 'MessageType', message: str):
-        self.type = type
-        self.message = message
+class ShowMessageParams(Model):
+    type: 'MessageType'
+    message: str
 
 
 class MessageType(enum.IntEnum):
@@ -43,32 +42,24 @@ class MessageType(enum.IntEnum):
     Log = 4
 
 
-class ShowMessageRequestParams:
-    def __init__(self,
-                 type: MessageType,
-                 message: str,
-                 actions: Optional[List['MessageActionItem']] = None):
-        self.type = type
-        self.message = message
-        self.actions = actions
+class MessageActionItem(Model):
+    title: str
 
 
-class MessageActionItem:
-    def __init__(self, title: str):
-        self.title = title
+class ShowMessageRequestParams(Model):
+    type: MessageType
+    message: str
+    actions: Optional[List[MessageActionItem]] = None
 
 
-class LogMessageParams:
-    def __init__(self, type: NumType, message: str):
-        self.type = type
-        self.message = message
+class LogMessageParams(Model):
+    type: NumType
+    message: str
 
 
-class WorkDoneProgressCreateParams:
-    def __init__(self, token: ProgressToken):
-        self.token = token
+class WorkDoneProgressCreateParams(Model):
+    token: ProgressToken
 
 
-class WorkDoneProgressCancelParams:
-    def __init__(self, token: ProgressToken):
-        self.token = token
+class WorkDoneProgressCancelParams(Model):
+    token: ProgressToken

@@ -26,54 +26,38 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, PartialResultParams, ProgressToken,
-                                              Range, StaticRegistrationOptions,
+from pygls.lsp.types.basic_structures import (DocumentSelector, Model, PartialResultParams,
+                                              ProgressToken, Range, StaticRegistrationOptions,
                                               TextDocumentIdentifier,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class DocumentColorClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class DocumentColorClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class DocumentColorOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class DocumentColorRegistrationOptions(DocumentColorOptions,
                                        TextDocumentRegistrationOptions,
                                        StaticRegistrationOptions):
-    def __init__(self,
-                 id: Optional[str] = None,
-                 document_selector: Optional[DocumentSelector] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        DocumentColorOptions.__init__(self, work_done_progress)
-        TextDocumentRegistrationOptions.__init__(self, document_selector)
-        StaticRegistrationOptions.__init__(self, id)
+    pass
 
 
 class DocumentColorParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
+    text_document: TextDocumentIdentifier
 
 
-class ColorInformation:
-    def __init__(self, range: Range, color: 'Color'):
-        self.range = range
-        self.color = color
+class Color(Model):
+    red: float
+    green: float
+    blue: float
+    alpha: float
 
 
-class Color:
-    def __init__(self, red: float, green: float, blue: float, alpha: float):
-        self.red = red
-        self.green = green
-        self.blue = blue
-        self.alpha = alpha
+class ColorInformation(Model):
+    range: Range
+    color: Color

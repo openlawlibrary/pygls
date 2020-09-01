@@ -78,11 +78,12 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
     """
     try:
         return Position(
-            position.line,
-            position.character - utf16_unit_offset(lines[position.line][:position.character])
+            line=position.line,
+            character=position.character -
+            utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
-        return Position(len(lines), 0)
+        return Position(line=len(lines), character=0)
 
 
 def position_to_utf16(lines: List[str], position: Position) -> Position:
@@ -112,11 +113,12 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
     """
     try:
         return Position(
-            position.line,
-            position.character + utf16_unit_offset(lines[position.line][:position.character])
+            line=position.line,
+            character=position.character +
+            utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
-        return Position(len(lines), 0)
+        return Position(line=len(lines), character=0)
 
 
 def range_from_utf16(lines: List[str], range: Range) -> Range:
@@ -132,8 +134,8 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
         The range with `character` offsets being converted to utf-16 code units.
     """
     return Range(
-        position_from_utf16(lines, range.start),
-        position_from_utf16(lines, range.end)
+        start=position_from_utf16(lines, range.start),
+        end=position_from_utf16(lines, range.end)
     )
 
 
@@ -150,8 +152,8 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
         The range with `character` offsets being converted to utf-32 code units.
     """
     return Range(
-        position_to_utf16(lines, range.start),
-        position_to_utf16(lines, range.end)
+        start=position_to_utf16(lines, range.start),
+        end=position_to_utf16(lines, range.end)
     )
 
 

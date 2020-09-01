@@ -18,12 +18,12 @@ import pathlib
 from time import sleep
 
 import pytest
+
 from pygls.lsp.methods import INITIALIZE, TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
-from pygls.lsp.types import (DidOpenTextDocumentParams, ExecuteCommandParams, InitializeParams,
-                             TextDocumentItem)
+from pygls.lsp.types import (ClientCapabilities, DidOpenTextDocumentParams, ExecuteCommandParams,
+                             InitializeParams, TextDocumentItem)
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
-
 from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, FEATURE_SYNC, FEATURE_THREAD
 
 CALL_TIMEOUT = 2
@@ -33,7 +33,7 @@ def _initialize_server(server):
     server.lsp.bf_initialize(InitializeParams(
         process_id=1234,
         root_uri=pathlib.Path(__file__).parent.as_uri(),
-        capabilities=None
+        capabilities=ClientCapabilities(),
     ))
 
 
@@ -47,7 +47,7 @@ def test_bf_initialize(client_server):
         {
             "processId": process_id,
             "rootUri": root_uri,
-            "capabilities": None
+            "capabilities": ClientCapabilities(),
         }
     ).result(timeout=CALL_TIMEOUT)
 
@@ -63,8 +63,10 @@ def test_bf_text_document_did_open(client_server):
 
     client.lsp.notify(TEXT_DOCUMENT_DID_OPEN,
                       DidOpenTextDocumentParams(
-                          TextDocumentItem(__file__, 'python', 1, 'test')
-                      ))
+                          text_document=TextDocumentItem(uri=__file__,
+                                                         language_id='python',
+                                                         version=1,
+                                                         text='test')))
 
     sleep(1)
 
@@ -106,7 +108,7 @@ def test_command_async(client_server):
 
     is_called, thread_id = client.lsp.send_request(WORKSPACE_EXECUTE_COMMAND,
                                                    ExecuteCommandParams(
-                                                       CMD_ASYNC
+                                                       command=CMD_ASYNC
                                                    ))\
         .result(timeout=CALL_TIMEOUT)
 
@@ -121,7 +123,7 @@ def test_command_sync(client_server):
         client.lsp.send_request(
             WORKSPACE_EXECUTE_COMMAND,
             ExecuteCommandParams(
-                CMD_SYNC
+                command=CMD_SYNC
             )
         ).result(timeout=CALL_TIMEOUT)
 
@@ -136,7 +138,7 @@ def test_command_thread(client_server):
         client.lsp.send_request(
             WORKSPACE_EXECUTE_COMMAND,
             ExecuteCommandParams(
-                CMD_THREAD
+                command=CMD_THREAD
             )
         ).result(timeout=CALL_TIMEOUT)
 

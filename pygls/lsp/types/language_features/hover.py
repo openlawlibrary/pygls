@@ -26,46 +26,35 @@ that.
 """
 from typing import List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Position, ProgressToken,
-                                              Range, TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, Position,
+                                              ProgressToken, Range, TextDocumentIdentifier,
                                               TextDocumentPositionParams, WorkDoneProgressOptions,
                                               WorkDoneProgressParams)
 
 
-class HoverClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 content_format: Optional[List[MarkupKind]] = None):
-        self.dynamicRegistration = dynamic_registration
-        self.contentFormat = content_format
+class HoverClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    content_format: Optional[List[MarkupKind]] = None
 
 
 class HoverOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class HoverParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 work_done_token: Optional[bool] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
+    text_document: TextDocumentIdentifier
+    position: Position
+    work_done_token: Optional[bool] = None
 
 
-class Hover:
-    def __init__(self,
-                 contents: Union['MarkedString', List['MarkedString'], MarkupContent],
-                 range: Optional[Range] = None):
-        self.contents = contents
-        self.range = range
-
-
-class _MarkedString:
-    def __init__(self, language: str, value: str):
-        self.language = language
-        self.value = value
+class _MarkedString(Model):
+    language: str
+    value: str
 
 
 MarkedString = Union[str, _MarkedString]
+
+
+class Hover(Model):
+    contents: Union[MarkedString, List[MarkedString], MarkupContent]
+    range: Optional[Range] = None

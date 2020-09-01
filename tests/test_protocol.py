@@ -17,6 +17,7 @@
 import json
 
 import pytest
+
 from pygls.lsp.types import InitializeResult
 from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
                             deserialize_message, to_lsp_name)

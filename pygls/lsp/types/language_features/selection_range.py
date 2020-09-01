@@ -26,48 +26,33 @@ that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, PartialResultParams, Position,
-                                              ProgressToken, Range, StaticRegistrationOptions,
-                                              TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (DocumentSelector, Model, PartialResultParams,
+                                              Position, ProgressToken, Range,
+                                              StaticRegistrationOptions, TextDocumentIdentifier,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class SelectionRangeClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class SelectionRangeClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class SelectionRangeOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class SelectionRangeRegistrationOptions(SelectionRangeOptions,
                                         TextDocumentRegistrationOptions,
                                         StaticRegistrationOptions):
-    def __init__(self,
-                 id: Optional[str] = None,
-                 document_selector: Optional[DocumentSelector] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        SelectionRangeOptions.__init__(self, work_done_progress)
-        TextDocumentRegistrationOptions.__init__(self, document_selector)
-        StaticRegistrationOptions.__init__(self, id)
+    pass
 
 
 class SelectionRangeParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self, query: str,
-                 text_document: TextDocumentIdentifier,
-                 positions: List[Position],
-                 work_done_progress: Optional[ProgressToken] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_progress)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
-        self.positions = positions
+    query: str
+    text_document: TextDocumentIdentifier
+    positions: List[Position]
 
 
-class SelectionRange:
-    def __init__(self, range: Range, parent: Optional['SelectionRange'] = None):
-        self.range = range
-        self.parent = parent
+class SelectionRange(Model):
+    range: Range
+    parent: Optional['SelectionRange'] = None

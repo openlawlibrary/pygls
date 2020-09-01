@@ -28,71 +28,52 @@ import enum
 import sys
 from typing import Any, List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (NumType, PartialResultParams, ProgressToken, Range,
-                                              TextDocumentIdentifier, TextDocumentItem,
+from pygls.lsp.types.basic_structures import (Model, NumType, PartialResultParams, ProgressToken,
+                                              Range, TextDocumentIdentifier, TextDocumentItem,
                                               VersionedTextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
+from pygls.lsp.types.language_features.document_symbol import WorkspaceCapabilitiesSymbolKind
 
 
-class WorkspaceFoldersServerCapabilities:
-    def __init__(self,
-                 supported: Optional[bool] = False,
-                 change_notifications: Optional[Union[str, bool]] = None):
-        self.supported = supported
-        self.changeNotifications = change_notifications
+class WorkspaceFoldersServerCapabilities(Model):
+    supported: Optional[bool] = False
+    change_notifications: Optional[Union[str, bool]] = None
 
 
-class WorkspaceFolder:
-    def __init__(self, uri: str, name: str):
-        self.uri = uri
-        self.name = name
+class WorkspaceFolder(Model):
+    uri: str
+    name: str
 
 
-class DidChangeWorkspaceFoldersParams:
-    def __init__(self, event: 'WorkspaceFoldersChangeEvent'):
-        self.event = event
+class WorkspaceFoldersChangeEvent(Model):
+    added: List[WorkspaceFolder]
+    removed: List[WorkspaceFolder]
 
 
-class WorkspaceFoldersChangeEvent:
-    def __init__(self,
-                 added: List[WorkspaceFolder],
-                 removed: List[WorkspaceFolder]):
-        self.added = added
-        self.removed = removed
+class DidChangeWorkspaceFoldersParams(Model):
+    event: WorkspaceFoldersChangeEvent
 
 
-class DidChangeConfigurationClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class DidChangeConfigurationClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
-class DidChangeConfigurationParams:
-    def __init__(self, settings: Any):
-        self.settings = settings
+class DidChangeConfigurationParams(Model):
+    settings: Any
 
 
-class ConfigurationParams:
-    def __init__(self, items: List['ConfigurationItem']):
-        self.items = items
+class ConfigurationItem(Model):
+    scope_uri: Optional[str] = None
+    section: Optional[str] = None
 
 
-class ConfigurationItem:
-    def __init__(self,
-                 scope_uri: Optional[str] = None,
-                 section: Optional[str] = None):
-        self.scopeUri = scope_uri
-        self.section = section
+class ConfigurationParams(Model):
+    items: List[ConfigurationItem]
 
 
-class DidChangeWatchedFilesClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-
-
-class DidChangeWatchedFilesRegistrationOptions:
-    def __init__(self, watchers: List['FileSystemWatcher']):
-        self.watchers = watchers
+class DidChangeWatchedFilesClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 if sys.version_info >= (3, 6):
@@ -110,23 +91,13 @@ else:
     WatchKindType = int
 
 
-class FileSystemWatcher:
-    def __init__(self,
-                 glob_pattern: str,
-                 kind: Optional[WatchKindType] = WatchKind.Create | WatchKind.Change | WatchKind.Delete):
-        self.globPattern = glob_pattern
-        self.kind = kind
+class FileSystemWatcher(Model):
+    glob_pattern: str
+    kind: Optional[WatchKindType] = WatchKind.Create | WatchKind.Change | WatchKind.Delete
 
 
-class DidChangeWatchedFilesParams:
-    def __init__(self, changes: List['FileEvent']):
-        self.changes = changes
-
-
-class FileEvent:
-    def __init__(self, uri: str, type: 'FileChangeType'):
-        self.uri = uri
-        self.type = type
+class DidChangeWatchedFilesRegistrationOptions(Model):
+    watchers: List[FileSystemWatcher]
 
 
 class FileChangeType(enum.IntEnum):
@@ -135,107 +106,82 @@ class FileChangeType(enum.IntEnum):
     Deleted = 3
 
 
-class WorkspaceSymbolClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 symbol_kind: Optional['WorkspaceCapabilitiesSymbolKind'] = None):
-        self.dynamicRegistration = dynamic_registration
-        self.symbolKind = symbol_kind
+class FileEvent(Model):
+    uri: str
+    type: FileChangeType
+
+
+class DidChangeWatchedFilesParams(Model):
+    changes: List[FileEvent]
+
+
+class WorkspaceSymbolClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
 
 
 class WorkspaceSymbolOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class WorkspaceSymbolRegistrationOptions(WorkspaceSymbolOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class WorkspaceSymbolParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self, query: str,
-                 work_done_progress: Optional[ProgressToken] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_progress)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.query = query
+    query: str
 
 
-class ExecuteCommandClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class ExecuteCommandClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class ExecuteCommandOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 commands: List[str],
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-        self.commands = commands
+    commands: List[str]
 
 
 class ExecuteCommandRegistrationOptions(ExecuteCommandOptions):
-    def __init__(self,
-                 commands: List[str],
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(commands, work_done_progress)
+    pass
 
 
 class ExecuteCommandParams(WorkDoneProgressParams):
-    def __init__(self,
-                 command: str,
-                 arguments: Optional[List[Any]] = None,
-                 work_done_token: Optional[bool] = None):
-        super().__init__(work_done_token)
-        self.command = command
-        self.arguments = arguments
+    command: str
+    arguments: Optional[List[Any]] = None
 
 
-class ApplyWorkspaceEditParams:
-    def __init__(self, edit: WorkspaceEdit, label: Optional[str] = None):
-        self.edit = edit
-        self.label = label
+class ApplyWorkspaceEditParams(Model):
+    edit: WorkspaceEdit
+    label: Optional[str] = None
 
 
-class ApplyWorkspaceEditResponse:
-    def __init__(self, applied: bool, failure_reason: Optional[str] = None):
-        self.applied = applied
-        self.failureReason = failure_reason
+class ApplyWorkspaceEditResponse(Model):
+    applied: bool
+    failure_reason: Optional[str] = None
 
 
-class DidOpenTextDocumentParams:
-    def __init__(self, text_document: TextDocumentItem):
-        self.textDocument = text_document
+class DidOpenTextDocumentParams(Model):
+    text_document: TextDocumentItem
 
 
-class DidChangeTextDocumentParams:
-    def __init__(self,
-                 text_document: VersionedTextDocumentIdentifier,
-                 content_changes: Union[List['TextDocumentContentChangeEvent'], List['TextDocumentContentChangeTextEvent']]):
-        self.textDocument = text_document
-        self.contentChanges = content_changes
+class TextDocumentContentChangeEvent(Model):
+    range: Optional[Range] = None
+    range_length: Optional[NumType] = None
+    text: str = ''
 
 
-class TextDocumentContentChangeEvent:
-    def __init__(self,
-                 range: Range,
-                 range_length: Optional[NumType] = None,
-                 text: str = ''):
-        self.range = range
-        self.rangeLength = range_length
-        self.text = text
+class TextDocumentContentChangeTextEvent(Model):
+    text: str
 
 
-class TextDocumentContentChangeTextEvent:
-    def __init__(self, text: str):
-        self.text = text
+class DidChangeTextDocumentParams(Model):
+    text_document: VersionedTextDocumentIdentifier
+    content_changes: Union[List[TextDocumentContentChangeEvent],
+                           List[TextDocumentContentChangeTextEvent]]
 
 
-class WillSaveTextDocumentParams:
-    def __init__(self, text_document: TextDocumentIdentifier, reason: int):
-        self.textDocument = text_document
-        self.reason = reason
+class WillSaveTextDocumentParams(Model):
+    text_document: TextDocumentIdentifier
+    reason: int
 
 
 class TextDocumentSaveReason(enum.IntEnum):
@@ -244,29 +190,21 @@ class TextDocumentSaveReason(enum.IntEnum):
     FocusOut = 3
 
 
-class SaveOptions:
-    def __init__(self, include_text: bool = False):
-        self.includeText = include_text
+class SaveOptions(Model):
+    include_text: bool = False
 
 
-class DidSaveTextDocumentParams:
-    def __init__(self, text_document: TextDocumentIdentifier, text: Optional[str] = None):
-        self.textDocument = text_document
-        self.text = text
+class DidSaveTextDocumentParams(Model):
+    text_document: TextDocumentIdentifier
+    text: Optional[str] = None
 
 
-class DidCloseTextDocumentParams:
-    def __init__(self, text_document: TextDocumentIdentifier):
-        self.textDocument = text_document
+class DidCloseTextDocumentParams(Model):
+    text_document: TextDocumentIdentifier
 
 
-class TextDocumentSyncClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 will_save: Optional[bool] = False,
-                 will_save_wait_until: Optional[bool] = False,
-                 did_save: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.willSave = will_save
-        self.willSaveWaitUntil = will_save_wait_until
-        self.didSave = did_save
+class TextDocumentSyncClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    will_save: Optional[bool] = False
+    will_save_wait_until: Optional[bool] = False
+    did_save: Optional[bool] = False

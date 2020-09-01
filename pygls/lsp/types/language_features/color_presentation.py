@@ -26,31 +26,21 @@ that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (PartialResultParams, ProgressToken, Range,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, ProgressToken, Range,
                                               TextDocumentIdentifier, TextEdit,
                                               WorkDoneProgressParams)
 from pygls.lsp.types.language_features.document_color import Color
 
 
 class ColorPresentationParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 color: Color,
-                 range: Range,
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
-        self.color = color
-        self.range = range
+    text_document: TextDocumentIdentifier
+    color: Color
+    range: Range
+    work_done_token: Optional[bool] = None
+    partial_result_token: Optional[ProgressToken] = None
 
 
-class ColorPresentation:
-    def __init__(self,
-                 label: str,
-                 text_edit: Optional[TextEdit] = None,
-                 additional_text_edits: Optional[List[TextEdit]] = None):
-        self.label = label
-        self.textEdit = text_edit
-        self.additionalTextEdits = additional_text_edits
+class ColorPresentation(Model):
+    label: str
+    text_edit: Optional[TextEdit] = None
+    additional_text_edits: Optional[List[TextEdit]] = None

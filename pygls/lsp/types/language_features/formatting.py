@@ -26,41 +26,26 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (ProgressToken, TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (Model, ProgressToken, TextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class DocumentFormattingClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class DocumentFormattingClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class DocumentFormattingOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
+
+
+class FormattingOptions(Model):
+    tab_size: int
+    insert_spaces: bool
+    trim_trailing_whitespace: Optional[bool] = False
+    insert_final_newline: Optional[bool] = False
+    trim_final_newlines: Optional[bool] = False
 
 
 class DocumentFormattingParams(WorkDoneProgressParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 options: 'FormattingOptions',
-                 work_done_token: Optional[bool] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        self.textDocument = text_document
-        self.options = options
-
-
-class FormattingOptions:
-    def __init__(self,
-                 tab_size: int,
-                 insert_spaces: bool,
-                 trim_trailing_whitespace: Optional[bool] = False,
-                 insert_final_newline: Optional[bool] = False,
-                 trim_final_newlines: Optional[bool] = False,
-                 **kwargs):
-        self.tabSize = tab_size
-        self.insertSpaces = insert_spaces
-        self.trimTrailingWhitespace = trim_trailing_whitespace
-        self.insertFinalNewline = insert_final_newline
-        self.trimFinalNewlines = trim_final_newlines
-        self.kwargs = kwargs
+    text_document: TextDocumentIdentifier
+    options: FormattingOptions

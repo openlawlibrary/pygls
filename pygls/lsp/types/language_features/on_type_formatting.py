@@ -26,32 +26,21 @@ that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Position, ProgressToken, TextDocumentIdentifier,
-                                              TextDocumentPositionParams, WorkDoneProgressOptions)
+from pygls.lsp.types.basic_structures import (Model, Position, ProgressToken,
+                                              TextDocumentIdentifier, TextDocumentPositionParams,
+                                              WorkDoneProgressOptions)
 from pygls.lsp.types.language_features.formatting import FormattingOptions
 
 
-class DocumentOnTypeFormattingClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class DocumentOnTypeFormattingClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class DocumentOnTypeFormattingOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 first_trigger_character: str,
-                 more_trigger_character: Optional[List[str]] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-        self.firstTriggerCharacter = first_trigger_character
-        self.moreTriggerCharacter = more_trigger_character
+    first_trigger_character: str
+    more_trigger_character: Optional[List[str]] = None
 
 
 class DocumentOnTypeFormattingParams(TextDocumentPositionParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 ch: str,
-                 options: FormattingOptions):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        self.ch = ch
-        self.options = options
+    ch: str
+    options: FormattingOptions

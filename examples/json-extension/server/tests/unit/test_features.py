@@ -15,6 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import json
+from typing import Optional
 
 import pytest
 from mock import Mock
@@ -66,7 +67,7 @@ def test_did_close():
     _reset_mocks()
 
     params = DidCloseTextDocumentParams(
-        TextDocumentIdentifier(fake_document_uri))
+        text_document=TextDocumentIdentifier(uri=fake_document_uri))
 
     did_close(server, params)
 
@@ -87,7 +88,10 @@ async def test_did_open():
         expected_msg = err.msg
 
     params = DidOpenTextDocumentParams(
-        TextDocumentItem(fake_document_uri, 'json', 1, fake_document_content))
+        text_document=TextDocumentItem(uri=fake_document_uri,
+                                       language_id='json',
+                                       version=1,
+                                       text=fake_document_content))
 
     await did_open(server, params)
 

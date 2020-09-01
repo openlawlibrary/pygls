@@ -65,113 +65,113 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_completion(self):
-        self.server_cap.completionProvider = \
+        self.server_cap.completion_provider = \
             self._provider_options(COMPLETION, default=CompletionOptions())
         return self
 
     def _with_hover(self):
-        self.server_cap.hoverProvider = self._provider_options(HOVER)
+        self.server_cap.hover_provider = self._provider_options(HOVER)
         return self
 
     def _with_signature_help(self):
-        self.server_cap.signatureHelpProvider = \
+        self.server_cap.signature_help_provider = \
             self._provider_options(SIGNATURE_HELP,
                                    default=SignatureHelpOptions())
         return self
 
     def _with_declaration(self):
-        self.server_cap.declarationProvider = \
+        self.server_cap.declaration_provider = \
             self._provider_options(DECLARATION)
         return self
 
     def _with_definition(self):
-        self.server_cap.definitionProvider = self._provider_options(DEFINITION)
+        self.server_cap.definition_provider = self._provider_options(DEFINITION)
         return self
 
     def _with_type_definition(self):
-        self.server_cap.typeDefinitionProvider = \
+        self.server_cap.type_definition_provider = \
             self._provider_options(TYPE_DEFINITION,
                                    default=TypeDefinitionOptions())
         return self
 
     def _with_implementation(self):
-        self.server_cap.implementationProvider = \
+        self.server_cap.implementation_provider = \
             self._provider_options(IMPLEMENTATION,
                                    default=ImplementationOptions())
         return self
 
     def _with_references(self):
-        self.server_cap.referencesProvider = self._provider_options(REFERENCES)
+        self.server_cap.references_provider = self._provider_options(REFERENCES)
         return self
 
     def _with_document_highlight(self):
-        self.server_cap.documentHighlightProvider = \
+        self.server_cap.document_highlight_provider = \
             self._provider_options(DOCUMENT_HIGHLIGHT)
         return self
 
     def _with_document_symbol(self):
-        self.server_cap.documentSymbolProvider = \
+        self.server_cap.document_symbol_provider = \
             self._provider_options(DOCUMENT_SYMBOL)
         return self
 
     def _with_code_action(self):
-        self.server_cap.codeActionProvider = \
+        self.server_cap.code_action_provider = \
             self._provider_options(CODE_ACTION)
         return self
 
     def _with_code_lens(self):
-        self.server_cap.codeLensProvider = \
+        self.server_cap.code_lens_provider = \
             self._provider_options(CODE_LENS,
                                    default=CodeLensOptions())
         return self
 
     def _with_document_link(self):
-        self.server_cap.documentLinkProvider = \
+        self.server_cap.document_link_provider = \
             self._provider_options(DOCUMENT_LINK,
                                    default=DocumentLinkOptions())
         return self
 
     def _with_color(self):
-        self.server_cap.colorProvider = \
+        self.server_cap.color_provider = \
             self._provider_options(COLOR_PRESENTATION)
         return self
 
     def _with_document_formatting(self):
-        self.server_cap.documentFormattingProvider = \
+        self.server_cap.document_formatting_provider = \
             self._provider_options(FORMATTING)
         return self
 
     def _with_document_range_formatting(self):
-        self.server_cap.documentRangeFormattingProvider = \
+        self.server_cap.document_range_formatting_provider = \
             self._provider_options(RANGE_FORMATTING)
         return self
 
     def _with_document_on_type_formatting(self):
-        self.server_cap.documentOnTypeFormattingProvider = \
+        self.server_cap.document_on_type_formatting_provider = \
             self._provider_options(ON_TYPE_FORMATTING)
         return self
 
     def _with_rename(self):
-        self.server_cap.renameProvider = self._provider_options(RENAME)
+        self.server_cap.rename_provider = self._provider_options(RENAME)
         return self
 
     def _with_folding_range(self):
-        self.server_cap.foldingRangeProvider = \
+        self.server_cap.folding_range_provider = \
             self._provider_options(FOLDING_RANGE)
         return self
 
     def _with_execute_command(self):
-        self.server_cap.executeCommandProvider = \
-            ExecuteCommandOptions(self.commands)
+        self.server_cap.execute_command_provider = \
+            ExecuteCommandOptions(commands=self.commands)
         return self
 
     def _with_selection_range(self):
-        self.server_cap.selectionRangeProvider = \
+        self.server_cap.selection_range_provider = \
             self._provider_options(SELECTION_RANGE)
         return self
 
     def _with_workspace_symbol(self):
-        self.server_cap.workspaceSymbolProvider = \
+        self.server_cap.workspace_symbol_provider = \
             self._provider_options(WORKSPACE_SYMBOL)
         return self
 

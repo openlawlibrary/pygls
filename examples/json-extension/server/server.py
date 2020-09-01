@@ -19,6 +19,7 @@ import json
 import time
 import uuid
 from json import JSONDecodeError
+from typing import Optional
 
 from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
@@ -57,7 +58,7 @@ json_server = JsonLanguageServer()
 def _validate(ls, params):
     ls.show_message_log('Validating json...')
 
-    text_doc = ls.workspace.get_document(params.textDocument.uri)
+    text_doc = ls.workspace.get_document(params.text_document.uri)
 
     source = text_doc.source
     diagnostics = _validate_json(source) if source else []
@@ -77,11 +78,11 @@ def _validate_json(source):
         line = err.lineno
 
         d = Diagnostic(
-            Range(
-                Position(line - 1, col - 1),
-                Position(line - 1, col)
+            range=Range(
+                start=Position(line=line - 1, character=col - 1),
+                end=Position(line=line - 1, character=col)
             ),
-            msg,
+            message=msg,
             source=type(json_server).__name__
         )
 
@@ -91,15 +92,18 @@ def _validate_json(source):
 
 
 @json_server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
-def completions(params: CompletionParams = None):
+def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Returns completion items."""
-    return CompletionList(False, [
-        CompletionItem('"'),
-        CompletionItem('['),
-        CompletionItem(']'),
-        CompletionItem('{'),
-        CompletionItem('}')
-    ])
+    return CompletionList(
+        is_incomplete=False,
+        items=[
+            CompletionItem(label='"'),
+            CompletionItem(label='['),
+            CompletionItem(label=']'),
+            CompletionItem(label='{'),
+            CompletionItem(label='}'),
+        ]
+    )
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)

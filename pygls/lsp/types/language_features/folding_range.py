@@ -27,48 +27,32 @@ that.
 import enum
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, NumType, PartialResultParams,
-                                              ProgressToken, StaticRegistrationOptions,
-                                              TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (DocumentSelector, Model, NumType,
+                                              PartialResultParams, ProgressToken,
+                                              StaticRegistrationOptions, TextDocumentIdentifier,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class FoldingRangeClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 range_limit: Optional[NumType] = None,
-                 line_folding_only: Optional[bool] = False,):
-        self.dynamicRegistration = dynamic_registration
-        self.rangeLimit = range_limit
-        self.lineFoldingOnly = line_folding_only
+class FoldingRangeClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    range_limit: Optional[NumType] = None
+    line_folding_only: Optional[bool] = False
 
 
 class FoldingRangeOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class FoldingRangeRegistrationOptions(FoldingRangeOptions,
                                       TextDocumentRegistrationOptions,
                                       StaticRegistrationOptions):
-    def __init__(self,
-                 id: Optional[str] = None,
-                 document_selector: Optional[DocumentSelector] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        FoldingRangeOptions.__init__(self, work_done_progress)
-        TextDocumentRegistrationOptions.__init__(self, document_selector)
-        StaticRegistrationOptions.__init__(self, id)
+    pass
 
 
 class FoldingRangeParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self, query: str,
-                 text_document: TextDocumentIdentifier,
-                 work_done_progress: Optional[ProgressToken] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_progress)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
+    query: str
+    text_document: TextDocumentIdentifier
 
 
 class FoldingRangeKind(str, enum.Enum):
@@ -77,15 +61,9 @@ class FoldingRangeKind(str, enum.Enum):
     Region = 'region'
 
 
-class FoldingRange:
-    def __init__(self,
-                 start_line: int,
-                 end_line: int,
-                 start_character: Optional[int] = None,
-                 end_character: Optional[int] = None,
-                 kind: Optional[FoldingRangeKind] = None):
-        self.startLine = start_line
-        self.startCharacter = start_character
-        self.endLine = end_line
-        self.endCharacter = end_character
-        self.kind = kind
+class FoldingRange(Model):
+    start_line: int
+    end_line: int
+    start_character: Optional[int] = None
+    end_character: Optional[int] = None
+    kind: Optional[FoldingRangeKind] = None

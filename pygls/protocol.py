@@ -569,7 +569,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         logger.info('Language server initialized {}'.format(params))
 
-        self._server.process_id = params.processId
+        self._server.process_id = params.process_id
 
         # Initialize server capabilities
         client_capabilities = params.capabilities
@@ -590,7 +590,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = getattr(params, 'workspaceFolders', [])
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        return InitializeResult(server_capabilities)
+        return InitializeResult(capabilities=server_capabilities)
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""

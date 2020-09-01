@@ -24,13 +24,13 @@ from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)
 DOC_TEXT = '''test'''
-DOC = TextDocumentItem(DOC_URI, 'plaintext', 0, DOC_TEXT)
+DOC = TextDocumentItem(uri=DOC_URI, language_id='plaintext', version=0, text=DOC_TEXT)
 
 
 def test_add_folder(workspace):
     dir_uri = os.path.dirname(DOC_URI)
     dir_name = 'test'
-    workspace.add_folder(WorkspaceFolder(dir_uri, dir_name))
+    workspace.add_folder(WorkspaceFolder(uri=dir_uri, name=dir_name))
     assert workspace.folders[dir_uri].name == dir_name
 
 
@@ -55,7 +55,7 @@ def test_put_document(workspace):
 def test_remove_folder(workspace):
     dir_uri = os.path.dirname(DOC_URI)
     dir_name = 'test'
-    workspace.add_folder(WorkspaceFolder(dir_uri, dir_name))
+    workspace.add_folder(WorkspaceFolder(uri=dir_uri, name=dir_name))
     workspace.remove_folder(dir_uri)
 
     assert dir_uri not in workspace.folders
@@ -69,8 +69,8 @@ def test_remove_document(workspace):
 
 
 def test_workspace_folders():
-    wf1 = WorkspaceFolder('/ws/f1', 'ws1')
-    wf2 = WorkspaceFolder('/ws/f2', 'ws2')
+    wf1 = WorkspaceFolder(uri='/ws/f1', name='ws1')
+    wf2 = WorkspaceFolder(uri='/ws/f2', name='ws2')
 
     workspace = Workspace('/ws', workspace_folders=[wf1, wf2])
 

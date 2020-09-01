@@ -26,42 +26,27 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, Position, ProgressToken,
+from pygls.lsp.types.basic_structures import (DocumentSelector, Model, Position, ProgressToken,
                                               StaticRegistrationOptions, TextDocumentIdentifier,
                                               TextDocumentPositionParams,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class DeclarationClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 link_support: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.linkSupport = link_support
+class DeclarationClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    link_support: Optional[bool] = False
 
 
 class DeclarationOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class DeclarationRegistrationOptions(DeclarationOptions,
                                      TextDocumentRegistrationOptions,
                                      StaticRegistrationOptions):
-    def __init__(self,
-                 id: Optional[str] = None,
-                 document_selector: Optional[DocumentSelector] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        DeclarationOptions.__init__(self, work_done_progress)
-        TextDocumentRegistrationOptions.__init__(self, document_selector)
-        StaticRegistrationOptions.__init__(self, id)
+    pass
 
 
 class DeclarationParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 work_done_token: Optional[bool] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
+    pass

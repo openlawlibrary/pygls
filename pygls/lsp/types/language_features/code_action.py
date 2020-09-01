@@ -27,54 +27,25 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Command, Diagnostic, PartialResultParams,
+from pygls.lsp.types.basic_structures import (Command, Diagnostic, Model, PartialResultParams,
                                               ProgressToken, Range, TextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
 from pygls.lsp.types.language_features.document_symbol import SymbolKind
 
 
-class CodeActionClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 code_action_literal_support: Optional['CodeActionLiteralSupportClientCapabilities'] = None,
-                 is_preferred_support: Optional[bool] = False,):
-        self.dynamicRegistration = dynamic_registration
-        self.codeActionLiteralSupport = code_action_literal_support
-        self.isPreferredSupport = is_preferred_support
+class CodeActionLiteralSupportActionKindClientCapabilities(Model):
+    value_set: Optional[List[SymbolKind]] = None
 
 
-class CodeActionLiteralSupportClientCapabilities:
-    def __init__(self,
-                 code_action_kind: Optional['CodeActionLiteralSupportActionKindClientCapabilities'] = None):
-        self.codeActionKind = code_action_kind
+class CodeActionLiteralSupportClientCapabilities(Model):
+    code_action_kind: Optional[CodeActionLiteralSupportActionKindClientCapabilities] = None
 
 
-class CodeActionLiteralSupportActionKindClientCapabilities:
-    def __init__(self, value_set: Optional[List[SymbolKind]] = None):
-        self.valueSet = value_set
-
-
-class CodeActionOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 code_action_kinds: Optional[List['CodeActionKind']] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-        self.codeActionKinds = code_action_kinds
-
-
-class CodeActionParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 range: Range,
-                 context: 'CodeActionContext',
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
-        self.range = range
-        self.context = context
+class CodeActionClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    code_action_literal_support: Optional[CodeActionLiteralSupportClientCapabilities] = None
+    is_preferred_support: Optional[bool] = False
 
 
 class CodeActionKind(str, enum.Enum):
@@ -88,25 +59,25 @@ class CodeActionKind(str, enum.Enum):
     SourceOrganizeImports = 'source.organizeImports'
 
 
-class CodeActionContext:
-    def __init__(self,
-                 diagnostics: List[Diagnostic],
-                 only: Optional[List[CodeActionKind]] = None):
-        self.diagnostics = diagnostics
-        self.only = only
+class CodeActionOptions(WorkDoneProgressOptions):
+    code_action_kinds: Optional[List[CodeActionKind]] = None
 
 
-class CodeAction:
-    def __init__(self,
-                 title: str,
-                 kind: Optional[CodeActionKind] = None,
-                 diagnostics: Optional[List[Diagnostic]] = None,
-                 is_preferred: Optional[bool] = None,
-                 edit: Optional[WorkspaceEdit] = None,
-                 command: Optional[Command] = None):
-        self.title = title
-        self.kind = kind
-        self.diagnostics = diagnostics
-        self.isPreferred = is_preferred
-        self.edit = edit
-        self.command = command
+class CodeActionContext(Model):
+    diagnostics: List[Diagnostic]
+    only: Optional[List[CodeActionKind]] = None
+
+
+class CodeActionParams(WorkDoneProgressParams, PartialResultParams):
+    text_document: TextDocumentIdentifier
+    range: Range
+    context: CodeActionContext
+
+
+class CodeAction(Model):
+    title: str
+    kind: Optional[CodeActionKind] = None
+    diagnostics: Optional[List[Diagnostic]] = None
+    is_preferred: Optional[bool] = None
+    edit: Optional[WorkspaceEdit] = None
+    command: Optional[Command] = None

@@ -26,44 +26,27 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, PartialResultParams, Position,
-                                              ProgressToken, StaticRegistrationOptions,
+from pygls.lsp.types.basic_structures import (DocumentSelector, Model, PartialResultParams,
+                                              Position, ProgressToken, StaticRegistrationOptions,
                                               TextDocumentIdentifier, TextDocumentPositionParams,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class ImplementationClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 link_support: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.linkSupport = link_support
+class ImplementationClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    link_support: Optional[bool] = False
 
 
 class ImplementationOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
 
 
 class ImplementationRegistrationOptions(ImplementationOptions,
                                         TextDocumentRegistrationOptions,
                                         StaticRegistrationOptions):
-    def __init__(self,
-                 id: Optional[str] = None,
-                 document_selector: Optional[DocumentSelector] = None,
-                 work_done_progress: Optional[ProgressToken] = None):
-        ImplementationOptions.__init__(self, work_done_progress)
-        TextDocumentRegistrationOptions.__init__(self, document_selector)
-        StaticRegistrationOptions.__init__(self, id)
+    pass
 
 
 class ImplementationParams(TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
+    pass

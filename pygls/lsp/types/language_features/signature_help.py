@@ -27,54 +27,30 @@ that.
 import enum
 from typing import List, Optional, Tuple, Union
 
-from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, NumType, Position,
+from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, NumType, Position,
                                               ProgressToken, TextDocumentIdentifier,
                                               TextDocumentPositionParams, WorkDoneProgressOptions,
                                               WorkDoneProgressParams)
 
 
-class SignatureHelpClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 signature_information: Optional['SignatureHelpInformationClientCapabilities'] = None,
-                 contextSupport: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.signatureInformation = signature_information
+class SignatureHelpInformationParameterInformationClientCapabilities(Model):
+    label_offset_support: Optional[bool] = False
 
 
-class SignatureHelpInformationClientCapabilities:
-    def __init__(self,
-                 documentation_format: Optional[List[MarkupKind]] = None,
-                 parameter_information: Optional['SignatureHelpInformationParameterInformationClientCapabilities'] = None):
-        self.documentationFormat = documentation_format
-        self.parameterInformation = parameter_information
+class SignatureHelpInformationClientCapabilities(Model):
+    documentation_format: Optional[List[MarkupKind]] = None
+    parameter_information: Optional[SignatureHelpInformationParameterInformationClientCapabilities] = None
 
 
-class SignatureHelpInformationParameterInformationClientCapabilities:
-    def __init__(self, label_offset_support: Optional[bool] = False):
-        self.labelOffsetSupport = label_offset_support
+class SignatureHelpClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    signature_information: Optional[SignatureHelpInformationClientCapabilities] = None
+    contextSupport: Optional[bool] = False
 
 
 class SignatureHelpOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 trigger_characters: Optional[List[str]] = None,
-                 retrigger_characters: Optional[List[str]] = None,
-                 work_done_progress: Optional[ProgressToken] = None
-                 ):
-        super().__init__(work_done_progress)
-        self.triggerCharacters = trigger_characters
-        self.retriggerCharacters = retrigger_characters
-
-
-class SignatureHelpParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 work_done_token: Optional[bool] = None,
-                 context: Optional['SignatureHelpContext'] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        self.context = context
+    trigger_characters: Optional[List[str]] = None
+    retrigger_characters: Optional[List[str]] = None
 
 
 class SignatureHelpTriggerKind(enum.IntEnum):
@@ -83,41 +59,29 @@ class SignatureHelpTriggerKind(enum.IntEnum):
     ContentChange = 3
 
 
-class SignatureHelpContext:
-    def __init__(self,
-                 trigger_kind: SignatureHelpTriggerKind,
-                 is_retrigger: bool,
-                 trigger_character: Optional[str] = None,
-                 active_signature_help: Optional['SignatureHelp'] = None):
-        self.triggerKind = trigger_kind
-        self.isRetrigger = is_retrigger
-        self.triggerCharacter = trigger_character
-        self.activeSignatureHelp = active_signature_help
+class ParameterInformation(Model):
+    label: Union[str, Tuple[int, int]]
+    documentation: Optional[Union[str, MarkupContent]] = None
 
 
-class SignatureHelp:
-    def __init__(self,
-                 signatures: List['SignatureInformation'],
-                 active_signature: Optional[NumType] = None,
-                 active_parameter: Optional[NumType] = None):
-        self.signatures = signatures
-        self.activeSignature = active_signature
-        self.activeParameter = active_parameter
+class SignatureInformation(Model):
+    label: str
+    documentation: Optional[Union[str, MarkupContent]] = None
+    parameters: Optional[List[ParameterInformation]] = None
 
 
-class SignatureInformation:
-    def __init__(self,
-                 label: str,
-                 documentation: Optional[Union[str, MarkupContent]] = None,
-                 parameters: Optional[List['ParameterInformation']] = None):
-        self.label = label
-        self.documentation = documentation
-        self.pararmeters = parameters
+class SignatureHelp(Model):
+    signatures: List[SignatureInformation]
+    active_signature: Optional[NumType] = None
+    active_parameter: Optional[NumType] = None
 
 
-class ParameterInformation:
-    def __init__(self,
-                 label: Union[str, Tuple[int, int]],
-                 documentation: Optional[Union[str, MarkupContent]] = None):
-        self.label = label
-        self.documentation = documentation
+class SignatureHelpContext(Model):
+    trigger_kind: SignatureHelpTriggerKind
+    is_retrigger: bool
+    trigger_character: Optional[str] = None
+    active_signature_help: Optional[SignatureHelp] = None
+
+
+class SignatureHelpParams(TextDocumentPositionParams, WorkDoneProgressParams):
+    context: Optional[SignatureHelpContext] = None

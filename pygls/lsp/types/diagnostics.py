@@ -26,26 +26,20 @@ that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticTag, NumType
+from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticTag, Model, NumType
 
 
-class PublishDiagnosticsClientCapabilities:
-    def __init__(self,
-                 related_information: Optional[bool] = False,
-                 tag_support: Optional['PublishDiagnosticsTagSupportClientCapabilities'] = None,
-                 version_support: Optional[bool] = False):
-        self.relatedInformation = related_information
-        self.tagSupport = tag_support
-        self.versionSupport = version_support
+class PublishDiagnosticsTagSupportClientCapabilities(Model):
+    value_set: Optional[List[DiagnosticTag]] = None
 
 
-class PublishDiagnosticsTagSupportClientCapabilities:
-    def __init__(self, value_set: Optional[List[DiagnosticTag]] = None):
-        self.valueSet = value_set
+class PublishDiagnosticsClientCapabilities(Model):
+    related_information: Optional[bool] = False
+    tag_support: Optional[PublishDiagnosticsTagSupportClientCapabilities] = None
+    version_support: Optional[bool] = False
 
 
-class PublishDiagnosticsParams:
-    def __init__(self, uri: str, diagnostics: List[Diagnostic], version: Optional[NumType] = None):
-        self.uri = uri
-        self.diagnostics = diagnostics
-        self.version = version
+class PublishDiagnosticsParams(Model):
+    uri: str
+    diagnostics: List[Diagnostic]
+    version: Optional[NumType] = None

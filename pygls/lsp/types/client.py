@@ -26,25 +26,23 @@ that.
 """
 from typing import Any, List, Optional
 
-
-class Registration:
-    def __init__(self, id: str, method: str, register_options: Optional[Any] = None):
-        self.id = id
-        self.method = method
-        self.registerOptions = register_options
+from pygls.lsp.types.basic_structures import Model
 
 
-class RegistrationParams:
-    def __init__(self, registrations: List[Registration]):
-        self.registrations = registrations
+class Registration(Model):
+    id: str
+    method: str
+    register_options: Optional[Any] = None
 
 
-class Unregistration:
-    def __init__(self, id: str, method: str):
-        self.id = id
-        self.method = method
+class RegistrationParams(Model):
+    registrations: List[Registration]
 
 
-class UnregistrationParams:
-    def __init__(self, unregisterations: List[Unregistration]):
-        self.unregisterations = unregisterations
+class Unregistration(Model):
+    id: str
+    method: str
+
+
+class UnregistrationParams(Model):
+    unregisterations: List[Unregistration]

@@ -27,39 +27,9 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Location, PartialResultParams, ProgressToken, Range,
-                                              TextDocumentIdentifier, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
-
-
-class DocumentSymbolClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 symbol_kind: Optional['WorkspaceCapabilitiesSymbolKind'] = None,
-                 hierarchical_document_symbol_support: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration,
-        self.symbolKind = symbol_kind
-        self.hierarchicalDocumentSymbolSupport = hierarchical_document_symbol_support
-
-
-class WorkspaceCapabilitiesSymbolKind:
-    def __init__(self, value_set: Optional[List['SymbolKind']] = None):
-        self.valueSet = value_set
-
-
-class DocumentSymbolOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-
-
-class DocumentSymbolParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
+from pygls.lsp.types.basic_structures import (Location, Model, PartialResultParams, ProgressToken,
+                                              Range, TextDocumentIdentifier,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
 class SymbolKind(enum.IntEnum):
@@ -91,33 +61,37 @@ class SymbolKind(enum.IntEnum):
     TypeParameter = 26
 
 
-class DocumentSymbol:
-    def __init__(self,
-                 name: str,
-                 kind: SymbolKind,
-                 range: Range,
-                 selection_range: Range,
-                 detail: Optional[str] = None,
-                 children: Optional[List['DocumentSymbol']] = None,
-                 deprecated: Optional[bool] = False):
-        self.name = name
-        self.kind = kind
-        self.range = range
-        self.selectionRange = selection_range
-        self.detail = detail
-        self.children = children
-        self.deprecated = deprecated
+class WorkspaceCapabilitiesSymbolKind(Model):
+    value_set: Optional[List[SymbolKind]] = None
 
 
-class SymbolInformation:
-    def __init__(self,
-                 name: str,
-                 kind: int,
-                 location: Location,
-                 container_name: Optional[str] = None,
-                 deprecated: Optional[bool] = False):
-        self.name = name
-        self.kind = kind
-        self.location = location
-        self.containerName = container_name
-        self.deprecated = deprecated
+class DocumentSymbolClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
+    hierarchical_document_symbol_support: Optional[bool] = False
+
+
+class DocumentSymbolOptions(WorkDoneProgressOptions):
+    pass
+
+
+class DocumentSymbolParams(WorkDoneProgressParams, PartialResultParams):
+    text_document: TextDocumentIdentifier
+
+
+class DocumentSymbol(Model):
+    name: str
+    kind: SymbolKind
+    range: Range
+    selection_range: Range
+    detail: Optional[str] = None
+    children: Optional[List['DocumentSymbol']] = None
+    deprecated: Optional[bool] = False
+
+
+class SymbolInformation(Model):
+    name: str
+    kind: int
+    location: Location
+    container_name: Optional[str] = None
+    deprecated: Optional[bool] = False

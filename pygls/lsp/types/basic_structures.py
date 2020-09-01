@@ -27,20 +27,31 @@ that.
 import enum
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
+from pydantic import BaseModel
+
 NumType = Union[int, float]
 T = TypeVar('T')
 ProgressToken = Union[int, str]
 
 ConfigCallbackType = Optional[Callable[[List[Any]], None]]
-DocumentChangesType = Union[List['TextDocumentEdit'],
-                            'TextDocumentEdit',
-                            'CreateFile', 'RenameFile', 'DeleteFile']
 
 
-class Position:
-    def __init__(self, line: int = 0, character: int = 0):
-        self.line = line
-        self.character = character
+def snake_to_camel(string: str) -> str:
+    return ''.join(
+        word.capitalize() if idx > 0 else word
+        for idx, word in enumerate(string.split('_'))
+    )
+
+
+class Model(BaseModel):
+    class Config:
+        alias_generator = snake_to_camel
+        allow_population_by_field_name = True
+
+
+class Position(Model):
+    line: int = 0
+    character: int = 0
 
     def __eq__(self, other):
         return (
@@ -105,10 +116,9 @@ class Position:
         return '{}:{}'.format(self.line, self.character)
 
 
-class Range:
-    def __init__(self, start: Position, end: Position):
-        self.start = start
-        self.end = end
+class Range(Model):
+    start: Position
+    end: Position
 
     def __eq__(self, other):
         return (
@@ -123,13 +133,12 @@ class Range:
         return iter((self.start, self.end))
 
     def __repr__(self):
-        return '{}-{}'.format(self.start, self.end)
+        return '{!r}-{!r}'.format(self.start, self.end)
 
 
-class Location:
-    def __init__(self, uri: str, range: Range):
-        self.uri = uri
-        self.range = range
+class Location(Model):
+    uri: str
+    range: Range
 
     def __eq__(self, other):
         return (
@@ -138,37 +147,14 @@ class Location:
             and self.range == other.range)
 
     def __repr__(self):
-        return "{}:{}".format(self.uri, self.range)
+        return "{}:{!r}".format(self.uri, self.range)
 
 
-class LocationLink:
-    def __init__(self,
-                 target_uri: str,
-                 target_range: Range,
-                 target_selection_range: Range,
-                 origin_selection_range: Optional[Range] = None):
-        self.targetUri = target_uri
-        self.targetRange = target_range
-        self.targetSelectionRange = target_selection_range
-        self.originSelectionRange = origin_selection_range
-
-
-class Diagnostic:
-    def __init__(self,
-                 range: Range,
-                 message: str,
-                 severity: Optional['DiagnosticSeverity'] = None,
-                 code: Optional[Union[int, str]] = None,
-                 source: Optional[str] = None,
-                 related_information: Optional[List['DiagnosticRelatedInformation']] = None,
-                 tags: Optional[List['DiagnosticTag']] = None):
-        self.range = range
-        self.message = message
-        self.severity = severity
-        self.code = code
-        self.source = source
-        self.relatedInformation = related_information
-        self.tags = tags
+class LocationLink(Model):
+    target_uri: str
+    target_range: Range
+    target_selection_range: Range
+    origin_selection_range: Optional[Range] = None
 
 
 class DiagnosticSeverity(enum.IntEnum):
@@ -183,102 +169,61 @@ class DiagnosticTag(enum.IntEnum):
     Deprecated = 2
 
 
-class DiagnosticRelatedInformation:
-    def __init__(self, location: 'Location', message: str):
-        self.location = location
-        self.message = message
+class DiagnosticRelatedInformation(Model):
+    location: Location
+    message: str
 
 
-class Command:
-    def __init__(self, title: str, command: str, arguments: Optional[List[Any]] = None):
-        self.title = title
-        self.command = command
-        self.arguments = arguments
+class Diagnostic(Model):
+    range: Range
+    message: str
+    severity: Optional[DiagnosticSeverity] = None
+    code: Optional[Union[int, str]] = None
+    source: Optional[str] = None
+    related_information: Optional[List[DiagnosticRelatedInformation]] = None
+    tags: Optional[List[DiagnosticTag]] = None
 
 
-class TextEdit:
-    def __init__(self, range: Range, new_text: str):
-        self.range = range
-        self.newText = new_text
+class Command(Model):
+    title: str
+    command: str
+    arguments: Optional[List[Any]] = None
 
 
-class TextDocumentEdit:
-    def __init__(self,
-                 text_document: 'VersionedTextDocumentIdentifier',
-                 edits: List[TextEdit]):
-        self.textDocument = text_document
-        self.edits = edits
+class TextEdit(Model):
+    range: Range
+    new_text: str
 
 
-class CreateFileOptions:
-    def __init__(self,
-                 overwrite: Optional[bool] = False,
-                 ignore_if_exists: Optional[bool] = False):
-        self.overwrite = overwrite
-        self.ignoreIfExists = ignore_if_exists
+class CreateFileOptions(Model):
+    overwrite: Optional[bool] = False
+    ignore_if_exists: Optional[bool] = False
 
 
-class CreateFile:
-    def __init__(self,
-                 uri: str,
-                 options: Optional[CreateFileOptions] = None):
-        self.kind = 'create'
-        self.uri = uri
-        self.options = options
+class CreateFile(Model):
+    uri: str
+    options: Optional[CreateFileOptions] = None
 
 
-class RenameFileOptions:
-    def __init__(self,
-                 overwrite: Optional[bool] = False,
-                 ignore_if_exists: Optional[bool] = False):
-        self.overwrite = overwrite
-        self.ignoreIfExists = ignore_if_exists
+class RenameFileOptions(Model):
+    overwrite: Optional[bool] = False
+    ignore_if_exists: Optional[bool] = False
 
 
-class RenameFile:
-    def __init__(self,
-                 old_uri: str,
-                 new_uri: str,
-                 options: Optional[RenameFileOptions] = None):
-        self.kind = 'rename'
-        self.old_uri = old_uri
-        self.new_uri = new_uri
-        self.options = options
+class RenameFile(Model):
+    old_uri: str
+    new_uri: str
+    options: Optional[RenameFileOptions] = None
 
 
-class DeleteFileOptions:
-    def __init__(self,
-                 recursive: Optional[bool] = False,
-                 ignore_if_exists: Optional[bool] = False):
-        self.recursive = recursive
-        self.ignore_if_exists = ignore_if_exists
+class DeleteFileOptions(Model):
+    recursive: Optional[bool] = False
+    ignore_if_exists: Optional[bool] = False
 
 
-class DeleteFile:
-    def __init__(self,
-                 uri: str,
-                 options: Optional[DeleteFileOptions] = None):
-        self.kind = 'delete'
-        self.uri = uri
-        self.options = options
-
-
-class WorkspaceEdit:
-    def __init__(self,
-                 changes: Optional[Dict[str, List[TextEdit]]] = None,
-                 document_changes: Optional[DocumentChangesType] = None):
-        self.changes = changes
-        self.documentChanges = document_changes
-
-
-class WorkspaceEditClientCapabilities:
-    def __init__(self,
-                 document_changes: Optional[bool] = False,
-                 resource_operations: Optional[List['ResourceOperationKind']] = None,
-                 failure_handling: Optional['FailureHandlingKind'] = None):
-        self.documentChanges = document_changes
-        self.resourceOperations = resource_operations
-        self.failureHandling = failure_handling
+class DeleteFile(Model):
+    uri: str
+    options: Optional[DeleteFileOptions] = None
 
 
 class ResourceOperationKind(str, enum.Enum):
@@ -294,58 +239,52 @@ class FailureHandlingKind(str, enum.Enum):
     Undo = 'undo'
 
 
-class TextDocumentIdentifier:
-    def __init__(self, uri: str):
-        self.uri = uri
+class WorkspaceEditClientCapabilities(Model):
+    document_changes: Optional[bool] = False
+    resource_operations: Optional[List[ResourceOperationKind]] = None
+    failure_handling: Optional[FailureHandlingKind] = None
 
 
-class TextDocumentItem:
-    def __init__(self,
-                 uri: str,
-                 language_id: str,
-                 version: NumType,
-                 text: str):
-        self.uri = uri
-        self.languageId = language_id
-        self.version = version
-        self.text = text
+class TextDocumentIdentifier(Model):
+    uri: str
+
+
+class TextDocumentItem(Model):
+    uri: str
+    language_id: str
+    version: NumType
+    text: str
 
 
 class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    def __init__(self, uri: str, version: Union[NumType, None]):
-        super().__init__(uri)
-        self.version = version
+    version: Union[NumType, None]
 
 
-class TextDocumentPositionParams:
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position):
-        self.textDocument = text_document
-        self.position = position
+class TextDocumentEdit(Model):
+    text_document: VersionedTextDocumentIdentifier
+    edits: List[TextEdit]
 
 
-class DocumentFilter:
-    def __init__(self,
-                 language: Optional[str] = None,
-                 scheme: Optional[str] = None,
-                 pattern: Optional[str] = None):
-        self.language = language
-        self.scheme = scheme
-        self.pattern = pattern
+class TextDocumentPositionParams(Model):
+    text_document: TextDocumentIdentifier
+    position: Position
 
 
-DocumentSelector = List['DocumentFilter']
+class DocumentFilter(Model):
+    language: Optional[str] = None
+    scheme: Optional[str] = None
+    pattern: Optional[str] = None
 
 
-class StaticRegistrationOptions:
-    def __init__(self, id: Optional[str] = None):
-        self.id = id
+DocumentSelector = List[DocumentFilter]
 
 
-class TextDocumentRegistrationOptions:
-    def __init__(self, document_selector: Optional[DocumentSelector] = None):
-        self.documentSelector = document_selector
+class StaticRegistrationOptions(Model):
+    id: Optional[str] = None
+
+
+class TextDocumentRegistrationOptions(Model):
+    document_selector: Optional[DocumentSelector] = None
 
 
 class MarkupKind(str, enum.Enum):
@@ -353,52 +292,50 @@ class MarkupKind(str, enum.Enum):
     Markdown = 'markdown'
 
 
-class MarkupContent:
-    def __init__(self, kind: MarkupKind, value: str):
-        self.kind = kind
-        self.value = value
+class MarkupContent(Model):
+    kind: MarkupKind
+    value: str
 
 
-class WorkDoneProgressBegin:
-    def __init__(self,
-                 title: str,
-                 cancellable: Optional[bool] = False,
-                 message: Optional[str] = None,
-                 percentage: Optional[NumType] = None):
-        self.kind = 'begin'
-        self.title = title
-        self.cancellable = cancellable
-        self.message = message
-        self.percentage = percentage
+DocumentChangesType = Union[List[TextDocumentEdit],
+                            TextDocumentEdit,
+                            CreateFile,
+                            RenameFile,
+                            DeleteFile]
 
 
-class WorkDoneProgressReport:
-    def __init__(self,
-                 cancellable: Optional[bool] = False,
-                 message: Optional[str] = None,
-                 percentage: Optional[NumType] = None):
-        self.kind = 'report'
-        self.cancellable = cancellable
-        self.message = message
-        self.percentage = percentage
+class WorkspaceEdit(Model):
+    changes: Optional[Dict[str, List[TextEdit]]] = None
+    document_changes: Optional[DocumentChangesType] = None
 
 
-class WorkDoneProgressEnd:
-    def __init__(self, message: Optional[str] = None):
-        self.kind = 'end'
-        self.message = message
+class WorkDoneProgressBegin(Model):
+    kind: str = 'begin'
+    title: str
+    cancellable: Optional[bool] = False
+    message: Optional[str] = None
+    percentage: Optional[NumType] = None
 
 
-class WorkDoneProgressParams:
-    def __init__(self, work_done_token: Optional[ProgressToken] = None):
-        self.workDoneToken = work_done_token
+class WorkDoneProgressReport(Model):
+    kind: str = 'report'
+    cancellable: Optional[bool] = False
+    message: Optional[str] = None
+    percentage: Optional[NumType] = None
 
 
-class WorkDoneProgressOptions:
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        self.workDoneProgress = work_done_progress
+class WorkDoneProgressEnd(Model):
+    kind: str = 'end'
+    message: Optional[str] = None
 
 
-class PartialResultParams:
-    def __init__(self, partial_result_token: Optional[ProgressToken] = None):
-        self.partialResultToken = partial_result_token
+class WorkDoneProgressParams(Model):
+    work_done_token: Optional[ProgressToken]
+
+
+class WorkDoneProgressOptions(Model):
+    work_done_progress: Optional[ProgressToken]
+
+
+class PartialResultParams(Model):
+    partial_result_token: Optional[ProgressToken]

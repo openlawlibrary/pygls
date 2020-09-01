@@ -26,39 +26,25 @@ that.
 """
 from typing import Any, Optional
 
-from pygls.lsp.types.basic_structures import (Command, PartialResultParams, ProgressToken, Range,
-                                              TextDocumentIdentifier, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Command, Model, PartialResultParams, ProgressToken,
+                                              Range, TextDocumentIdentifier,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class CodeLensClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class CodeLensClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class CodeLensOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 resolve_provider: Optional[bool] = False,
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-        self.resolveProvider = resolve_provider
+    resolve_provider: Optional[bool] = False
+    work_done_progress: Optional[ProgressToken] = None
 
 
 class CodeLensParams(WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: 'TextDocumentIdentifier',
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.textDocument = text_document
+    text_document: TextDocumentIdentifier
 
 
-class CodeLens:
-    def __init__(self,
-                 range: Range,
-                 command: Optional[Command] = None,
-                 data: Optional[Any] = None):
-        self.range = range
-        self.command = command
-        self.data = data
+class CodeLens(Model):
+    range: Range
+    command: Optional[Command] = None
+    data: Optional[Any] = None

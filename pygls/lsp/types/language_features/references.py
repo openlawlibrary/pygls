@@ -26,34 +26,22 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (PartialResultParams, Position, ProgressToken,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Position, ProgressToken,
                                               TextDocumentIdentifier, TextDocumentPositionParams,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class ReferenceClientCapabilities:
-    def __init__(self, dynamic_registration: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
+class ReferenceClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
 
 
 class ReferenceOptions(WorkDoneProgressOptions):
-    def __init__(self, work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
+    pass
+
+
+class ReferenceContext(Model):
+    include_declaration: bool
 
 
 class ReferenceParams(TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 context: 'ReferenceContext',
-                 work_done_token: Optional[bool] = None,
-                 partial_result_token: Optional[ProgressToken] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        PartialResultParams.__init__(self, partial_result_token)
-        self.context = context
-
-
-class ReferenceContext:
-    def __init__(self, include_declaration: bool):
-        self.includeDeclaration = include_declaration
+    context: ReferenceContext

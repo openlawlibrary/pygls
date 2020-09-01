@@ -28,6 +28,7 @@ import enum
 from typing import Optional
 
 from pygls.lsp.types import DocumentSelector, TextDocumentRegistrationOptions
+from pygls.lsp.types.basic_structures import Model
 
 
 class TextDocumentSyncKind(enum.IntEnum):
@@ -36,17 +37,10 @@ class TextDocumentSyncKind(enum.IntEnum):
     INCREMENTAL = 2
 
 
-class TextDocumentSyncOptions:
-    def __init__(self,
-                 open_close: Optional[bool] = False,
-                 change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE):
-        self.openClose = open_close
-        self.change = change
+class TextDocumentSyncOptions(Model):
+    open_close: Optional[bool] = False
+    change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE
 
 
 class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
-    def __init__(self,
-                 include_text: Optional[bool] = False,
-                 document_selector: Optional[DocumentSelector] = None):
-        super().__init__(document_selector)
-        self.includeText = include_text
+    include_text: Optional[bool] = False

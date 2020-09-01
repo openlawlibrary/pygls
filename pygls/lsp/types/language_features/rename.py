@@ -26,33 +26,19 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (Position, ProgressToken, TextDocumentIdentifier,
-                                              TextDocumentPositionParams, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Model, Position, ProgressToken,
+                                              TextDocumentIdentifier, TextDocumentPositionParams,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class RenameClientCapabilities:
-    def __init__(self,
-                 dynamic_registration: Optional[bool] = False,
-                 prepare_support: Optional[bool] = False):
-        self.dynamicRegistration = dynamic_registration
-        self.prepareSupport = prepare_support
+class RenameClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    prepare_support: Optional[bool] = False
 
 
 class RenameOptions(WorkDoneProgressOptions):
-    def __init__(self,
-                 prepare_provider: Optional[bool] = False,
-                 work_done_progress: Optional[ProgressToken] = None):
-        super().__init__(work_done_progress)
-        self.prepareProvider = prepare_provider
+    prepare_provider: Optional[bool] = False
 
 
 class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    def __init__(self,
-                 text_document: TextDocumentIdentifier,
-                 position: Position,
-                 new_name: str,
-                 work_done_token: Optional[bool] = None):
-        TextDocumentPositionParams.__init__(self, text_document, position)
-        WorkDoneProgressParams.__init__(self, work_done_token)
-        self.newName = new_name
+    new_name: str
