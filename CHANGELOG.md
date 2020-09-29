@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [0.9.1] - 09/29/2020
+
+### Added
+
 - Functions to convert positions from and to utf-16 code units ([#117])
 - Type definitions for `ClientInfo` and `HoverParams` ([#125])
 
@@ -168,7 +176,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/openlawlibrary/pygls/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/openlawlibrary/pygls/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/openlawlibrary/pygls/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/openlawlibrary/pygls/compare/v0.7.4...v0.8.0
