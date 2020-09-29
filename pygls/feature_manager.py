@@ -59,12 +59,14 @@ def wrap_with_server(f, server):
         return f
 
     if asyncio.iscoroutinefunction(f):
-        return asyncio.coroutine(functools.partial(f, server))
+        async def wrapped(*args, **kwargs):
+            return await f(server, *args, **kwargs)
     else:
         wrapped = functools.partial(f, server)
         if is_thread_function(f):
             assign_thread_attr(wrapped)
-        return wrapped
+
+    return wrapped
 
 
 class FeatureManager:
