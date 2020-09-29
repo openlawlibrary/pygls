@@ -20,10 +20,15 @@ and this project adheres to [Semantic Versioning][semver].
 - Fix `__init__()` constructors in several interface types ([#125])
 - Fix valueSet type in `SymbolKindAbstract` ([#125])
 
+### Fixed
+
+- `coroutine` deprecation warning - use async def instead ([#136])
+
 [#125]: https://github.com/openlawlibrary/pygls/pull/125
 [#123]: https://github.com/openlawlibrary/pygls/pull/123
 [#120]: https://github.com/openlawlibrary/pygls/pull/120
 [#117]: https://github.com/openlawlibrary/pygls/pull/117
+[#136]: https://github.com/openlawlibrary/pygls/pull/136
 
 ## [0.9.0] - 04/20/2020
 
