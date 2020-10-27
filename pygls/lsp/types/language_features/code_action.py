@@ -25,27 +25,12 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, Diagnostic, Model, PartialResultParams,
                                               ProgressToken, Range, TextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
-from pygls.lsp.types.language_features.document_symbol import SymbolKind
-
-
-class CodeActionLiteralSupportActionKindClientCapabilities(Model):
-    value_set: Optional[List[SymbolKind]] = None
-
-
-class CodeActionLiteralSupportClientCapabilities(Model):
-    code_action_kind: Optional[CodeActionLiteralSupportActionKindClientCapabilities] = None
-
-
-class CodeActionClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    code_action_literal_support: Optional[CodeActionLiteralSupportClientCapabilities] = None
-    is_preferred_support: Optional[bool] = False
 
 
 class CodeActionKind(str, enum.Enum):
@@ -57,6 +42,20 @@ class CodeActionKind(str, enum.Enum):
     RefactorRewrite = 'refactor.rewrite'
     Source = 'source'
     SourceOrganizeImports = 'source.organizeImports'
+
+
+class CodeActionLiteralSupportActionKindClientCapabilities(Model):
+    value_set: Optional[List[Union[str, CodeActionKind]]] = None
+
+
+class CodeActionLiteralSupportClientCapabilities(Model):
+    code_action_kind: Optional[CodeActionLiteralSupportActionKindClientCapabilities] = None
+
+
+class CodeActionClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    code_action_literal_support: Optional[CodeActionLiteralSupportClientCapabilities] = None
+    is_preferred_support: Optional[bool] = False
 
 
 class CodeActionOptions(WorkDoneProgressOptions):

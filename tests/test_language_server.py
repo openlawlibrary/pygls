@@ -18,12 +18,12 @@ import pathlib
 from time import sleep
 
 import pytest
-
 from pygls.lsp.methods import INITIALIZE, TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
 from pygls.lsp.types import (ClientCapabilities, DidOpenTextDocumentParams, ExecuteCommandParams,
                              InitializeParams, TextDocumentItem)
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
+
 from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, FEATURE_SYNC, FEATURE_THREAD
 
 CALL_TIMEOUT = 2
@@ -53,7 +53,7 @@ def test_bf_initialize(client_server):
 
     assert server.process_id == process_id
     assert server.workspace.root_uri == root_uri
-    assert hasattr(response, 'capabilities')
+    assert 'capabilities' in response
 
 
 def test_bf_text_document_did_open(client_server):

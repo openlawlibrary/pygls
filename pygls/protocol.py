@@ -23,6 +23,7 @@ import re
 import sys
 import traceback
 import uuid
+from collections import namedtuple
 from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
@@ -88,8 +89,10 @@ def deserialize_params(data):
 
         try:
             _, params_cls, _ = LSP_METHODS_MAP[method]
+            if params_cls is None:
+                return data
         except KeyError:
-            raise ValueError(f'Method "{method}"" does not exist in LSP specification.')
+            params_cls = lambda **p: namedtuple('Object', p.keys(), rename=True)(*p.values())
 
         try:
             data['params'] = params_cls(**params)
@@ -605,11 +608,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         logger.debug('Server capabilities: {}'
                      .format(server_capabilities.__dict__))
 
-        root_path = getattr(params, 'rootPath', None)
-        root_uri = params.rootUri or from_fs_path(root_path)
+        root_path = params.root_path
+        root_uri = params.root_uri or from_fs_path(root_path)
 
         # Initialize the workspace
-        workspace_folders = getattr(params, 'workspaceFolders', [])
+        workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
         return InitializeResult(capabilities=server_capabilities)
@@ -635,17 +638,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         (Incremental(from server capabilities); not configurable for now)
         """
         for change in params.contentChanges:
-            self.workspace.update_document(params.textDocument, change)
+            self.workspace.update_document(params.text_document, change)
 
     def bf_text_document__did_close(self,
                                     params: DidCloseTextDocumentParams):
         """Removes document from workspace."""
-        self.workspace.remove_document(params.textDocument.uri)
+        self.workspace.remove_document(params.text_document.uri)
 
     def bf_text_document__did_open(self,
                                    params: DidOpenTextDocumentParams):
         """Puts document to the workspace."""
-        self.workspace.put_document(params.textDocument)
+        self.workspace.put_document(params.text_document)
 
     def bf_workspace__did_change_workspace_folders(
             self,
