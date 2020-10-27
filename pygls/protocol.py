@@ -33,7 +33,7 @@ from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
                               JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
-from pygls.lsp import LSP_METHODS_MAP
+from pygls.lsp import LSP_METHODS_MAP, Model
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
@@ -78,6 +78,9 @@ def default_serializer(o):
     """JSON serializer for complex objects."""
     if isinstance(o, enum.Enum):
         return o.value
+    elif isinstance(o, Model):
+        return o.dict(by_alias=True, exclude_none=True)
+
     return o.__dict__
 
 
@@ -637,7 +640,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Updates document's content.
         (Incremental(from server capabilities); not configurable for now)
         """
-        for change in params.contentChanges:
+        for change in params.content_changes:
             self.workspace.update_document(params.text_document, change)
 
     def bf_text_document__did_close(self,
@@ -698,7 +701,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""
         self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                    PublishDiagnosticsParams(doc_uri, diagnostics))
+                    PublishDiagnosticsParams(uri=doc_uri, diagnostics=diagnostics))
 
     def register_capability(self, params: RegistrationParams, callback):
         """Register a new capability on the client.
@@ -728,11 +731,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def show_message(self, message, msg_type=MessageType.Info):
         """Sends message to the client to display message."""
-        self.notify(WINDOW_SHOW_MESSAGE, ShowMessageParams(msg_type, message))
+        self.notify(WINDOW_SHOW_MESSAGE, ShowMessageParams(type=msg_type, message=message))
 
     def show_message_log(self, message, msg_type=MessageType.Log):
         """Sends message to the client's output channel."""
-        self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(msg_type, message))
+        self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(type=msg_type, message=message))
 
     def unregister_capability(self, params: UnregistrationParams, callback):
         """Unregister a new capability on the client.
