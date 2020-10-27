@@ -30,16 +30,16 @@ from typing import List, Optional
 from pygls.lsp.types.basic_structures import Model, NumType, ProgressToken
 
 
-class ShowMessageParams(Model):
-    type: 'MessageType'
-    message: str
-
-
 class MessageType(enum.IntEnum):
     Error = 1
     Warning = 2
     Info = 3
     Log = 4
+
+
+class ShowMessageParams(Model):
+    type: MessageType
+    message: str
 
 
 class MessageActionItem(Model):

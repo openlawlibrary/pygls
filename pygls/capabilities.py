@@ -54,7 +54,7 @@ class ServerCapabilitiesBuilder:
         else:
             save = False
 
-        self.textDocumentSync = TextDocumentSyncOptionsServerCapabilities(
+        self.server_cap.text_document_sync = TextDocumentSyncOptionsServerCapabilities(
             open_close=open_close,
             change=self.sync_kind,
             will_save=will_save,
