@@ -23,7 +23,6 @@ import re
 import sys
 import traceback
 import uuid
-from collections import namedtuple
 from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
@@ -33,6 +32,7 @@ from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
                               JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
+from pygls.lsp import LSP_METHODS_MAP
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
@@ -80,9 +80,31 @@ def default_serializer(o):
     return o.__dict__
 
 
+def deserialize_params(data):
+    """Function used to deserialize params to a specific class."""
+    try:
+        method = data['method']
+        params = data['params']
+
+        try:
+            _, params_cls, _ = LSP_METHODS_MAP[method]
+        except KeyError:
+            raise ValueError(f'Method "{method}"" does not exist in LSP specification.')
+
+        try:
+            data['params'] = params_cls(**params)
+        except TypeError:
+            raise ValueError(f'Could not instantiate "{params_cls.__name__}" from params: {params}')
+    except KeyError:
+        pass
+
+    return data
+
+
 def deserialize_message(data):
     """Function used to deserialize data received from client."""
     if 'jsonrpc' in data:
+        deserialize_params(data)
         if 'id' in data:
             if 'method' in data:
                 return JsonRPCRequestMessage(**data)
@@ -91,7 +113,7 @@ def deserialize_message(data):
         else:
             return JsonRPCNotification(**data)
 
-    return namedtuple('Object', data.keys(), rename=True)(*data.values())
+    return data
 
 
 def to_lsp_name(method_name):
