@@ -150,4 +150,4 @@ class ValidationError(Exception):
 
     def __repr__(self):
         opt_errs = '\n-'.join([e for e in self.errors])
-        return 'Missing options: {}'.format(opt_errs)
+        return f'Missing options: {opt_errs}'

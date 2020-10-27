@@ -358,7 +358,7 @@ The code snippet below shows how to send show message notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message notification to the client
-            ls.show_message("Counting down... {}".format(10 - i))
+            ls.show_message(f"Counting down... {10 - i}")
             await asyncio.sleep(1)
 
 Show Message Log
@@ -377,7 +377,7 @@ The code snippet below shows how to send show message log notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message log notification to the client's output channel
-            ls.show_message_log("Counting down... {}".format(10 - i))
+            ls.show_message_log("Counting down... {10 - i}")
             await asyncio.sleep(1)
 
 Publish Diagnostics

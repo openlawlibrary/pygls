@@ -95,7 +95,7 @@ class FeatureManager:
     def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
         """Registers builtin (predefined) feature."""
         self._builtin_features[feature_name] = func
-        logger.info('Registered builtin feature {}'.format(feature_name))
+        logger.info('Registered builtin feature %s', feature_name)
 
     @property
     def builtin_features(self) -> Dict:
@@ -116,8 +116,7 @@ class FeatureManager:
 
             # Check if not already registered
             if command_name in self._commands:
-                logger.error('Command {} already registered.'
-                             .format(command_name))
+                logger.error('Command "%s" already registered.', command_name)
                 raise CommandAlreadyRegisteredError()
 
             self._commands[command_name] = wrap_with_server(f, self.server)
@@ -125,8 +124,7 @@ class FeatureManager:
             # Assign help attributes for thread decorator
             assign_help_attrs(f, command_name, ATTR_COMMAND_TYPE)
 
-            logger.info('Command {} is successfully registered.'
-                        .format(command_name))
+            logger.info('Command "%s" is successfully registered.', command_name)
 
             return f
         return decorator
@@ -152,8 +150,7 @@ class FeatureManager:
 
             # Add feature if not exists
             if feature_name in self._features:
-                logger.error('Feature {} already registered.'
-                             .format(feature_name))
+                logger.error('Feature "%s" already registered.', feature_name)
                 raise FeatureAlreadyRegisteredError()
 
             self._features[feature_name] = wrap_with_server(f, self.server)
@@ -164,12 +161,13 @@ class FeatureManager:
             if options:
                 options_type, _, _ = LSP_METHODS_MAP[feature_name]
                 if options_type and not isinstance(options, options_type):
-                    raise TypeError("Options should be instance of type {}"
-                                    .format(options_type))
+                    raise TypeError(
+                        (f'Options of method "{feature_name}"'
+                         f' should be instance of type {options_type}')
+                    )
                 self._feature_options[feature_name] = options
 
-            logger.info('Registered {} with options {}'
-                        .format(feature_name, options))
+            logger.info('Registered "%s" with options "%s"', feature_name, options)
 
             return f
         return decorator
@@ -189,8 +187,7 @@ class FeatureManager:
         def decorator(f):
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
-                    "Thread decorator can't be used with async functions `{}`"
-                    .format(f.__name__))
+                    f"Thread decorator can't be used with async functions \"{f.__name__}\"")
 
             # Allow any decorator order
             try:

@@ -152,12 +152,11 @@ triggered once response from the client is received.
             example_config = config[0].exampleConfiguration
 
             ls.show_message(
-                'jsonServer.exampleConfiguration value: {}'
-                .format(example_config)
+                f'jsonServer.exampleConfiguration value: {example_config}'
             )
 
         except Exception as e:
-            ls.show_message_log('Error ocurred: {}'.format(e))
+            ls.show_message_log(f'Error ocurred: {e}')
 
     ls.get_configuration(ConfigurationParams([
         ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)

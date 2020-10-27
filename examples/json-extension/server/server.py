@@ -113,8 +113,7 @@ def count_down_10_seconds_blocking(ls, *args):
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message('Counting down... {}'
-                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
         time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
@@ -125,8 +124,7 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message('Counting down... {}'
-                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
         await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
@@ -172,12 +170,10 @@ async def show_configuration_async(ls: JsonLanguageServer, *args):
 
         example_config = config[0].exampleConfiguration
 
-        ls.show_message(
-            'jsonServer.exampleConfiguration value: {}'.format(example_config)
-        )
+        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
     except Exception as e:
-        ls.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log(f'Error ocurred: {e}')
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
@@ -187,13 +183,10 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
         try:
             example_config = config[0].exampleConfiguration
 
-            ls.show_message(
-                'jsonServer.exampleConfiguration value: {}'
-                .format(example_config)
-            )
+            ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
         except Exception as e:
-            ls.show_message_log('Error ocurred: {}'.format(e))
+            ls.show_message_log(f'Error ocurred: {e}')
 
     ls.get_configuration(ConfigurationParams([
         ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
@@ -211,12 +204,10 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
 
         example_config = config[0].exampleConfiguration
 
-        ls.show_message(
-            'jsonServer.exampleConfiguration value: {}'.format(example_config)
-        )
+        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
     except Exception as e:
-        ls.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log(f'Error ocurred: {e}')
 
 
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)

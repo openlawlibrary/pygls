@@ -113,7 +113,7 @@ class Position(Model):
         return iter((self.line, self.character))
 
     def __repr__(self):
-        return '{}:{}'.format(self.line, self.character)
+        return f'{self.line}:{self.character}'
 
 
 class Range(Model):
@@ -133,7 +133,7 @@ class Range(Model):
         return iter((self.start, self.end))
 
     def __repr__(self):
-        return '{!r}-{!r}'.format(self.start, self.end)
+        return f'{self.start!r}-{self.end!r}'
 
 
 class Location(Model):
@@ -147,7 +147,7 @@ class Location(Model):
             and self.range == other.range)
 
     def __repr__(self):
-        return "{}:{!r}".format(self.uri, self.range)
+        return f"{self.uri}:{self.range!r}"
 
 
 class LocationLink(Model):

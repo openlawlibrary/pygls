@@ -54,7 +54,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
             match = CONTENT_LENGTH_PATTERN.fullmatch(header)
             if match:
                 content_length = int(match.group(1))
-                logger.debug('Content length: {}'.format(content_length))
+                logger.debug('Content length: %s', content_length)
 
         # Check if all headers have been read (as indicated by an empty line \r\n)
         if content_length and not header.strip():
@@ -183,7 +183,7 @@ class Server:
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting server on {}:{}'.format(host, port))
+        logger.info('Starting server on {}:{}', host, port)
 
         self._server = self.loop.run_until_complete(
             self.loop.create_server(self.lsp, host, port)
