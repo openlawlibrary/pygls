@@ -40,12 +40,42 @@ def test_range():
 
 
 def test_location():
-    assert Location(uri="file:///document.txt", range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4))) \
-        == Location(uri="file:///document.txt", range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4)))
-    assert Location(uri="file:///document.txt", range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4))) \
-        != Location(uri="file:///another.txt", range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4)))
-    assert Location(uri="file:///document.txt", range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4))) \
-        != 'something else'
-    assert "file:///document.txt:1:2-3:4" == repr(Location(
+    assert Location(
         uri="file:///document.txt",
-        range=Range(start=Position(line=1, character=2), end=Position(line=3, character=4))))
+        range=Range(
+            start=Position(line=1, character=2), end=Position(line=3, character=4)
+        ),
+    ) == Location(
+        uri="file:///document.txt",
+        range=Range(
+            start=Position(line=1, character=2), end=Position(line=3, character=4)
+        ),
+    )
+    assert Location(
+        uri="file:///document.txt",
+        range=Range(
+            start=Position(line=1, character=2), end=Position(line=3, character=4)
+        ),
+    ) != Location(
+        uri="file:///another.txt",
+        range=Range(
+            start=Position(line=1, character=2), end=Position(line=3, character=4)
+        ),
+    )
+    assert (
+        Location(
+            uri="file:///document.txt",
+            range=Range(
+                start=Position(line=1, character=2), end=Position(line=3, character=4)
+            ),
+        )
+        != "something else"
+    )
+    assert "file:///document.txt:1:2-3:4" == repr(
+        Location(
+            uri="file:///document.txt",
+            range=Range(
+                start=Position(line=1, character=2), end=Position(line=3, character=4)
+            ),
+        )
+    )

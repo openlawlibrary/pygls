@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from pygls.exceptions import JsonRpcInvalidParams, JsonRpcInvalidRequest
+from pygls.exceptions import JsonRpcInvalidParams
 from pygls.lsp import LSP_METHODS_MAP, Model
 from pygls.lsp.types import ClientCapabilities, InitializeParams, InitializeResult
 from pygls.protocol import JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage
@@ -71,6 +71,24 @@ def test_deserialize_notification_message_valid_params():
     assert result.params.field_b.inner_field == "test_inner"
 
 
+def test_deserialize_notification_message_bad_params_should_raise_error():
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "method": "test_method",
+        "params": {
+            "field_a": "test_a",
+            "field_b": {
+                "wrong_field_name": "test_inner"
+            }
+        }
+    }
+    '''
+
+    with pytest.raises(JsonRpcInvalidParams):
+        json.loads(params, object_hook=deserialize_message)
+
+
 def test_deserialize_response_message():
     params = '''
     {
@@ -113,6 +131,7 @@ def test_deserialize_request_message_with_registered_type__should_return_instanc
 
     assert isinstance(result.params.field_b, FeatureParams.InnerType)
     assert result.params.field_b.inner_field == "test_inner"
+
 
 def test_deserialize_request_message_without_registered_type__should_return_namedtuple():
     params = '''
