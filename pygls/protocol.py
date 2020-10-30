@@ -30,7 +30,8 @@ from itertools import zip_longest
 from typing import List
 
 from pygls.capabilities import ServerCapabilitiesBuilder
-from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
+from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
+                              JsonRpcInvalidRequest, JsonRpcMethodNotFound,
                               JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
 from pygls.lsp import LSP_METHODS_MAP, Model
@@ -83,18 +84,29 @@ def default_serializer(o):
     return o.__dict__
 
 
-def deserialize_params(data):
+def dict_to_object(**d):
+    """Create nested objects (namedtuple) from dict."""
+    return json.loads(
+        json.dumps(d),
+        object_hook=lambda p: namedtuple('Object', p.keys(), rename=True)(*p.values())
+    )
+
+
+def deserialize_params(data, lsp_methods_map=LSP_METHODS_MAP):
     """Function used to deserialize params to a specific class."""
     try:
         method = data['method']
         params = data['params']
+
+        if not isinstance(params, dict):
+            return data
 
         try:
             _, params_cls, _ = LSP_METHODS_MAP[method]
             if params_cls is None:
                 return data
         except KeyError:
-            params_cls = lambda **p: namedtuple('Object', p.keys(), rename=True)(*p.values())
+            params_cls = dict_to_object
 
         try:
             data['params'] = params_cls(**params)
@@ -107,10 +119,14 @@ def deserialize_params(data):
     return data
 
 
-def deserialize_message(data):
+def deserialize_message(data, lsp_methods_map=LSP_METHODS_MAP):
     """Function used to deserialize data received from client."""
     if 'jsonrpc' in data:
-        deserialize_params(data)
+        try:
+            deserialize_params(data, lsp_methods_map=lsp_methods_map)
+        except ValueError:
+            raise JsonRpcInvalidParams()
+
         if 'id' in data:
             if 'method' in data:
                 return JsonRPCRequestMessage(**data)

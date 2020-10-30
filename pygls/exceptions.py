@@ -103,6 +103,11 @@ class JsonRpcRequestCancelled(JsonRpcException):
     MESSAGE = 'Request Cancelled'
 
 
+class JsonRpcContentModified(JsonRpcException):
+    CODE = -32801
+    MESSAGE = 'Content Modified'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
