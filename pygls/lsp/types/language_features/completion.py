@@ -28,8 +28,7 @@ import enum
 from typing import Any, List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, MarkupContent, MarkupKind, Model,
-                                              PartialResultParams, Position, ProgressToken,
-                                              TextDocumentIdentifier, TextDocumentPositionParams,
+                                              PartialResultParams, TextDocumentPositionParams,
                                               TextEdit, WorkDoneProgressOptions,
                                               WorkDoneProgressParams)
 

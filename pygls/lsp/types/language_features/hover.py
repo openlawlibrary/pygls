@@ -26,10 +26,9 @@ that.
 """
 from typing import List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, Position,
-                                              ProgressToken, Range, TextDocumentIdentifier,
-                                              TextDocumentPositionParams, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, Position, Range,
+                                              TextDocumentIdentifier, TextDocumentPositionParams,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
 class HoverClientCapabilities(Model):

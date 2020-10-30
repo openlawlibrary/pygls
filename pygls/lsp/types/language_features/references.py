@@ -26,9 +26,9 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Position, ProgressToken,
-                                              TextDocumentIdentifier, TextDocumentPositionParams,
-                                              WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams,
+                                              TextDocumentPositionParams, WorkDoneProgressOptions,
+                                              WorkDoneProgressParams)
 
 
 class ReferenceClientCapabilities(Model):

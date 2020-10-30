@@ -26,9 +26,9 @@ that.
 """
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (DocumentSelector, Model, PartialResultParams,
-                                              Position, ProgressToken, StaticRegistrationOptions,
-                                              TextDocumentIdentifier, TextDocumentPositionParams,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams,
+                                              StaticRegistrationOptions,
+                                              TextDocumentPositionParams,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 

@@ -27,8 +27,7 @@ that.
 import enum
 from typing import Optional
 
-from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Position, ProgressToken,
-                                              Range, TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
                                               TextDocumentPositionParams, WorkDoneProgressOptions,
                                               WorkDoneProgressParams)
 

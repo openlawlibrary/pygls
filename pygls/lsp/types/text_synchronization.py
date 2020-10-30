@@ -27,7 +27,7 @@ that.
 import enum
 from typing import Optional
 
-from pygls.lsp.types import DocumentSelector, TextDocumentRegistrationOptions
+from pygls.lsp.types import TextDocumentRegistrationOptions
 from pygls.lsp.types.basic_structures import Model
 
 

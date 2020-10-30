@@ -1,5 +1,16 @@
-from pygls.lsp.methods import *
-from pygls.lsp.types import *
+from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COLOR_PRESENTATION, COMPLETION, DECLARATION,
+                               DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK, DOCUMENT_SYMBOL,
+                               FOLDING_RANGE, FORMATTING, HOVER, IMPLEMENTATION,
+                               ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME,
+                               SELECTION_RANGE, SIGNATURE_HELP, TEXT_DOCUMENT_DID_CLOSE,
+                               TEXT_DOCUMENT_DID_SAVE, TEXT_DOCUMENT_WILL_SAVE,
+                               TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL, TYPE_DEFINITION,
+                               WORKSPACE_SYMBOL)
+from pygls.lsp.types import (CodeLensOptions, CompletionOptions, DocumentLinkOptions,
+                             ExecuteCommandOptions, ImplementationOptions, SaveOptions,
+                             ServerCapabilities, SignatureHelpOptions,
+                             TextDocumentSyncOptionsServerCapabilities, TypeDefinitionOptions,
+                             WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities)
 
 # TODO: Check client capabilities also
 

@@ -31,8 +31,7 @@ from typing import List
 
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
-                              JsonRpcInvalidRequest, JsonRpcMethodNotFound,
-                              JsonRpcRequestCancelled)
+                              JsonRpcMethodNotFound, JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
 from pygls.lsp import LSP_METHODS_MAP, Model
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
@@ -583,7 +582,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(WORKSPACE_APPLY_EDIT,
-                                 ApplyWorkspaceEditParams(edit, label))
+                                 ApplyWorkspaceEditParams(edit=edit, label=label))
 
     def bf_exit(self, *args):
         """Stops the server process."""

@@ -79,8 +79,8 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
     try:
         return Position(
             line=position.line,
-            character=position.character -
-            utf16_unit_offset(lines[position.line][:position.character])
+            character=position.character
+            - utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
         return Position(line=len(lines), character=0)
@@ -114,8 +114,8 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
     try:
         return Position(
             line=position.line,
-            character=position.character +
-            utf16_unit_offset(lines[position.line][:position.character])
+            character=position.character
+            + utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
         return Position(line=len(lines), character=0)
@@ -182,7 +182,8 @@ class Document(object):
         text = change.text
         change_range = change.range
 
-        (start_line, start_col), (end_line, end_col) = range_from_utf16(lines, change_range)
+        (start_line, start_col), (end_line, end_col) = \
+            range_from_utf16(lines, change_range)  # type: ignore
 
         # Check for an edit occurring at the very end of the file
         if start_line == len(lines):

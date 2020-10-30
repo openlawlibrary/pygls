@@ -27,9 +27,9 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Location, Model, PartialResultParams, ProgressToken,
-                                              Range, TextDocumentIdentifier,
-                                              WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Location, Model, PartialResultParams, Range,
+                                              TextDocumentIdentifier, WorkDoneProgressOptions,
+                                              WorkDoneProgressParams)
 
 
 class SymbolKind(enum.IntEnum):

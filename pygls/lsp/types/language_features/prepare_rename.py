@@ -25,8 +25,7 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 
-from pygls.lsp.types.basic_structures import (Model, Position, Range, TextDocumentIdentifier,
-                                              TextDocumentPositionParams)
+from pygls.lsp.types.basic_structures import Model, Range, TextDocumentPositionParams
 
 
 class PrepareRenameParams(TextDocumentPositionParams):

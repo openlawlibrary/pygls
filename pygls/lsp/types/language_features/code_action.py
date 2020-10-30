@@ -28,7 +28,7 @@ import enum
 from typing import List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, Diagnostic, Model, PartialResultParams,
-                                              ProgressToken, Range, TextDocumentIdentifier,
+                                              Range, TextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
 

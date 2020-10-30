@@ -27,8 +27,7 @@ that.
 import enum
 from typing import List, Optional, Tuple, Union
 
-from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, NumType, Position,
-                                              ProgressToken, TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, NumType,
                                               TextDocumentPositionParams, WorkDoneProgressOptions,
                                               WorkDoneProgressParams)
 
