@@ -76,24 +76,15 @@ class DidChangeWatchedFilesClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
 
 
-if sys.version_info >= (3, 6):
-    class WatchKind(enum.IntFlag):
-        Create = 1
-        Change = 2
-        Delete = 4
-    WatchKindType = WatchKind
-else:
-    # python 3.5 does not have enum.IntFlag
-    class WatchKind:
-        Create = 1
-        Change = 2
-        Delete = 4
-    WatchKindType = int
+class WatchKind(enum.IntFlag):
+    Create = 1
+    Change = 2
+    Delete = 4
 
 
 class FileSystemWatcher(Model):
     glob_pattern: str
-    kind: Optional[WatchKindType] = WatchKind.Create | WatchKind.Change | WatchKind.Delete
+    kind: Optional[WatchKind] = WatchKind.Create | WatchKind.Change | WatchKind.Delete
 
 
 class DidChangeWatchedFilesRegistrationOptions(Model):

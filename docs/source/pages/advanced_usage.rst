@@ -161,7 +161,7 @@ please take a look at the :ref:`tutorial <tutorial>`.
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*pygls* supports ``python 3.5+`` which has a keyword ``async`` to
+*pygls* supports ``python 3.6+`` which has a keyword ``async`` to
 specify coroutines.
 
 The code snippet below shows how to register a command as a coroutine:

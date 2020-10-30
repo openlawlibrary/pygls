@@ -30,7 +30,7 @@ Features
 Python Versions
 ---------------
 
-*pygls* works with Python 3.5+.
+*pygls* works with Python 3.6+.
 
 User Guide
 ----------
