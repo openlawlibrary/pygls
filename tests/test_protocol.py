@@ -15,71 +15,63 @@
 # limitations under the License.                                           #
 ############################################################################
 import json
+from functools import partial
+from pathlib import Path
+from typing import Optional
 
 import pytest
+from pygls.exceptions import JsonRpcInvalidParams, JsonRpcInvalidRequest
+from pygls.lsp import LSP_METHODS_MAP, Model
+from pygls.lsp.types import ClientCapabilities, InitializeParams, InitializeResult
+from pygls.protocol import JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage
+from pygls.protocol import deserialize_message as _deserialize_message
+from pygls.protocol import to_lsp_name
 
-from pygls.lsp.types import InitializeResult
-from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
-                            deserialize_message, to_lsp_name)
+TEST_METHOD = 'test_method'
 
 
-class dictToObj:
-    def __init__(self, entries):
-        self.__dict__.update(**entries)
+class FeatureParams(Model):
+    class InnerType(Model):
+        inner_field: str
+
+    field_a: str
+    field_b: Optional[InnerType] = None
 
 
-def test_deserialize_message_with_reserved_words_should_pass_without_errors(client_server):
+TEST_LSP_METHODS_MAP = LSP_METHODS_MAP.update({
+    TEST_METHOD: (None, FeatureParams, None),
+})
+
+deserialize_message = partial(_deserialize_message, lsp_methods_map=TEST_LSP_METHODS_MAP)
+
+
+def test_deserialize_notification_message_valid_params():
     params = '''
     {
         "jsonrpc": "2.0",
-        "method": "initialized",
+        "method": "test_method",
         "params": {
-            "__dummy__": true
+            "field_a": "test_a",
+            "field_b": {
+                "inner_field": "test_inner"
+            }
         }
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
 
-    assert isinstance(result, JsonRPCNotification)
-    assert result.params._0 is True
-
-
-def test_deserialize_message_should_return_notification_message():
-    params = '''
-    {
-        "jsonrpc": "2.0",
-        "method": "test",
-        "params": "1"
-    }
-    '''
     result = json.loads(params, object_hook=deserialize_message)
 
     assert isinstance(result, JsonRPCNotification)
     assert result.jsonrpc == "2.0"
-    assert result.method == "test"
-    assert result.params == "1"
+
+    assert isinstance(result.params, FeatureParams)
+    assert result.params.field_a == "test_a"
+
+    assert isinstance(result.params.field_b, FeatureParams.InnerType)
+    assert result.params.field_b.inner_field == "test_inner"
 
 
-def test_deserialize_message_without_jsonrpc_field__should_return_object():
-    params = '''
-    {
-        "random": "data",
-        "def": "def"
-    }
-    '''
-    result = json.loads(params, object_hook=deserialize_message)
-
-    assert type(result).__name__ == 'Object'
-    assert result.random == "data"
-
-    # namedtuple does not guarantee field order
-    try:
-        assert result._0 == "def"
-    except AttributeError:
-        assert result._1 == "def"
-
-
-def test_deserialize_message_should_return_response_message():
+def test_deserialize_response_message():
     params = '''
     {
         "jsonrpc": "2.0",
@@ -96,13 +88,18 @@ def test_deserialize_message_should_return_response_message():
     assert result.error is None
 
 
-def test_deserialize_message_should_return_request_message():
+def test_deserialize_request_message_with_registered_type__should_return_instance():
     params = '''
     {
         "jsonrpc": "2.0",
         "id": "id",
-        "method": "test",
-        "params": "1"
+        "method": "test_method",
+        "params": {
+            "field_a": "test_a",
+            "field_b": {
+                "inner_field": "test_inner"
+            }
+        }
     }
     '''
     result = json.loads(params, object_hook=deserialize_message)
@@ -110,8 +107,36 @@ def test_deserialize_message_should_return_request_message():
     assert isinstance(result, JsonRPCRequestMessage)
     assert result.jsonrpc == "2.0"
     assert result.id == "id"
-    assert result.method == "test"
-    assert result.params == "1"
+
+    assert isinstance(result.params, FeatureParams)
+    assert result.params.field_a == "test_a"
+
+    assert isinstance(result.params.field_b, FeatureParams.InnerType)
+    assert result.params.field_b.inner_field == "test_inner"
+
+def test_deserialize_request_message_without_registered_type__should_return_namedtuple():
+    params = '''
+    {
+        "jsonrpc": "2.0",
+        "id": "id",
+        "method": "random",
+        "params": {
+            "field_a": "test_a",
+            "field_b": {
+                "inner_field": "test_inner"
+            }
+        }
+    }
+    '''
+    result = json.loads(params, object_hook=deserialize_message)
+
+    assert isinstance(result, JsonRPCRequestMessage)
+    assert result.jsonrpc == "2.0"
+    assert result.id == "id"
+
+    assert type(result.params).__name__ == "Object"
+    assert result.params.field_a == "test_a"
+    assert result.params.field_b.inner_field == "test_inner"
 
 
 def test_data_received_without_content_type_should_handle_message(client_server):
@@ -183,43 +208,13 @@ def test_data_received_multi_message_should_handle_messages(client_server):
     server.lsp.data_received(data)
 
 
-def test_initialize_without_capabilities_should_raise_error(client_server):
-    _, server = client_server
-    params = dictToObj({
-        "processId": 1234,
-        "rootUri": None
-    })
-    with pytest.raises(Exception):
-        server.lsp.bf_initialize(params)
-
-
-def test_initialize_without_process_id_should_raise_error(client_server):
-    _, server = client_server
-    params = dictToObj({
-        "capabilities": {},
-        "rootUri": None
-    })
-    with pytest.raises(Exception):
-        server.lsp.bf_initialize(params)
-
-
-def test_initialize_without_root_uri_should_raise_error(client_server):
-    _, server = client_server
-    params = dictToObj({
-        "capabilities": {},
-        "processId": 1234,
-    })
-    with pytest.raises(Exception):
-        server.lsp.bf_initialize(params)
-
-
 def test_initialize_should_return_server_capabilities(client_server):
     _, server = client_server
-    params = dictToObj({
-        "capabilities": {},
-        "processId": 1234,
-        "rootUri": None
-    })
+    params = InitializeParams(
+        process_id=1234,
+        root_uri=Path(__file__).parent.as_uri(),
+        capabilities=ClientCapabilities(),
+    )
 
     server_capabilities = server.lsp.bf_initialize(params)
 
