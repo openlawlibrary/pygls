@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
-import enum
 import functools
 import json
 import logging
@@ -34,7 +33,7 @@ from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInv
                               JsonRpcMethodNotFound, JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
 from pygls.lsp import (LSP_METHODS_MAP, JsonRPCNotification, JsonRPCRequestMessage,
-                       JsonRPCResponseMessage, Model)
+                       JsonRPCResponseMessage)
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,

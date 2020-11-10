@@ -49,7 +49,7 @@ class Model(BaseModel):
         allow_population_by_field_name = True
 
 
-class  JsonRpcMessage(Model):
+class JsonRpcMessage(Model):
     """A base json rpc message defined by LSP."""
     jsonrpc: str
 
