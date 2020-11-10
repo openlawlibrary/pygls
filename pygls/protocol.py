@@ -33,7 +33,8 @@ from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
                               JsonRpcMethodNotFound, JsonRpcRequestCancelled)
 from pygls.feature_manager import FeatureManager, is_thread_function
-from pygls.lsp import LSP_METHODS_MAP, Model
+from pygls.lsp import (LSP_METHODS_MAP, JsonRPCNotification, JsonRPCRequestMessage,
+                       JsonRPCResponseMessage, Model)
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
@@ -71,16 +72,6 @@ def call_user_feature(base_func, method_name):
         return ret_val
 
     return decorator
-
-
-def default_serializer(o):
-    """JSON serializer for complex objects."""
-    if isinstance(o, enum.Enum):
-        return o.value
-    elif isinstance(o, Model):
-        return o.dict(by_alias=True, exclude_none=True)
-
-    return o.__dict__
 
 
 def dict_to_object(**d):
@@ -158,62 +149,6 @@ def to_lsp_name(method_name):
         m_replaced.append(ch)
 
     return ''.join(m_replaced)
-
-
-class JsonRPCNotification:
-    """A class that represents json rpc notification message.
-
-    Attributes:
-        jsonrpc(str): Version of a json rpc protocol
-        method(str): Name of the method that should be executed
-        params(dict): Parameters that should be passed to the method
-    """
-
-    def __init__(self, jsonrpc=None, method=None, params=None):
-        self.jsonrpc = jsonrpc
-        self.method = method
-        self.params = params
-
-
-class JsonRPCRequestMessage:
-    """A class that represents json rpc request message.
-
-    Attributes:
-        id(str): Message id
-        jsonrpc(str): Version of a json rpc protocol
-        method(str): Name of the method that should be executed
-        params(dict): Parameters that should be passed to the method
-    """
-
-    def __init__(self, id=None, jsonrpc=None, method=None, params=None):
-        self.id = id
-        self.jsonrpc = jsonrpc
-        self.method = method
-        self.params = params
-
-
-class JsonRPCResponseMessage:
-    """A class that represents json rpc response message.
-
-    Attributes:
-        id(str): Message id (same as id from `JsonRPCRequestMessage`)
-        jsonrpc(str): Version of a json rpc protocol
-        result(str): Returned value from executed method
-        error(str): Error object
-    """
-
-    def __init__(self, id=None, jsonrpc=None, result=None, error=None):
-        self.id = id
-        self.jsonrpc = jsonrpc
-        self.result = result
-        self.error = error
-
-    def without_none_fields(self):
-        if self.error is None:
-            del self.error
-        else:
-            del self.result
-        return self
 
 
 class JsonRPCProtocol(asyncio.Protocol):
@@ -412,7 +347,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            body = json.dumps(data, default=default_serializer)
+            body = data.json(by_alias=True, exclude_none=True)
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
@@ -433,11 +368,11 @@ class JsonRPCProtocol(asyncio.Protocol):
             result(any): Result returned by handler
             error(any): Error returned by handler
         """
-        response = JsonRPCResponseMessage(msg_id,
-                                          JsonRPCProtocol.VERSION,
-                                          result,
-                                          error)
-        self._send_data(response.without_none_fields())
+        response = JsonRPCResponseMessage(id=msg_id,
+                                          jsonrpc=JsonRPCProtocol.VERSION,
+                                          result=result,
+                                          error=error)
+        self._send_data(response)
 
     def connection_made(self, transport: asyncio.BaseTransport):
         """Method from base class, called when connection is established"""

@@ -49,6 +49,31 @@ class Model(BaseModel):
         allow_population_by_field_name = True
 
 
+class  JsonRpcMessage(Model):
+    """A base json rpc message defined by LSP."""
+    jsonrpc: str
+
+
+class JsonRPCNotification(JsonRpcMessage):
+    """A class that represents json rpc notification message."""
+    method: str
+    params: Any
+
+
+class JsonRPCRequestMessage(JsonRpcMessage):
+    """A class that represents json rpc request message."""
+    id: str
+    method: str
+    params: Any
+
+
+class JsonRPCResponseMessage(JsonRpcMessage):
+    """A class that represents json rpc response message."""
+    id: str
+    result: Any
+    error: Any
+
+
 class Position(Model):
     line: int = 0
     character: int = 0
