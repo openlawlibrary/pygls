@@ -39,44 +39,59 @@ with "😋" unicode.
 DOC_URI = uris.from_fs_path(__file__)
 
 
+class ClientServer:
+    def __init__(self):
+        # Client to Server pipe
+        csr, csw = os.pipe()
+        # Server to client pipe
+        scr, scw = os.pipe()
+
+        # Setup Server
+        self.server = LanguageServer()
+        self.server_thread = Thread(target=self.server.start_io, args=(
+            os.fdopen(csr, 'rb'), os.fdopen(scw, 'wb')
+        ))
+        self.server_thread.daemon = True
+
+        # Setup client
+        self.client = LanguageServer(asyncio.new_event_loop())
+        self.client_thread = Thread(target=self.client.start_io, args=(
+            os.fdopen(scr, 'rb'), os.fdopen(csw, 'wb')))
+        self.client_thread.daemon = True
+
+    def start(self):
+        self.server_thread.start()
+        self.server.thread_id = self.server_thread.ident
+
+        self.client_thread.start()
+
+    def stop(self):
+        shutdown_response = (
+            self.client
+            .lsp.send_request(pygls.lsp.methods.SHUTDOWN)
+            .result(timeout=CALL_TIMEOUT)
+        )
+        assert shutdown_response is None
+        self.client.lsp.notify(pygls.lsp.methods.EXIT)
+
+    def __iter__(self):
+        yield self.client
+        yield self.server
+
+
 @pytest.fixture(scope='session', autouse=True)
 def client_server():
     """ A fixture to setup a client/server """
+    client_server = ClientServer()
+    setup_ls_features(client_server.server)
 
-    # Client to Server pipe
-    csr, csw = os.pipe()
-    # Server to client pipe
-    scr, scw = os.pipe()
+    client_server.start()
 
-    # Setup server
-    server = LanguageServer()
-    setup_ls_features(server)
-
-    server_thread = Thread(target=server.start_io, args=(
-        os.fdopen(csr, 'rb'), os.fdopen(scw, 'wb')
-    ))
-
-    server_thread.daemon = True
-    server_thread.start()
-
-    # Add thread id to the server (just for testing)
-    server.thread_id = server_thread.ident
-
-    # Setup client
-    client = LanguageServer(asyncio.new_event_loop())
-
-    client_thread = Thread(target=client.start_io, args=(
-        os.fdopen(scr, 'rb'), os.fdopen(csw, 'wb')))
-
-    client_thread.daemon = True
-    client_thread.start()
+    client, server = client_server
 
     yield client, server
 
-    shutdown_response = client.lsp.send_request(
-        pygls.lsp.methods.SHUTDOWN).result(timeout=CALL_TIMEOUT)
-    assert shutdown_response is None
-    client.lsp.notify(pygls.lsp.methods.EXIT)
+    client_server.stop()
 
 
 @pytest.fixture
