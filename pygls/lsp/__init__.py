@@ -16,6 +16,7 @@
 ############################################################################
 from typing import Any, List, Union
 
+from pygls.exceptions import MethodTypeNotRegisteredError
 from pygls.lsp.methods import *
 from pygls.lsp.types import *
 
@@ -131,7 +132,7 @@ LSP_METHODS_MAP = {
         Union[List[DocumentSymbol], List[SymbolInformation], None],
     ),
     CODE_ACTION: (
-        CodeActionOptions,
+        Union[CodeActionOptions, TextDocumentRegistrationOptions],
         CodeActionParams,
         Optional[List[Union[Command, CodeAction]]],
     ),
@@ -201,3 +202,53 @@ LSP_METHODS_MAP = {
         Optional[List[SelectionRange]],
     ),
 }
+
+
+def get_method_registration_options_type(method_name, lsp_methods_map=LSP_METHODS_MAP):
+    try:
+        return lsp_methods_map[method_name][0]
+    except KeyError:
+        raise MethodTypeNotRegisteredError(method_name)
+
+
+def get_method_params_type(method_name, lsp_methods_map=LSP_METHODS_MAP):
+    try:
+        return lsp_methods_map[method_name][1]
+    except KeyError:
+        raise MethodTypeNotRegisteredError(method_name)
+
+
+def get_method_return_type(method_name, lsp_methods_map=LSP_METHODS_MAP):
+    try:
+        return lsp_methods_map[method_name][2]
+    except KeyError:
+        raise MethodTypeNotRegisteredError(method_name)
+
+
+def _get_origin(t):
+    try:
+        return t.__origin__
+    except AttributeError:
+        return None
+
+
+def _get_args(t):
+    try:
+        return t.__args__
+    except:
+        return None
+
+
+def is_instance(o, t):
+    try:
+        return isinstance(o, t)
+    except TypeError:
+        origin = _get_origin(t)
+        if not origin:
+            raise TypeError(f'Could not determine type of {t}')
+
+        return {
+            Union: lambda o: isinstance(o, t.__args__),
+        }.get(origin, lambda o: False)(o)
+
+

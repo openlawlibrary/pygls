@@ -136,19 +136,42 @@ _EXCEPTIONS = (
 )
 
 
-class CommandAlreadyRegisteredError(Exception):
+class PyglsException(Exception):
     pass
 
 
-class FeatureAlreadyRegisteredError(Exception):
+class CommandAlreadyRegisteredError(PyglsException):
+
+    def __init__(self, command_name):
+        self.command_name = command_name
+
+    def __repr__(self):
+        return f'Command "{self.command_name}" is already registered.'
+
+
+class FeatureAlreadyRegisteredError(PyglsException):
+
+    def __init__(self, feature_name):
+        self.feature_name = feature_name
+
+    def __repr__(self):
+        return f'Feature "{self.feature_name}" is already registered.'
+
+
+class MethodTypeNotRegisteredError(PyglsException):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f'"{self.name}" is not added to `pygls.lsp.LSP_METHODS_MAP`.'
+
+
+class ThreadDecoratorError(PyglsException):
     pass
 
 
-class ThreadDecoratorError(Exception):
-    pass
-
-
-class ValidationError(Exception):
+class ValidationError(PyglsException):
 
     def __init__(self, errors=None):
         self.errors = errors or []

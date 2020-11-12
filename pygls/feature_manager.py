@@ -25,7 +25,7 @@ from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEA
                              ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
 from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
                               ThreadDecoratorError, ValidationError)
-from pygls.lsp import LSP_METHODS_MAP
+from pygls.lsp import get_method_registration_options_type, is_instance
 
 logger = logging.getLogger(__name__)
 
@@ -110,14 +110,14 @@ class FeatureManager:
         """
         def decorator(f):
             # Validate
-            if command_name.isspace():
+            if command_name is None or command_name.strip() == '':
                 logger.error('Missing command name.')
                 raise ValidationError('Command name is required.')
 
             # Check if not already registered
             if command_name in self._commands:
-                logger.error('Command "%s" already registered.', command_name)
-                raise CommandAlreadyRegisteredError()
+                logger.error('Command "%s" is already registered.', command_name)
+                raise CommandAlreadyRegisteredError(command_name)
 
             self._commands[command_name] = wrap_with_server(f, self.server)
 
@@ -144,14 +144,14 @@ class FeatureManager:
         """
         def decorator(f):
             # Validate
-            if feature_name.isspace():
+            if feature_name is None or feature_name.strip() == '':
                 logger.error('Missing feature name.')
                 raise ValidationError('Feature name is required.')
 
             # Add feature if not exists
             if feature_name in self._features:
-                logger.error('Feature "%s" already registered.', feature_name)
-                raise FeatureAlreadyRegisteredError()
+                logger.error('Feature "%s" is already registered.', feature_name)
+                raise FeatureAlreadyRegisteredError(feature_name)
 
             self._features[feature_name] = wrap_with_server(f, self.server)
 
@@ -159,8 +159,8 @@ class FeatureManager:
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 
             if options:
-                options_type, _, _ = LSP_METHODS_MAP[feature_name]
-                if options_type and not isinstance(options, options_type):
+                options_type = get_method_registration_options_type(feature_name)
+                if options_type and not is_instance(options, options_type):
                     raise TypeError(
                         (f'Options of method "{feature_name}"'
                          f' should be instance of type {options_type}')

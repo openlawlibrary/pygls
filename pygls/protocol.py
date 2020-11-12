@@ -30,10 +30,11 @@ from typing import List
 
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
-                              JsonRpcMethodNotFound, JsonRpcRequestCancelled)
+                              JsonRpcMethodNotFound, JsonRpcRequestCancelled,
+                              MethodTypeNotRegisteredError)
 from pygls.feature_manager import FeatureManager, is_thread_function
-from pygls.lsp import (LSP_METHODS_MAP, JsonRPCNotification, JsonRPCRequestMessage,
-                       JsonRPCResponseMessage)
+from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
+                       get_method_params_type, get_method_return_type, is_instance)
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
@@ -81,7 +82,7 @@ def dict_to_object(**d):
     )
 
 
-def deserialize_params(data, lsp_methods_map=LSP_METHODS_MAP):
+def deserialize_params(data, get_params_type):
     """Function used to deserialize params to a specific class."""
     try:
         method = data['method']
@@ -91,28 +92,28 @@ def deserialize_params(data, lsp_methods_map=LSP_METHODS_MAP):
             return data
 
         try:
-            _, params_cls, _ = LSP_METHODS_MAP[method]
-            if params_cls is None:
+            params_type = get_params_type(method)
+            if params_type is None:
                 return data
-        except KeyError:
-            params_cls = dict_to_object
+        except MethodTypeNotRegisteredError:
+            params_type = dict_to_object
 
         try:
-            data['params'] = params_cls(**params)
+            data['params'] = params_type(**params)
         except TypeError:
             raise ValueError(
-                f'Could not instantiate "{params_cls.__name__}" from params: {params}')
+                f'Could not instantiate "{params_type.__name__}" from params: {params}')
     except KeyError:
         pass
 
     return data
 
 
-def deserialize_message(data, lsp_methods_map=LSP_METHODS_MAP):
+def deserialize_message(data, get_params_type=get_method_params_type):
     """Function used to deserialize data received from client."""
     if 'jsonrpc' in data:
         try:
-            deserialize_params(data, lsp_methods_map=lsp_methods_map)
+            deserialize_params(data, get_params_type)
         except ValueError:
             raise JsonRpcInvalidParams()
 
@@ -211,6 +212,11 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _execute_request(self, msg_id, handler, params):
         """Executes request message handler."""
+        # TODO: Check return type
+        # - Get handler reg_type and reg_name
+        # - Execute sync or async
+        # - Check returned type
+        # - Allow 0 args
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(params))
             self._client_request_futures[msg_id] = future
@@ -534,14 +540,14 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize server capabilities
         client_capabilities = params.capabilities
-        server_capabilities = ServerCapabilitiesBuilder(
+        self.capabilities = ServerCapabilitiesBuilder(
             client_capabilities,
             self.fm.features.keys(),
             self.fm.feature_options,
             list(self.fm.commands.keys()),
             self._server.sync_kind,
         ).build()
-        logger.debug('Server capabilities: %s', server_capabilities.dict())
+        logger.debug('Server capabilities: %s', self.capabilities.dict())
 
         root_path = params.root_path
         root_uri = params.root_uri or from_fs_path(root_path)
@@ -550,7 +556,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        return InitializeResult(capabilities=server_capabilities)
+        return InitializeResult(capabilities=self.capabilities)
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""
