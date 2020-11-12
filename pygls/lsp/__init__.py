@@ -235,7 +235,7 @@ def _get_origin(t):
 def _get_args(t):
     try:
         return t.__args__
-    except:
+    except AttributeError:
         return None
 
 
