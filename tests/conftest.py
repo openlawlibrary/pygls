@@ -24,6 +24,8 @@ import pygls.lsp.methods
 import pytest
 from pygls import uris
 from pygls.feature_manager import FeatureManager
+from pygls.lsp.methods import INITIALIZE
+from pygls.lsp.types import ClientCapabilities, InitializeParams
 from pygls.server import LanguageServer
 from pygls.workspace import Document, Workspace
 
@@ -65,6 +67,8 @@ class ClientServer:
 
         self.client_thread.start()
 
+        self.initialize()
+
     def stop(self):
         shutdown_response = (
             self.client
@@ -73,6 +77,18 @@ class ClientServer:
         )
         assert shutdown_response is None
         self.client.lsp.notify(pygls.lsp.methods.EXIT)
+
+    def initialize(self):
+        response = self.client.lsp.send_request(
+            INITIALIZE,
+            InitializeParams(
+                process_id=12345,
+                root_uri="file://",
+                capabilities=ClientCapabilities()
+            )
+        ).result(timeout=CALL_TIMEOUT)
+
+        assert 'capabilities' in response
 
     def __iter__(self):
         yield self.client

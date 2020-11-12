@@ -21,7 +21,7 @@ from typing import Optional
 
 import pytest
 from pygls.exceptions import JsonRpcInvalidParams
-from pygls.lsp import LSP_METHODS_MAP, Model
+from pygls.lsp import Model, get_method_params_type
 from pygls.lsp.types import ClientCapabilities, InitializeParams, InitializeResult
 from pygls.protocol import JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage
 from pygls.protocol import deserialize_message as _deserialize_message
@@ -38,11 +38,14 @@ class FeatureParams(Model):
     field_b: Optional[InnerType] = None
 
 
-TEST_LSP_METHODS_MAP = LSP_METHODS_MAP.update({
+TEST_LSP_METHODS_MAP = {
     TEST_METHOD: (None, FeatureParams, None),
-})
+}
 
-deserialize_message = partial(_deserialize_message, lsp_methods_map=TEST_LSP_METHODS_MAP)
+deserialize_message = partial(
+    _deserialize_message,
+    get_params_type=partial(get_method_params_type, lsp_methods_map=TEST_LSP_METHODS_MAP)
+)
 
 
 def test_deserialize_notification_message_valid_params():

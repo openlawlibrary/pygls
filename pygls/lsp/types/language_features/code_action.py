@@ -29,6 +29,7 @@ from typing import List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, Diagnostic, Model, PartialResultParams,
                                               Range, TextDocumentIdentifier,
+                                              TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
 
@@ -60,6 +61,10 @@ class CodeActionClientCapabilities(Model):
 
 class CodeActionOptions(WorkDoneProgressOptions):
     code_action_kinds: Optional[List[CodeActionKind]] = None
+
+
+class CodeActionRegistrationOptions(TextDocumentRegistrationOptions, CodeActionOptions):
+    pass
 
 
 class CodeActionContext(Model):

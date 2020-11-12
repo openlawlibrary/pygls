@@ -13,8 +13,11 @@ class TestCompletions(unittest.TestCase):
         self.client_server = ClientServer()
         self.client, self.server = self.client_server
 
-        @self.server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
-        def completions(params: CompletionParams) -> CompletionList:
+        @self.server.feature(
+            COMPLETION,
+            CompletionOptions(trigger_characters=[','], all_commit_characters=[':'], resolve_provider=True)
+        )
+        def f(params: CompletionParams) -> CompletionList:
             return CompletionList(
                 is_incomplete=False,
                 items=[
@@ -30,6 +33,14 @@ class TestCompletions(unittest.TestCase):
 
     def tearDown(self):
         self.client_server.stop()
+
+    def test_capabilities(self):
+        capabilities = self.server.lsp.capabilities
+
+        assert capabilities.completion_provider
+        assert capabilities.completion_provider.trigger_characters == [',']
+        assert capabilities.completion_provider.all_commit_characters == [':']
+        assert capabilities.completion_provider.resolve_provider is True
 
     def test_completions(self):
         response = self.client.lsp.send_request(
