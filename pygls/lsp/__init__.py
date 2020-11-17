@@ -19,6 +19,7 @@ from typing import Any, List, Union
 from pygls.exceptions import MethodTypeNotRegisteredError
 from pygls.lsp.methods import *
 from pygls.lsp.types import *
+from typeguard import check_type
 
 __LSP_VERSION__ = "3.15"
 
@@ -241,14 +242,7 @@ def _get_args(t):
 
 def is_instance(o, t):
     try:
-        return isinstance(o, t)
+        check_type('', o, t)
+        return True
     except TypeError:
-        origin = _get_origin(t)
-        if not origin:
-            raise TypeError(f'Could not determine type of {t}')
-
-        return {
-            Union: lambda o: isinstance(o, t.__args__),
-        }.get(origin, lambda o: False)(o)
-
-
+        return False

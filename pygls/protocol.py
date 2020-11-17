@@ -29,10 +29,12 @@ from itertools import zip_longest
 from typing import List
 
 from pygls.capabilities import ServerCapabilitiesBuilder
+from pygls.constants import ATTR_FEATURE_TYPE
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
                               JsonRpcMethodNotFound, JsonRpcRequestCancelled,
                               MethodTypeNotRegisteredError)
-from pygls.feature_manager import FeatureManager, is_thread_function
+from pygls.feature_manager import (FeatureManager, assign_help_attrs, get_help_attrs,
+                                   is_thread_function)
 from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
                        get_method_params_type, get_method_return_type, is_instance)
 from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
@@ -189,6 +191,16 @@ class JsonRPCProtocol(asyncio.Protocol):
     def __call__(self):
         return self
 
+    def _check_ret_type_and_send_response(self, method_name, method_type, msg_id, result):
+        """Check if registered feature returns appropriate result type."""
+        if method_type == ATTR_FEATURE_TYPE:
+            return_type = get_method_return_type(method_name)
+            if not is_instance(result, return_type):
+                error = JsonRpcInternalError().to_dict()
+                self._send_response(msg_id, error=error)
+
+        self._send_response(msg_id, result=result)
+
     def _execute_notification(self, handler, *params):
         """Executes notification message handler."""
         if asyncio.iscoroutinefunction(handler):
@@ -212,32 +224,33 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _execute_request(self, msg_id, handler, params):
         """Executes request message handler."""
-        # TODO: Check return type
-        # - Get handler reg_type and reg_name
-        # - Execute sync or async
-        # - Check returned type
-        # - Allow 0 args
+        method_name, method_type = get_help_attrs(handler)
+
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(params))
             self._client_request_futures[msg_id] = future
             future.add_done_callback(partial(self._execute_request_callback,
-                                             msg_id))
+                                             method_name, method_type, msg_id))
         else:
             # Can't be canceled
             if is_thread_function(handler):
                 self._server.thread_pool.apply_async(
                     handler, (params, ),
-                    callback=lambda res: self._send_response(msg_id, res),
-                    error_callback=partial(self._execute_request_err_callback,
-                                           msg_id))
+                    callback=partial(
+                        self._check_ret_type_and_send_response,
+                        method_name, method_type, msg_id,
+                    ),
+                    error_callback=partial(self._execute_request_err_callback, msg_id))
             else:
-                self._send_response(msg_id, handler(params))
+                self._check_ret_type_and_send_response(
+                    method_name, method_type, msg_id, handler(params))
 
-    def _execute_request_callback(self, msg_id, future):
+    def _execute_request_callback(self, method_name, method_type, msg_id, future):
         """Success callback used for coroutine request message."""
         try:
             if not future.cancelled():
-                self._send_response(msg_id, result=future.result())
+                self._check_ret_type_and_send_response(
+                    method_name, method_type, msg_id, result=future.result())
             else:
                 self._send_response(
                     msg_id,
@@ -385,7 +398,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
-        logger.debug('Received {!r}', data)
+        logger.debug('Received {%r}', data)
 
         while len(data):
             # Append the incoming chunk to the message buffer
@@ -487,7 +500,9 @@ class LSPMeta(type):
         for attr_name, attr_val in cls.items():
             if callable(attr_val) and attr_name.startswith('bf_'):
                 method_name = to_lsp_name(attr_name[3:])
-                cls[attr_name] = call_user_feature(attr_val, method_name)
+                wrapped = call_user_feature(attr_val, method_name)
+                assign_help_attrs(wrapped, method_name, ATTR_FEATURE_TYPE)
+                cls[attr_name] = wrapped
 
                 logger.debug('Added decorator for lsp method: "%s"', attr_name)
 

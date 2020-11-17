@@ -183,7 +183,7 @@ class Server:
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting server on {}:{}', host, port)
+        logger.info('Starting server on %s:%s', host, port)
 
         self._server = self.loop.run_until_complete(
             self.loop.create_server(self.lsp, host, port)

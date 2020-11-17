@@ -113,8 +113,7 @@ class JsonRpcServerError(JsonRpcException):
     def __init__(self, message, code, data=None):
         if not _is_server_error_code(code):
             raise ValueError('Error code should be in range -32099 - -32000')
-        super().__init__(
-            message=message, code=code, data=data)
+        super().__init__(message=message, code=code, data=data)
 
     @classmethod
     def supports_code(cls, code):

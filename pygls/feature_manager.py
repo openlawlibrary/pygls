@@ -39,6 +39,10 @@ def assign_thread_attr(f):
     setattr(f, ATTR_EXECUTE_IN_THREAD, True)
 
 
+def get_help_attrs(f):
+    return getattr(f, ATTR_REGISTERED_NAME, None), getattr(f, ATTR_REGISTERED_TYPE, None)
+
+
 def has_ls_param_or_annotation(f, annotation):
     """Returns true if callable has first parameter named `ls` or type of
     annotation"""
