@@ -37,7 +37,6 @@ class CodeLensClientCapabilities(Model):
 
 class CodeLensOptions(WorkDoneProgressOptions):
     resolve_provider: Optional[bool] = False
-    work_done_progress: Optional[ProgressToken] = None
 
 
 class CodeLensParams(WorkDoneProgressParams, PartialResultParams):

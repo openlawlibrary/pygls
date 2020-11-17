@@ -32,7 +32,7 @@ class ServerCapabilitiesBuilder:
 
         self.server_cap = ServerCapabilities()
 
-    def _provider_options(self, feature, default=False):
+    def _provider_options(self, feature, default=True):
         if feature in self.features:
             if feature in self.feature_options:
                 return self.feature_options[feature]

@@ -36,8 +36,6 @@ class ColorPresentationParams(WorkDoneProgressParams, PartialResultParams):
     text_document: TextDocumentIdentifier
     color: Color
     range: Range
-    work_done_token: Optional[bool] = None
-    partial_result_token: Optional[ProgressToken] = None
 
 
 class ColorPresentation(Model):
