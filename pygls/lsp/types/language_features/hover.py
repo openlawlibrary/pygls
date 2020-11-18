@@ -41,19 +41,17 @@ class HoverOptions(WorkDoneProgressOptions):
 
 
 class HoverParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    text_document: TextDocumentIdentifier
-    position: Position
-    work_done_token: Optional[bool] = None
+    pass
 
 
-class _MarkedString(Model):
+class MarkedString(Model):
     language: str
     value: str
 
 
-MarkedString = Union[str, _MarkedString]
+MarkedStringType = Union[str, MarkedString]
 
 
 class Hover(Model):
-    contents: Union[MarkedString, List[MarkedString], MarkupContent]
+    contents: Union[MarkedStringType, List[MarkedStringType], MarkupContent]
     range: Optional[Range] = None
