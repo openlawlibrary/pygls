@@ -89,9 +89,15 @@ class DocumentSymbol(Model):
     deprecated: Optional[bool] = False
 
 
+DocumentSymbol.update_forward_refs()
+
+
 class SymbolInformation(Model):
     name: str
-    kind: int
+    kind: SymbolKind
     location: Location
     container_name: Optional[str] = None
     deprecated: Optional[bool] = False
+
+
+
