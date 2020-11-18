@@ -168,7 +168,7 @@ LSP_METHODS_MAP = {
         List[ColorPresentation],
     ),
     FORMATTING: (
-        FormattingOptions,
+        DocumentFormattingOptions,
         DocumentFormattingParams,
         Optional[List[TextEdit]],
     ),
