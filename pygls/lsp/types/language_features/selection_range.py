@@ -55,3 +55,6 @@ class SelectionRangeParams(WorkDoneProgressParams, PartialResultParams):
 class SelectionRange(Model):
     range: Range
     parent: Optional['SelectionRange'] = None
+
+
+SelectionRange.update_forward_refs()
