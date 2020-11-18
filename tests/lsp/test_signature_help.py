@@ -1,0 +1,135 @@
+
+import unittest
+from typing import Optional
+
+from pygls.lsp.methods import SIGNATURE_HELP
+from pygls.lsp.types import (ParameterInformation, Position, SignatureHelp, SignatureHelpContext,
+                             SignatureHelpOptions, SignatureHelpParams, SignatureHelpTriggerKind,
+                             SignatureInformation, TextDocumentIdentifier)
+from pygls.server import LanguageServer
+
+from ..conftest import CALL_TIMEOUT, ClientServer
+
+
+class TestSignatureHelp(unittest.TestCase):
+    def setUp(self):
+        self.client_server = ClientServer()
+        self.client, self.server = self.client_server
+
+        @self.server.feature(
+            SIGNATURE_HELP,
+            SignatureHelpOptions(
+                trigger_characters=['a', 'b'],
+                retrigger_characters=['c', 'd'],
+            ),
+        )
+        def f(params: SignatureHelpParams) -> Optional[SignatureHelp]:
+            if params.text_document.uri == 'file://return.signature_help':
+                return SignatureHelp(
+                    signatures=[
+                        SignatureInformation(
+                            label='label',
+                            documentation='documentation',
+                            parameters=[
+                                ParameterInformation(
+                                    label=(0, 0),
+                                    documentation='documentation',
+                                ),
+                            ]
+                        ),
+                    ],
+                    active_signature=0,
+                    active_parameter=0,
+                )
+            else:
+                return None
+
+        self.client_server.start()
+
+
+    def tearDown(self):
+        self.client_server.stop()
+
+    def test_capabilities(self):
+        capabilities = self.server.lsp.capabilities
+
+        assert capabilities.signature_help_provider
+        assert capabilities.signature_help_provider.trigger_characters == ['a', 'b']
+        assert capabilities.signature_help_provider.retrigger_characters == ['c', 'd']
+
+    def test_signature_help_return_signature_help(self):
+        response = self.client.lsp.send_request(
+            SIGNATURE_HELP,
+            SignatureHelpParams(
+                text_document=TextDocumentIdentifier(uri='file://return.signature_help'),
+                position=Position(line=0, character=0),
+                context=SignatureHelpContext(
+                    trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
+                    is_retrigger=True,
+                    trigger_character='a',
+                    active_signature_help=SignatureHelp(
+                        signatures=[
+                            SignatureInformation(
+                                label='label',
+                                documentation='documentation',
+                                parameters=[
+                                    ParameterInformation(
+                                        label=(0, 0),
+                                        documentation='documentation',
+                                    ),
+                                ]
+                            ),
+                        ],
+                        active_signature=0,
+                        active_parameter=0,
+                    ),
+                ),
+            ),
+        ).result(timeout=CALL_TIMEOUT)
+
+        assert response
+
+        assert response['activeParameter'] == 0
+        assert response['activeSignature'] == 0
+
+        assert response['signatures'][0]['label'] == 'label'
+        assert response['signatures'][0]['documentation'] == 'documentation'
+        assert response['signatures'][0]['parameters'][0]['label'] == [0, 0]
+        assert response['signatures'][0]['parameters'][0]['documentation'] == 'documentation'
+
+    def test_signature_help_return_none(self):
+        response = self.client.lsp.send_request(
+            SIGNATURE_HELP,
+            SignatureHelpParams(
+                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                position=Position(line=0, character=0),
+                context=SignatureHelpContext(
+                    trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
+                    is_retrigger=True,
+                    trigger_character='a',
+                    active_signature_help=SignatureHelp(
+                        signatures=[
+                            SignatureInformation(
+                                label='label',
+                                documentation='documentation',
+                                parameters=[
+                                    ParameterInformation(
+                                        label=(0, 0),
+                                        documentation='documentation',
+                                    ),
+                                ]
+                            ),
+                        ],
+                        active_signature=0,
+                        active_parameter=0,
+                    ),
+                ),
+            ),
+        ).result(timeout=CALL_TIMEOUT)
+
+        assert response is None
+
+
+if __name__ == '__main__':
+    unittest.main()
+
