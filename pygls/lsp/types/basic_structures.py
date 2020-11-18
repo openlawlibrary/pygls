@@ -322,11 +322,10 @@ class MarkupContent(Model):
     value: str
 
 
-DocumentChangesType = Union[List[TextDocumentEdit],
-                            TextDocumentEdit,
-                            CreateFile,
-                            RenameFile,
-                            DeleteFile]
+DocumentChangesType = Union[
+    List[TextDocumentEdit],
+    List[Union[TextDocumentEdit, CreateFile, RenameFile, DeleteFile]],
+]
 
 
 class WorkspaceEdit(Model):
