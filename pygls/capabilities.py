@@ -1,5 +1,5 @@
-from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COLOR_PRESENTATION, COMPLETION, DECLARATION,
-                               DEFINITION, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK, DOCUMENT_SYMBOL,
+from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COMPLETION, DECLARATION, DEFINITION,
+                               DOCUMENT_COLOR, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK, DOCUMENT_SYMBOL,
                                FOLDING_RANGE, FORMATTING, HOVER, IMPLEMENTATION,
                                ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME,
                                SELECTION_RANGE, SIGNATURE_HELP, TEXT_DOCUMENT_DID_CLOSE,
@@ -144,7 +144,7 @@ class ServerCapabilitiesBuilder:
 
     def _with_color(self):
         self.server_cap.color_provider = \
-            self._provider_options(COLOR_PRESENTATION)
+            self._provider_options(DOCUMENT_COLOR)
         return self
 
     def _with_document_formatting(self):
