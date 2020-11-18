@@ -26,7 +26,7 @@ that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Model, PartialResultParams, ProgressToken, Range,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
                                               TextDocumentIdentifier, TextEdit,
                                               WorkDoneProgressParams)
 from pygls.lsp.types.language_features.document_color import Color

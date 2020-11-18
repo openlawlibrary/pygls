@@ -17,7 +17,7 @@ class TestRepareRename(unittest.TestCase):
 
         @self.server.feature(PREPARE_RENAME)
         def f(params: PrepareRenameParams) -> Optional[Union[Range, PrepareRename]]:
-            return {
+            return {    # type: ignore
                 'file://return.range': Range(
                     start=Position(line=0, character=0),
                     end=Position(line=1, character=1),

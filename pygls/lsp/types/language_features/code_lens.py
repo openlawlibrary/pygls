@@ -26,9 +26,9 @@ that.
 """
 from typing import Any, Optional
 
-from pygls.lsp.types.basic_structures import (Command, Model, PartialResultParams, ProgressToken,
-                                              Range, TextDocumentIdentifier,
-                                              WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.lsp.types.basic_structures import (Command, Model, PartialResultParams, Range,
+                                              TextDocumentIdentifier, WorkDoneProgressOptions,
+                                              WorkDoneProgressParams)
 
 
 class CodeLensClientCapabilities(Model):

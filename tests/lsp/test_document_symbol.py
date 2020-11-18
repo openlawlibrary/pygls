@@ -64,7 +64,7 @@ class TestDocumentSymbol(unittest.TestCase):
                 deprecated=True,
             )
 
-            return {
+            return {    # type: ignore
                 'file://return.symbol_information_list': [symbol_info],
                 'file://return.document_symbol_list': [document_symbol],
             }.get(params.text_document.uri, None)

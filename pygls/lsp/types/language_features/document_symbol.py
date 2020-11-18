@@ -98,6 +98,3 @@ class SymbolInformation(Model):
     location: Location
     container_name: Optional[str] = None
     deprecated: Optional[bool] = False
-
-
-

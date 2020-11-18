@@ -44,7 +44,7 @@ class TestImplementation(unittest.TestCase):
                 ),
             )
 
-            return {
+            return {    # type: ignore
                 'file://return.location': location,
                 'file://return.location_list': [location],
                 'file://return.location_link_list': [location_link],

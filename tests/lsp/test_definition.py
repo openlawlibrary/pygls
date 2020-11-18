@@ -44,12 +44,11 @@ class TestDefinition(unittest.TestCase):
                 ),
             )
 
-            return {
+            return {    # type: ignore
                 'file://return.location': location,
                 'file://return.location_list': [location],
                 'file://return.location_link_list': [location_link],
-                'file://return.none': None,
-            }.get(params.text_document.uri)
+            }.get(params.text_document.uri, None)
 
         self.client_server.start()
 
