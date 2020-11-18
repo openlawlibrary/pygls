@@ -28,8 +28,9 @@ import enum
 from typing import Optional
 
 from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
-                                              TextDocumentPositionParams, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
+                                              TextDocumentPositionParams,
+                                              TextDocumentRegistrationOptions,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
 class DocumentHighlightClientCapabilities(Model):
@@ -37,6 +38,10 @@ class DocumentHighlightClientCapabilities(Model):
 
 
 class DocumentHighlightOptions(WorkDoneProgressOptions):
+    pass
+
+
+class DocumentHighlightRegistrationOptions(TextDocumentRegistrationOptions, DocumentHighlightOptions):
     pass
 
 
