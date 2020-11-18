@@ -3,8 +3,8 @@ import unittest
 from typing import List, Optional, Union
 
 from pygls.lsp.methods import DECLARATION
-from pygls.lsp.types import (DeclarationParams, Location, LocationLink, Position, Range,
-                             TextDocumentIdentifier)
+from pygls.lsp.types import (DeclarationOptions, DeclarationParams, Location, LocationLink,
+                             Position, Range, TextDocumentIdentifier)
 from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
@@ -15,7 +15,7 @@ class TestDeclaration(unittest.TestCase):
         self.client_server = ClientServer()
         self.client, self.server = self.client_server
 
-        @self.server.feature(DECLARATION)
+        @self.server.feature(DECLARATION, DeclarationOptions())
         def f(params: DeclarationParams) -> Optional[Union[Location, List[Location], List[LocationLink]]]:
             location = Location(
                 uri='uri',
@@ -57,7 +57,7 @@ class TestDeclaration(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.lsp.capabilities
 
-        assert capabilities.declaration_provider == True
+        assert capabilities.declaration_provider
 
     def test_declaration_return_location(self):
         response = self.client.lsp.send_request(

@@ -30,7 +30,6 @@ class TestCompletions(unittest.TestCase):
 
         self.client_server.start()
 
-
     def tearDown(self):
         self.client_server.stop()
 

@@ -59,7 +59,7 @@ class TestTypeDefinition(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.lsp.capabilities
 
-        assert capabilities.type_definition_provider is not None
+        assert capabilities.type_definition_provider
 
     def test_type_definition_return_location(self):
         response = self.client.lsp.send_request(
