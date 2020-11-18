@@ -24,9 +24,10 @@ from threading import Event
 from typing import Any, Callable, List, Optional, TypeVar
 
 from pygls import IS_WIN
-from pygls.lsp.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, ConfigurationParams,
-                             Diagnostic, MessageType, RegistrationParams, TextDocumentSyncKind,
-                             UnregistrationParams, WorkspaceEdit)
+from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
+                             ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
+                             ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
+                             WorkspaceEdit)
 from pygls.protocol import LanguageServerProtocol
 from pygls.workspace import Workspace
 
@@ -244,6 +245,11 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.command(command_name)
 
+    @property
+    def client_capabilities(self) -> ClientCapabilities:
+        """Return client capabilities."""
+        return self.lsp.client_capabilities
+
     def feature(
         self, feature_name: str, options: Optional[Any] = None,
     ) -> Callable[[F], F]:
@@ -280,6 +286,11 @@ class LanguageServer(Server):
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
         self.lsp.notify(method, params)
+
+    @property
+    def server_capabilities(self) -> ServerCapabilities:
+        """Return server capabilities."""
+        return self.lsp.server_capabilities
 
     def show_message(self, message, msg_type=MessageType.Info) -> None:
         """Sends message to the client to display message."""

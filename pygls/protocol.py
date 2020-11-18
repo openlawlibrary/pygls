@@ -554,15 +554,15 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self._server.process_id = params.process_id
 
         # Initialize server capabilities
-        client_capabilities = params.capabilities
-        self.capabilities = ServerCapabilitiesBuilder(
-            client_capabilities,
+        self.client_capabilities = params.capabilities
+        self.server_capabilities = ServerCapabilitiesBuilder(
+            self.client_capabilities,
             self.fm.features.keys(),
             self.fm.feature_options,
             list(self.fm.commands.keys()),
             self._server.sync_kind,
         ).build()
-        logger.debug('Server capabilities: %s', self.capabilities.dict())
+        logger.debug('Server capabilities: %s', self.server_capabilities.dict())
 
         root_path = params.root_path
         root_uri = params.root_uri or from_fs_path(root_path)
@@ -571,7 +571,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        return InitializeResult(capabilities=self.capabilities)
+        return InitializeResult(capabilities=self.server_capabilities)
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""

@@ -51,7 +51,7 @@ class TestSignatureHelp(unittest.TestCase):
         self.client_server.stop()
 
     def test_capabilities(self):
-        capabilities = self.server.lsp.capabilities
+        capabilities = self.server.server_capabilities
 
         assert capabilities.signature_help_provider
         assert capabilities.signature_help_provider.trigger_characters == ['a', 'b']

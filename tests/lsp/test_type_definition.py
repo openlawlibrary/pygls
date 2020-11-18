@@ -57,7 +57,7 @@ class TestTypeDefinition(unittest.TestCase):
         self.client_server.stop()
 
     def test_capabilities(self):
-        capabilities = self.server.lsp.capabilities
+        capabilities = self.server.server_capabilities
 
         assert capabilities.type_definition_provider
 

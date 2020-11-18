@@ -35,7 +35,7 @@ class TestCodeAction(unittest.TestCase):
         self.client_server.stop()
 
     def test_capabilities(self):
-        capabilities = self.server.lsp.capabilities
+        capabilities = self.server.server_capabilities
 
         assert capabilities.code_action_provider
         assert capabilities.code_action_provider.code_action_kinds == [CodeActionKind.Refactor]

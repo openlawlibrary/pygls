@@ -44,7 +44,7 @@ class TestCodeLens(unittest.TestCase):
         self.client_server.stop()
 
     def test_capabilities(self):
-        capabilities = self.server.lsp.capabilities
+        capabilities = self.server.server_capabilities
 
         assert capabilities.code_lens_provider
         assert capabilities.code_lens_provider.resolve_provider == False
