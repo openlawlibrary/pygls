@@ -45,7 +45,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
     message = []
     content_length = 0
 
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not rfile.closed:
         # Read a header line
         header = await loop.run_in_executor(executor, rfile.readline)
         message.append(header)
@@ -146,6 +146,8 @@ class Server:
         """Shutdown server."""
         logger.info('Shutting down the server')
 
+        self._stop_event.set()
+
         if self._thread_pool:
             self._thread_pool.terminate()
             self._thread_pool.join()
@@ -179,7 +181,6 @@ class Server:
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
-            self._stop_event.set()
             self.shutdown()
 
     def start_tcp(self, host, port):

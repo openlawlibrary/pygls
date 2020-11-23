@@ -19,6 +19,8 @@
 import asyncio
 import os
 from threading import Thread
+from time import sleep
+from typing import List
 
 import pygls.lsp.methods
 import pytest
@@ -31,7 +33,7 @@ from pygls.workspace import Document, Workspace
 
 from tests.ls_setup import setup_ls_features
 
-CALL_TIMEOUT = 2
+CALL_TIMEOUT = 3
 
 DOC = """document
 for
@@ -41,7 +43,16 @@ with "😋" unicode.
 DOC_URI = uris.from_fs_path(__file__)
 
 
+def pytest_sessionfinish(session, exitstatus):
+    """ whole test run finishes. """
+    sleep(CALL_TIMEOUT)
+    for cs in ClientServer._to_stop:
+       cs._stop()
+
+
 class ClientServer:
+    _to_stop: List['ClientServer'] = []
+
     def __init__(self):
         # Client to Server pipe
         csr, csw = os.pipe()
@@ -70,13 +81,25 @@ class ClientServer:
         self.initialize()
 
     def stop(self):
+        ClientServer._to_stop.append(self)
+
+    def _stop(self):
         shutdown_response = (
             self.client
             .lsp.send_request(pygls.lsp.methods.SHUTDOWN)
             .result(timeout=CALL_TIMEOUT)
         )
         assert shutdown_response is None
+        # Exit the server
         self.client.lsp.notify(pygls.lsp.methods.EXIT)
+        self.server_thread.join()
+        # Exit the client
+        self.client._stop_event.set()
+        try:
+            self.client.loop._signal_handlers.clear() # HACK ?
+        except AttributeError:
+            pass
+        self.client_thread.join()
 
     def initialize(self):
         response = self.client.lsp.send_request(

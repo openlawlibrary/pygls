@@ -27,11 +27,12 @@ from ..conftest import CALL_TIMEOUT, ClientServer
 
 
 class TestSignatureHelp(unittest.TestCase):
-    def setUp(self):
-        self.client_server = ClientServer()
-        self.client, self.server = self.client_server
+    @classmethod
+    def setUpClass(cls):
+        cls.client_server = ClientServer()
+        cls.client, cls.server = cls.client_server
 
-        @self.server.feature(
+        @cls.server.feature(
             SIGNATURE_HELP,
             SignatureHelpOptions(
                 trigger_characters=['a', 'b'],
@@ -59,11 +60,11 @@ class TestSignatureHelp(unittest.TestCase):
             else:
                 return None
 
-        self.client_server.start()
+        cls.client_server.start()
 
-
-    def tearDown(self):
-        self.client_server.stop()
+    @classmethod
+    def tearDownClass(cls):
+        cls.client_server.stop()
 
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
