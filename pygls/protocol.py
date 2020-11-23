@@ -542,7 +542,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def bf_exit(self, *args):
         """Stops the server process."""
         self.transport.close()
-        sys.exit(1)
+        sys.exit(0 if self._shutdown else 1)
 
     def bf_initialize(self, params: InitializeParams):
         """Method that initializes language server.
