@@ -25,6 +25,7 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
+from functools import reduce
 from typing import Any, List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Model, NumType, WorkDoneProgressParams,
@@ -148,6 +149,18 @@ class ClientCapabilities(Model):
     text_document: Optional[TextDocumentClientCapabilities] = None
     window: Optional[WindowClientCapabilities] = None
     experimental: Optional[Any] = None
+
+    def has_capability(self, field):
+        """Check if ClientCapabilities has some nested value without raising
+        AttributeError.
+
+        e.g. has_capability('text_document.synchronization.will_save')
+        """
+        return reduce(
+            lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
+            field.split("."),
+            self.dict(),
+        )
 
 
 class InitializeParams(WorkDoneProgressParams):

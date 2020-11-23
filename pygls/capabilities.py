@@ -1,21 +1,38 @@
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
 from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COMPLETION, DECLARATION, DEFINITION,
                                DOCUMENT_COLOR, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK, DOCUMENT_SYMBOL,
                                FOLDING_RANGE, FORMATTING, HOVER, IMPLEMENTATION,
                                ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME,
                                SELECTION_RANGE, SIGNATURE_HELP, TEXT_DOCUMENT_DID_CLOSE,
-                               TEXT_DOCUMENT_DID_SAVE, TEXT_DOCUMENT_WILL_SAVE,
-                               TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL, TYPE_DEFINITION,
-                               WORKSPACE_SYMBOL)
+                               TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_SAVE,
+                               TEXT_DOCUMENT_WILL_SAVE, TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
+                               TYPE_DEFINITION, WORKSPACE_SYMBOL)
 from pygls.lsp.types import (CodeLensOptions, CompletionOptions, DocumentLinkOptions,
                              ExecuteCommandOptions, ImplementationOptions, SaveOptions,
                              ServerCapabilities, SignatureHelpOptions,
                              TextDocumentSyncOptionsServerCapabilities, TypeDefinitionOptions,
                              WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities)
 
-# TODO: Check client capabilities also
-
 
 class ServerCapabilitiesBuilder:
+    """Create `ServerCapabilities` instance depending on builtin and user registered
+    features.
+    """
     def __init__(
         self,
         client_capabilities,
@@ -42,23 +59,22 @@ class ServerCapabilitiesBuilder:
 
     def _with_text_doc_sync(self):
         open_close = (
-            # TEXT_DOCUMENT_DID_OPEN in self.features
-            # or
-            TEXT_DOCUMENT_DID_CLOSE in self.features
+            TEXT_DOCUMENT_DID_OPEN in self.features
+            or TEXT_DOCUMENT_DID_CLOSE in self.features
         )
         will_save = (
-            # self.client_capabilities.textDocument.synchronization.willSave
-            # and
-            TEXT_DOCUMENT_WILL_SAVE in self.features
+            self.client_capabilities.has_capability(
+                'text_document.synchronization.will_save')
+            and TEXT_DOCUMENT_WILL_SAVE in self.features
         )
         will_save_wait_until = (
-            # self.client_capabilities.textDocument.synchronization.willSaveWaitUntil
-            # and
-            TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
+            self.client_capabilities.has_capability(
+                'text_document.synchronization.will_save_wait_until')
+            and TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
         )
         if TEXT_DOCUMENT_DID_SAVE in self.features:
             if TEXT_DOCUMENT_DID_SAVE in self.feature_options:
-                include_text = self.feature_options[TEXT_DOCUMENT_DID_SAVE].includeText
+                include_text = self.feature_options[TEXT_DOCUMENT_DID_SAVE].include_text
                 save = SaveOptions(include_text=include_text)
             else:
                 save = True

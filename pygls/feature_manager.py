@@ -191,7 +191,7 @@ class FeatureManager:
         def decorator(f):
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
-                    f"Thread decorator can't be used with async functions \"{f.__name__}\"")
+                    f"Thread decorator cannot be used with async functions \"{f.__name__}\"")
 
             # Allow any decorator order
             try:
