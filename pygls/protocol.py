@@ -15,6 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
+import enum
 import functools
 import json
 import logging
@@ -78,10 +79,31 @@ def call_user_feature(base_func, method_name):
 
 def dict_to_object(**d):
     """Create nested objects (namedtuple) from dict."""
+    type_name = d.pop('type_name', 'Object')
     return json.loads(
         json.dumps(d),
-        object_hook=lambda p: namedtuple('Object', p.keys(), rename=True)(*p.values())
+        object_hook=lambda p: namedtuple(type_name, p.keys(), rename=True)(*p.values())
     )
+
+
+def default_serializer(o):
+    """JSON serializer for complex objects."""
+    if isinstance(o, enum.Enum):
+        return o.value
+    return o.__dict__
+
+
+def deserialize_command(params):
+    """Function used to deserialize command arguments to a specific class
+    or a namedtuple."""
+    cmd_name = params['command']
+    # TODO: Register/Look up custom command arguments' types
+
+    type_name = re.sub('[^a-zA-Z]+', '', cmd_name) + 'Params'
+    temp_obj = dict_to_object(**params, type_name=type_name)
+
+    params['arguments'] = getattr(temp_obj, 'arguments', None)
+    return params
 
 
 def deserialize_params(data, get_params_type):
@@ -96,7 +118,10 @@ def deserialize_params(data, get_params_type):
         try:
             params_type = get_params_type(method)
             if params_type is None:
-                return data
+                params_type = dict_to_object
+            elif params_type.__name__ == ExecuteCommandParams.__name__:
+                params = deserialize_command(params)
+
         except MethodTypeNotRegisteredError:
             params_type = dict_to_object
 
@@ -365,7 +390,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            body = data.json(by_alias=True, exclude_none=True)
+            body = data.json(by_alias=True, encoder=default_serializer)
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
@@ -390,6 +415,12 @@ class JsonRPCProtocol(asyncio.Protocol):
                                           jsonrpc=JsonRPCProtocol.VERSION,
                                           result=result,
                                           error=error)
+
+        if error is None:
+            del response.error
+        else:
+            del response.result
+
         self._send_data(response)
 
     def connection_made(self, transport: asyncio.BaseTransport):

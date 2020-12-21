@@ -236,8 +236,11 @@ class Document(object):
             both Range and RangeLength from their request. Consequently, the
             attributes "range" and "rangeLength" will be missing from FULL
             content update client requests in the pygls Python library.
+
+        NOTE: After adding pydantic models, "range" and "rangeLength" fileds
+        will be None if not passed by the client
         """
-        if hasattr(change, 'range'):
+        if change.range is not None:
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return

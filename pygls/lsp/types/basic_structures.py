@@ -27,7 +27,7 @@ that.
 import enum
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 
 NumType = Union[int, float]
 T = TypeVar('T')
@@ -72,6 +72,15 @@ class JsonRPCResponseMessage(JsonRpcMessage):
     id: str
     result: Any
     error: Any
+
+    @root_validator
+    def check_result_or_error(cls, values):
+        result_val, error_val = values.get('result'), values.get('error')
+
+        if result_val is not None and error_val is not None:
+            raise ValueError('Fields "result" and "error" are both given!')
+
+        return values
 
 
 class Position(Model):
