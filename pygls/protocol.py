@@ -77,9 +77,14 @@ def default_serializer(o):
     return o.__dict__
 
 
-def deserialize_message(data):
+def deserialize_message(content):
     """Function used to deserialize data received from client."""
-    if 'jsonrpc' in data:
+    def objectify(data):
+        return namedtuple('Object', data.keys(), rename=True)(*data.values())
+
+    obj = json.loads(content, object_hook=objectify)
+    if hasattr(obj, "jsonrpc"):
+        data = obj._asdict()
         if 'id' in data:
             if 'method' in data:
                 return JsonRPCRequestMessage(**data)
@@ -87,8 +92,7 @@ def deserialize_message(data):
                 return JsonRPCResponseMessage(**data)
         else:
             return JsonRPCNotification(**data)
-
-    return namedtuple('Object', data.keys(), rename=True)(*data.values())
+    return obj
 
 
 def to_lsp_name(method_name):
@@ -437,8 +441,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
             # Parse the body
             self._procedure_handler(
-                json.loads(body.decode(self.CHARSET),
-                           object_hook=deserialize_message))
+                deserialize_message(body.decode(self.CHARSET)))
 
     def notify(self, method: str, params=None):
         """Sends a JSON RPC notification to the client."""

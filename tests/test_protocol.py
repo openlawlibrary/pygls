@@ -38,7 +38,7 @@ def test_deserialize_message_with_reserved_words_should_pass_without_errors(clie
         }
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
+    result = deserialize_message(params)
 
     assert isinstance(result, JsonRPCNotification)
     assert result.params._0 is True
@@ -52,7 +52,7 @@ def test_deserialize_message_should_return_notification_message():
         "params": "1"
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
+    result = deserialize_message(params)
 
     assert isinstance(result, JsonRPCNotification)
     assert result.jsonrpc == "2.0"
@@ -67,7 +67,7 @@ def test_deserialize_message_without_jsonrpc_field__should_return_object():
         "def": "def"
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
+    result = deserialize_message(params)
 
     assert type(result).__name__ == 'Object'
     assert result.random == "data"
@@ -87,7 +87,7 @@ def test_deserialize_message_should_return_response_message():
         "result": "1"
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
+    result = deserialize_message(params)
 
     assert isinstance(result, JsonRPCResponseMessage)
     assert result.jsonrpc == "2.0"
@@ -105,13 +105,31 @@ def test_deserialize_message_should_return_request_message():
         "params": "1"
     }
     '''
-    result = json.loads(params, object_hook=deserialize_message)
+    result = deserialize_message(params)
 
     assert isinstance(result, JsonRPCRequestMessage)
     assert result.jsonrpc == "2.0"
     assert result.id == "id"
     assert result.method == "test"
     assert result.params == "1"
+
+
+def test_deserialize_message_should_not_error_on_nested_jsonrpc_object():
+    params = '''
+    [
+        {
+            "jsonrpc": "-1",
+            "content": "unexpected"
+        }
+    ]
+    '''
+    result = deserialize_message(params)
+
+    assert isinstance(result, list)
+    obj, = result
+    assert type(obj).__name__ == "Object"
+    assert obj.jsonrpc == "-1"
+    assert obj.content == "unexpected"
 
 
 def test_data_received_without_content_type_should_handle_message(client_server):

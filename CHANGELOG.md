@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Fix nested jsonrpc message deserialization ([#140])
+
 ## [0.9.1] - 09/29/2020
 
 ### Added
