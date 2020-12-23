@@ -23,8 +23,9 @@ class JsonRpcException(Exception):
     """A class used as a base class for json rpc exceptions."""
 
     def __init__(self, message=None, code=None, data=None):
-        super().__init__()
-        self.message = message or getattr(self.__class__, 'MESSAGE')
+        message = message or getattr(self.__class__, 'MESSAGE')
+        super().__init__(message)
+        self.message = message
         self.code = code or getattr(self.__class__, 'CODE')
         self.data = data
 
