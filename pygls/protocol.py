@@ -345,7 +345,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         if error is not None:
             logger.debug('Received error response to message {}: {}'
                          .format(msg_id, error))
-            future.set_exception(JsonRpcException.from_dict(error))
+            future.set_exception(JsonRpcException.from_dict(error._asdict()))
 
         logger.debug('Received result for message {}: {}'
                      .format(msg_id, result))
