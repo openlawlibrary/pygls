@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Fix server handling of client errors ([#141])
+
 ## [0.9.1] - 09/29/2020
 
 ### Added

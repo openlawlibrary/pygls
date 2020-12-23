@@ -2,6 +2,7 @@
 
 - [@augb](https://github.com/augb)
 - [Daniel Elero](https://github.com/danixeee)
+- [Daniel Miller](https://github.com/millerdev)
 - [DeathAxe](https://github.com/deathaxe)
 - [Denis Loginov](https://github.com/dinvlad)
 - [Jérome Perrin](https://github.com/perrinjerome)
