@@ -15,8 +15,10 @@
 # limitations under the License.                                           #
 ############################################################################
 import json
+from concurrent.futures import Future
 
 import pytest
+from pygls.exceptions import JsonRpcException
 from pygls.protocol import (JsonRPCNotification, JsonRPCRequestMessage,
                             JsonRPCResponseMessage, deserialize_message,
                             to_lsp_name)
@@ -199,6 +201,28 @@ def test_data_received_multi_message_should_handle_messages(client_server):
     messages = (dummy_message(i) for i in range(3))
     data = b''.join(messages)
     server.lsp.data_received(data)
+
+
+def test_data_received_error_should_raise_jsonrpc_error(client_server):
+    _, server = client_server
+    body = json.dumps({
+        "jsonrpc": "2.0",
+        "id": "err",
+        "error": {
+            "code": -1,
+            "message": "message for you sir",
+        },
+    })
+    message = '\r\n'.join([
+        'Content-Length: ' + str(len(body)),
+        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
+        '',
+        body,
+    ]).encode("utf-8")
+    future = server.lsp._server_request_futures["err"] = Future()
+    server.lsp.data_received(message)
+    with pytest.raises(JsonRpcException, match="message for you sir"):
+        future.result()
 
 
 def test_initialize_without_capabilities_should_raise_error(client_server):

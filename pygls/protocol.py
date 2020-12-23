@@ -349,11 +349,11 @@ class JsonRPCProtocol(asyncio.Protocol):
         if error is not None:
             logger.debug('Received error response to message {}: {}'
                          .format(msg_id, error))
-            future.set_exception(JsonRpcException.from_dict(error))
-
-        logger.debug('Received result for message {}: {}'
-                     .format(msg_id, result))
-        future.set_result(result)
+            future.set_exception(JsonRpcException.from_dict(error._asdict()))
+        else:
+            logger.debug('Received result for message {}: {}'
+                         .format(msg_id, result))
+            future.set_result(result)
 
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
