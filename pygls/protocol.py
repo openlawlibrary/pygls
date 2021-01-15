@@ -96,7 +96,6 @@ def default_serializer(o):
 def deserialize_command(params):
     """Function used to deserialize command arguments to a specific class
     or a namedtuple."""
-    cmd_name = params['command']
     # TODO: Register/Look up custom command arguments' types
     # Currently command parameters are type of 'any', but eventually we would
     # want to register an argument type of our custom command and to
