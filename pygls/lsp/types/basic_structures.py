@@ -78,7 +78,7 @@ class JsonRPCResponseMessage(JsonRpcMessage):
         result_val, error_val = values.get('result'), values.get('error')
 
         if result_val is not None and error_val is not None:
-            raise ValueError('Fields "result" and "error" are both given!')
+            raise ValueError('Fields "result" and "error" are both set!')
 
         return values
 

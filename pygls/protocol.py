@@ -98,9 +98,10 @@ def deserialize_command(params):
     or a namedtuple."""
     cmd_name = params['command']
     # TODO: Register/Look up custom command arguments' types
-
-    type_name = re.sub('[^a-zA-Z]+', '', cmd_name) + 'Params'
-    temp_obj = dict_to_object(**params, type_name=type_name)
+    # Currently command parameters are type of 'any', but eventually we would
+    # want to register an argument type of our custom command and to
+    # deserialize it properly.
+    temp_obj = dict_to_object(**params, type_name='CommandParams')
 
     params['arguments'] = getattr(temp_obj, 'arguments', None)
     return params
