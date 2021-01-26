@@ -150,7 +150,7 @@ class TestDocumentSymbol(unittest.TestCase):
         assert response[0]['children'][0]['selectionRange']['end']['line'] == 1
         assert response[0]['children'][0]['selectionRange']['end']['character'] == 1
 
-        assert not hasattr(response[0]['children'][0], 'children')
+        assert 'children' not in response[0]['children'][0]
 
 
 

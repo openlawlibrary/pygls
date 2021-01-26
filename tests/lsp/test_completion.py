@@ -73,7 +73,7 @@ class TestCompletions(unittest.TestCase):
         assert response['items'][0]['label'] == 'test1'
         assert response['items'][0]['kind'] == CompletionItemKind.Method
         assert response['items'][0]['preselect'] == True
-        assert not hasattr(response['items'][0], 'deprecated')
+        assert 'deprecated' not in response['items'][0]
 
 
 

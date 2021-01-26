@@ -81,7 +81,7 @@ class TestDocumentHighlight(unittest.TestCase):
         assert response[0]['range']['start']['character'] == 0
         assert response[0]['range']['end']['line'] == 1
         assert response[0]['range']['end']['character'] == 1
-        assert not hasattr(response[0], 'kind')
+        assert 'kind' not in response[0]
 
         assert response[1]['range']['start']['line'] == 1
         assert response[1]['range']['start']['character'] == 1

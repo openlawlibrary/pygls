@@ -84,7 +84,7 @@ class TestSelectionRange(unittest.TestCase):
         assert root['range']['start']['character'] == 0
         assert root['range']['end']['line'] == 10
         assert root['range']['end']['character'] == 10
-        assert not hasattr(root, 'parent')
+        assert 'parent' not in root
 
         assert response[1]['range']['start']['line'] == 0
         assert response[1]['range']['start']['character'] == 0
