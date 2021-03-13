@@ -150,17 +150,20 @@ class ClientCapabilities(Model):
     window: Optional[WindowClientCapabilities] = None
     experimental: Optional[Any] = None
 
-    def has_capability(self, field):
+    def get_capability(self, field: str, default: Any = None) -> Any:
         """Check if ClientCapabilities has some nested value without raising
         AttributeError.
 
-        e.g. has_capability('text_document.synchronization.will_save')
+        e.g. get_capability('text_document.synchronization.will_save')
         """
-        return reduce(
-            lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
-            field.split("."),
-            self.dict(),
-        )
+        try:
+            value = reduce(getattr, field.split("."), self)
+        except AttributeError:
+            return default
+
+        # If we reach the desired leaf value but it's None, return the default.
+        value = default if value is None else value
+        return value
 
 
 class InitializeParams(WorkDoneProgressParams):
