@@ -29,6 +29,9 @@ from ...server import completions, did_close, did_open
 
 class FakeServer():
     """We don't need real server to unit test features."""
+    publish_diagnostics = None
+    show_message = None
+    show_message_log = None
 
     def __init__(self):
         self.workspace = Workspace('', None)

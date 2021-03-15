@@ -150,8 +150,12 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
 async def register_completions(ls: JsonLanguageServer, *args):
     """Register completions method on the client."""
-    params = RegistrationParams([Registration(str(uuid.uuid4()), COMPLETION,
-                                              {"triggerCharacters": "[':']"})])
+    params = RegistrationParams(registrations=[
+                Registration(
+                    id=str(uuid.uuid4()),
+                    method=COMPLETION,
+                    register_options={"triggerCharacters": "[':']"})
+             ])
     response = await ls.register_capability_async(params)
     if response is None:
         ls.show_message('Successfully registered completions method')
@@ -164,8 +168,11 @@ async def register_completions(ls: JsonLanguageServer, *args):
 async def show_configuration_async(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
-        config = await ls.get_configuration_async(ConfigurationParams([
-            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        config = await ls.get_configuration_async(
+            ConfigurationParams(items=[
+                ConfigurationItem(
+                    scope_uri='',
+                    section=JsonLanguageServer.CONFIGURATION_SECTION)
         ]))
 
         example_config = config[0].exampleConfiguration
@@ -188,8 +195,10 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
         except Exception as e:
             ls.show_message_log(f'Error ocurred: {e}')
 
-    ls.get_configuration(ConfigurationParams([
-        ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+    ls.get_configuration(ConfigurationParams(items=[
+        ConfigurationItem(
+            scope_uri='',
+            section=JsonLanguageServer.CONFIGURATION_SECTION)
     ]), _config_callback)
 
 
@@ -198,8 +207,10 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
 def show_configuration_thread(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
-        config = ls.get_configuration(ConfigurationParams([
-            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        config = ls.get_configuration(ConfigurationParams(items=[
+            ConfigurationItem(
+                scope_uri='',
+                section=JsonLanguageServer.CONFIGURATION_SECTION)
         ])).result(2)
 
         example_config = config[0].exampleConfiguration
@@ -213,7 +224,9 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)
 async def unregister_completions(ls: JsonLanguageServer, *args):
     """Unregister completions method on the client."""
-    params = UnregistrationParams([Unregistration(str(uuid.uuid4()), COMPLETION)])
+    params = UnregistrationParams(unregisterations=[
+        Unregistration(id=str(uuid.uuid4()), method=COMPLETION)
+    ])
     response = await ls.unregister_capability_async(params)
     if response is None:
         ls.show_message('Successfully unregistered completions method')
