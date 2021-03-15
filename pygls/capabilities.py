@@ -63,12 +63,12 @@ class ServerCapabilitiesBuilder:
             or TEXT_DOCUMENT_DID_CLOSE in self.features
         )
         will_save = (
-            self.client_capabilities.has_capability(
+            self.client_capabilities.get_capability(
                 'text_document.synchronization.will_save')
             and TEXT_DOCUMENT_WILL_SAVE in self.features
         )
         will_save_wait_until = (
-            self.client_capabilities.has_capability(
+            self.client_capabilities.get_capability(
                 'text_document.synchronization.will_save_wait_until')
             and TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
         )
