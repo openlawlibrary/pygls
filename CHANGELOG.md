@@ -9,9 +9,21 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- New LSP types and methods ([#139])
+- `pydantic` and `typeguard` deps for type-checking ([#139])
+- Runtime type matching and deserialization ([#139])
+
 ### Changed
 
+- New LSP types and methods ([#139])
+- Updated docs ([#139])
+
 ### Fixed
+
+- Periodically check client pid and exit server ([#149])
+
+[#139]: https://github.com/openlawlibrary/pygls/pull/139
+[#149]: https://github.com/openlawlibrary/pygls/pull/149
 
 ## [0.9.1] - 09/29/2020
 
