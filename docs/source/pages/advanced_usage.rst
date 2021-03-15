@@ -90,8 +90,7 @@ What is a feature in *pygls*? In terms of language servers and the
 a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
-that are available can be found in `pygls.features <../features>`__
-module.
+that are available can be found in `pygls.lps.methods`_ module.
 
 *Built-In* Features
 ~~~~~~~~~~~~~~~~~~~
@@ -161,7 +160,7 @@ please take a look at the :ref:`tutorial <tutorial>`.
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*pygls* supports ``python 3.5+`` which has a keyword ``async`` to
+*pygls* supports ``python 3.6+`` which has a keyword ``async`` to
 specify coroutines.
 
 The code snippet below shows how to register a command as a coroutine:
@@ -241,7 +240,6 @@ while or you are new to threading in Python, check out Python's
 ``multithreading`` and `GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__
 before messing with threads.
 
-.. _passing-instance:
 
 Passing Language Server Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -323,7 +321,7 @@ client, depending on way how the function is registered (described
 .. code:: python
 
     # await keyword tells event loop to switch to another task until notification is received
-    config = await ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]))
+    config = await ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]))
 
 -  *synchronous* functions
 
@@ -333,14 +331,14 @@ client, depending on way how the function is registered (described
     def callback(config):
         # Omitted
 
-    config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]), callback)
+    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]), callback)
 
 -  *threaded* functions
 
 .. code:: python
 
     # .result() will block the thread
-    config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')])).result()
+    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')])).result()
 
 Show Message
 ^^^^^^^^^^^^
@@ -358,7 +356,7 @@ The code snippet below shows how to send show message notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message notification to the client
-            ls.show_message("Counting down... {}".format(10 - i))
+            ls.show_message(f"Counting down... {10 - i}")
             await asyncio.sleep(1)
 
 Show Message Log
@@ -377,7 +375,7 @@ The code snippet below shows how to send show message log notification:
     async def count_down_10_seconds_non_blocking(ls, *args):
         for i in range(10):
             # Sends message log notification to the client's output channel
-            ls.show_message_log("Counting down... {}".format(10 - i))
+            ls.show_message_log(f"Counting down... {10 - i}")
             await asyncio.sleep(1)
 
 Publish Diagnostics
@@ -400,16 +398,20 @@ document content change, e.g.:
         ls.show_message_log("Validating json...")
 
         # Get document from workspace
-        text_doc = ls.workspace.get_document(params.textDocument.uri)
+        text_doc = ls.workspace.get_document(params.text_document.uri)
 
         diagnostic = Diagnostic(
-                         range=Range(Position(line-1, col-1), Position(line-1, col)),
-                         message="Custom validation message",
-                         source="Json Server"
+                        range=Range(
+                            start=Position(line-1, col-1),
+                            end=Position(line-1, col)
+                        ),
+                        message="Custom validation message",
+                        source="Json Server"
                      )
 
         # Send diagnostics
         ls.publish_diagnostics(text_doc.uri, [diagnostic])
+
 
 Custom Notifications
 ^^^^^^^^^^^^^^^^^^^^
@@ -456,3 +458,6 @@ Workspace methods that can be used for user defined features are:
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         # Omitted
 
+
+.. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
+.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types

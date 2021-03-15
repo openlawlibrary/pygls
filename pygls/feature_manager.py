@@ -19,12 +19,13 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
-from .constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
-                        ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
-from .exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
-                         ThreadDecoratorError, ValidationError)
+from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
+                             ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
+from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
+                              ThreadDecoratorError, ValidationError)
+from pygls.lsp import get_method_registration_options_type, is_instance
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,10 @@ def assign_help_attrs(f, reg_name, reg_type):
 
 def assign_thread_attr(f):
     setattr(f, ATTR_EXECUTE_IN_THREAD, True)
+
+
+def get_help_attrs(f):
+    return getattr(f, ATTR_REGISTERED_NAME, None), getattr(f, ATTR_REGISTERED_TYPE, None)
 
 
 def has_ls_param_or_annotation(f, annotation):
@@ -94,7 +99,7 @@ class FeatureManager:
     def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
         """Registers builtin (predefined) feature."""
         self._builtin_features[feature_name] = func
-        logger.info('Registered builtin feature {}'.format(feature_name))
+        logger.info('Registered builtin feature %s', feature_name)
 
     @property
     def builtin_features(self) -> Dict:
@@ -109,23 +114,21 @@ class FeatureManager:
         """
         def decorator(f):
             # Validate
-            if command_name.isspace():
+            if command_name is None or command_name.strip() == '':
                 logger.error('Missing command name.')
                 raise ValidationError('Command name is required.')
 
             # Check if not already registered
             if command_name in self._commands:
-                logger.error('Command {} already registered.'
-                             .format(command_name))
-                raise CommandAlreadyRegisteredError()
+                logger.error('Command "%s" is already registered.', command_name)
+                raise CommandAlreadyRegisteredError(command_name)
 
             self._commands[command_name] = wrap_with_server(f, self.server)
 
             # Assign help attributes for thread decorator
             assign_help_attrs(f, command_name, ATTR_COMMAND_TYPE)
 
-            logger.info('Command {} is successfully registered.'
-                        .format(command_name))
+            logger.info('Command "%s" is successfully registered.', command_name)
 
             return f
         return decorator
@@ -135,7 +138,9 @@ class FeatureManager:
         """Returns registered custom commands."""
         return self._commands
 
-    def feature(self, feature_name: str, **options: Dict) -> Callable:
+    def feature(
+        self, feature_name: str, options: Optional[Any] = None,
+    ) -> Callable:
         """Decorator used to register LSP features.
 
         Example:
@@ -143,15 +148,14 @@ class FeatureManager:
         """
         def decorator(f):
             # Validate
-            if feature_name.isspace():
+            if feature_name is None or feature_name.strip() == '':
                 logger.error('Missing feature name.')
                 raise ValidationError('Feature name is required.')
 
             # Add feature if not exists
             if feature_name in self._features:
-                logger.error('Feature {} already registered.'
-                             .format(feature_name))
-                raise FeatureAlreadyRegisteredError()
+                logger.error('Feature "%s" is already registered.', feature_name)
+                raise FeatureAlreadyRegisteredError(feature_name)
 
             self._features[feature_name] = wrap_with_server(f, self.server)
 
@@ -159,10 +163,15 @@ class FeatureManager:
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 
             if options:
+                options_type = get_method_registration_options_type(feature_name)
+                if options_type and not is_instance(options, options_type):
+                    raise TypeError(
+                        (f'Options of method "{feature_name}"'
+                         f' should be instance of type {options_type}')
+                    )
                 self._feature_options[feature_name] = options
 
-            logger.info('Registered {} with options {}'
-                        .format(feature_name, options))
+            logger.info('Registered "%s" with options "%s"', feature_name, options)
 
             return f
         return decorator
@@ -182,8 +191,7 @@ class FeatureManager:
         def decorator(f):
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
-                    "Thread decorator can't be used with async functions `{}`"
-                    .format(f.__name__))
+                    f"Thread decorator cannot be used with async functions \"{f.__name__}\"")
 
             # Allow any decorator order
             try:

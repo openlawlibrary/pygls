@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-"""This module contains all features supported by Language Server Protocol
+"""This module contains all methods supported by Language Server Protocol
 
 LSP Specification:
     https://microsoft.github.io/language-server-protocol/specification
@@ -56,6 +56,7 @@ PREPARE_RENAME = 'textDocument/prepareRename'
 RANGE_FORMATTING = 'textDocument/rangeFormatting'
 REFERENCES = 'textDocument/references'
 RENAME = 'textDocument/rename'
+SELECTION_RANGE = 'textDocument/selectionRange'
 SIGNATURE_HELP = 'textDocument/signatureHelp'
 TYPE_DEFINITION = 'textDocument/typeDefinition'
 
@@ -74,6 +75,8 @@ TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL = 'textDocument/willSaveWaitUntil'
 WINDOW_LOG_MESSAGE = 'window/logMessage'
 WINDOW_SHOW_MESSAGE = 'window/showMessage'
 WINDOW_SHOW_MESSAGE_REQUEST = 'window/showMessageRequest'
+WINDOW_WORK_DONE_PROGRESS_CANCEL = 'window/workDoneProgress/cancel'
+WINDOW_WORK_DONE_PROGRESS_CREATE = 'window/workDoneProgress/create'
 
 # Workspace
 WORKSPACE_APPLY_EDIT = 'workspace/applyEdit'
@@ -82,5 +85,5 @@ WORKSPACE_DID_CHANGE_CONFIGURATION = 'workspace/didChangeConfiguration'
 WORKSPACE_DID_CHANGE_WATCHED_FILES = 'workspace/didChangeWatchedFiles'
 WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS = 'workspace/didChangeWorkspaceFolders'
 WORKSPACE_EXECUTE_COMMAND = 'workspace/executeCommand'
-WORKSPACE_FOLDERS = 'workspace/folders'
+WORKSPACE_FOLDERS = 'workspace/workspaceFolders'
 WORKSPACE_SYMBOL = 'workspace/symbol'

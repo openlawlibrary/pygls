@@ -13,7 +13,7 @@ In order to setup and run the example extension, you need following software
 installed:
 
 * `Visual Studio Code <https://code.visualstudio.com/>`_ editor
-* `Python 3.5+ <https://www.python.org/downloads/>`_
+* `Python 3.6+ <https://www.python.org/downloads/>`_
 * `vscode-python <https://marketplace.visualstudio.com/items?itemName=ms-python.python>`_ extension
 * A clone of the `pygls <https://github.com/openlawlibrary/pygls>`_ repository
 
@@ -152,12 +152,11 @@ triggered once response from the client is received.
             example_config = config[0].exampleConfiguration
 
             ls.show_message(
-                'jsonServer.exampleConfiguration value: {}'
-                .format(example_config)
+                f'jsonServer.exampleConfiguration value: {example_config}'
             )
 
         except Exception as e:
-            ls.show_message_log('Error ocurred: {}'.format(e))
+            ls.show_message_log(f'Error ocurred: {e}')
 
     ls.get_configuration(ConfigurationParams([
         ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)

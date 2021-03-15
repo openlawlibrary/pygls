@@ -22,9 +22,9 @@ import os
 import re
 from typing import List
 
-from .types import (NumType, Position, Range, TextDocumentContentChangeEvent,
-                    TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
-from .uris import to_fs_path, uri_scheme
+from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
+                             TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
+from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
@@ -78,11 +78,12 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
     """
     try:
         return Position(
-            position.line,
-            position.character - utf16_unit_offset(lines[position.line][:position.character])
+            line=position.line,
+            character=position.character
+            - utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
-        return Position(len(lines), 0)
+        return Position(line=len(lines), character=0)
 
 
 def position_to_utf16(lines: List[str], position: Position) -> Position:
@@ -112,11 +113,12 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
     """
     try:
         return Position(
-            position.line,
-            position.character + utf16_unit_offset(lines[position.line][:position.character])
+            line=position.line,
+            character=position.character
+            + utf16_unit_offset(lines[position.line][:position.character])
         )
     except IndexError:
-        return Position(len(lines), 0)
+        return Position(line=len(lines), character=0)
 
 
 def range_from_utf16(lines: List[str], range: Range) -> Range:
@@ -132,8 +134,8 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
         The range with `character` offsets being converted to utf-16 code units.
     """
     return Range(
-        position_from_utf16(lines, range.start),
-        position_from_utf16(lines, range.end)
+        start=position_from_utf16(lines, range.start),
+        end=position_from_utf16(lines, range.end)
     )
 
 
@@ -150,8 +152,8 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
         The range with `character` offsets being converted to utf-32 code units.
     """
     return Range(
-        position_to_utf16(lines, range.start),
-        position_to_utf16(lines, range.end)
+        start=position_to_utf16(lines, range.start),
+        end=position_to_utf16(lines, range.end)
     )
 
 
@@ -180,7 +182,8 @@ class Document(object):
         text = change.text
         change_range = change.range
 
-        (start_line, start_col), (end_line, end_col) = range_from_utf16(lines, change_range)
+        (start_line, start_col), (end_line, end_col) = \
+            range_from_utf16(lines, change_range)  # type: ignore
 
         # Check for an edit occurring at the very end of the file
         if start_line == len(lines):
@@ -233,8 +236,11 @@ class Document(object):
             both Range and RangeLength from their request. Consequently, the
             attributes "range" and "rangeLength" will be missing from FULL
             content update client requests in the pygls Python library.
+
+        NOTE: After adding pydantic models, "range" and "rangeLength" fileds
+        will be None if not passed by the client
         """
-        if hasattr(change, 'range'):
+        if change.range is not None:
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return
@@ -333,9 +339,10 @@ class Workspace(object):
         return self._docs.get(doc_uri) or self._create_document(doc_uri)
 
     def is_local(self):
-        return (self._root_uri_scheme == '' or
-                self._root_uri_scheme == 'file') and \
-            os.path.exists(self._root_path)
+        return (
+            self._root_uri_scheme == ''
+            or self._root_uri_scheme == 'file'
+        ) and os.path.exists(self._root_path)
 
     def put_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri

@@ -17,10 +17,11 @@
 import asyncio
 
 import pytest
-from pygls import features
-from pygls.exceptions import (CommandAlreadyRegisteredError,
-                              FeatureAlreadyRegisteredError, ValidationError)
+from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
+                              ValidationError)
 from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
+from pygls.lsp import methods
+from pygls.lsp.types import CompletionOptions
 
 
 def test_has_ls_param_or_annotation():
@@ -66,44 +67,54 @@ def test_register_commands(feature_manager):
     assert feature_manager.commands[cmd2_name] is cmd2
 
 
-def test_register_feature_with_options(feature_manager):
-
-    options = {
-        'opt1': 1,
-        'opt2': 2
-    }
-
-    @feature_manager.feature(features.COMPLETION, **options)
+def test_register_feature_with_valid_options(feature_manager):
+    options = CompletionOptions(trigger_characters=['!'])
+    @feature_manager.feature(methods.COMPLETION, options)
     def completions():
         pass
 
     reg_features = feature_manager.features.keys()
     reg_feature_options = feature_manager.feature_options.keys()
 
-    assert features.COMPLETION in reg_features
-    assert features.COMPLETION in reg_feature_options
+    assert methods.COMPLETION in reg_features
+    assert methods.COMPLETION in reg_feature_options
 
-    assert feature_manager.features[features.COMPLETION] is completions
-    assert feature_manager.feature_options[features.COMPLETION] == options
+    assert feature_manager.features[methods.COMPLETION] is completions
+    assert feature_manager.feature_options[methods.COMPLETION] is options
+
+
+def test_register_feature_with_wrong_options(feature_manager):
+
+    class Options:
+        pass
+
+    with pytest.raises(
+        TypeError,
+        match=(f"Options of method \"{methods.COMPLETION}\" should be instance of type "
+               "<class 'pygls.lsp.types.language_features.completion.CompletionOptions'>")  # noqa
+    ):
+        @feature_manager.feature(methods.COMPLETION, Options())
+        def completions():
+            pass
 
 
 def test_register_features(feature_manager):
 
-    @feature_manager.feature(features.COMPLETION)
+    @feature_manager.feature(methods.COMPLETION)
     def completions():
         pass
 
-    @feature_manager.feature(features.CODE_LENS)
+    @feature_manager.feature(methods.CODE_LENS)
     def code_lens():
         pass
 
     reg_features = feature_manager.features.keys()
 
-    assert features.COMPLETION in reg_features
-    assert features.CODE_LENS in reg_features
+    assert methods.COMPLETION in reg_features
+    assert methods.CODE_LENS in reg_features
 
-    assert feature_manager.features[features.COMPLETION] is completions
-    assert feature_manager.features[features.CODE_LENS] is code_lens
+    assert feature_manager.features[methods.COMPLETION] is completions
+    assert feature_manager.features[methods.CODE_LENS] is code_lens
 
 
 def test_register_same_command_twice_error(feature_manager):
@@ -123,11 +134,11 @@ def test_register_same_feature_twice_error(feature_manager):
 
     with pytest.raises(FeatureAlreadyRegisteredError):
 
-        @feature_manager.feature(features.CODE_ACTION)
+        @feature_manager.feature(methods.CODE_ACTION)
         def code_action1():  # pylint: disable=unused-variable
             pass
 
-        @feature_manager.feature(features.CODE_ACTION)
+        @feature_manager.feature(methods.CODE_ACTION)
         def code_action2():  # pylint: disable=unused-variable
             pass
 

@@ -30,9 +30,9 @@ class JsonRpcException(Exception):
 
     def __eq__(self, other):
         return (
-            isinstance(other, self.__class__) and
-            self.code == other.code and
-            self.message == other.message
+            isinstance(other, self.__class__)
+            and self.code == other.code
+            and self.message == other.message
         )
 
     def __hash__(self):
@@ -103,13 +103,17 @@ class JsonRpcRequestCancelled(JsonRpcException):
     MESSAGE = 'Request Cancelled'
 
 
+class JsonRpcContentModified(JsonRpcException):
+    CODE = -32801
+    MESSAGE = 'Content Modified'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
         if not _is_server_error_code(code):
             raise ValueError('Error code should be in range -32099 - -32000')
-        super().__init__(
-            message=message, code=code, data=data)
+        super().__init__(message=message, code=code, data=data)
 
     @classmethod
     def supports_code(cls, code):
@@ -131,23 +135,46 @@ _EXCEPTIONS = (
 )
 
 
-class CommandAlreadyRegisteredError(Exception):
+class PyglsException(Exception):
     pass
 
 
-class FeatureAlreadyRegisteredError(Exception):
+class CommandAlreadyRegisteredError(PyglsException):
+
+    def __init__(self, command_name):
+        self.command_name = command_name
+
+    def __repr__(self):
+        return f'Command "{self.command_name}" is already registered.'
+
+
+class FeatureAlreadyRegisteredError(PyglsException):
+
+    def __init__(self, feature_name):
+        self.feature_name = feature_name
+
+    def __repr__(self):
+        return f'Feature "{self.feature_name}" is already registered.'
+
+
+class MethodTypeNotRegisteredError(PyglsException):
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f'"{self.name}" is not added to `pygls.lsp.LSP_METHODS_MAP`.'
+
+
+class ThreadDecoratorError(PyglsException):
     pass
 
 
-class ThreadDecoratorError(Exception):
-    pass
-
-
-class ValidationError(Exception):
+class ValidationError(PyglsException):
 
     def __init__(self, errors=None):
         self.errors = errors or []
 
     def __repr__(self):
         opt_errs = '\n-'.join([e for e in self.errors])
-        return 'Missing options: {}'.format(opt_errs)
+        return f'Missing options: {opt_errs}'

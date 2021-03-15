@@ -58,14 +58,17 @@ Register Features and Commands
 
 .. code:: python
 
-   @server.feature(COMPLETION, trigger_characters=[','])
-   def completions(params: CompletionParams):
-       """Returns completion items."""
-       return CompletionList(False, [
-           CompletionItem('Item1'),
-           CompletionItem('Item2'),
-           CompletionItem('Item3'),
-       ])
+    @server.feature(COMPLETION, trigger_characters=[','])
+    def completions(params: CompletionParams):
+        """Returns completion items."""
+        return CompletionList(
+            is_incomplete=False,
+            item=[
+                CompletionItem(label='Item1'),
+                CompletionItem(label='Item2'),
+                CompletionItem(label='Item3'),
+            ]
+        )
 
 … as well as custom commands:
 
@@ -76,8 +79,8 @@ Register Features and Commands
        return 'Hello World!'
 
 Features that are currently supported by the LSP specification can be
-found in `pygls.features`_ module, while corresponding request/response
-classes can be found in `pygls.types`_ module.
+found in `pygls.lps.methods`_ module, while corresponding request/response
+classes can be found in `pygls.lsp.types`_ module.
 
 Advanced usage
 --------------
@@ -93,5 +96,5 @@ haven't worked with language servers before.
 
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
-.. _pygls.features: https://github.com/openlawlibrary/pygls/blob/master/pygls/features.py
-.. _pygls.types: https://github.com/openlawlibrary/pygls/blob/master/pygls/types.py
+.. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
+.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types

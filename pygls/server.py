@@ -21,16 +21,15 @@ import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from threading import Event
-from typing import Callable, Any, List, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
-from pygls.types import (ApplyWorkspaceEditResponse, ConfigCallbackType, Diagnostic, MessageType,
-                         RegistrationParams, TextDocumentSyncKind, UnregistrationParams,
-                         WorkspaceEdit)
-
-from . import IS_WIN
-from .protocol import LanguageServerProtocol
-from .types import ConfigurationParams
-from .workspace import Workspace
+from pygls import IS_WIN
+from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
+                             ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
+                             ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
+                             WorkspaceEdit)
+from pygls.protocol import LanguageServerProtocol
+from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
     message = []
     content_length = 0
 
-    while not stop_event.is_set():
+    while not stop_event.is_set() and not rfile.closed:
         # Read a header line
         header = await loop.run_in_executor(executor, rfile.readline)
         message.append(header)
@@ -56,7 +55,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
             match = CONTENT_LENGTH_PATTERN.fullmatch(header)
             if match:
                 content_length = int(match.group(1))
-                logger.debug('Content length: {}'.format(content_length))
+                logger.debug('Content length: %s', content_length)
 
         # Check if all headers have been read (as indicated by an empty line \r\n)
         if content_length and not header.strip():
@@ -147,6 +146,8 @@ class Server:
         """Shutdown server."""
         logger.info('Shutting down the server')
 
+        self._stop_event.set()
+
         if self._thread_pool:
             self._thread_pool.terminate()
             self._thread_pool.join()
@@ -180,13 +181,13 @@ class Server:
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
-            self._stop_event.set()
             self.shutdown()
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting server on {}:{}'.format(host, port))
+        logger.info('Starting server on %s:%s', host, port)
 
+        self._stop_event = Event()
         self._server = self.loop.run_until_complete(
             self.loop.create_server(self.lsp, host, port)
         )
@@ -246,7 +247,14 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.command(command_name)
 
-    def feature(self, feature_name: str, **options: Any) -> Callable[[F], F]:
+    @property
+    def client_capabilities(self) -> ClientCapabilities:
+        """Return client capabilities."""
+        return self.lsp.client_capabilities
+
+    def feature(
+        self, feature_name: str, options: Optional[Any] = None,
+    ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
         Example:
@@ -254,7 +262,7 @@ class LanguageServer(Server):
             def completions(ls, params: CompletionRequest):
                 return CompletionList(False, [CompletionItem("Completion 1")])
         """
-        return self.lsp.fm.feature(feature_name, **options)
+        return self.lsp.fm.feature(feature_name, options)
 
     def get_configuration(self, params: ConfigurationParams,
                           callback: ConfigCallbackType = None) -> Future:
@@ -280,6 +288,11 @@ class LanguageServer(Server):
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
         self.lsp.notify(method, params)
+
+    @property
+    def server_capabilities(self) -> ServerCapabilities:
+        """Return server capabilities."""
+        return self.lsp.server_capabilities
 
     def show_message(self, message, msg_type=MessageType.Info) -> None:
         """Sends message to the client to display message."""

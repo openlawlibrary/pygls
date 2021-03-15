@@ -80,7 +80,7 @@ setup(
         ])
     ],
     zip_safe=False,
-    install_requires=[],
+    install_requires=["pydantic>=1.7,<1.9", "typeguard>=2.10.0,<3"],
     extras_require={
         'dev': development,
         'docs': docs_require,
@@ -95,7 +95,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

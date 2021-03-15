@@ -29,20 +29,28 @@ from functools import partial
 from itertools import zip_longest
 from typing import List
 
-from .exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcMethodNotFound,
-                         JsonRpcRequestCancelled)
-from .feature_manager import FeatureManager, is_thread_function
-from .features import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
-                       TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE, WINDOW_SHOW_MESSAGE,
-                       WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND)
-from .types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
-                    DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
-                    DidCloseTextDocumentParams, DidOpenTextDocumentParams, ExecuteCommandParams,
-                    InitializeParams, InitializeResult, LogMessageParams, MessageType,
-                    PublishDiagnosticsParams, RegistrationParams, ServerCapabilities,
-                    ShowMessageParams, UnregistrationParams, WorkspaceEdit)
-from .uris import from_fs_path
-from .workspace import Workspace
+from pygls.capabilities import ServerCapabilitiesBuilder
+from pygls.constants import ATTR_FEATURE_TYPE
+from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
+                              JsonRpcMethodNotFound, JsonRpcRequestCancelled,
+                              MethodTypeNotRegisteredError)
+from pygls.feature_manager import (FeatureManager, assign_help_attrs, get_help_attrs,
+                                   is_thread_function)
+from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
+                       get_method_params_type, get_method_return_type, is_instance)
+from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
+                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
+                               WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
+                               WORKSPACE_EXECUTE_COMMAND)
+from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
+                             DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
+                             DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+                             ExecuteCommandParams, InitializeParams, InitializeResult,
+                             LogMessageParams, MessageType, PublishDiagnosticsParams,
+                             RegistrationParams, ShowMessageParams, UnregistrationParams,
+                             WorkspaceEdit)
+from pygls.uris import from_fs_path
+from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +69,21 @@ def call_user_feature(base_func, method_name):
         except KeyError:
             pass
         except Exception:
-            logger.exception(
-                'Failed to handle *user defined* notification {}: {}'
-                .format(method_name, args))
+            logger.exception('Failed to handle user defined notification "%s": %s',
+                             method_name, args)
 
         return ret_val
 
     return decorator
+
+
+def dict_to_object(**d):
+    """Create nested objects (namedtuple) from dict."""
+    type_name = d.pop('type_name', 'Object')
+    return json.loads(
+        json.dumps(d),
+        object_hook=lambda p: namedtuple(type_name, p.keys(), rename=True)(*p.values())
+    )
 
 
 def default_serializer(o):
@@ -77,9 +93,57 @@ def default_serializer(o):
     return o.__dict__
 
 
-def deserialize_message(data):
+def deserialize_command(params):
+    """Function used to deserialize command arguments to a specific class
+    or a namedtuple."""
+    # TODO: Register/Look up custom command arguments' types
+    # Currently command parameters are type of 'any', but eventually we would
+    # want to register an argument type of our custom command and to
+    # deserialize it properly.
+    temp_obj = dict_to_object(**params, type_name='CommandParams')
+
+    params['arguments'] = getattr(temp_obj, 'arguments', None)
+    return params
+
+
+def deserialize_params(data, get_params_type):
+    """Function used to deserialize params to a specific class."""
+    try:
+        method = data['method']
+        params = data['params']
+
+        if not isinstance(params, dict):
+            return data
+
+        try:
+            params_type = get_params_type(method)
+            if params_type is None:
+                params_type = dict_to_object
+            elif params_type.__name__ == ExecuteCommandParams.__name__:
+                params = deserialize_command(params)
+
+        except MethodTypeNotRegisteredError:
+            params_type = dict_to_object
+
+        try:
+            data['params'] = params_type(**params)
+        except TypeError:
+            raise ValueError(
+                f'Could not instantiate "{params_type.__name__}" from params: {params}')
+    except KeyError:
+        pass
+
+    return data
+
+
+def deserialize_message(data, get_params_type=get_method_params_type):
     """Function used to deserialize data received from client."""
     if 'jsonrpc' in data:
+        try:
+            deserialize_params(data, get_params_type)
+        except ValueError:
+            raise JsonRpcInvalidParams()
+
         if 'id' in data:
             if 'method' in data:
                 return JsonRPCRequestMessage(**data)
@@ -88,7 +152,7 @@ def deserialize_message(data):
         else:
             return JsonRPCNotification(**data)
 
-    return namedtuple('Object', data.keys(), rename=True)(*data.values())
+    return data
 
 
 def to_lsp_name(method_name):
@@ -105,69 +169,13 @@ def to_lsp_name(method_name):
         if ch == '_':
             continue
 
-        if m_chars[i-1] == '_':
+        if m_chars[i - 1] == '_':
             m_replaced.append(ch.capitalize())
             continue
 
         m_replaced.append(ch)
 
     return ''.join(m_replaced)
-
-
-class JsonRPCNotification:
-    """A class that represents json rpc notification message.
-
-    Attributes:
-        jsonrpc(str): Version of a json rpc protocol
-        method(str): Name of the method that should be executed
-        params(dict): Parameters that should be passed to the method
-    """
-
-    def __init__(self, jsonrpc=None, method=None, params=None):
-        self.jsonrpc = jsonrpc
-        self.method = method
-        self.params = params
-
-
-class JsonRPCRequestMessage:
-    """A class that represents json rpc request message.
-
-    Attributes:
-        id(str): Message id
-        jsonrpc(str): Version of a json rpc protocol
-        method(str): Name of the method that should be executed
-        params(dict): Parameters that should be passed to the method
-    """
-
-    def __init__(self, id=None, jsonrpc=None, method=None, params=None):
-        self.id = id
-        self.jsonrpc = jsonrpc
-        self.method = method
-        self.params = params
-
-
-class JsonRPCResponseMessage:
-    """A class that represents json rpc response message.
-
-    Attributes:
-        id(str): Message id (same as id from `JsonRPCRequestMessage`)
-        jsonrpc(str): Version of a json rpc protocol
-        result(str): Returned value from executed method
-        error(str): Error object
-    """
-
-    def __init__(self, id=None, jsonrpc=None, result=None, error=None):
-        self.id = id
-        self.jsonrpc = jsonrpc
-        self.result = result
-        self.error = error
-
-    def without_none_fields(self):
-        if self.error is None:
-            del self.error
-        else:
-            del self.result
-        return self
 
 
 class JsonRPCProtocol(asyncio.Protocol):
@@ -185,10 +193,10 @@ class JsonRPCProtocol(asyncio.Protocol):
     CONTENT_TYPE = 'application/vscode-jsonrpc'
 
     MESSAGE_PATTERN = re.compile(
-        rb'^(?:[^\r\n]+\r\n)*' +
-        rb'Content-Length: (?P<length>\d+)\r\n' +
-        rb'(?:[^\r\n]+\r\n)*\r\n' +
-        rb'(?P<body>{.*)',
+        rb'^(?:[^\r\n]+\r\n)*'
+        + rb'Content-Length: (?P<length>\d+)\r\n'
+        + rb'(?:[^\r\n]+\r\n)*\r\n'
+        + rb'(?P<body>{.*)',
         re.DOTALL,
     )
 
@@ -208,6 +216,16 @@ class JsonRPCProtocol(asyncio.Protocol):
     def __call__(self):
         return self
 
+    def _check_ret_type_and_send_response(self, method_name, method_type, msg_id, result):
+        """Check if registered feature returns appropriate result type."""
+        if method_type == ATTR_FEATURE_TYPE:
+            return_type = get_method_return_type(method_name)
+            if not is_instance(result, return_type):
+                error = JsonRpcInternalError().to_dict()
+                self._send_response(msg_id, error=error)
+
+        self._send_response(msg_id, result=result)
+
     def _execute_notification(self, handler, *params):
         """Executes notification message handler."""
         if asyncio.iscoroutinefunction(handler):
@@ -223,8 +241,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Success callback used for coroutine notification message."""
         if future.exception():
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
-            logger.exception('Exception occurred in notification: {}'
-                             .format(error))
+            logger.exception('Exception occurred in notification: "%s"', error)
 
             # Revisit. Client does not support response with msg_id = None
             # https://stackoverflow.com/questions/31091376/json-rpc-2-0-allow-notifications-to-have-an-error-response
@@ -232,45 +249,49 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _execute_request(self, msg_id, handler, params):
         """Executes request message handler."""
+        method_name, method_type = get_help_attrs(handler)
+
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(params))
             self._client_request_futures[msg_id] = future
             future.add_done_callback(partial(self._execute_request_callback,
-                                             msg_id))
+                                             method_name, method_type, msg_id))
         else:
             # Can't be canceled
             if is_thread_function(handler):
                 self._server.thread_pool.apply_async(
                     handler, (params, ),
-                    callback=lambda res: self._send_response(msg_id, res),
-                    error_callback=partial(self._execute_request_err_callback,
-                                           msg_id))
+                    callback=partial(
+                        self._check_ret_type_and_send_response,
+                        method_name, method_type, msg_id,
+                    ),
+                    error_callback=partial(self._execute_request_err_callback, msg_id))
             else:
-                self._send_response(msg_id, handler(params))
+                self._check_ret_type_and_send_response(
+                    method_name, method_type, msg_id, handler(params))
 
-    def _execute_request_callback(self, msg_id, future):
+    def _execute_request_callback(self, method_name, method_type, msg_id, future):
         """Success callback used for coroutine request message."""
         try:
             if not future.cancelled():
-                self._send_response(msg_id, result=future.result())
+                self._check_ret_type_and_send_response(
+                    method_name, method_type, msg_id, result=future.result())
             else:
                 self._send_response(
                     msg_id,
-                    error=JsonRpcRequestCancelled(
-                        'Request with id {} is canceled'.format(msg_id)))
+                    error=JsonRpcRequestCancelled(f'Request with id "{msg_id}" is canceled')
+                )
             self._client_request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
-            logger.exception('Exception occurred for message {}: {}'
-                             .format(msg_id, error))
+            logger.exception('Exception occurred for message "%s": %s', msg_id, error)
             self._send_response(msg_id, error=error)
 
     def _execute_request_err_callback(self, msg_id, exc):
         """Error callback used for coroutine request message."""
         exc_info = (type(exc), exc, None)
         error = JsonRpcInternalError.of(exc_info).to_dict()
-        logger.exception('Exception occurred for message {}: {}'
-                         .format(msg_id, error))
+        logger.exception('Exception occurred for message "%s": %s', msg_id, error)
         self._send_response(msg_id, error=error)
 
     def _get_handler(self, feature_name):
@@ -288,13 +309,12 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._client_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warning('Cancel notification for unknown message id {}'
-                           .format(msg_id))
+            logger.warning('Cancel notification for unknown message id "%s"', msg_id)
             return
 
         # Will only work if the request hasn't started executing
         if future.cancel():
-            logger.info('Cancelled request with id {}'.format(msg_id))
+            logger.info('Cancelled request with id "%s"', msg_id)
 
     def _handle_notification(self, method_name, params):
         """Handles a notification from the client."""
@@ -306,11 +326,9 @@ class JsonRPCProtocol(asyncio.Protocol):
             handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
         except KeyError:
-            logger.warning('Ignoring notification for unknown method {}'
-                           .format(method_name))
+            logger.warning('Ignoring notification for unknown method "%s"', method_name)
         except Exception:
-            logger.exception('Failed to handle notification {}: {}'
-                             .format(method_name, params))
+            logger.exception('Failed to handle notification "%s": %s', method_name, params)
 
     def _handle_request(self, msg_id, method_name, params):
         """Handles a request from the client."""
@@ -324,12 +342,10 @@ class JsonRPCProtocol(asyncio.Protocol):
                 self._execute_request(msg_id, handler, params)
 
         except JsonRpcException as e:
-            logger.exception('Failed to handle request {} {} {}'
-                             .format(msg_id, method_name, params))
+            logger.exception('Failed to handle request %s %s %s', msg_id, method_name, params)
             self._send_response(msg_id, None, e.to_dict())
         except Exception:
-            logger.exception('Failed to handle request {} {} {}'
-                             .format(msg_id, method_name, params))
+            logger.exception('Failed to handle request %s %s %s', msg_id, method_name, params)
             err = JsonRpcInternalError.of(sys.exc_info()).to_dict()
             self._send_response(msg_id, None, err)
 
@@ -338,23 +354,20 @@ class JsonRPCProtocol(asyncio.Protocol):
         future = self._server_request_futures.pop(msg_id, None)
 
         if not future:
-            logger.warning('Received response to unknown message id {}'
-                           .format(msg_id))
+            logger.warning('Received response to unknown message id "%s"', msg_id)
             return
 
         if error is not None:
-            logger.debug('Received error response to message {}: {}'
-                         .format(msg_id, error))
+            logger.debug('Received error response to message "%s": %s', msg_id, error)
             future.set_exception(JsonRpcException.from_dict(error))
 
-        logger.debug('Received result for message {}: {}'
-                     .format(msg_id, result))
+        logger.debug('Received result for message "%s": %s', msg_id, result)
         future.set_result(result)
 
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
         if message.jsonrpc != JsonRPCProtocol.VERSION:
-            logger.warning('Unknown message {}'.format(message))
+            logger.warning('Unknown message "%s"', message)
             return
 
         if self._shutdown and getattr(message, 'method', '') != EXIT:
@@ -377,15 +390,13 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            body = json.dumps(data, default=default_serializer)
-            logger.info('Sending data: {}'.format(body))
+            body = data.json(by_alias=True, exclude_unset=True, encoder=default_serializer)
+            logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
             header = (
-                'Content-Length: {}\r\n'
-                'Content-Type: {}; charset={}\r\n\r\n'
-            ).format(
-                len(body), self.CONTENT_TYPE, self.CHARSET
+                f'Content-Length: {len(body)}\r\n'
+                f'Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n'
             ).encode(self.CHARSET)
 
             self.transport.write(header + body)
@@ -400,11 +411,17 @@ class JsonRPCProtocol(asyncio.Protocol):
             result(any): Result returned by handler
             error(any): Error returned by handler
         """
-        response = JsonRPCResponseMessage(msg_id,
-                                          JsonRPCProtocol.VERSION,
-                                          result,
-                                          error)
-        self._send_data(response.without_none_fields())
+        response = JsonRPCResponseMessage(id=msg_id,
+                                          jsonrpc=JsonRPCProtocol.VERSION,
+                                          result=result,
+                                          error=error)
+
+        if error is None:
+            del response.error
+        else:
+            del response.result
+
+        self._send_data(response)
 
     def connection_made(self, transport: asyncio.BaseTransport):
         """Method from base class, called when connection is established"""
@@ -412,7 +429,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
-        logger.debug('Received {!r}'.format(data))
+        logger.debug('Received %r', data)
 
         while len(data):
             # Append the incoming chunk to the message buffer
@@ -442,7 +459,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def notify(self, method: str, params=None):
         """Sends a JSON RPC notification to the client."""
-        logger.debug('Sending notification: {} {}'.format(method, params))
+        logger.debug('Sending notification: "%s" %s', method, params)
 
         request = JsonRPCNotification(
             jsonrpc=JsonRPCProtocol.VERSION,
@@ -463,8 +480,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             Future that will be resolved once a response has been received
         """
         msg_id = str(uuid.uuid4())
-        logger.debug('Sending request with id {}: {} {}'
-                     .format(msg_id, method, params))
+        logger.debug('Sending request with id "%s": %s %s', msg_id, method, params)
 
         request = JsonRPCRequestMessage(
             id=msg_id,
@@ -478,8 +494,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         if callback:
             def wrapper(future: Future):
                 result = future.result()
-                logger.info('Configuration for {} received: {}'
-                            .format(params, result))
+                logger.info('Configuration for %s received: %s', params, result)
                 callback(result)
             future.add_done_callback(wrapper)
 
@@ -516,10 +531,11 @@ class LSPMeta(type):
         for attr_name, attr_val in cls.items():
             if callable(attr_val) and attr_name.startswith('bf_'):
                 method_name = to_lsp_name(attr_name[3:])
-                cls[attr_name] = call_user_feature(attr_val, method_name)
+                wrapped = call_user_feature(attr_val, method_name)
+                assign_help_attrs(wrapped, method_name, ATTR_FEATURE_TYPE)
+                cls[attr_name] = wrapped
 
-                logger.debug('Added decorator for lsp method: {}'
-                             .format(attr_name))
+                logger.debug('Added decorator for lsp method: "%s"', attr_name)
 
         return super().__new__(mcs, cls_name, cls_bases, cls)
 
@@ -552,40 +568,41 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(WORKSPACE_APPLY_EDIT,
-                                 ApplyWorkspaceEditParams(edit, label))
+                                 ApplyWorkspaceEditParams(edit=edit, label=label))
 
     def bf_exit(self, *args):
         """Stops the server process."""
         self.transport.close()
-        sys.exit(1)
+        sys.exit(0 if self._shutdown else 1)
 
     def bf_initialize(self, params: InitializeParams):
         """Method that initializes language server.
         It will compute and return server capabilities based on
         registered features.
         """
-        logger.info('Language server initialized {}'.format(params))
+        logger.info('Language server initialized %s', params)
 
-        self._server.process_id = params.processId
+        self._server.process_id = params.process_id
 
         # Initialize server capabilities
-        client_capabilities = params.capabilities
-        server_capabilities = ServerCapabilities(self.fm.features.keys(),
-                                                 self.fm.feature_options,
-                                                 self.fm.commands,
-                                                 self._server.sync_kind,
-                                                 client_capabilities)
-        logger.debug('Server capabilities: {}'
-                     .format(server_capabilities.__dict__))
+        self.client_capabilities = params.capabilities
+        self.server_capabilities = ServerCapabilitiesBuilder(
+            self.client_capabilities,
+            self.fm.features.keys(),
+            self.fm.feature_options,
+            list(self.fm.commands.keys()),
+            self._server.sync_kind,
+        ).build()
+        logger.debug('Server capabilities: %s', self.server_capabilities.dict())
 
-        root_path = getattr(params, 'rootPath', None)
-        root_uri = params.rootUri or from_fs_path(root_path)
+        root_path = params.root_path
+        root_uri = params.root_uri or from_fs_path(root_path)
 
         # Initialize the workspace
-        workspace_folders = getattr(params, 'workspaceFolders', [])
+        workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        return InitializeResult(server_capabilities)
+        return InitializeResult(capabilities=self.server_capabilities)
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""
@@ -607,24 +624,24 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Updates document's content.
         (Incremental(from server capabilities); not configurable for now)
         """
-        for change in params.contentChanges:
-            self.workspace.update_document(params.textDocument, change)
+        for change in params.content_changes:
+            self.workspace.update_document(params.text_document, change)
 
     def bf_text_document__did_close(self,
                                     params: DidCloseTextDocumentParams):
         """Removes document from workspace."""
-        self.workspace.remove_document(params.textDocument.uri)
+        self.workspace.remove_document(params.text_document.uri)
 
     def bf_text_document__did_open(self,
                                    params: DidOpenTextDocumentParams):
         """Puts document to the workspace."""
-        self.workspace.put_document(params.textDocument)
+        self.workspace.put_document(params.text_document)
 
     def bf_workspace__did_change_workspace_folders(
             self,
             params: DidChangeWorkspaceFoldersParams):
         """Adds/Removes folders from the workspace."""
-        logger.info('Workspace folders changed: {}'.format(params))
+        logger.info('Workspace folders changed: %s', params)
 
         added_folders = params.event.added or []
         removed_folders = params.event.removed or []
@@ -668,7 +685,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""
         self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                    PublishDiagnosticsParams(doc_uri, diagnostics))
+                    PublishDiagnosticsParams(uri=doc_uri, diagnostics=diagnostics))
 
     def register_capability(self, params: RegistrationParams, callback):
         """Register a new capability on the client.
@@ -698,11 +715,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def show_message(self, message, msg_type=MessageType.Info):
         """Sends message to the client to display message."""
-        self.notify(WINDOW_SHOW_MESSAGE, ShowMessageParams(msg_type, message))
+        self.notify(WINDOW_SHOW_MESSAGE, ShowMessageParams(type=msg_type, message=message))
 
     def show_message_log(self, message, msg_type=MessageType.Log):
         """Sends message to the client's output channel."""
-        self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(msg_type, message))
+        self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(type=msg_type, message=message))
 
     def unregister_capability(self, params: UnregistrationParams, callback):
         """Unregister a new capability on the client.

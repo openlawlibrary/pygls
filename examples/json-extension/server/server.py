@@ -19,17 +19,19 @@ import json
 import time
 import uuid
 from json import JSONDecodeError
+from typing import Optional
 
-from pygls.features import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
-                            TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
+from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
+                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
+from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
+                             CompletionParams, ConfigurationItem,
+                             ConfigurationParams, Diagnostic,
+                             DidChangeTextDocumentParams,
+                             DidCloseTextDocumentParams,
+                             DidOpenTextDocumentParams, MessageType, Position,
+                             Range, Registration, RegistrationParams,
+                             Unregistration, UnregistrationParams)
 from pygls.server import LanguageServer
-from pygls.types import (CompletionItem, CompletionList, CompletionParams,
-                         ConfigurationItem, ConfigurationParams, Diagnostic,
-                         DidChangeTextDocumentParams,
-                         DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-                         MessageType, Position, Range, Registration,
-                         RegistrationParams, Unregistration,
-                         UnregistrationParams)
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
@@ -56,7 +58,7 @@ json_server = JsonLanguageServer()
 def _validate(ls, params):
     ls.show_message_log('Validating json...')
 
-    text_doc = ls.workspace.get_document(params.textDocument.uri)
+    text_doc = ls.workspace.get_document(params.text_document.uri)
 
     source = text_doc.source
     diagnostics = _validate_json(source) if source else []
@@ -76,11 +78,11 @@ def _validate_json(source):
         line = err.lineno
 
         d = Diagnostic(
-            Range(
-                Position(line - 1, col - 1),
-                Position(line - 1, col)
+            range=Range(
+                start=Position(line=line - 1, character=col - 1),
+                end=Position(line=line - 1, character=col)
             ),
-            msg,
+            message=msg,
             source=type(json_server).__name__
         )
 
@@ -89,16 +91,19 @@ def _validate_json(source):
     return diagnostics
 
 
-@json_server.feature(COMPLETION, trigger_characters=[','])
-def completions(params: CompletionParams = None):
+@json_server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
+def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Returns completion items."""
-    return CompletionList(False, [
-        CompletionItem('"'),
-        CompletionItem('['),
-        CompletionItem(']'),
-        CompletionItem('{'),
-        CompletionItem('}')
-    ])
+    return CompletionList(
+        is_incomplete=False,
+        items=[
+            CompletionItem(label='"'),
+            CompletionItem(label='['),
+            CompletionItem(label=']'),
+            CompletionItem(label='{'),
+            CompletionItem(label='}'),
+        ]
+    )
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
@@ -108,8 +113,7 @@ def count_down_10_seconds_blocking(ls, *args):
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message('Counting down... {}'
-                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
         time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
@@ -120,8 +124,7 @@ async def count_down_10_seconds_non_blocking(ls, *args):
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message('Counting down... {}'
-                        .format(COUNT_DOWN_START_IN_SECONDS - i))
+        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
         await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
@@ -147,8 +150,12 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
 async def register_completions(ls: JsonLanguageServer, *args):
     """Register completions method on the client."""
-    params = RegistrationParams([Registration(str(uuid.uuid4()), COMPLETION,
-                                              {"triggerCharacters": "[':']"})])
+    params = RegistrationParams(registrations=[
+                Registration(
+                    id=str(uuid.uuid4()),
+                    method=COMPLETION,
+                    register_options={"triggerCharacters": "[':']"})
+             ])
     response = await ls.register_capability_async(params)
     if response is None:
         ls.show_message('Successfully registered completions method')
@@ -161,18 +168,19 @@ async def register_completions(ls: JsonLanguageServer, *args):
 async def show_configuration_async(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
-        config = await ls.get_configuration_async(ConfigurationParams([
-            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        config = await ls.get_configuration_async(
+            ConfigurationParams(items=[
+                ConfigurationItem(
+                    scope_uri='',
+                    section=JsonLanguageServer.CONFIGURATION_SECTION)
         ]))
 
-        example_config = config[0].exampleConfiguration
+        example_config = config[0].get('exampleConfiguration')
 
-        ls.show_message(
-            'jsonServer.exampleConfiguration value: {}'.format(example_config)
-        )
+        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
     except Exception as e:
-        ls.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log(f'Error ocurred: {e}')
 
 
 @json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
@@ -180,18 +188,17 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using callback."""
     def _config_callback(config):
         try:
-            example_config = config[0].exampleConfiguration
+            example_config = config[0].get('exampleConfiguration')
 
-            ls.show_message(
-                'jsonServer.exampleConfiguration value: {}'
-                .format(example_config)
-            )
+            ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
         except Exception as e:
-            ls.show_message_log('Error ocurred: {}'.format(e))
+            ls.show_message_log(f'Error ocurred: {e}')
 
-    ls.get_configuration(ConfigurationParams([
-        ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+    ls.get_configuration(ConfigurationParams(items=[
+        ConfigurationItem(
+            scope_uri='',
+            section=JsonLanguageServer.CONFIGURATION_SECTION)
     ]), _config_callback)
 
 
@@ -200,24 +207,26 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
 def show_configuration_thread(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
-        config = ls.get_configuration(ConfigurationParams([
-            ConfigurationItem('', JsonLanguageServer.CONFIGURATION_SECTION)
+        config = ls.get_configuration(ConfigurationParams(items=[
+            ConfigurationItem(
+                scope_uri='',
+                section=JsonLanguageServer.CONFIGURATION_SECTION)
         ])).result(2)
 
-        example_config = config[0].exampleConfiguration
+        example_config = config[0].get('exampleConfiguration')
 
-        ls.show_message(
-            'jsonServer.exampleConfiguration value: {}'.format(example_config)
-        )
+        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
     except Exception as e:
-        ls.show_message_log('Error ocurred: {}'.format(e))
+        ls.show_message_log(f'Error ocurred: {e}')
 
 
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)
 async def unregister_completions(ls: JsonLanguageServer, *args):
     """Unregister completions method on the client."""
-    params = UnregistrationParams([Unregistration(str(uuid.uuid4()), COMPLETION)])
+    params = UnregistrationParams(unregisterations=[
+        Unregistration(id=str(uuid.uuid4()), method=COMPLETION)
+    ])
     response = await ls.unregister_capability_async(params)
     if response is None:
         ls.show_message('Successfully unregistered completions method')
