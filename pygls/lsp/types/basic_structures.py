@@ -291,11 +291,15 @@ class TextDocumentItem(Model):
 
 
 class VersionedTextDocumentIdentifier(TextDocumentIdentifier):
-    version: Union[NumType, None]
+    version: NumType
+
+
+class OptionalVersionedTextDocumentIdentifier(TextDocumentIdentifier):
+    version: Optional[NumType]
 
 
 class TextDocumentEdit(Model):
-    text_document: VersionedTextDocumentIdentifier
+    text_document: OptionalVersionedTextDocumentIdentifier
     edits: List[TextEdit]
 
 
