@@ -19,9 +19,9 @@ from typing import Optional
 
 from pygls.lsp.methods import RENAME
 from pygls.lsp.types import (CreateFile, CreateFileOptions, DeleteFile, DeleteFileOptions,
-                             Position, Range, RenameFile, RenameFileOptions, RenameOptions,
-                             RenameParams, TextDocumentEdit, TextDocumentIdentifier, TextEdit,
-                             VersionedTextDocumentIdentifier, WorkspaceEdit)
+                             OptionalVersionedTextDocumentIdentifier, Position, Range, RenameFile,
+                             RenameFileOptions, RenameOptions, RenameParams, TextDocumentEdit,
+                             TextDocumentIdentifier, TextEdit, WorkspaceEdit)
 from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
@@ -60,7 +60,7 @@ class TestRename(unittest.TestCase):
                     },
                     document_changes=[
                         TextDocumentEdit(
-                            text_document=VersionedTextDocumentIdentifier(
+                            text_document=OptionalVersionedTextDocumentIdentifier(
                                 uri='uri',
                                 version=3,
                             ),
