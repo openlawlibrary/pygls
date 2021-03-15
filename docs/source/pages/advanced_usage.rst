@@ -460,4 +460,4 @@ Workspace methods that can be used for user defined features are:
 
 
 .. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
-.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/types.py
+.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types

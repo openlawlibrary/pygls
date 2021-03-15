@@ -64,9 +64,9 @@ Register Features and Commands
         return CompletionList(
             is_incomplete=False,
             item=[
-                CompletionItem('Item1'),
-                CompletionItem('Item2'),
-                CompletionItem('Item3'),
+                CompletionItem(label='Item1'),
+                CompletionItem(label='Item2'),
+                CompletionItem(label='Item3'),
             ]
         )
 
@@ -97,4 +97,4 @@ haven't worked with language servers before.
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
 .. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
-.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/types.py
+.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types
