@@ -97,9 +97,17 @@ class Server:
     Args:
         protocol_cls(Protocol): Protocol implementation that must be derived
                                 from `asyncio.Protocol`
+
         loop(AbstractEventLoop): asyncio event loop
+
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
+
+        exit_on_client_termination(bool, optional): Tells the server to watch
+                                                    if the client process is
+                                                    still alive.
+                                                    Pass `False` otherwise.
+
         sync_kind(TextDocumentSyncKind): Text document synchronization option
             - NONE(0): no synchronization
             - FULL(1): replace whole text
@@ -117,7 +125,8 @@ class Server:
     """
 
     def __init__(self, protocol_cls, loop=None, max_workers=2,
-                 sync_kind=TextDocumentSyncKind.INCREMENTAL):
+                 sync_kind=TextDocumentSyncKind.INCREMENTAL,
+                 exit_on_client_termination=True):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
@@ -126,6 +135,7 @@ class Server:
         self._stop_event = None
         self._thread_pool = None
         self._thread_pool_executor = None
+        self._exit_on_client_termination = exit_on_client_termination
         self.sync_kind = sync_kind
 
         if IS_WIN:
