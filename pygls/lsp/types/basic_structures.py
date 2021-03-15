@@ -84,8 +84,8 @@ class JsonRPCResponseMessage(JsonRpcMessage):
 
 
 class Position(Model):
-    line: int = 0
-    character: int = 0
+    line: int
+    character: int
 
     def __eq__(self, other):
         return (
