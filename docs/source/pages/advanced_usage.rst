@@ -90,8 +90,7 @@ What is a feature in *pygls*? In terms of language servers and the
 a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
-that are available can be found in `pygls.features <../features>`__
-module.
+that are available can be found in `pygls.lps.methods`_ module.
 
 *Built-In* Features
 ~~~~~~~~~~~~~~~~~~~
@@ -241,7 +240,6 @@ while or you are new to threading in Python, check out Python's
 ``multithreading`` and `GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__
 before messing with threads.
 
-.. _passing-instance:
 
 Passing Language Server Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -323,7 +321,7 @@ client, depending on way how the function is registered (described
 .. code:: python
 
     # await keyword tells event loop to switch to another task until notification is received
-    config = await ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]))
+    config = await ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]))
 
 -  *synchronous* functions
 
@@ -333,14 +331,14 @@ client, depending on way how the function is registered (described
     def callback(config):
         # Omitted
 
-    config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')]), callback)
+    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]), callback)
 
 -  *threaded* functions
 
 .. code:: python
 
     # .result() will block the thread
-    config = ls.get_configuration(ConfigurationParams([ConfigurationItem('doc_uri_here', 'section')])).result()
+    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')])).result()
 
 Show Message
 ^^^^^^^^^^^^
@@ -400,16 +398,20 @@ document content change, e.g.:
         ls.show_message_log("Validating json...")
 
         # Get document from workspace
-        text_doc = ls.workspace.get_document(params.textDocument.uri)
+        text_doc = ls.workspace.get_document(params.text_document.uri)
 
         diagnostic = Diagnostic(
-                         range=Range(Position(line-1, col-1), Position(line-1, col)),
-                         message="Custom validation message",
-                         source="Json Server"
+                        range=Range(
+                            start=Position(line-1, col-1),
+                            end=Position(line-1, col)
+                        ),
+                        message="Custom validation message",
+                        source="Json Server"
                      )
 
         # Send diagnostics
         ls.publish_diagnostics(text_doc.uri, [diagnostic])
+
 
 Custom Notifications
 ^^^^^^^^^^^^^^^^^^^^
@@ -456,3 +458,6 @@ Workspace methods that can be used for user defined features are:
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         # Omitted
 
+
+.. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
+.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/types.py
