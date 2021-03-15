@@ -175,7 +175,7 @@ async def show_configuration_async(ls: JsonLanguageServer, *args):
                     section=JsonLanguageServer.CONFIGURATION_SECTION)
         ]))
 
-        example_config = config[0].exampleConfiguration
+        example_config = config[0].get('exampleConfiguration')
 
         ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
@@ -188,7 +188,7 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using callback."""
     def _config_callback(config):
         try:
-            example_config = config[0].exampleConfiguration
+            example_config = config[0].get('exampleConfiguration')
 
             ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
@@ -213,7 +213,7 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
                 section=JsonLanguageServer.CONFIGURATION_SECTION)
         ])).result(2)
 
-        example_config = config[0].exampleConfiguration
+        example_config = config[0].get('exampleConfiguration')
 
         ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
 
