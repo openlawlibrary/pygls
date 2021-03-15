@@ -169,15 +169,15 @@ class DidChangeTextDocumentParams(Model):
                            List[TextDocumentContentChangeTextEvent]]
 
 
-class WillSaveTextDocumentParams(Model):
-    text_document: TextDocumentIdentifier
-    reason: int
-
-
 class TextDocumentSaveReason(enum.IntEnum):
     Manual = 1
     AfterDelay = 2
     FocusOut = 3
+
+
+class WillSaveTextDocumentParams(Model):
+    text_document: TextDocumentIdentifier
+    reason: TextDocumentSaveReason
 
 
 class SaveOptions(Model):

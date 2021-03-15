@@ -44,7 +44,7 @@ class SignatureHelpInformationClientCapabilities(Model):
 class SignatureHelpClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
     signature_information: Optional[SignatureHelpInformationClientCapabilities] = None
-    contextSupport: Optional[bool] = False
+    context_support: Optional[bool] = False
 
 
 class SignatureHelpOptions(WorkDoneProgressOptions):

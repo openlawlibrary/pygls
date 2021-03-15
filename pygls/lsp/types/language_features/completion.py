@@ -101,10 +101,10 @@ class CompletionTagSupportClientCapabilities(Model):
 
 class CompletionItemClientCapabilities(Model):
     snippet_support: Optional[bool] = False
-    commit_character_support: Optional[bool] = False
+    commit_characters_support: Optional[bool] = False
     documentation_format: Optional[List[MarkupKind]] = None
     deprecated_support: Optional[bool] = False
-    preselected_support: Optional[bool] = False
+    preselect_support: Optional[bool] = False
     tag_support: Optional[CompletionTagSupportClientCapabilities] = None
 
 
