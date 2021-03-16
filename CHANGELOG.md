@@ -21,9 +21,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Fixed
 
 - Periodically check client pid and exit server ([#149])
+- Fix server handling of client errors ([#141])
 
-[#139]: https://github.com/openlawlibrary/pygls/pull/139
 [#149]: https://github.com/openlawlibrary/pygls/pull/149
+[#141]: https://github.com/openlawlibrary/pygls/pull/141
+[#139]: https://github.com/openlawlibrary/pygls/pull/139
 
 ## [0.9.1] - 09/29/2020
 
