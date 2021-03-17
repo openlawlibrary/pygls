@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+## [0.10.1] - 03/17/2021
+
+### Fixed
+
+- Remove "query" from FoldingRangeParams ([#153])
+
+[#153]: https://github.com/openlawlibrary/pygls/pull/153
+
 ## [0.10.0] - 03/16/2021
 
 ### Added
@@ -198,7 +206,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/openlawlibrary/pygls/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/openlawlibrary/pygls/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/openlawlibrary/pygls/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/openlawlibrary/pygls/compare/v0.8.1...v0.9.0

@@ -50,7 +50,6 @@ class FoldingRangeRegistrationOptions(FoldingRangeOptions,
 
 
 class FoldingRangeParams(WorkDoneProgressParams, PartialResultParams):
-    query: str
     text_document: TextDocumentIdentifier
 
 
