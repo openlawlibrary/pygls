@@ -64,7 +64,6 @@ class TestFoldingRange(unittest.TestCase):
         response = self.client.lsp.send_request(
             FOLDING_RANGE,
             FoldingRangeParams(
-                query='query',
                 text_document=TextDocumentIdentifier(uri='file://return.list'),
             ),
         ).result(timeout=CALL_TIMEOUT)
@@ -81,7 +80,6 @@ class TestFoldingRange(unittest.TestCase):
         response = self.client.lsp.send_request(
             FOLDING_RANGE,
             FoldingRangeParams(
-                query='query',
                 text_document=TextDocumentIdentifier(uri='file://return.none'),
             ),
         ).result(timeout=CALL_TIMEOUT)
