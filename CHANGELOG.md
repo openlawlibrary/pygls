@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Fix change_notifications type (pydantic bug) ([#158])
+
+[#158]: https://github.com/openlawlibrary/pygls/pull/158
+
 ## [0.10.1] - 03/17/2021
 
 ### Fixed
