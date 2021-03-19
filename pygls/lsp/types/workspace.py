@@ -37,7 +37,7 @@ from pygls.lsp.types.language_features.document_symbol import WorkspaceCapabilit
 
 class WorkspaceFoldersServerCapabilities(Model):
     supported: Optional[bool] = False
-    change_notifications: Optional[Union[str, bool]] = None
+    change_notifications: Optional[Union[bool, str]] = None
 
 
 class WorkspaceFolder(Model):
