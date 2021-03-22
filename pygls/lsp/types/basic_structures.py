@@ -28,6 +28,7 @@ import enum
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, root_validator
+from typeguard import check_type
 
 NumType = Union[int, float]
 T = TypeVar('T')
@@ -62,19 +63,33 @@ class JsonRPCNotification(JsonRpcMessage):
 
 class JsonRPCRequestMessage(JsonRpcMessage):
     """A class that represents json rpc request message."""
-    id: str
+    id: Any
     method: str
     params: Any
+
+    @root_validator
+    def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
+        id_val = values.get('id')
+        check_type('', id_val, Union[int, str])
+
+        return values
 
 
 class JsonRPCResponseMessage(JsonRpcMessage):
     """A class that represents json rpc response message."""
-    id: str
+    id: Any
     result: Any
     error: Any
 
     @root_validator
     def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
+        id_val = values.get('id')
+        check_type('', id_val, Union[int, str])
+
         result_val, error_val = values.get('result'), values.get('error')
 
         if result_val is not None and error_val is not None:
@@ -335,15 +350,26 @@ class MarkupContent(Model):
     value: str
 
 
-DocumentChangesType = Union[
-    List[TextDocumentEdit],
-    List[Union[TextDocumentEdit, CreateFile, RenameFile, DeleteFile]],
-]
-
-
 class WorkspaceEdit(Model):
     changes: Optional[Dict[str, List[TextEdit]]] = None
-    document_changes: Optional[DocumentChangesType] = None
+    document_changes: Any = None
+
+    @root_validator
+    def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
+
+        document_changes_val = values.get('document_changes')
+        check_type(
+            '',
+            document_changes_val,
+            Optional[Union[
+                List[TextDocumentEdit],
+                List[Union[TextDocumentEdit, CreateFile, RenameFile, DeleteFile]],
+            ]]
+        )
+
+        return values
 
 
 class WorkDoneProgressBegin(Model):
