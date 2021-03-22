@@ -28,6 +28,7 @@ import enum
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, root_validator
+from typeguard import check_type
 
 NumType = Union[int, float]
 T = TypeVar('T')
@@ -62,19 +63,31 @@ class JsonRPCNotification(JsonRpcMessage):
 
 class JsonRPCRequestMessage(JsonRpcMessage):
     """A class that represents json rpc request message."""
-    id: str
+    id: Any
     method: str
     params: Any
+
+    @root_validator
+    def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        id_val = values.get('id')
+        check_type('', id_val, Union[int, str])
+
+        return values
 
 
 class JsonRPCResponseMessage(JsonRpcMessage):
     """A class that represents json rpc response message."""
-    id: str
+    id: Any
     result: Any
     error: Any
 
     @root_validator
     def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        id_val = values.get('id')
+        check_type('', id_val, Union[int, str])
+
         result_val, error_val = values.get('result'), values.get('error')
 
         if result_val is not None and error_val is not None:
