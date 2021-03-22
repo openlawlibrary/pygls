@@ -350,12 +350,6 @@ class MarkupContent(Model):
     value: str
 
 
-DocumentChangesType = Union[
-    List[TextDocumentEdit],
-    List[Union[TextDocumentEdit, CreateFile, RenameFile, DeleteFile]],
-]
-
-
 class WorkspaceEdit(Model):
     changes: Optional[Dict[str, List[TextEdit]]] = None
     document_changes: Any = None
@@ -366,7 +360,14 @@ class WorkspaceEdit(Model):
         # https://github.com/samuelcolvin/pydantic/pull/2092
 
         document_changes_val = values.get('document_changes')
-        check_type('', document_changes_val, Optional[DocumentChangesType])
+        check_type(
+            '',
+            document_changes_val,
+            Optional[Union[
+                List[TextDocumentEdit],
+                List[Union[TextDocumentEdit, CreateFile, RenameFile, DeleteFile]],
+            ]]
+        )
 
         return values
 
