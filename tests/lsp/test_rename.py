@@ -157,11 +157,7 @@ class TestRename(unittest.TestCase):
 
         assert response['documentChanges'][3]['uri'] == 'delete file'
         assert response['documentChanges'][3]['options']['ignoreIfExists'] == True
-
-        # NOTE: pydantic BUG! `response['documentChanges'][3]` is of type `CreateFile` !?!?
-        # https://github.com/samuelcolvin/pydantic/pull/2092
-        #
-        # assert response['documentChanges'][3]['options']['overwrite'] == True
+        assert response['documentChanges'][3]['options']['recursive'] == True
 
     def test_rename_return_none(self):
         response = self.client.lsp.send_request(

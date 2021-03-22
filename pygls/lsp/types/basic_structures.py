@@ -70,6 +70,7 @@ class JsonRPCRequestMessage(JsonRpcMessage):
     @root_validator
     def check_result_or_error(cls, values):
         # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
         id_val = values.get('id')
         check_type('', id_val, Union[int, str])
 
@@ -85,6 +86,7 @@ class JsonRPCResponseMessage(JsonRpcMessage):
     @root_validator
     def check_result_or_error(cls, values):
         # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
         id_val = values.get('id')
         check_type('', id_val, Union[int, str])
 
@@ -356,7 +358,17 @@ DocumentChangesType = Union[
 
 class WorkspaceEdit(Model):
     changes: Optional[Dict[str, List[TextEdit]]] = None
-    document_changes: Optional[DocumentChangesType] = None
+    document_changes: Any = None
+
+    @root_validator
+    def check_result_or_error(cls, values):
+        # Workaround until pydantic supports StrictUnion
+        # https://github.com/samuelcolvin/pydantic/pull/2092
+
+        document_changes_val = values.get('document_changes')
+        check_type('', document_changes_val, Optional[DocumentChangesType])
+
+        return values
 
 
 class WorkDoneProgressBegin(Model):
