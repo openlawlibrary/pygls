@@ -11,11 +11,14 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
+- Handle lost connection; Remove psutil ([#163])
+
 ### Fixed
 
 - Fix `pydantic` Unions type conversion ([#160])
 - Fix change_notifications type (pydantic bug) ([#158])
 
+[#163]: https://github.com/openlawlibrary/pygls/pull/163
 [#160]: https://github.com/openlawlibrary/pygls/pull/160
 [#158]: https://github.com/openlawlibrary/pygls/pull/158
 
