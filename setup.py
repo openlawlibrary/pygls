@@ -80,7 +80,7 @@ setup(
         ])
     ],
     zip_safe=False,
-    install_requires=["pydantic>=1.7,<1.9", "typeguard>=2.10.0,<3", "psutil>=5"],
+    install_requires=["pydantic>=1.7,<1.9", "typeguard>=2.10.0,<3"],
     extras_require={
         'dev': development,
         'docs': docs_require,
