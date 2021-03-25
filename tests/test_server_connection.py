@@ -17,14 +17,17 @@ async def test_tcp_connection_lost():
     server.lsp.connection_lost = Mock()
 
     # Run the server over TCP in a separate thread
-    server_thread = Thread(target=server.start_tcp, args=(
-        'localhost', 8080
-    ))
+    server_thread = Thread(target=server.start_tcp, args=('localhost', 0, ))
     server_thread.daemon = True
     server_thread.start()
 
+    # Wait for server to be ready
+    while server._server is None:
+        await asyncio.sleep(.5)
+
     # Simulate client's connection
-    reader, writer = await asyncio.open_connection('localhost', 8080)
+    port = server._server.sockets[0].getsockname()[1]
+    reader, writer = await asyncio.open_connection('localhost', port)
     await asyncio.sleep(1)
 
     assert server.lsp.connection_made.called
