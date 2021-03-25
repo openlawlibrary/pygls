@@ -50,7 +50,6 @@ from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditRespons
                              RegistrationParams, ShowMessageParams, UnregistrationParams,
                              WorkspaceEdit)
 from pygls.uris import from_fs_path
-from pygls.utils import process_watcher
 from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -424,6 +423,13 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         self._send_data(response)
 
+    def connection_lost(self, exc):
+        """Method from base class, called when connection is lost, in which case we
+        want to shutdown the server's process as well.
+        """
+        logger.error('Client process is not running! Shutting down the server.')
+        sys.exit(1)
+
     def connection_made(self, transport: asyncio.BaseTransport):
         """Method from base class, called when connection is established"""
         self.transport = transport
@@ -607,18 +613,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def bf_initialized(self, *args):
         """Notification received when client and server are connected."""
-
-        # Once the connection is initialized, periodically start checking the client pid
-        if self._server.process_id and self._server._exit_on_client_termination:
-            def on_process_terminated():
-                logger.error('Client process is not running! Shutting down the server.')
-                sys.exit(1)
-
-            asyncio.ensure_future(
-                asyncio.gather(
-                    process_watcher(self._server.process_id, on_process_terminated),
-                    loop=self._server.loop,
-                    return_exceptions=True))
+        pass
 
     def bf_shutdown(self, *args):
         """Request from client which asks server to shutdown."""
