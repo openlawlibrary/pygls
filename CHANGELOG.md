@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Don't serialize unwanted `"null"` values in server capabilities
+
 ## [0.10.2] - 03/25/2021
 
 ### Added
