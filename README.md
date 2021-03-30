@@ -13,9 +13,9 @@ _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of th
 Here's how to create a server and register a code completion feature:
 
 ```python
-from pygls.features import COMPLETION
+from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
-from pygls.types import CompletionItem, CompletionList, CompletionOptions, CompletionParams
+from pygls.lsp import CompletionItem, CompletionList, CompletionOptions, CompletionParams
 
 server = LanguageServer()
 
