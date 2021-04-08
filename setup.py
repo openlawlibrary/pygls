@@ -27,7 +27,7 @@ KEYWORDS = 'python pythonic generic language server protocol'
 LICENSE = 'Apache 2.0'
 URL = 'https://github.com/openlawlibrary/pygls/tree/master/'
 
-packages = find_packages(exclude=['tests'])
+packages = find_packages(exclude=['tests*'])
 
 print('packages:', packages)
 
