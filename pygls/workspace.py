@@ -23,7 +23,8 @@ import re
 from typing import List
 
 from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
-                             TextDocumentItem, TextDocumentSyncKind, WorkspaceFolder)
+                             TextDocumentItem, TextDocumentSyncKind,
+                             VersionedTextDocumentIdentifier, WorkspaceFolder)
 from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -372,7 +373,7 @@ class Workspace(object):
         return self._root_uri
 
     def update_document(self,
-                        text_doc: TextDocumentItem,
+                        text_doc: VersionedTextDocumentIdentifier,
                         change: TextDocumentContentChangeEvent):
         doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
