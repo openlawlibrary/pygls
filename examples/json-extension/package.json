@@ -7,7 +7,7 @@
   "version": "0.10.2",
   "publisher": "openlawlibrary",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.55.0"
   },
   "categories": [
     "Other"
@@ -60,21 +60,19 @@
   },
   "main": "./client/out/extension",
   "scripts": {
-    "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "vscode": "npm run vscode:prepublish && VSCODE=$(which code-insiders || which code || echo echo ERROR: neither the code nor code-insiders vscode executable is installed); USER=dummy-dont-share-vscode-instance $VSCODE --user-data-dir=$PWD/.vscode-dev/user-data --extensionHomePath=$PWD/.vscode-dev/extensions --extensionDevelopmentPath=$PWD $*"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w"
   },
   "devDependencies": {
-    "@types/node": "^12.12.6",
-    "tslint": "^6.1.1",
-    "tslint-microsoft-contrib": "^6.2.0",
-    "tsutils": "^3.17.1",
-    "typescript": "^3.8.3",
-    "vscode": "^1.1.36"
+    "@types/node": "^14.14.41",
+    "@types/vscode": "^1.55.0",
+    "@typescript-eslint/eslint-plugin": "^4.21.0",
+    "@typescript-eslint/parser": "^4.21.0",
+    "eslint": "^7.23.0",
+    "typescript": "^4.2.4"
   },
   "dependencies": {
-    "vscode-languageclient": "^5.2.1"
+    "vscode-languageclient": "^7.0.0"
   }
 }

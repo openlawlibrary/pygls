@@ -7,14 +7,12 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "sourceMaps": true,
-            "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}"
-            ],
-            "outFiles": [
-                "${workspaceRoot}/client/out/**/*.js"
-            ],
-            "preLaunchTask": "compile:client",
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+            "outFiles": ["${workspaceRoot}/client/out/**/*.js"],
+            "preLaunchTask": {
+                "type": "npm",
+                "script": "compile"
+            },
             "env": {
                 "VSCODE_DEBUG_MODE": "true"
             }
@@ -24,9 +22,7 @@
             "type": "python",
             "request": "launch",
             "module": "server",
-            "args": [
-                "--tcp"
-            ],
+            "args": ["--tcp"],
             "justMyCode": false,
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
@@ -38,10 +34,7 @@
     "compounds": [
         {
             "name": "Server + Client",
-            "configurations": [
-                "Launch Server",
-                "Launch Client"
-            ]
+            "configurations": ["Launch Server", "Launch Client"]
         }
     ]
 }

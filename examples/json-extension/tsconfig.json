@@ -1,18 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es6",
         "module": "commonjs",
-        "sourceMap": true,
-        "strict": true,
+        "target": "es2019",
+        "lib": ["ES2019"],
         "rootDir": "client/src",
         "outDir": "client/out",
-        "lib": [
-            "es6"
-        ],
-        "types": [],
-        "skipLibCheck": true,
+        "sourceMap": true
     },
-    "exclude": [
-        "node_modules",
-    ]
+    "include": ["client/src"],
+    "exclude": ["node_modules"]
 }
