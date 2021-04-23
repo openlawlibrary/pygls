@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from pygls.lsp.types.basic_structures import ResourceOperationKind
 import unittest
 from typing import Optional
 
@@ -75,6 +76,7 @@ class TestRename(unittest.TestCase):
                             ]
                         ),
                         CreateFile(
+                            kind=ResourceOperationKind.Create,
                             uri='create file',
                             options=CreateFileOptions(
                                 overwrite=True,
@@ -82,6 +84,7 @@ class TestRename(unittest.TestCase):
                             ),
                         ),
                         RenameFile(
+                            kind=ResourceOperationKind.Rename,
                             old_uri='rename old uri',
                             new_uri='rename new uri',
                             options=RenameFileOptions(
@@ -90,6 +93,7 @@ class TestRename(unittest.TestCase):
                             )
                         ),
                         DeleteFile(
+                            kind=ResourceOperationKind.Delete,
                             uri='delete file',
                             options=DeleteFileOptions(
                                 recursive=True,
@@ -146,15 +150,18 @@ class TestRename(unittest.TestCase):
         assert response['documentChanges'][0]['edits'][0]['range']['end']['line'] == 3
         assert response['documentChanges'][0]['edits'][0]['range']['end']['character'] == 3
 
+        assert response['documentChanges'][1]['kind'] == ResourceOperationKind.Create
         assert response['documentChanges'][1]['uri'] == 'create file'
         assert response['documentChanges'][1]['options']['ignoreIfExists'] == True
         assert response['documentChanges'][1]['options']['overwrite'] == True
 
+        assert response['documentChanges'][2]['kind'] == ResourceOperationKind.Rename
         assert response['documentChanges'][2]['newUri'] == 'rename new uri'
         assert response['documentChanges'][2]['oldUri'] == 'rename old uri'
         assert response['documentChanges'][2]['options']['ignoreIfExists'] == True
         assert response['documentChanges'][2]['options']['overwrite'] == True
 
+        assert response['documentChanges'][3]['kind'] == ResourceOperationKind.Delete
         assert response['documentChanges'][3]['uri'] == 'delete file'
         assert response['documentChanges'][3]['options']['ignoreIfExists'] == True
         assert response['documentChanges'][3]['options']['recursive'] == True
