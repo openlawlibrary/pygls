@@ -1,0 +1,74 @@
+name: JSON language server
+
+on:
+  push:
+    paths:
+      - "examples/json-extension/**"
+  pull_request:
+    paths:
+      - "examples/json-extension/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: examples/json-extension
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('examples/json-extension/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: |
+          npm i
+          npm i vsce
+
+      - name: Lint
+        run: npx eslint client/src/*.ts
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Replace package.json version
+        run: |
+          replace_packagejson_version() {
+            version_line=$(grep -o '"version".*' $1)
+            version=$(python -m json.tool package.json | awk -F'"' '/version/{print $4}')
+            build_version=$version+$2
+            build_version_line=${version_line/$version/$build_version}
+            sed -i "s|$version_line|$build_version_line|g" $1
+          }
+
+          replace_packagejson_version package.json $GITHUB_RUN_ID
+          ./node_modules/.bin/vsce package
+
+      - name: Check VSIX
+        run: |
+          npx vsce ls | grep package.json
+          npx vsce ls | grep out/extension.js
+          npx vsce ls | grep server/__init__.py
+          npx vsce ls | grep server/__main__.py
+          npx vsce ls | grep server/server.py
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v2
+        with:
+          name: json-extension-vsix
+          path: "*.vsix"
