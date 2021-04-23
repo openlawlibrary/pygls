@@ -243,10 +243,12 @@ class TextEdit(Model):
     range: Range
     new_text: str
 
+
 class ResourceOperationKind(str, enum.Enum):
     Create = 'create'
     Rename = 'rename'
     Delete = 'delete'
+
 
 class CreateFileOptions(Model):
     overwrite: Optional[bool] = False
