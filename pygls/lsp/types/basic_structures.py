@@ -243,6 +243,10 @@ class TextEdit(Model):
     range: Range
     new_text: str
 
+class ResourceOperationKind(str, enum.Enum):
+    Create = 'create'
+    Rename = 'rename'
+    Delete = 'delete'
 
 class CreateFileOptions(Model):
     overwrite: Optional[bool] = False
@@ -250,6 +254,7 @@ class CreateFileOptions(Model):
 
 
 class CreateFile(Model):
+    kind: ResourceOperationKind = ResourceOperationKind.Create
     uri: str
     options: Optional[CreateFileOptions] = None
 
@@ -260,6 +265,7 @@ class RenameFileOptions(Model):
 
 
 class RenameFile(Model):
+    kind: ResourceOperationKind = ResourceOperationKind.Rename
     old_uri: str
     new_uri: str
     options: Optional[RenameFileOptions] = None
@@ -271,14 +277,9 @@ class DeleteFileOptions(Model):
 
 
 class DeleteFile(Model):
+    kind: ResourceOperationKind = ResourceOperationKind.Delete
     uri: str
     options: Optional[DeleteFileOptions] = None
-
-
-class ResourceOperationKind(str, enum.Enum):
-    Create = 'create'
-    Rename = 'rename'
-    Delete = 'delete'
 
 
 class FailureHandlingKind(str, enum.Enum):
