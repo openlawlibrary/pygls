@@ -1,4 +1,5 @@
 import asyncio
+import os
 from threading import Thread
 from unittest.mock import Mock
 
@@ -37,3 +38,27 @@ async def test_tcp_connection_lost():
     await asyncio.sleep(1)
 
     assert server.lsp.connection_lost.called
+
+@pytest.mark.asyncio
+async def test_io_connection_lost():
+    # Client to Server pipe.
+    csr, csw = os.pipe()
+    # Server to client pipe.
+    scr, scw = os.pipe()
+
+    server = LanguageServer(loop=asyncio.new_event_loop())
+    server.lsp.connection_made = Mock()
+    server_thread = Thread(
+        target=server.start_io,
+        args=(os.fdopen(csr, 'rb'), os.fdopen(scw, 'wb'))
+    )
+    server_thread.daemon = True
+    server_thread.start()
+
+    # Wait for server to be ready
+    while not server.lsp.connection_made.called:
+        await asyncio.sleep(.5)
+
+    # Pipe is closed (client's process is terminated)
+    os.close(csw)
+    server_thread.join()

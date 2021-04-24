@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning][semver].
 ### Fixed
 
 - Don't serialize unwanted `"null"` values in server capabilities
+- Exit when no more input is available
 
 ## [0.10.2] - 03/25/2021
 
