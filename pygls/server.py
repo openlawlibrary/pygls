@@ -48,6 +48,8 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
     while not stop_event.is_set() and not rfile.closed:
         # Read a header line
         header = await loop.run_in_executor(executor, rfile.readline)
+        if not header:
+            break
         message.append(header)
 
         # Extract content length if possible
@@ -62,6 +64,8 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
 
             # Read body
             body = await loop.run_in_executor(executor, rfile.read, content_length)
+            if not body:
+                break
             message.append(body)
 
             # Pass message to language server protocol
