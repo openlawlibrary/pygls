@@ -185,6 +185,8 @@ class Server:
                              self._stop_event,
                              stdin or sys.stdin.buffer,
                              self.lsp.data_received))
+        except BrokenPipeError:
+            logger.error('Connection to the client is lost! Shutting down the server.')
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
