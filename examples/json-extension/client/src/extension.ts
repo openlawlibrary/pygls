@@ -50,7 +50,7 @@ function isStartedInDebugMode(): boolean {
 
 function startLangServerTCP(addr: number): LanguageClient {
     const serverOptions: ServerOptions = () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve /*, reject */) => {
             const clientSocket = new net.Socket();
             clientSocket.connect(addr, "127.0.0.1", () => {
                 resolve({
@@ -82,7 +82,7 @@ function startLangServer(
     return new LanguageClient(command, serverOptions, getClientOptions());
 }
 
-export function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
     if (isStartedInDebugMode()) {
         // Development - Run the server manually
         client = startLangServerTCP(2087);

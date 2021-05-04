@@ -1,6 +1,7 @@
 # Contributors (alphabetical)
 
 - [@augb](https://github.com/augb)
+- [Brett Cannon](https://github.com/brettcannon/)
 - [Daniel Elero](https://github.com/danixeee)
 - [Daniel Miller](https://github.com/millerdev)
 - [DeathAxe](https://github.com/deathaxe)
