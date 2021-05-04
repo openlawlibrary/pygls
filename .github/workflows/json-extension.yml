@@ -2,11 +2,13 @@ name: JSON language server
 
 on:
   push:
-    # paths:
-    #   - "examples/json-extension/**"
+    paths:
+      - ".github/workflows/json-extension.yml"
+      - "examples/json-extension/**"
   pull_request:
-    # paths:
-    #   - "examples/json-extension/**"
+    paths:
+      - ".github/workflows/json-extension.yml"
+      - "examples/json-extension/**"
 
 jobs:
   build:
@@ -73,5 +75,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: json-extension-vsix
+          # The path must be rooted from the directory GitHub Actions starts
+          # from, not the working-directory.
           path: examples/json-extension/*.vsix
           if-no-files-found: error
