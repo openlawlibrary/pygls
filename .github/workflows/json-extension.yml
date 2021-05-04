@@ -2,15 +2,18 @@ name: JSON language server
 
 on:
   push:
-    paths:
-      - "examples/json-extension/**"
+    # paths:
+    #   - "examples/json-extension/**"
   pull_request:
-    paths:
-      - "examples/json-extension/**"
+    # paths:
+    #   - "examples/json-extension/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      VSIX_FILE_NAME: json-extension.vsix
 
     defaults:
       run:
@@ -57,10 +60,10 @@ jobs:
           }
 
           replace_packagejson_version package.json $GITHUB_RUN_ID
-          ./node_modules/.bin/vsce package
 
-      - name: Check VSIX
+      - name: Build VSIX
         run: |
+          npx vsce package --out ${{ env.VSIX_FILE_NAME }}
           npx vsce ls | grep package.json
           npx vsce ls | grep out/extension.js
           npx vsce ls | grep server/__init__.py
@@ -71,4 +74,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: json-extension-vsix
-          path: "*.vsix"
+          path: ${{ env.VSIX_FILE_NAME }}
