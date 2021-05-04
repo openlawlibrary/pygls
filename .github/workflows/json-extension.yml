@@ -64,14 +64,22 @@ jobs:
       - name: Build VSIX
         run: |
           npx vsce package --out ${{ env.VSIX_FILE_NAME }}
+          ls
+
+      - name: Validate VSIX
+        run: |
           npx vsce ls | grep package.json
           npx vsce ls | grep out/extension.js
           npx vsce ls | grep server/__init__.py
           npx vsce ls | grep server/__main__.py
           npx vsce ls | grep server/server.py
 
+      - name: List files
+        run: ls
+
       - name: Upload VSIX
         uses: actions/upload-artifact@v2
         with:
           name: json-extension-vsix
           path: ${{ env.VSIX_FILE_NAME }}
+          if-no-files-found: error
