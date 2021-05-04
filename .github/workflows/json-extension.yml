@@ -73,5 +73,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: json-extension-vsix
-          path: ./*.vsix
+          path: examples/json-extension/*.vsix
           if-no-files-found: error
