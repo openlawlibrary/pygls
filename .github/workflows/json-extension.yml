@@ -12,9 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      VSIX_FILE_NAME: json-extension.vsix
-
     defaults:
       run:
         shell: bash
@@ -62,9 +59,7 @@ jobs:
           replace_packagejson_version package.json $GITHUB_RUN_ID
 
       - name: Build VSIX
-        run: |
-          npx vsce package --out ${{ env.VSIX_FILE_NAME }}
-          ls
+        run: npx vsce package
 
       - name: Validate VSIX
         run: |
@@ -74,12 +69,9 @@ jobs:
           npx vsce ls | grep server/__main__.py
           npx vsce ls | grep server/server.py
 
-      - name: List files
-        run: ls
-
       - name: Upload VSIX
         uses: actions/upload-artifact@v2
         with:
           name: json-extension-vsix
-          path: ${{ env.VSIX_FILE_NAME }}
+          path: ./*.vsix
           if-no-files-found: error
