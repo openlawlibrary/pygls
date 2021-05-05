@@ -427,7 +427,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Method from base class, called when connection is lost, in which case we
         want to shutdown the server's process as well.
         """
-        logger.error('Client process is not running! Shutting down the server.')
+        logger.error('Connection to the client is lost! Shutting down the server.')
         sys.exit(1)
 
     def connection_made(self, transport: asyncio.BaseTransport):
