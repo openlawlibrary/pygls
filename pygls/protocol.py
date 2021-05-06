@@ -240,8 +240,12 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _execute_notification_callback(self, future):
         """Success callback used for coroutine notification message."""
         if future.exception():
-            error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
-            logger.exception('Exception occurred in notification: "%s"', error)
+
+            try:
+                raise future.exception()
+            except Exception:
+                error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
+                logger.exception('Exception occurred in notification: "%s"', error)
 
             # Revisit. Client does not support response with msg_id = None
             # https://stackoverflow.com/questions/31091376/json-rpc-2-0-allow-notifications-to-have-an-error-response
