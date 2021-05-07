@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Testing against Python 3.9 ([#186])
+
 ### Changed
 
 ### Fixed
