@@ -109,6 +109,36 @@ class JsonRpcContentModified(JsonRpcException):
     MESSAGE = 'Content Modified'
 
 
+class JsonRpcServerNotInitialized(JsonRpcException):
+    CODE = -32002
+    MESSAGE = 'ServerNotInitialized'
+
+
+class JsonRpcUnknownErrorCode(JsonRpcException):
+    CODE = -32001
+    MESSAGE = 'UnknownErrorCode'
+
+
+class JsonRpcReservedErrorRangeStart(JsonRpcException):
+    CODE = -32099
+    MESSAGE = 'jsonrpcReservedErrorRangeStart'
+
+
+class JsonRpcReservedErrorRangeEnd(JsonRpcException):
+    CODE = -32000
+    MESSAGE = 'jsonrpcReservedErrorRangeEnd'
+
+
+class JsonRpcReservedErrorRangeStart(JsonRpcException):
+    CODE = -32899
+    MESSAGE = 'lspReservedErrorRangeStart'
+
+
+class JsonRpcReservedErrorRangeEnd(JsonRpcException):
+    CODE = -32800
+    MESSAGE = 'lspReservedErrorRangeEnd'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
