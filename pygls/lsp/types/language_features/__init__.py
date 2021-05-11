@@ -1,4 +1,5 @@
 # flake8: noqa
+from pygls.lsp.types.language_features.call_hierarchy import *
 from pygls.lsp.types.language_features.code_action import *
 from pygls.lsp.types.language_features.code_lens import *
 from pygls.lsp.types.language_features.color_presentation import *
@@ -13,11 +14,14 @@ from pygls.lsp.types.language_features.folding_range import *
 from pygls.lsp.types.language_features.formatting import *
 from pygls.lsp.types.language_features.hover import *
 from pygls.lsp.types.language_features.implementation import *
+from pygls.lsp.types.language_features.linked_editing_range import *
+from pygls.lsp.types.language_features.monikers import *
 from pygls.lsp.types.language_features.on_type_formatting import *
 from pygls.lsp.types.language_features.prepare_rename import *
 from pygls.lsp.types.language_features.range_formatting import *
 from pygls.lsp.types.language_features.references import *
 from pygls.lsp.types.language_features.rename import *
 from pygls.lsp.types.language_features.selection_range import *
+from pygls.lsp.types.language_features.semantic_tokens import *
 from pygls.lsp.types.language_features.signature_help import *
 from pygls.lsp.types.language_features.type_definition import *

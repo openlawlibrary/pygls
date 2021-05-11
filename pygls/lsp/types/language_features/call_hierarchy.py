@@ -19,32 +19,62 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - Rename --
+-- Language Features - Call Hierarchy --
 
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Optional
+from typing import Any, List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
+                                              StaticRegistrationOptions,
+                                              TextDocumentPositionParams,
+                                              TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
+from pygls.lsp.types.language_features.document_symbol import SymbolKind, SymbolTag
 
 
-class PrepareSupportDefaultBehavior(enum.IntEnum):
-    Identifier = 1
-
-
-class RenameClientCapabilities(Model):
+class CallHierarchyClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
-    prepare_support: Optional[bool] = False
-    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior] = None
-    honors_change_annotations: Optional[bool] = False
 
 
-class RenameOptions(WorkDoneProgressOptions):
-    prepare_provider: Optional[bool] = False
+class CallHierarchyOptions(WorkDoneProgressOptions):
+    pass
 
 
-class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    new_name: str
+class CallHierarchyRegistrationOptions(TextDocumentRegistrationOptions, CallHierarchyOptions, StaticRegistrationOptions):
+    pass
+
+
+class CallHierarchyPrepareParams(TextDocumentPositionParams, WorkDoneProgressParams):
+    pass
+
+
+class CallHierarchyItem(Model):
+    name: str
+    kind: SymbolKind
+    uri: str
+    range: Range
+    selection_range: Range
+    tags: Optional[List[SymbolTag]] = None
+    detail: Optional[str] = None
+    data: Optional[Any] = None
+
+
+class CallHierarchyIncomingCallsParams(WorkDoneProgressParams, PartialResultParams):
+    item: CallHierarchyItem
+
+
+class CallHierarchyIncomingCall(Model):
+    from_: CallHierarchyItem
+    from_ranges: List[Range]
+
+
+class CallHierarchyOutgoingCallsParams(WorkDoneProgressParams, PartialResultParams):
+    item: CallHierarchyItem
+
+
+class CallHierarchyOutgoingCall(Model):
+    to: CallHierarchyItem
+    from_ranges: List[Range]

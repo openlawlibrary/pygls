@@ -27,7 +27,8 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import Model, NumType, ProgressToken
+from pygls.lsp.types.basic_structures import URI, Model, NumType, ProgressToken, Range
+from pygls.lsp.types.language_features.formatting import FormattingOptions
 
 
 class MessageType(enum.IntEnum):
@@ -50,6 +51,29 @@ class ShowMessageRequestParams(Model):
     type: MessageType
     message: str
     actions: Optional[List[MessageActionItem]] = None
+
+
+class ShowDocumentClientCapabilities(Model):
+    support: Optional[bool] = False
+
+
+class ShowDocumentParams(Model):
+    uri: URI
+    external: Optional[bool] = False
+    take_focus: Optional[bool] = False
+    selection: Optional[Range] = None
+
+
+class ShowDocumentResult(Model):
+    success: bool
+
+
+class ShowMessageRequestActionItem(Model):
+    additional_properties_support: Optional[bool] = False
+
+
+class ShowMessageRequestClientCapabilities(Model):
+    message_action_item: Optional[ShowMessageRequestActionItem] = None
 
 
 class LogMessageParams(Model):

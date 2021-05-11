@@ -25,10 +25,11 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, Diagnostic, Model, PartialResultParams,
-                                              Range, TextDocumentIdentifier,
+                                              Range, ResolveSupportClientCapabilities,
+                                              TextDocumentIdentifier,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
@@ -57,10 +58,15 @@ class CodeActionClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
     code_action_literal_support: Optional[CodeActionLiteralSupportClientCapabilities] = None
     is_preferred_support: Optional[bool] = False
+    disabled_support: Optional[bool] = False
+    data_support: Optional[bool] = False
+    resolve_support: Optional[ResolveSupportClientCapabilities] = None
+    honors_change_annotations: Optional[bool] = False
 
 
 class CodeActionOptions(WorkDoneProgressOptions):
     code_action_kinds: Optional[List[CodeActionKind]] = None
+    resolve_provider: Optional[bool] = False
 
 
 class CodeActionRegistrationOptions(TextDocumentRegistrationOptions, CodeActionOptions):
@@ -78,10 +84,16 @@ class CodeActionParams(WorkDoneProgressParams, PartialResultParams):
     context: CodeActionContext
 
 
+class CodeActionDisabled(Model):
+    reason: str
+
+
 class CodeAction(Model):
     title: str
     kind: Optional[CodeActionKind] = None
     diagnostics: Optional[List[Diagnostic]] = None
     is_preferred: Optional[bool] = None
+    disabled: Optional[CodeActionDisabled] = None
     edit: Optional[WorkspaceEdit] = None
     command: Optional[Command] = None
+    data: Optional[Any] = None

@@ -19,32 +19,53 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - Rename --
+-- Language Features - Monikers --
 
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Optional
+from typing import Any, Dict, List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
+                                              StaticRegistrationOptions, TextDocumentIdentifier,
+                                              TextDocumentPositionParams,
+                                              TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class PrepareSupportDefaultBehavior(enum.IntEnum):
-    Identifier = 1
-
-
-class RenameClientCapabilities(Model):
+class MonikerClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
-    prepare_support: Optional[bool] = False
-    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior] = None
-    honors_change_annotations: Optional[bool] = False
 
 
-class RenameOptions(WorkDoneProgressOptions):
-    prepare_provider: Optional[bool] = False
+class MonikerOptions(WorkDoneProgressOptions):
+    pass
 
 
-class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    new_name: str
+class MonikerRegistrationOptions(TextDocumentRegistrationOptions, MonikerOptions):
+    pass
+
+
+class MonikerParams(TextDocumentPositionParams, WorkDoneProgressParams, PartialResultParams):
+    pass
+
+
+class UniquenessLevel(str, enum.Enum):
+    Document = 'document'
+    Project = 'project'
+    Group = 'group'
+    Scheme = 'scheme'
+    Global = 'global'
+
+
+class MonikerKind(str, enum.Enum):
+    Import = 'import'
+    Export = 'export'
+    Local = 'local'
+
+
+class Moniker(Model):
+    scheme: str
+    identifier: str
+    unique: UniquenessLevel
+    kind: Optional[MonikerKind] = None

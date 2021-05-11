@@ -37,6 +37,8 @@ class PublishDiagnosticsClientCapabilities(Model):
     related_information: Optional[bool] = False
     tag_support: Optional[PublishDiagnosticsTagSupportClientCapabilities] = None
     version_support: Optional[bool] = False
+    code_description_support: Optional[bool] = False
+    data_support: Optional[bool] = False
 
 
 class PublishDiagnosticsParams(Model):

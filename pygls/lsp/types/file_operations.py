@@ -19,32 +19,62 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - Rename --
+-- File Operations --
 
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Optional
+from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
-                                              WorkDoneProgressOptions, WorkDoneProgressParams)
-
-
-class PrepareSupportDefaultBehavior(enum.IntEnum):
-    Identifier = 1
+from pygls.lsp.types import TextDocumentRegistrationOptions
+from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticTag, Model, NumType
 
 
-class RenameClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    prepare_support: Optional[bool] = False
-    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior] = None
-    honors_change_annotations: Optional[bool] = False
+class FileOperationPatternKind(str, enum.Enum):
+    File = 'file'
+    Folder = 'folder'
 
 
-class RenameOptions(WorkDoneProgressOptions):
-    prepare_provider: Optional[bool] = False
+class FileOperationPatternOptions(Model):
+    ignore_case: Optional[bool] = False
 
 
-class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    new_name: str
+class FileOperationPattern(Model):
+	glob: str
+    matches: Optional[FileOperationPatternKind] = None
+    options: Optional[FileOperationPatternOptions] = None
+
+
+class FileOperationFilter(Model):
+    scheme: Optional[str] = None
+    pattern: FileOperationPattern
+
+
+class FileOperationRegistrationOptions(Model):
+    filters: List[FileOperationFilter]
+
+
+class FileCreate(Model):
+    uri: str
+
+
+class CreateFileParams(Model):
+    files: List[FileCreate]
+
+
+class FileRename(Model):
+    oldUri: str
+    newUri: str
+
+
+class RenameFilesParams(Model):
+    files: List[FileRename]
+
+
+class FileDelete(Model):
+    uri: str
+
+
+class RenameFilesParams(Model):
+    files: List[FileDelete]

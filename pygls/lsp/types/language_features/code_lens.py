@@ -35,6 +35,10 @@ class CodeLensClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
 
 
+class CodeLensWorkspaceClientCapabilities(Model):
+    refresh_support: Optional[bool] = False
+
+
 class CodeLensOptions(WorkDoneProgressOptions):
     resolve_provider: Optional[bool] = False
 

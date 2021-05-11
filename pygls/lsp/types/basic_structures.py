@@ -50,6 +50,9 @@ class Model(BaseModel):
     class Config:
         alias_generator = snake_to_camel
         allow_population_by_field_name = True
+        fields = {
+            'from_': 'from'
+        }
 
 
 class JsonRpcMessage(Model):
@@ -199,6 +202,15 @@ class Location(Model):
 
     def __repr__(self):
         return f"{self.uri}:{self.range!r}"
+
+
+class RegularExpressionsClientCapabilities(Model):
+    engine: str
+    version: Optional[str] = None
+
+
+class ResolveSupportClientCapabilities(Model):
+    properties: List[str]
 
 
 class LocationLink(Model):

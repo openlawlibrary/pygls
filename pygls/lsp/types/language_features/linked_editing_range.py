@@ -19,32 +19,35 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - Rename --
+-- Language Features - Linked Editing Range --
 
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-import enum
-from typing import Optional
+from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
+from pygls.lsp.types.basic_structures import (Model, Range, StaticRegistrationOptions,
+                                              TextDocumentPositionParams,
+                                              TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class PrepareSupportDefaultBehavior(enum.IntEnum):
-    Identifier = 1
-
-
-class RenameClientCapabilities(Model):
+class LinkedEditingRangeClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
-    prepare_support: Optional[bool] = False
-    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior] = None
-    honors_change_annotations: Optional[bool] = False
 
 
-class RenameOptions(WorkDoneProgressOptions):
-    prepare_provider: Optional[bool] = False
+class LinkedEditingRangeOptions(WorkDoneProgressOptions):
+    pass
 
 
-class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):
-    new_name: str
+class LinkedEditingRangeRegistrationOptions(TextDocumentRegistrationOptions, LinkedEditingRangeOptions, StaticRegistrationOptions):
+    pass
+
+
+class LinkedEditingRangeParams(TextDocumentPositionParams, WorkDoneProgressParams):
+    pass
+
+
+class LinkedEditingRanges(Model):
+    ranges: List[Range]
+    word_pattern: Optional[str] = None
