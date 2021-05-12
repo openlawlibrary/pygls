@@ -38,7 +38,8 @@ from pygls.feature_manager import (FeatureManager, assign_help_attrs, get_help_a
                                    is_thread_function)
 from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
                        get_method_params_type, get_method_return_type, is_instance)
-from pygls.lsp.methods import (CLIENT_REGISTER_CAPABILITY, CLIENT_UNREGISTER_CAPABILITY, EXIT,
+from pygls.lsp.methods import (CANCEL_REQUEST, CLIENT_REGISTER_CAPABILITY,
+                               CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
                                WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
                                WORKSPACE_EXECUTE_COMMAND)
@@ -186,9 +187,6 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     This class provides bidirectional communication which is needed for LSP.
     """
-
-    CANCEL_REQUEST = '$/cancelRequest'
-
     CHARSET = 'utf-8'
     CONTENT_TYPE = 'application/vscode-jsonrpc'
 
@@ -322,7 +320,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _handle_notification(self, method_name, params):
         """Handles a notification from the client."""
-        if method_name == JsonRPCProtocol.CANCEL_REQUEST:
+        if method_name == CANCEL_REQUEST:
             self._handle_cancel_notification(params.id)
             return
 

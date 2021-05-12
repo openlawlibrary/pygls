@@ -20,6 +20,12 @@ LSP Specification:
     https://microsoft.github.io/language-server-protocol/specification
 """
 
+# Special methods
+CANCEL_REQUEST = '$/cancelRequest'
+PROGRESS_NOTIFICATION = '$/progress'
+LOG_TRACE_NOTIFICATION = '$/logTrace'
+SET_TRACE_NOTIFICATION = '$/setTrace'
+
 # Client
 CLIENT_REGISTER_CAPABILITY = 'client/registerCapability'
 CLIENT_UNREGISTER_CAPABILITY = 'client/unregisterCapability'

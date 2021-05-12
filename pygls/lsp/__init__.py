@@ -39,6 +39,11 @@ __LSP_VERSION__ = "3.15"
 
 # TODO: support partial-results types
 LSP_METHODS_MAP = {
+    # Special methods
+    CANCEL_REQUEST: (None, CancelParams, None, ),
+    PROGRESS_NOTIFICATION: (None, ProgressParams, None, ),
+    LOG_TRACE_NOTIFICATION: (None, None, LogTraceParams, ),
+    SET_TRACE_NOTIFICATION: (None, SetTraceParams, None, ),
     # General messages
     INITIALIZE: (None, InitializeParams, InitializeResult, ),
     INITIALIZED: (None, InitializedParams, None, ),

@@ -204,6 +204,36 @@ class Location(Model):
         return f"{self.uri}:{self.range!r}"
 
 
+class _TraceValue(str, enum.Enum):
+    Off = 'off'
+    Messages = 'messages'
+    Verbose = 'verbose'
+
+
+TraceValue = NewType('TraceValue', _TraceValue)
+
+
+class CancelParams(Model):
+    id: Union[int, str]
+
+
+ProgressToken = Union[int, str]
+
+
+class ProgressParams(Model):
+    token: ProgressToken
+    value: Any
+
+
+class LogTraceParams(Model):
+    message: str
+    verbose: Optional[bool]
+
+
+class SetTraceParams(Model):
+    value: TraceValue
+
+
 class RegularExpressionsClientCapabilities(Model):
     engine: str
     version: Optional[str] = None
