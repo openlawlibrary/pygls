@@ -129,12 +129,12 @@ class JsonRpcReservedErrorRangeEnd(JsonRpcException):
     MESSAGE = 'jsonrpcReservedErrorRangeEnd'
 
 
-class JsonRpcReservedErrorRangeStart(JsonRpcException):
+class LspReservedErrorRangeStart(JsonRpcException):
     CODE = -32899
     MESSAGE = 'lspReservedErrorRangeStart'
 
 
-class JsonRpcReservedErrorRangeEnd(JsonRpcException):
+class LspReservedErrorRangeEnd(JsonRpcException):
     CODE = -32800
     MESSAGE = 'lspReservedErrorRangeEnd'
 

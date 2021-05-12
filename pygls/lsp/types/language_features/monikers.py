@@ -25,10 +25,9 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional
 
-from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
-                                              StaticRegistrationOptions, TextDocumentIdentifier,
+from pygls.lsp.types.basic_structures import (Model, PartialResultParams,
                                               TextDocumentPositionParams,
                                               TextDocumentRegistrationOptions,
                                               WorkDoneProgressOptions, WorkDoneProgressParams)

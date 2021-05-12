@@ -27,8 +27,7 @@ that.
 import enum
 from typing import List, Optional
 
-from pygls.lsp.types import TextDocumentRegistrationOptions
-from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticTag, Model, NumType
+from pygls.lsp.types.basic_structures import Model
 
 
 class FileOperationPatternKind(str, enum.Enum):

@@ -28,7 +28,6 @@ import enum
 from typing import List, Optional
 
 from pygls.lsp.types.basic_structures import URI, Model, NumType, ProgressToken, Range
-from pygls.lsp.types.language_features.formatting import FormattingOptions
 
 
 class MessageType(enum.IntEnum):
