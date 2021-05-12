@@ -16,10 +16,11 @@
 ############################################################################
 from typing import Any, List, Union
 
+from typeguard import check_type
+
 from pygls.exceptions import MethodTypeNotRegisteredError
 from pygls.lsp.methods import *
 from pygls.lsp.types import *
-from typeguard import check_type
 
 __LSP_VERSION__ = "3.15"
 
@@ -45,6 +46,7 @@ LSP_METHODS_MAP = {
     EXIT: (None, None, None, ),
     # Window
     WINDOW_SHOW_MESSAGE: (None, None, ShowMessageParams, ),
+    WINDOW_SHOW_DOCUMENT: (None, ShowDocumentParams, ShowDocumentResult, ),
     WINDOW_SHOW_MESSAGE_REQUEST: (None, None, ShowMessageRequestParams, ),
     WINDOW_LOG_MESSAGE: (None, None, LogMessageParams, ),
     WINDOW_WORK_DONE_PROGRESS_CREATE: (None, None, WorkDoneProgressCreateParams, ),
@@ -55,15 +57,32 @@ LSP_METHODS_MAP = {
     CLIENT_REGISTER_CAPABILITY: (None, None, RegistrationParams, ),
     CLIENT_UNREGISTER_CAPABILITY: (None, None, UnregistrationParams, ),
     # Workspace
-    WORKSPACE_FOLDERS: (None, Optional[List[WorkspaceFolder]], None, ),
-    WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS: (None, DidChangeWorkspaceFoldersParams, None, ),
-    WORKSPACE_DID_CHANGE_CONFIGURATION: (None, DidChangeConfigurationParams, None, ),
-    WORKSPACE_CONFIGURATION: (None, List[Any], ConfigurationParams, ),
-    WORKSPACE_DID_CHANGE_WATCHED_FILES: (None, DidChangeWatchedFilesParams, None, ),
-    WORKSPACE_SYMBOL: (None, WorkspaceSymbolParams, Optional[List[SymbolInformation]], ),
-    WORKSPACE_EXECUTE_COMMAND: (None, ExecuteCommandParams, Optional[Any], ),
     WORKSPACE_APPLY_EDIT: (None, ApplyWorkspaceEditResponse, ApplyWorkspaceEditParams, ),
+    WORKSPACE_CODE_LENS_REFRESH: (None, None, None),
+    WORKSPACE_CONFIGURATION: (None, List[Any], ConfigurationParams, ),
+    WORKSPACE_DID_CHANGE_CONFIGURATION: (None, DidChangeConfigurationParams, None, ),
+    WORKSPACE_DID_CHANGE_WATCHED_FILES: (None, DidChangeWatchedFilesParams, None, ),
+    WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS: (None, DidChangeWorkspaceFoldersParams, None, ),
+    WORKSPACE_EXECUTE_COMMAND: (None, ExecuteCommandParams, Optional[Any], ),
+    WORKSPACE_FOLDERS: (None, Optional[List[WorkspaceFolder]], None, ),
+    WORKSPACE_SEMANTIC_TOKENS_REFRESH: (None, None, None),
+    WORKSPACE_SYMBOL: (None, WorkspaceSymbolParams, Optional[List[SymbolInformation]], ),
     # Text Document Synchronization
+    TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE: (
+        Union[CallHierarchyOptions, CallHierarchyRegistrationOptions],
+        CallHierarchyPrepareParams,
+        Optional[List[CallHierarchyItem]],
+    ),
+    TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS: (
+        None,
+        CallHierarchyIncomingCallsParams,
+        Optional[List[CallHierarchyIncomingCall]],
+    ),
+    TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS: (
+        None,
+        CallHierarchyOutgoingCallsParams,
+        Optional[List[CallHierarchyOutgoingCall]],
+    ),
     TEXT_DOCUMENT_DID_OPEN: (None, DidOpenTextDocumentParams, None, ),
     TEXT_DOCUMENT_DID_CHANGE: (None, DidChangeTextDocumentParams, None, ),
     TEXT_DOCUMENT_WILL_SAVE: (None, WillSaveTextDocumentParams, None, ),
@@ -73,7 +92,64 @@ LSP_METHODS_MAP = {
         DidSaveTextDocumentParams,
         None,
     ),
+    TEXT_DOCUMENT_LINKED_EDITING_RANGE: (
+        Union[LinkedEditingRangeOptions, LinkedEditingRangeRegistrationOptions],
+        LinkedEditingRangeParams,
+        Optional[LinkedEditingRanges],
+    ),
+    TEXT_DOCUMENT_MONIKER: (
+        Union[MonikerOptions, MonikerRegistrationOptions],
+        MonikerParams,
+        Optional[List[Moniker]],
+    ),
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL: (
+        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        SemanticTokensParams,
+        Union[SemanticTokensPartialResult, Optional[SemanticTokens]],
+    ),
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA: (
+        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        SemanticTokensDeltaParams,
+        Union[SemanticTokensDeltaPartialResult, Optional[Union[SemanticTokens, SemanticTokensDelta]]],
+    ),
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE: (
+        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        SemanticTokensRangeParams,
+        Union[SemanticTokensPartialResult, Optional[SemanticTokens]],
+
+    ),
     TEXT_DOCUMENT_DID_CLOSE: (None, DidCloseTextDocumentParams, None, ),
+    # File operations
+    WORKSPACE_WILL_CREATE_FILES: (
+        FileOperationRegistrationOptions,
+        CreateFilesParams,
+        Optional[WorkspaceEdit],
+    ),
+    WORKSPACE_DID_CREATE_FILES: (
+        FileOperationRegistrationOptions,
+        CreateFilesParams,
+        None,
+    ),
+    WORKSPACE_WILL_RENAME_FILES: (
+        FileOperationRegistrationOptions,
+        RenameFilesParams,
+        Optional[WorkspaceEdit],
+    ),
+    WORKSPACE_DID_RENAME_FILES: (
+        FileOperationRegistrationOptions,
+        RenameFilesParams,
+        None,
+    ),
+    WORKSPACE_WILL_DELETE_FILES: (
+        FileOperationRegistrationOptions,
+        DeleteFilesParams,
+        Optional[WorkspaceEdit],
+    ),
+    WORKSPACE_DID_DELETE_FILES: (
+        FileOperationRegistrationOptions,
+        DeleteFilesParams,
+        None,
+    ),
     # Diagnostics notification
     TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS: (None, None, PublishDiagnosticsParams, ),
     # Language features
@@ -133,9 +209,14 @@ LSP_METHODS_MAP = {
         Union[List[DocumentSymbol], List[SymbolInformation], None],
     ),
     CODE_ACTION: (
-        Union[CodeActionOptions, TextDocumentRegistrationOptions],
+        Union[CodeActionOptions, CodeActionRegistrationOptions],
         CodeActionParams,
         Optional[List[Union[Command, CodeAction]]],
+    ),
+    CODE_ACTION_RESOLVE: (
+        None,
+        CodeAction,
+        CodeAction,
     ),
     CODE_LENS: (
         CodeLensOptions,

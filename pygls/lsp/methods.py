@@ -35,7 +35,7 @@ SHUTDOWN = 'shutdown'
 
 # Language Features
 CODE_ACTION = 'textDocument/codeAction'
-CODE_ACTION_RESOVLVE = 'codeAction/resolve'
+CODE_ACTION_RESOLVE = 'codeAction/resolve'
 CODE_LENS = 'textDocument/codeLens'
 CODE_LENS_RESOLVE = 'codeLens/resolve'
 COLOR_PRESENTATION = 'textDocument/colorPresentation'

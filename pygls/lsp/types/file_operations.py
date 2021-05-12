@@ -41,7 +41,7 @@ class FileOperationPatternOptions(Model):
 
 
 class FileOperationPattern(Model):
-	glob: str
+    glob: str
     matches: Optional[FileOperationPatternKind] = None
     options: Optional[FileOperationPatternOptions] = None
 
@@ -59,7 +59,7 @@ class FileCreate(Model):
     uri: str
 
 
-class CreateFileParams(Model):
+class CreateFilesParams(Model):
     files: List[FileCreate]
 
 
@@ -76,5 +76,5 @@ class FileDelete(Model):
     uri: str
 
 
-class RenameFilesParams(Model):
+class DeleteFilesParams(Model):
     files: List[FileDelete]
