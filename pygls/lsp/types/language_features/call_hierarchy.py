@@ -39,7 +39,9 @@ class CallHierarchyClientCapabilities(Model):
 
 
 class CallHierarchyOptions(WorkDoneProgressOptions):
-    pass
+
+    def __eq__(self, other: Any) -> bool:
+        return self.__dict__ == other.__dict__
 
 
 class CallHierarchyRegistrationOptions(TextDocumentRegistrationOptions, CallHierarchyOptions, StaticRegistrationOptions):

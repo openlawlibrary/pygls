@@ -80,7 +80,11 @@ TEXT_DOCUMENT_DID_OPEN = 'textDocument/didOpen'
 TEXT_DOCUMENT_DID_SAVE = 'textDocument/didSave'
 TEXT_DOCUMENT_LINKED_EDITING_RANGE = 'textDocument/linkedEditingRange'
 TEXT_DOCUMENT_MONIKER = 'textDocument/moniker'
-TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL = 'textDocument/semanticTokens/full'
+# NOTE: From official specs regarding semantic tokens:
+# Since the registration option handles range, full and delta requests the method used to
+# register for semantic tokens requests is textDocument/semanticTokens
+# and not one of the specific methods described below.
+TEXT_DOCUMENT_SEMANTIC_TOKENS = 'textDocument/semanticTokens'
 TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL = 'textDocument/semanticTokens/full'
 TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA = 'textDocument/semanticTokens/full/delta'
 TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE = 'textDocument/semanticTokens/range'

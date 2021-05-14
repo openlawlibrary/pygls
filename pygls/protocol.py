@@ -27,7 +27,7 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import partial
 from itertools import zip_longest
-from typing import List
+from typing import Callable, List, Optional
 
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.constants import ATTR_FEATURE_TYPE
@@ -41,8 +41,9 @@ from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCRespon
 from pygls.lsp.methods import (CANCEL_REQUEST, CLIENT_REGISTER_CAPABILITY,
                                CLIENT_UNREGISTER_CAPABILITY, EXIT,
                                TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
-                               WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
-                               WORKSPACE_EXECUTE_COMMAND)
+                               WINDOW_SHOW_DOCUMENT, WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT,
+                               WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND,
+                               WORKSPACE_SEMANTIC_TOKENS_REFRESH)
 from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
                              DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
                              DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -50,6 +51,9 @@ from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditRespons
                              LogMessageParams, MessageType, PublishDiagnosticsParams,
                              RegistrationParams, ShowMessageParams, UnregistrationParams,
                              WorkspaceEdit)
+from pygls.lsp.types.basic_structures import ConfigCallbackType
+from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
+from pygls.lsp.types.workspace import ConfigurationParams
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
@@ -573,18 +577,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
                 lsp_name = to_lsp_name(name[3:])
                 self.fm.add_builtin_feature(lsp_name, attr)
 
-    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> \
-            ApplyWorkspaceEditResponse:
+    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(WORKSPACE_APPLY_EDIT,
                                  ApplyWorkspaceEditParams(edit=edit, label=label))
 
-    def bf_exit(self, *args):
+    def bf_exit(self, *args) -> None:
         """Stops the server process."""
         self.transport.close()
         sys.exit(0 if self._shutdown else 1)
 
-    def bf_initialize(self, params: InitializeParams):
+    def bf_initialize(self, params: InitializeParams) -> InitializeResult:
         """Method that initializes language server.
         It will compute and return server capabilities based on
         registered features.
@@ -613,11 +616,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         return InitializeResult(capabilities=self.server_capabilities)
 
-    def bf_initialized(self, *args):
+    def bf_initialized(self, *args) -> None:
         """Notification received when client and server are connected."""
         pass
 
-    def bf_shutdown(self, *args):
+    def bf_shutdown(self, *args) -> None:
         """Request from client which asks server to shutdown."""
         for future in self._client_request_futures.values():
             future.cancel()
@@ -628,27 +631,23 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self._shutdown = True
         return None
 
-    def bf_text_document__did_change(self,
-                                     params: DidChangeTextDocumentParams):
+    def bf_text_document__did_change(self, params: DidChangeTextDocumentParams) -> None:
         """Updates document's content.
         (Incremental(from server capabilities); not configurable for now)
         """
         for change in params.content_changes:
             self.workspace.update_document(params.text_document, change)
 
-    def bf_text_document__did_close(self,
-                                    params: DidCloseTextDocumentParams):
+    def bf_text_document__did_close(self, params: DidCloseTextDocumentParams) -> None:
         """Removes document from workspace."""
         self.workspace.remove_document(params.text_document.uri)
 
-    def bf_text_document__did_open(self,
-                                   params: DidOpenTextDocumentParams):
+    def bf_text_document__did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Puts document to the workspace."""
         self.workspace.put_document(params.text_document)
 
     def bf_workspace__did_change_workspace_folders(
-            self,
-            params: DidChangeWorkspaceFoldersParams):
+            self, params: DidChangeWorkspaceFoldersParams) -> None:
         """Adds/Removes folders from the workspace."""
         logger.info('Workspace folders changed: %s', params)
 
@@ -661,18 +660,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if f_remove:
                 self.workspace.remove_folder(f_remove.uri)
 
-    def bf_workspace__execute_command(self,
-                                      params: ExecuteCommandParams,
-                                      msg_id):
+    def bf_workspace__execute_command(self, params: ExecuteCommandParams, msg_id: str) -> None:
         """Executes commands with passed arguments and returns a value."""
         cmd_handler = self.fm.commands[params.command]
         self._execute_request(msg_id, cmd_handler, params.arguments)
 
-    def get_configuration(self, params, callback):
+    def get_configuration(self, params: ConfigurationParams,
+                          callback: Optional[ConfigCallbackType] = None) -> Future:
         """Sends configuration request to the client.
 
         Args:
-            params(dict): ConfigurationParams from lsp specs
+            params(ConfigurationParams): ConfigurationParams from lsp specs
             callback(callable): Callabe which will be called after
                                 response from the client is received
         Returns:
@@ -681,22 +679,23 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(WORKSPACE_CONFIGURATION, params, callback)
 
-    def get_configuration_async(self, params):
+    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Calls `get_configuration` method but designed to use with coroutines
 
         Args:
-            params(dict): ConfigurationParams from lsp specs
+            params(ConfigurationParams): ConfigurationParams from lsp specs
         Returns:
             asyncio.Future that can be awaited
         """
-        return asyncio.wrap_future(self.get_configuration(params, None))
+        return asyncio.wrap_future(self.get_configuration(params))
 
-    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
+    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]) -> None:
         """Sends diagnostic notification to the client."""
         self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
                     PublishDiagnosticsParams(uri=doc_uri, diagnostics=diagnostics))
 
-    def register_capability(self, params: RegistrationParams, callback):
+    def register_capability(self, params: RegistrationParams,
+                            callback: Optional[Callable[[], None]] = None) -> Future:
         """Register a new capability on the client.
 
         Args:
@@ -709,18 +708,66 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(CLIENT_REGISTER_CAPABILITY, params, callback)
 
-    def register_capability_async(self, params: RegistrationParams):
+    def register_capability_async(self, params: RegistrationParams) -> asyncio.Future:
         """Register a new capability on the client.
 
         Args:
             params(RegistrationParams): RegistrationParams from lsp specs
-            callback(callable): Callabe which will be called after
-                                response from the client is received
+
         Returns:
             asyncio.Future object that will be resolved once a
             response has been received
         """
         return asyncio.wrap_future(self.register_capability(params, None))
+
+    def semantic_tokens_refresh(self, callback: Optional[Callable[[], None]] = None) -> Future:
+        """Requesting a refresh of all semantic tokens.
+
+        Args:
+            callback(callable): Callabe which will be called after
+                                response from the client is received
+
+        Returns:
+            concurrent.futures.Future object that will be resolved once a
+            response has been received
+        """
+        return self.send_request(WORKSPACE_SEMANTIC_TOKENS_REFRESH, callback=callback)
+
+    def semantic_tokens_refresh_async(self) -> asyncio.Future:
+        """Requesting a refresh of all semantic tokens.
+
+        Returns:
+            asyncio.Future object that will be resolved once a
+            response has been received
+        """
+        return asyncio.wrap_future(self.semantic_tokens_refresh(None))
+
+    def show_document(self, params: ShowDocumentParams,
+                      callback: Optional[ShowDocumentCallbackType] = None) -> Future:
+        """Display a particular document in the user interface.
+
+        Args:
+            params(ShowDocumentParams): ShowDocumentParams from lsp specs
+            callback(callable): Callabe which will be called after
+                                response from the client is received
+
+        Returns:
+            concurrent.futures.Future object that will be resolved once a
+            response has been received
+        """
+        return self.send_request(WINDOW_SHOW_DOCUMENT, params, callback)
+
+    def show_document_async(self, params: ShowDocumentParams) -> asyncio.Future:
+        """Display a particular document in the user interface.
+
+        Args:
+            params(ShowDocumentParams): ShowDocumentParams from lsp specs
+
+        Returns:
+            asyncio.Future object that will be resolved once a
+            response has been received
+        """
+        return asyncio.wrap_future(self.show_document(params, None))
 
     def show_message(self, message, msg_type=MessageType.Info):
         """Sends message to the client to display message."""
@@ -730,7 +777,8 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Sends message to the client's output channel."""
         self.notify(WINDOW_LOG_MESSAGE, LogMessageParams(type=msg_type, message=message))
 
-    def unregister_capability(self, params: UnregistrationParams, callback):
+    def unregister_capability(self, params: UnregistrationParams,
+                              callback: Optional[Callable[[], None]] = None) -> Future:
         """Unregister a new capability on the client.
 
         Args:
@@ -743,7 +791,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(CLIENT_UNREGISTER_CAPABILITY, params, callback)
 
-    def unregister_capability_async(self, params: UnregistrationParams):
+    def unregister_capability_async(self, params: UnregistrationParams) -> asyncio.Future:
         """Unregister a new capability on the client.
 
         Args:

@@ -79,7 +79,7 @@ class TokenFormat(str, enum.Enum):
     Relative = 'relative'
 
 
-class SemanticTokensLegend(str, enum.Enum):
+class SemanticTokensLegend(Model):
     token_types: List[str]
     token_modifiers: List[str]
 
@@ -94,7 +94,7 @@ class SemanticTokensRequests(Model):
 
 
 class SemanticTokensClientCapabilities(Model):
-    requests: List[SemanticTokensRequests]
+    requests: SemanticTokensRequests
     token_types: List[str]
     token_modifiers: List[str]
     formats: List[TokenFormat]

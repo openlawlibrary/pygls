@@ -32,6 +32,7 @@ from pygls.lsp.types.basic_structures import (Model, NumType, RegularExpressions
                                               WorkDoneProgressParams,
                                               WorkspaceEditClientCapabilities)
 from pygls.lsp.types.diagnostics import PublishDiagnosticsClientCapabilities
+from pygls.lsp.types.file_operations import FileOperationRegistrationOptions
 from pygls.lsp.types.language_features import (CallHierarchyClientCapabilities,
                                                CallHierarchyOptions,
                                                CallHierarchyRegistrationOptions,
@@ -186,13 +187,12 @@ class TextDocumentSyncOptionsServerCapabilities(Model):
 
 
 class WorkspaceFileOperationsServerCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    did_create: Optional[bool] = False
-    will_create: Optional[bool] = False
-    did_rename: Optional[bool] = False
-    will_rename: Optional[bool] = False
-    did_delete: Optional[bool] = False
-    will_delete: Optional[bool] = False
+    did_create: Optional[FileOperationRegistrationOptions] = None
+    will_create: Optional[FileOperationRegistrationOptions] = None
+    did_rename: Optional[FileOperationRegistrationOptions] = None
+    will_rename: Optional[FileOperationRegistrationOptions] = None
+    did_delete: Optional[FileOperationRegistrationOptions] = None
+    will_delete: Optional[FileOperationRegistrationOptions] = None
 
 
 class WorkspaceServerCapabilities(Model):

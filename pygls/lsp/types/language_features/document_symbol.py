@@ -81,7 +81,7 @@ class DocumentSymbolClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
     symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
     hierarchical_document_symbol_support: Optional[bool] = False
-    tag_support: Optional[SymbolTag] = None
+    tag_support: Optional[WorkspaceCapabilitiesTagSupport] = None
     label_support: Optional[bool] = False
 
 

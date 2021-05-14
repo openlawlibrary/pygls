@@ -25,7 +25,7 @@ Class attributes are named with camel-case notation because client is expecting
 that.
 """
 import enum
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from pygls.lsp.types.basic_structures import URI, Model, NumType, ProgressToken, Range
 
@@ -86,3 +86,6 @@ class WorkDoneProgressCreateParams(Model):
 
 class WorkDoneProgressCancelParams(Model):
     token: ProgressToken
+
+
+ShowDocumentCallbackType = Callable[[ShowDocumentResult], None]

@@ -36,7 +36,7 @@ ProgressToken = Union[int, str]
 URI = NewType('URI', str)
 T = TypeVar('T')
 
-ConfigCallbackType = Optional[Callable[[List[Any]], None]]
+ConfigCallbackType = Callable[[List[Any]], None]
 
 
 def snake_to_camel(string: str) -> str:
@@ -215,9 +215,6 @@ TraceValue = NewType('TraceValue', _TraceValue)
 
 class CancelParams(Model):
     id: Union[int, str]
-
-
-ProgressToken = Union[int, str]
 
 
 class ProgressParams(Model):
