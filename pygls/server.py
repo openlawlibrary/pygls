@@ -29,6 +29,7 @@ from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, Con
                              ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
                              WorkspaceEdit)
 from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
+from pygls.progress import Progress
 from pygls.protocol import LanguageServerProtocol
 from pygls.workspace import Workspace
 
@@ -282,6 +283,11 @@ class LanguageServer(Server):
     def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
+
+    @property
+    def progress(self) -> Progress:
+        """Gets the object to manage client's progress bar."""
+        return self.lsp.progress
 
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""

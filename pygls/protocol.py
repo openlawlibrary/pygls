@@ -567,6 +567,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         self.workspace = None
 
+        from pygls.progress import Progress
+        self.progress = Progress(self)
+
         self._register_builtin_features()
 
     def _register_builtin_features(self):
