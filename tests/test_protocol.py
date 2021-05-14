@@ -19,8 +19,10 @@ from concurrent.futures import Future
 from functools import partial
 from pathlib import Path
 from typing import Optional
+from unittest.mock import Mock
 
 import pytest
+
 from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
 from pygls.lsp import Model, get_method_params_type
 from pygls.lsp.types import ClientCapabilities, InitializeParams, InitializeResult
@@ -264,6 +266,19 @@ def test_initialize_should_return_server_capabilities(client_server):
     server_capabilities = server.lsp.bf_initialize(params)
 
     assert isinstance(server_capabilities, InitializeResult)
+
+
+def test_ignore_unknown_notification(client_server):
+    _, server = client_server
+
+    fn = server.lsp._execute_notification
+    server.lsp._execute_notification = Mock()
+
+    server.lsp._handle_notification("random/notification", None)
+    assert not server.lsp._execute_notification.called
+
+    # Remove mock
+    server.lsp._execute_notification = fn
 
 
 def test_to_lsp_name():

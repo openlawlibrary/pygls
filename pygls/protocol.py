@@ -331,7 +331,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         try:
             handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
-        except KeyError:
+        except (KeyError, JsonRpcMethodNotFound):
             logger.warning('Ignoring notification for unknown method "%s"', method_name)
         except Exception:
             logger.exception('Failed to handle notification "%s": %s', method_name, params)
