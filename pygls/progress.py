@@ -1,5 +1,6 @@
 import asyncio
 from concurrent.futures import Future
+from typing import Dict
 
 from pygls.lsp.methods import (PROGRESS_NOTIFICATION, WINDOW_WORK_DONE_PROGRESS_CANCEL,
                                WINDOW_WORK_DONE_PROGRESS_CREATE)
@@ -14,7 +15,7 @@ class Progress:
     def __init__(self, lsp: LanguageServerProtocol) -> None:
         self._lsp = lsp
 
-        self.tokens = {}
+        self.tokens: Dict[ProgressToken, None] = {}
 
     def create(self, token: ProgressToken, callback=None) -> Future:
         if token in self.tokens:
