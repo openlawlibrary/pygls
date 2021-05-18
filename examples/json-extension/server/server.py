@@ -159,16 +159,16 @@ async def progress(ls: JsonLanguageServer, *args):
     # Create
     await ls.progress.create_async(token)
     # Begin
-    ls.progress.begin(token, WorkDoneProgressBegin(title='Begin...', percentage=0))
+    ls.progress.begin(token, WorkDoneProgressBegin(title='Indexing', percentage=0))
     # Report
     for i in range(1, 10):
         ls.progress.report(
             token,
-            WorkDoneProgressReport(message=f'Message {i}', percentage= i * 10),
+            WorkDoneProgressReport(message=f'{i * 10}%', percentage= i * 10),
         )
         await asyncio.sleep(2)
     # End
-    ls.progress.end(token, WorkDoneProgressEnd(message='End...'))
+    ls.progress.end(token, WorkDoneProgressEnd(message='Finished'))
 
 
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)

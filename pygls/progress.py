@@ -18,7 +18,7 @@ class Progress:
 
     def create(self, token: ProgressToken, callback=None) -> Future:
         if token in self.tokens:
-            raise Exception("Token is already registered!") # TODO
+            raise Exception("Token is already registered!")  # TODO
 
         def on_created(*args, **kwargs):
             self.tokens[token] = None
@@ -28,7 +28,7 @@ class Progress:
         return self._lsp.send_request(
             WINDOW_WORK_DONE_PROGRESS_CREATE,
             WorkDoneProgressCreateParams(token=token),
-            callback,
+            on_created,
         )
 
     async def create_async(self, token: ProgressToken) -> asyncio.Future:
@@ -39,7 +39,6 @@ class Progress:
         self.tokens[token] = None
 
         return result
-
 
     def cancel(self, token: ProgressToken, callback=None) -> Future:
         def on_canceled(*args, **kwargs):
@@ -71,5 +70,3 @@ class Progress:
 
     def end(self, token: ProgressToken, value: WorkDoneProgressEnd) -> None:
         self._lsp.notify(PROGRESS_NOTIFICATION, ProgressParams(token=token, value=value))
-
-

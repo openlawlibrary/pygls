@@ -54,6 +54,14 @@ class Model(BaseModel):
             'from_': 'from'
         }
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+        # Serialize (.json()) fields that has default value which is not None
+        for name, field in self.__fields__.items():
+            if getattr(field, 'default', None) is not None:
+                self.__fields_set__.add(name)
+
 
 class JsonRpcMessage(Model):
     """A base json rpc message defined by LSP."""

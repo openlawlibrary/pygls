@@ -259,50 +259,63 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_workspace_capabilities(self):
+        # File operations
+        file_operations = WorkspaceFileOperationsServerCapabilities()
+
         will_create = (
             self.client_capabilities.get_capability('workspace.fileOperations.willCreate')
             if WORKSPACE_WILL_CREATE_FILES in self.features
             else None
         )
+        if will_create is not None:
+            file_operations.will_create = will_create
+
         did_create = (
             self.client_capabilities.get_capability('workspace.fileOperations.didCreate')
             if WORKSPACE_DID_CREATE_FILES in self.features
             else None
         )
+        if did_create is not None:
+            file_operations.did_create = did_create
+
         will_rename = (
             self.client_capabilities.get_capability('workspace.fileOperations.willRename')
             if WORKSPACE_WILL_RENAME_FILES in self.features
             else None
         )
+        if will_rename is not None:
+            file_operations.will_rename = will_rename
+
         did_rename = (
             self.client_capabilities.get_capability('workspace.fileOperations.didRename')
             if WORKSPACE_DID_RENAME_FILES in self.features
             else None
         )
+        if did_rename is not None:
+            file_operations.did_rename = did_rename
+
         will_delete = (
             self.client_capabilities.get_capability('workspace.fileOperations.willDelete')
             if WORKSPACE_WILL_DELETE_FILES in self.features
             else None
         )
+        if will_delete is not None:
+            file_operations.will_delete = will_delete
+
         did_delete = (
             self.client_capabilities.get_capability('workspace.fileOperations.didDelete')
             if WORKSPACE_DID_DELETE_FILES in self.features
             else None
         )
+        if did_delete is not None:
+            file_operations.did_delete = did_delete
 
         self.server_cap.workspace = WorkspaceServerCapabilities(
             workspace_folders=WorkspaceFoldersServerCapabilities(
                 supported=True,
                 change_notifications=True,
             ),
-            file_operations=WorkspaceFileOperationsServerCapabilities(
-                will_create=will_create,
-                did_create=did_create,
-                will_rename=will_rename,
-                did_rename=did_rename,
-                will_delete=will_delete,
-                did_delete=did_delete,
-            ),
+            file_operations=file_operations,
         )
         return self
 
