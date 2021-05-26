@@ -38,10 +38,13 @@ from pygls.feature_manager import (FeatureManager, assign_help_attrs, get_help_a
 from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
                        get_method_params_type, get_method_return_type, is_instance)
 from pygls.lsp.methods import (CANCEL_REQUEST, CLIENT_REGISTER_CAPABILITY,
-                               CLIENT_UNREGISTER_CAPABILITY, EXIT,
-                               TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, WINDOW_LOG_MESSAGE,
-                               WINDOW_SHOW_DOCUMENT, WINDOW_SHOW_MESSAGE, WORKSPACE_APPLY_EDIT,
-                               WORKSPACE_CONFIGURATION, WORKSPACE_EXECUTE_COMMAND,
+                               CLIENT_UNREGISTER_CAPABILITY, EXIT, INITIALIZE, INITIALIZED,
+                               LOG_TRACE_NOTIFICATION, SET_TRACE_NOTIFICATION, SHUTDOWN,
+                               TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_CLOSE,
+                               TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+                               WINDOW_LOG_MESSAGE, WINDOW_SHOW_DOCUMENT, WINDOW_SHOW_MESSAGE,
+                               WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
+                               WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS, WORKSPACE_EXECUTE_COMMAND,
                                WORKSPACE_SEMANTIC_TOKENS_REFRESH)
 from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
                              DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
@@ -50,7 +53,8 @@ from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditRespons
                              LogMessageParams, MessageType, PublishDiagnosticsParams,
                              RegistrationParams, ShowMessageParams, UnregistrationParams,
                              WorkspaceEdit)
-from pygls.lsp.types.basic_structures import ConfigCallbackType
+from pygls.lsp.types.basic_structures import (ConfigCallbackType, LogTraceParams, SetTraceParams,
+                                              Trace)
 from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
 from pygls.lsp.types.workspace import ConfigurationParams
 from pygls.uris import from_fs_path
@@ -150,29 +154,6 @@ def deserialize_message(data, get_params_type=get_method_params_type):
             return JsonRPCNotification(**data)
 
     return data
-
-
-def to_lsp_name(method_name):
-    """Convert method name to LSP real name
-
-    Example:
-        text_document__did_open -> textDocument/didOpen
-    """
-    method_name = method_name.replace('__', '/')
-    m_chars = list(method_name)
-    m_replaced = []
-
-    for i, ch in enumerate(m_chars):
-        if ch == '_':
-            continue
-
-        if m_chars[i - 1] == '_':
-            m_replaced.append(ch.capitalize())
-            continue
-
-        m_replaced.append(ch)
-
-    return ''.join(m_replaced)
 
 
 class JsonRPCProtocol(asyncio.Protocol):
@@ -527,16 +508,23 @@ class JsonRPCProtocol(asyncio.Protocol):
         return self.fm.thread()
 
 
+def lsp_method(method_name: str):
+    def decorator(f):
+        f.method_name = method_name
+        return f
+    return decorator
+
+
 class LSPMeta(type):
-    """Wraps LSP built-in features (`bf_` naming convention).
+    """Wraps LSP built-in features (`lsp_` naming convention).
 
     Built-in features cannot be overridden but user defined features with
     the same LSP name will be called after them.
     """
     def __new__(mcs, cls_name, cls_bases, cls):
         for attr_name, attr_val in cls.items():
-            if callable(attr_val) and attr_name.startswith('bf_'):
-                method_name = to_lsp_name(attr_name[3:])
+            if callable(attr_val) and hasattr(attr_val, 'method_name'):
+                method_name = attr_val.method_name
                 wrapped = call_user_feature(attr_val, method_name)
                 assign_help_attrs(wrapped, method_name, ATTR_FEATURE_TYPE)
                 cls[attr_name] = wrapped
@@ -559,6 +547,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         super().__init__(server)
 
         self.workspace = None
+        self.trace = None
 
         from pygls.progress import Progress
         self.progress = Progress(self)
@@ -569,21 +558,22 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Registers generic LSP features from this class."""
         for name in dir(self):
             attr = getattr(self, name)
-            if callable(attr) and name.startswith('bf_'):
-                lsp_name = to_lsp_name(name[3:])
-                self.fm.add_builtin_feature(lsp_name, attr)
+            if callable(attr) and hasattr(attr, 'method_name'):
+                self.fm.add_builtin_feature(attr.method_name, attr)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(WORKSPACE_APPLY_EDIT,
                                  ApplyWorkspaceEditParams(edit=edit, label=label))
 
-    def bf_exit(self, *args) -> None:
+    @lsp_method(EXIT)
+    def lsp_exit(self, *args) -> None:
         """Stops the server process."""
         self.transport.close()
         sys.exit(0 if self._shutdown else 1)
 
-    def bf_initialize(self, params: InitializeParams) -> InitializeResult:
+    @lsp_method(INITIALIZE)
+    def lsp_initialize(self, params: InitializeParams) -> InitializeResult:
         """Method that initializes language server.
         It will compute and return server capabilities based on
         registered features.
@@ -610,13 +600,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
+        self.trace = Trace.Off
+
         return InitializeResult(capabilities=self.server_capabilities)
 
-    def bf_initialized(self, *args) -> None:
+    @lsp_method(INITIALIZED)
+    def lsp_initialized(self, *args) -> None:
         """Notification received when client and server are connected."""
         pass
 
-    def bf_shutdown(self, *args) -> None:
+    @lsp_method(SHUTDOWN)
+    def lsp_shutdown(self, *args) -> None:
         """Request from client which asks server to shutdown."""
         for future in self._client_request_futures.values():
             future.cancel()
@@ -627,22 +621,31 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self._shutdown = True
         return None
 
-    def bf_text_document__did_change(self, params: DidChangeTextDocumentParams) -> None:
+    @lsp_method(TEXT_DOCUMENT_DID_CHANGE)
+    def lsp_text_document__did_change(self, params: DidChangeTextDocumentParams) -> None:
         """Updates document's content.
         (Incremental(from server capabilities); not configurable for now)
         """
         for change in params.content_changes:
             self.workspace.update_document(params.text_document, change)
 
-    def bf_text_document__did_close(self, params: DidCloseTextDocumentParams) -> None:
+    @lsp_method(TEXT_DOCUMENT_DID_CLOSE)
+    def lsp_text_document__did_close(self, params: DidCloseTextDocumentParams) -> None:
         """Removes document from workspace."""
         self.workspace.remove_document(params.text_document.uri)
 
-    def bf_text_document__did_open(self, params: DidOpenTextDocumentParams) -> None:
+    @lsp_method(TEXT_DOCUMENT_DID_OPEN)
+    def lsp_text_document__did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Puts document to the workspace."""
         self.workspace.put_document(params.text_document)
 
-    def bf_workspace__did_change_workspace_folders(
+    @lsp_method(SET_TRACE_NOTIFICATION)
+    def lsp_set_trace(self, params: SetTraceParams) -> None:
+        """Changes server trace value."""
+        self.trace = params.value
+
+    @lsp_method(WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS)
+    def lsp_workspace__did_change_workspace_folders(
             self, params: DidChangeWorkspaceFoldersParams) -> None:
         """Adds/Removes folders from the workspace."""
         logger.info('Workspace folders changed: %s', params)
@@ -656,7 +659,8 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if f_remove:
                 self.workspace.remove_folder(f_remove.uri)
 
-    def bf_workspace__execute_command(self, params: ExecuteCommandParams, msg_id: str) -> None:
+    @lsp_method(WORKSPACE_EXECUTE_COMMAND)
+    def lsp_workspace__execute_command(self, params: ExecuteCommandParams, msg_id: str) -> None:
         """Executes commands with passed arguments and returns a value."""
         cmd_handler = self.fm.commands[params.command]
         self._execute_request(msg_id, cmd_handler, params.arguments)
@@ -684,6 +688,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             asyncio.Future that can be awaited
         """
         return asyncio.wrap_future(self.get_configuration(params))
+
+    def log_trace(self, message: str, verbose: Optional[str] = None) -> None:
+        """Sends trace notification to the client."""
+        if self.trace == Trace.Off:
+            return
+
+        params = LogTraceParams(message=message)
+        if self.trace == Trace.Verbose and verbose:
+            params.verbose = verbose
+
+        self.notify(LOG_TRACE_NOTIFICATION, params)
 
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]) -> None:
         """Sends diagnostic notification to the client."""

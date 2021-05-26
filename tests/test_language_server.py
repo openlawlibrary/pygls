@@ -18,19 +18,19 @@ import pathlib
 from time import sleep
 
 import pytest
+
 from pygls.lsp.methods import INITIALIZE, TEXT_DOCUMENT_DID_OPEN, WORKSPACE_EXECUTE_COMMAND
 from pygls.lsp.types import (ClientCapabilities, DidOpenTextDocumentParams, ExecuteCommandParams,
                              InitializeParams, TextDocumentItem)
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
-
 from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, FEATURE_SYNC, FEATURE_THREAD
 
 CALL_TIMEOUT = 2
 
 
 def _initialize_server(server):
-    server.lsp.bf_initialize(InitializeParams(
+    server.lsp.lsp_initialize(InitializeParams(
         process_id=1234,
         root_uri=pathlib.Path(__file__).parent.as_uri(),
         capabilities=ClientCapabilities(),

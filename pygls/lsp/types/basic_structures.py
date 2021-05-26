@@ -212,13 +212,10 @@ class Location(Model):
         return f"{self.uri}:{self.range!r}"
 
 
-class _TraceValue(str, enum.Enum):
+class Trace(str, enum.Enum):
     Off = 'off'
     Messages = 'messages'
     Verbose = 'verbose'
-
-
-TraceValue = NewType('TraceValue', _TraceValue)
 
 
 class CancelParams(Model):
@@ -232,11 +229,11 @@ class ProgressParams(Model):
 
 class LogTraceParams(Model):
     message: str
-    verbose: Optional[bool]
+    verbose: Optional[str]
 
 
 class SetTraceParams(Model):
-    value: TraceValue
+    value: Trace
 
 
 class RegularExpressionsClientCapabilities(Model):

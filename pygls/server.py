@@ -284,6 +284,10 @@ class LanguageServer(Server):
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
+    def log_trace(self, message: str, verbose: Optional[str] = None) -> None:
+        """Sends trace notification to the client."""
+        self.lsp.log_trace(message, verbose)
+
     @property
     def progress(self) -> Progress:
         """Gets the object to manage client's progress bar."""

@@ -24,12 +24,11 @@ https://microsoft.github.io/language-server-protocol/specification
 Class attributes are named with camel-case notation because client is expecting
 that.
 """
-import enum
 from functools import reduce
 from typing import Any, List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Model, NumType, RegularExpressionsClientCapabilities,
-                                              WorkDoneProgressParams,
+                                              Trace, WorkDoneProgressParams,
                                               WorkspaceEditClientCapabilities)
 from pygls.lsp.types.diagnostics import PublishDiagnosticsClientCapabilities
 from pygls.lsp.types.file_operations import FileOperationRegistrationOptions
@@ -101,12 +100,6 @@ class ClientInfo(Model):
 class ServerInfo(Model):
     name: str = 'unknown'
     version: Optional[str] = None
-
-
-class Trace(str, enum.Enum):
-    Off = 'off'
-    Messages = 'messages'
-    Verbose = 'verbose'
 
 
 class TextDocumentClientCapabilities(Model):
