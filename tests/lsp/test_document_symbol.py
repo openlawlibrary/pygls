@@ -21,7 +21,6 @@ from pygls.lsp.methods import DOCUMENT_SYMBOL
 from pygls.lsp.types import (DocumentSymbol, DocumentSymbolOptions, DocumentSymbolParams, Location,
                              Position, Range, SymbolInformation, SymbolKind,
                              TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -151,8 +150,6 @@ class TestDocumentSymbol(unittest.TestCase):
         assert response[0]['children'][0]['selectionRange']['end']['character'] == 1
 
         assert 'children' not in response[0]['children'][0]
-
-
 
 
 if __name__ == '__main__':

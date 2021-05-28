@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import DOCUMENT_HIGHLIGHT
 from pygls.lsp.types import (DocumentHighlight, DocumentHighlightKind, DocumentHighlightOptions,
                              DocumentHighlightParams, Position, Range, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -99,7 +98,6 @@ class TestDocumentHighlight(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

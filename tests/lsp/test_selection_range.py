@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import SELECTION_RANGE
 from pygls.lsp.types import (Position, Range, SelectionRange, SelectionRangeOptions,
                              SelectionRangeParams, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

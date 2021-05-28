@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import FOLDING_RANGE
 from pygls.lsp.types import (FoldingRange, FoldingRangeKind, FoldingRangeOptions,
                              FoldingRangeParams, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

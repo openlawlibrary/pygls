@@ -14,16 +14,14 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.lsp.types.basic_structures import ResourceOperationKind
 import unittest
 from typing import Optional
 
 from pygls.lsp.methods import RENAME
 from pygls.lsp.types import (CreateFile, CreateFileOptions, DeleteFile, DeleteFileOptions,
                              OptionalVersionedTextDocumentIdentifier, Position, Range, RenameFile,
-                             RenameFileOptions, RenameOptions, RenameParams, TextDocumentEdit,
-                             TextDocumentIdentifier, TextEdit, WorkspaceEdit)
-from pygls.server import LanguageServer
+                             RenameFileOptions, RenameOptions, RenameParams, ResourceOperationKind,
+                             TextDocumentEdit, TextDocumentIdentifier, TextEdit, WorkspaceEdit)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -177,7 +175,6 @@ class TestRename(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

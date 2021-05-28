@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import RANGE_FORMATTING
 from pygls.lsp.types import (DocumentRangeFormattingOptions, DocumentRangeFormattingParams,
                              FormattingOptions, Position, Range, TextDocumentIdentifier, TextEdit)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

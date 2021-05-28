@@ -19,7 +19,6 @@ import unittest
 from pygls.lsp.methods import COMPLETION
 from pygls.lsp.types import (CompletionItem, CompletionItemKind, CompletionList, CompletionOptions,
                              CompletionParams, Position, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

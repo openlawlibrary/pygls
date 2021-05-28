@@ -21,7 +21,7 @@ import uuid
 from json import JSONDecodeError
 from typing import Optional
 
-from pygls.lsp.methods import (COMPLETION, HOVER, TEXT_DOCUMENT_DID_CHANGE,
+from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
 from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              CompletionParams, ConfigurationItem,
@@ -34,7 +34,6 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
 from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
                                               WorkDoneProgressEnd,
                                               WorkDoneProgressReport)
-from pygls.lsp.types.language_features.hover import Hover
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10

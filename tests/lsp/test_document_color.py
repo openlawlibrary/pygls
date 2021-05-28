@@ -20,7 +20,6 @@ from typing import List
 from pygls.lsp.methods import DOCUMENT_COLOR
 from pygls.lsp.types import (Color, ColorInformation, DocumentColorOptions, DocumentColorParams,
                              Position, Range, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -73,7 +72,6 @@ class TestDocumentColor(unittest.TestCase):
         assert response[0]['range']['start']['character'] == 0
         assert response[0]['range']['end']['line'] == 1
         assert response[0]['range']['end']['character'] == 1
-
 
 
 if __name__ == '__main__':

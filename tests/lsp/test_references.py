@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import REFERENCES
 from pygls.lsp.types import (Location, Position, Range, ReferenceContext, ReferenceOptions,
                              ReferenceParams, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -94,7 +93,6 @@ class TestReferences(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

@@ -20,7 +20,6 @@ from typing import Optional
 from pygls.lsp.methods import HOVER
 from pygls.lsp.types import (Hover, HoverOptions, HoverParams, MarkedString, MarkupContent,
                              MarkupKind, Position, Range, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -136,7 +135,6 @@ class TestHover(unittest.TestCase):
         assert response['range']['start']['character'] == 0
         assert response['range']['end']['line'] == 1
         assert response['range']['end']['character'] == 1
-
 
 
 if __name__ == '__main__':
