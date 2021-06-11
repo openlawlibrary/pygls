@@ -11,19 +11,28 @@ from pygls.protocol import LanguageServerProtocol
 
 
 class Progress:
+    """A class for working with client's progress bar.
+
+    Attributes:
+        _lsp(LanguageServerProtocol): Language server protocol instance
+        tokens(dict): Holds progress bar tokens that are already registered
+    """
 
     def __init__(self, lsp: LanguageServerProtocol) -> None:
         self._lsp = lsp
 
         self.tokens: Dict[ProgressToken, None] = {}
 
-    def create(self, token: ProgressToken, callback=None) -> Future:
+    def _check_token_registered(self, token: ProgressToken) -> None:
         if token in self.tokens:
-            raise Exception("Token is already registered!")  # TODO
+            raise Exception("Token is already registered!")
+
+    def create(self, token: ProgressToken, callback=None) -> Future:
+        self._check_token_registered(token)
 
         def on_created(*args, **kwargs):
             self.tokens[token] = None
-            if callback:
+            if callback is not None:
                 callback(*args, **kwargs)
 
         return self._lsp.send_request(
@@ -33,6 +42,8 @@ class Progress:
         )
 
     async def create_async(self, token: ProgressToken) -> asyncio.Future:
+        self._check_token_registered(token)
+
         result = await self._lsp.send_request_async(
             WINDOW_WORK_DONE_PROGRESS_CREATE,
             WorkDoneProgressCreateParams(token=token),
@@ -45,7 +56,7 @@ class Progress:
         def on_canceled(*args, **kwargs):
             del self.tokens[token]
 
-            if callback:
+            if callback is not None:
                 callback(*args, **kwargs)
 
         return self._lsp.send_request(

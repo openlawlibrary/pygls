@@ -695,7 +695,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             return
 
         params = LogTraceParams(message=message)
-        if self.trace == Trace.Verbose and verbose:
+        if verbose and self.trace == Trace.Verbose:
             params.verbose = verbose
 
         self.notify(LOG_TRACE_NOTIFICATION, params)

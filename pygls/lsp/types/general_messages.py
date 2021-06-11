@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- General Messages --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 from functools import reduce
