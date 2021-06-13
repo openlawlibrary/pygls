@@ -20,7 +20,6 @@ from typing import Optional, Union
 from pygls.lsp.methods import PREPARE_RENAME
 from pygls.lsp.types import (Position, PrepareRename, PrepareRenameParams, Range,
                              TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -99,7 +98,6 @@ class TestRepareRename(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Language Features - Code Lens --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 from typing import Any, Optional
@@ -33,6 +33,10 @@ from pygls.lsp.types.basic_structures import (Command, Model, PartialResultParam
 
 class CodeLensClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
+
+
+class CodeLensWorkspaceClientCapabilities(Model):
+    refresh_support: Optional[bool] = False
 
 
 class CodeLensOptions(WorkDoneProgressOptions):

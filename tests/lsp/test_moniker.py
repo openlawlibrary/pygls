@@ -17,38 +17,31 @@
 import unittest
 from typing import List, Optional
 
-from pygls.lsp.methods import DOCUMENT_HIGHLIGHT
-from pygls.lsp.types import (DocumentHighlight, DocumentHighlightKind, DocumentHighlightOptions,
-                             DocumentHighlightParams, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.methods import TEXT_DOCUMENT_MONIKER
+from pygls.lsp.types import (Moniker, MonikerKind, MonikerOptions, MonikerParams, Position,
+                             TextDocumentIdentifier, UniquenessLevel)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
 
-class TestDocumentHighlight(unittest.TestCase):
+class TestMoniker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client_server = ClientServer()
         cls.client, cls.server = cls.client_server
 
         @cls.server.feature(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightOptions(),
+            TEXT_DOCUMENT_MONIKER,
+            MonikerOptions(),
         )
-        def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
+        def f(params: MonikerParams) -> Optional[List[Moniker]]:
             if params.text_document.uri == 'file://return.list':
                 return [
-                    DocumentHighlight(
-                       range=Range(
-                            start=Position(line=0, character=0),
-                            end=Position(line=1, character=1),
-                        ),
-                    ),
-                    DocumentHighlight(
-                       range=Range(
-                            start=Position(line=1, character=1),
-                            end=Position(line=2, character=2),
-                        ),
-                        kind=DocumentHighlightKind.Write,
+                    Moniker(
+                        scheme='test_scheme',
+                        identifier='test_identifier',
+                        unique=UniquenessLevel.Global,
+                        kind=MonikerKind.Local,
                     ),
                 ]
             else:
@@ -63,38 +56,31 @@ class TestDocumentHighlight(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.document_highlight_provider
+        assert capabilities.moniker_provider
 
-    def test_document_highlight_return_list(self):
+    def test_moniker_return_list(self):
         response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
+            TEXT_DOCUMENT_MONIKER,
+            MonikerParams(
                 text_document=TextDocumentIdentifier(uri='file://return.list'),
                 position=Position(line=0, character=0),
-            ),
+            )
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-        assert response[0]['kind'] == DocumentHighlightKind.Text
+        assert response[0]['scheme'] == 'test_scheme'
+        assert response[0]['identifier'] == 'test_identifier'
+        assert response[0]['unique'] == 'global'
+        assert response[0]['kind'] == 'local'
 
-        assert response[1]['range']['start']['line'] == 1
-        assert response[1]['range']['start']['character'] == 1
-        assert response[1]['range']['end']['line'] == 2
-        assert response[1]['range']['end']['character'] == 2
-        assert response[1]['kind'] == DocumentHighlightKind.Write
-
-    def test_document_highlight_return_none(self):
+    def test_references_return_none(self):
         response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
+            TEXT_DOCUMENT_MONIKER,
+            MonikerParams(
                 text_document=TextDocumentIdentifier(uri='file://return.none'),
                 position=Position(line=0, character=0),
-            ),
+            )
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None

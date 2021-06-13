@@ -15,42 +15,40 @@
 # limitations under the License.                                           #
 ############################################################################
 import unittest
-from typing import List, Optional
+from typing import Optional
 
-from pygls.lsp.methods import DOCUMENT_HIGHLIGHT
-from pygls.lsp.types import (DocumentHighlight, DocumentHighlightKind, DocumentHighlightOptions,
-                             DocumentHighlightParams, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.methods import TEXT_DOCUMENT_LINKED_EDITING_RANGE
+from pygls.lsp.types import (LinkedEditingRangeOptions, LinkedEditingRangeParams,
+                             LinkedEditingRanges, Position, Range, TextDocumentIdentifier)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
 
-class TestDocumentHighlight(unittest.TestCase):
+class TestLinkedEditingRange(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client_server = ClientServer()
         cls.client, cls.server = cls.client_server
 
         @cls.server.feature(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightOptions(),
+            TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+            LinkedEditingRangeOptions(),
         )
-        def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
-            if params.text_document.uri == 'file://return.list':
-                return [
-                    DocumentHighlight(
-                       range=Range(
+        def f(params: LinkedEditingRangeParams) -> Optional[LinkedEditingRanges]:
+            if params.text_document.uri == 'file://return.ranges':
+                return LinkedEditingRanges(
+                    ranges=[
+                        Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
-                    ),
-                    DocumentHighlight(
-                       range=Range(
+                        Range(
                             start=Position(line=1, character=1),
                             end=Position(line=2, character=2),
                         ),
-                        kind=DocumentHighlightKind.Write,
-                    ),
-                ]
+                    ],
+                    word_pattern='pattern',
+                )
             else:
                 return None
 
@@ -63,35 +61,33 @@ class TestDocumentHighlight(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.document_highlight_provider
+        assert capabilities.linked_editing_range_provider
 
-    def test_document_highlight_return_list(self):
+    def test_linked_editing_ranges_return_ranges(self):
         response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+            TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+            LinkedEditingRangeParams(
+                text_document=TextDocumentIdentifier(uri='file://return.ranges'),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-        assert response[0]['kind'] == DocumentHighlightKind.Text
+        assert response['ranges'][0]['start']['line'] == 0
+        assert response['ranges'][0]['start']['character'] == 0
+        assert response['ranges'][0]['end']['line'] == 1
+        assert response['ranges'][0]['end']['character'] == 1
+        assert response['ranges'][1]['start']['line'] == 1
+        assert response['ranges'][1]['start']['character'] == 1
+        assert response['ranges'][1]['end']['line'] == 2
+        assert response['ranges'][1]['end']['character'] == 2
+        assert response['wordPattern'] == 'pattern'
 
-        assert response[1]['range']['start']['line'] == 1
-        assert response[1]['range']['start']['character'] == 1
-        assert response[1]['range']['end']['line'] == 2
-        assert response[1]['range']['end']['character'] == 2
-        assert response[1]['kind'] == DocumentHighlightKind.Write
-
-    def test_document_highlight_return_none(self):
+    def test_linked_editing_ranges_return_none(self):
         response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
+            TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+            LinkedEditingRangeParams(
                 text_document=TextDocumentIdentifier(uri='file://return.none'),
                 position=Position(line=0, character=0),
             ),

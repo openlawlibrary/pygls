@@ -21,16 +21,17 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Language Features - Completion --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 import enum
 from typing import Any, List, Optional, Union
 
 from pygls.lsp.types.basic_structures import (Command, MarkupContent, MarkupKind, Model,
-                                              PartialResultParams, TextDocumentPositionParams,
-                                              TextEdit, WorkDoneProgressOptions,
-                                              WorkDoneProgressParams)
+                                              PartialResultParams, Range,
+                                              ResolveSupportClientCapabilities,
+                                              TextDocumentPositionParams, TextEdit,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
 class CompletionTriggerKind(enum.IntEnum):
@@ -99,6 +100,15 @@ class CompletionTagSupportClientCapabilities(Model):
     value_set: Optional[List[CompletionItemTag]] = None
 
 
+class InsertTextMode(enum.IntEnum):
+    AsIs = 1
+    AdjustIndentation = 2
+
+
+class InsertTextModeSupportClientCapabilities(Model):
+    value_set: List[InsertTextMode]
+
+
 class CompletionItemClientCapabilities(Model):
     snippet_support: Optional[bool] = False
     commit_characters_support: Optional[bool] = False
@@ -106,6 +116,9 @@ class CompletionItemClientCapabilities(Model):
     deprecated_support: Optional[bool] = False
     preselect_support: Optional[bool] = False
     tag_support: Optional[CompletionTagSupportClientCapabilities] = None
+    insert_replace_support: Optional[bool] = False
+    resolve_support: Optional[ResolveSupportClientCapabilities] = None
+    insert_text_mode_support: Optional[InsertTextModeSupportClientCapabilities] = None
 
 
 class CompletionClientCapabilities(Model):
@@ -113,6 +126,12 @@ class CompletionClientCapabilities(Model):
     completion_item: Optional[CompletionItemClientCapabilities] = None
     completion_item_kind: Optional[CompletionItemKindClientCapabilities] = None
     context_support: Optional[bool] = False
+
+
+class InsertReplaceEdit(Model):
+    new_text: str
+    insert: Range
+    replace: Range
 
 
 class CompletionItem(Model):
@@ -127,7 +146,8 @@ class CompletionItem(Model):
     filter_text: Optional[str] = None
     insert_text: Optional[str] = None
     insert_text_format: Optional[InsertTextFormat] = None
-    text_edit: Optional[TextEdit] = None
+    insert_text_mode: Optional[InsertTextMode] = None
+    text_edit: Optional[Union[TextEdit, InsertReplaceEdit]] = None
     additional_text_edits: Optional[List[TextEdit]] = None
     commit_characters: Optional[List[str]] = None
     command: Optional[Command] = None

@@ -21,20 +21,22 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Basic Structures --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 import enum
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, NewType, Optional, TypeVar, Union
 
 from pydantic import BaseModel, root_validator
 from typeguard import check_type
 
+ChangeAnnotationIdentifier = NewType('ChangeAnnotationIdentifier', str)
 NumType = Union[int, float]
-T = TypeVar('T')
 ProgressToken = Union[int, str]
+URI = NewType('URI', str)
+T = TypeVar('T')
 
-ConfigCallbackType = Optional[Callable[[List[Any]], None]]
+ConfigCallbackType = Callable[[List[Any]], None]
 
 
 def snake_to_camel(string: str) -> str:
@@ -48,6 +50,17 @@ class Model(BaseModel):
     class Config:
         alias_generator = snake_to_camel
         allow_population_by_field_name = True
+        fields = {
+            'from_': 'from'
+        }
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
+        # Serialize (.json()) fields that has default value which is not None
+        for name, field in self.__fields__.items():
+            if getattr(field, 'default', None) is not None:
+                self.__fields_set__.add(name)
 
 
 class JsonRpcMessage(Model):
@@ -199,6 +212,39 @@ class Location(Model):
         return f"{self.uri}:{self.range!r}"
 
 
+class Trace(str, enum.Enum):
+    Off = 'off'
+    Messages = 'messages'
+    Verbose = 'verbose'
+
+
+class CancelParams(Model):
+    id: Union[int, str]
+
+
+class ProgressParams(Model):
+    token: ProgressToken
+    value: Any
+
+
+class LogTraceParams(Model):
+    message: str
+    verbose: Optional[str]
+
+
+class SetTraceParams(Model):
+    value: Trace
+
+
+class RegularExpressionsClientCapabilities(Model):
+    engine: str
+    version: Optional[str] = None
+
+
+class ResolveSupportClientCapabilities(Model):
+    properties: List[str]
+
+
 class LocationLink(Model):
     target_uri: str
     target_range: Range
@@ -223,14 +269,20 @@ class DiagnosticRelatedInformation(Model):
     message: str
 
 
+class CodeDescription(Model):
+    href: URI
+
+
 class Diagnostic(Model):
     range: Range
     message: str
     severity: Optional[DiagnosticSeverity] = None
     code: Optional[Union[int, str]] = None
+    code_description: Optional[CodeDescription] = None
     source: Optional[str] = None
     related_information: Optional[List[DiagnosticRelatedInformation]] = None
     tags: Optional[List[DiagnosticTag]] = None
+    data: Optional[Any] = None
 
 
 class Command(Model):
@@ -242,6 +294,16 @@ class Command(Model):
 class TextEdit(Model):
     range: Range
     new_text: str
+
+
+class AnnotatedTextEdit(TextEdit):
+    annotation_id: ChangeAnnotationIdentifier
+
+
+class ChangeAnnotation(Model):
+    label: str
+    needs_confirmation: Optional[bool] = False
+    description: Optional[str] = None
 
 
 class ResourceOperationKind(str, enum.Enum):
@@ -259,6 +321,7 @@ class CreateFile(Model):
     kind: ResourceOperationKind = ResourceOperationKind.Create
     uri: str
     options: Optional[CreateFileOptions] = None
+    annotation_id: Optional[ChangeAnnotationIdentifier] = None
 
 
 class RenameFileOptions(Model):
@@ -271,6 +334,7 @@ class RenameFile(Model):
     old_uri: str
     new_uri: str
     options: Optional[RenameFileOptions] = None
+    annotation_id: Optional[ChangeAnnotationIdentifier] = None
 
 
 class DeleteFileOptions(Model):
@@ -282,6 +346,7 @@ class DeleteFile(Model):
     kind: ResourceOperationKind = ResourceOperationKind.Delete
     uri: str
     options: Optional[DeleteFileOptions] = None
+    annotation_id: Optional[ChangeAnnotationIdentifier] = None
 
 
 class FailureHandlingKind(str, enum.Enum):
@@ -291,10 +356,16 @@ class FailureHandlingKind(str, enum.Enum):
     Undo = 'undo'
 
 
+class ChangeAnnotationSupport(Model):
+    groups_on_label: Optional[bool] = False
+
+
 class WorkspaceEditClientCapabilities(Model):
     document_changes: Optional[bool] = False
     resource_operations: Optional[List[ResourceOperationKind]] = None
     failure_handling: Optional[FailureHandlingKind] = None
+    normalizes_line_endings: Optional[bool] = False
+    change_annotation_support: Optional[ChangeAnnotationSupport] = None
 
 
 class TextDocumentIdentifier(Model):
@@ -318,7 +389,7 @@ class OptionalVersionedTextDocumentIdentifier(TextDocumentIdentifier):
 
 class TextDocumentEdit(Model):
     text_document: OptionalVersionedTextDocumentIdentifier
-    edits: List[TextEdit]
+    edits: List[Union[TextEdit, AnnotatedTextEdit]]
 
 
 class TextDocumentPositionParams(Model):
@@ -355,7 +426,8 @@ class MarkupContent(Model):
 
 class WorkspaceEdit(Model):
     changes: Optional[Dict[str, List[TextEdit]]] = None
-    document_changes: Any = None
+    document_changes: Optional[Any] = None
+    change_annotations: Optional[Dict[ChangeAnnotationIdentifier, ChangeAnnotation]] = None
 
     @root_validator
     def check_result_or_error(cls, values):

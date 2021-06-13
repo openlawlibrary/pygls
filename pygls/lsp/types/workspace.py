@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Workspace --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 import enum
@@ -32,7 +32,8 @@ from pygls.lsp.types.basic_structures import (Model, NumType, PartialResultParam
                                               VersionedTextDocumentIdentifier,
                                               WorkDoneProgressOptions, WorkDoneProgressParams,
                                               WorkspaceEdit)
-from pygls.lsp.types.language_features.document_symbol import WorkspaceCapabilitiesSymbolKind
+from pygls.lsp.types.language_features.document_symbol import (WorkspaceCapabilitiesSymbolKind,
+                                                               WorkspaceCapabilitiesTagSupport)
 
 
 class WorkspaceFoldersServerCapabilities(Model):
@@ -108,6 +109,7 @@ class DidChangeWatchedFilesParams(Model):
 class WorkspaceSymbolClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
     symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
+    tag_support: Optional[WorkspaceCapabilitiesTagSupport] = None
 
 
 class WorkspaceSymbolOptions(WorkDoneProgressOptions):

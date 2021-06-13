@@ -21,7 +21,6 @@ from pygls.lsp.methods import CODE_ACTION
 from pygls.lsp.types import (CodeAction, CodeActionContext, CodeActionKind, CodeActionOptions,
                              CodeActionParams, Command, Diagnostic, Position, Range,
                              TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

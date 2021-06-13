@@ -20,7 +20,6 @@ from typing import List
 from pygls.lsp.methods import COLOR_PRESENTATION
 from pygls.lsp.types import (Color, ColorPresentation, ColorPresentationParams, Position, Range,
                              TextDocumentIdentifier, TextEdit)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -105,7 +104,6 @@ class TestColorPresentation(unittest.TestCase):
         assert response[0]['additionalTextEdits'][1]['range']['start']['character'] == 2
         assert response[0]['additionalTextEdits'][1]['range']['end']['line'] == 3
         assert response[0]['additionalTextEdits'][1]['range']['end']['character'] == 3
-
 
 
 if __name__ == '__main__':

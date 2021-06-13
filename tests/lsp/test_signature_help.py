@@ -21,7 +21,6 @@ from pygls.lsp.methods import SIGNATURE_HELP
 from pygls.lsp.types import (ParameterInformation, Position, SignatureHelp, SignatureHelpContext,
                              SignatureHelpOptions, SignatureHelpParams, SignatureHelpTriggerKind,
                              SignatureInformation, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 

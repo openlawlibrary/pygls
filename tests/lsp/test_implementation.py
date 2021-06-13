@@ -20,7 +20,6 @@ from typing import List, Optional, Union
 from pygls.lsp.methods import IMPLEMENTATION
 from pygls.lsp.types import (ImplementationOptions, ImplementationParams, Location, LocationLink,
                              Position, Range, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -145,7 +144,6 @@ class TestImplementation(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

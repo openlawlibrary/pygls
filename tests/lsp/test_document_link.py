@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import DOCUMENT_LINK
 from pygls.lsp.types import (DocumentLink, DocumentLinkOptions, DocumentLinkParams, Position,
                              Range, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -90,7 +89,6 @@ class TestDocumentLink(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':

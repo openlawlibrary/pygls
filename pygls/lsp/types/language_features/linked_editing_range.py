@@ -19,27 +19,35 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - On Type Formatting --
+-- Language Features - Linked Editing Range --
 
 Class attributes are named with camel case notation because client is expecting
 that.
 """
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
-                                              WorkDoneProgressOptions)
-from pygls.lsp.types.language_features.formatting import FormattingOptions
+from pygls.lsp.types.basic_structures import (Model, Range, StaticRegistrationOptions,
+                                              TextDocumentPositionParams,
+                                              TextDocumentRegistrationOptions,
+                                              WorkDoneProgressOptions, WorkDoneProgressParams)
 
 
-class DocumentOnTypeFormattingClientCapabilities(Model):
+class LinkedEditingRangeClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
 
 
-class DocumentOnTypeFormattingOptions(WorkDoneProgressOptions):
-    first_trigger_character: str
-    more_trigger_character: Optional[List[str]] = None
+class LinkedEditingRangeOptions(WorkDoneProgressOptions):
+    pass
 
 
-class DocumentOnTypeFormattingParams(TextDocumentPositionParams):
-    ch: str
-    options: FormattingOptions
+class LinkedEditingRangeRegistrationOptions(TextDocumentRegistrationOptions, LinkedEditingRangeOptions, StaticRegistrationOptions):
+    pass
+
+
+class LinkedEditingRangeParams(TextDocumentPositionParams, WorkDoneProgressParams):
+    pass
+
+
+class LinkedEditingRanges(Model):
+    ranges: List[Range]
+    word_pattern: Optional[str] = None

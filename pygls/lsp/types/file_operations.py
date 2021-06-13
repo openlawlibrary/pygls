@@ -19,27 +19,61 @@
 """This module contains Language Server Protocol types
 https://microsoft.github.io/language-server-protocol/specification
 
--- Language Features - On Type Formatting --
+-- File Operations --
 
 Class attributes are named with camel case notation because client is expecting
 that.
 """
+import enum
 from typing import List, Optional
 
-from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
-                                              WorkDoneProgressOptions)
-from pygls.lsp.types.language_features.formatting import FormattingOptions
+from pygls.lsp.types.basic_structures import Model
 
 
-class DocumentOnTypeFormattingClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+class FileOperationPatternKind(str, enum.Enum):
+    File = 'file'
+    Folder = 'folder'
 
 
-class DocumentOnTypeFormattingOptions(WorkDoneProgressOptions):
-    first_trigger_character: str
-    more_trigger_character: Optional[List[str]] = None
+class FileOperationPatternOptions(Model):
+    ignore_case: Optional[bool] = False
 
 
-class DocumentOnTypeFormattingParams(TextDocumentPositionParams):
-    ch: str
-    options: FormattingOptions
+class FileOperationPattern(Model):
+    glob: str
+    matches: Optional[FileOperationPatternKind] = None
+    options: Optional[FileOperationPatternOptions] = None
+
+
+class FileOperationFilter(Model):
+    scheme: Optional[str] = None
+    pattern: FileOperationPattern
+
+
+class FileOperationRegistrationOptions(Model):
+    filters: List[FileOperationFilter]
+
+
+class FileCreate(Model):
+    uri: str
+
+
+class CreateFilesParams(Model):
+    files: List[FileCreate]
+
+
+class FileRename(Model):
+    oldUri: str
+    newUri: str
+
+
+class RenameFilesParams(Model):
+    files: List[FileRename]
+
+
+class FileDelete(Model):
+    uri: str
+
+
+class DeleteFilesParams(Model):
+    files: List[FileDelete]

@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Diagnostics --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 from typing import List, Optional
@@ -37,6 +37,8 @@ class PublishDiagnosticsClientCapabilities(Model):
     related_information: Optional[bool] = False
     tag_support: Optional[PublishDiagnosticsTagSupportClientCapabilities] = None
     version_support: Optional[bool] = False
+    code_description_support: Optional[bool] = False
+    data_support: Optional[bool] = False
 
 
 class PublishDiagnosticsParams(Model):

@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Language Features - Prepare Rename --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 

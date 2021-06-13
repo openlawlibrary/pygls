@@ -26,6 +26,10 @@
         "title": "Count down 10 seconds [Non Blocking]"
       },
       {
+        "command": "progress",
+        "title": "Start the progress"
+      },
+      {
         "command": "registerCompletions",
         "title": "Register completions"
       },

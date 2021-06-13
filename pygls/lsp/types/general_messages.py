@@ -21,18 +21,23 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- General Messages --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
-import enum
 from functools import reduce
 from typing import Any, List, Optional, Union
 
-from pygls.lsp.types.basic_structures import (Model, NumType, WorkDoneProgressParams,
+from pygls.lsp.types.basic_structures import (Model, NumType, RegularExpressionsClientCapabilities,
+                                              Trace, WorkDoneProgressParams,
                                               WorkspaceEditClientCapabilities)
 from pygls.lsp.types.diagnostics import PublishDiagnosticsClientCapabilities
-from pygls.lsp.types.language_features import (CodeActionClientCapabilities, CodeActionOptions,
+from pygls.lsp.types.file_operations import FileOperationRegistrationOptions
+from pygls.lsp.types.language_features import (CallHierarchyClientCapabilities,
+                                               CallHierarchyOptions,
+                                               CallHierarchyRegistrationOptions,
+                                               CodeActionClientCapabilities, CodeActionOptions,
                                                CodeLensClientCapabilities, CodeLensOptions,
+                                               CodeLensWorkspaceClientCapabilities,
                                                CompletionClientCapabilities, CompletionOptions,
                                                DeclarationClientCapabilities, DeclarationOptions,
                                                DeclarationRegistrationOptions,
@@ -57,17 +62,28 @@ from pygls.lsp.types.language_features import (CodeActionClientCapabilities, Cod
                                                ImplementationClientCapabilities,
                                                ImplementationOptions,
                                                ImplementationRegistrationOptions,
+                                               LinkedEditingRangeClientCapabilities,
+                                               LinkedEditingRangeOptions,
+                                               LinkedEditingRangeRegistrationOptions,
+                                               MonikerClientCapabilities, MonikerOptions,
+                                               MonikerRegistrationOptions,
                                                ReferenceClientCapabilities, ReferenceOptions,
                                                RenameClientCapabilities, RenameOptions,
                                                SelectionRangeClientCapabilities,
                                                SelectionRangeOptions,
                                                SelectionRangeRegistrationOptions,
+                                               SemanticTokensClientCapabilities,
+                                               SemanticTokensOptions,
+                                               SemanticTokensRegistrationOptions,
+                                               SemanticTokensWorkspaceClientCapabilities,
                                                SignatureHelpClientCapabilities,
                                                SignatureHelpOptions,
                                                TypeDefinitionClientCapabilities,
                                                TypeDefinitionOptions,
                                                TypeDefinitionRegistrationOptions)
 from pygls.lsp.types.text_synchronization import TextDocumentSyncKind
+from pygls.lsp.types.window import (ShowDocumentClientCapabilities,
+                                    ShowMessageRequestClientCapabilities)
 from pygls.lsp.types.workspace import (DidChangeConfigurationClientCapabilities,
                                        DidChangeWatchedFilesClientCapabilities,
                                        ExecuteCommandClientCapabilities, ExecuteCommandOptions,
@@ -84,12 +100,6 @@ class ClientInfo(Model):
 class ServerInfo(Model):
     name: str = 'unknown'
     version: Optional[str] = None
-
-
-class Trace(str, enum.Enum):
-    Off = 'off'
-    Messages = 'messages'
-    Verbose = 'verbose'
 
 
 class TextDocumentClientCapabilities(Model):
@@ -115,6 +125,20 @@ class TextDocumentClientCapabilities(Model):
     publish_diagnostics: Optional[PublishDiagnosticsClientCapabilities] = None
     folding_range: Optional[FoldingRangeClientCapabilities] = None
     selection_range: Optional[SelectionRangeClientCapabilities] = None
+    linked_editing_range: Optional[LinkedEditingRangeClientCapabilities] = None
+    call_hierarchy: Optional[CallHierarchyClientCapabilities] = None
+    semantic_tokens: Optional[SemanticTokensClientCapabilities] = None
+    moniker: Optional[MonikerClientCapabilities] = None
+
+
+class FileOperationsClientCapabilities(Model):
+    dynamic_registration: Optional[bool] = False
+    did_create: Optional[bool] = False
+    will_create: Optional[bool] = False
+    did_rename: Optional[bool] = False
+    will_rename: Optional[bool] = False
+    did_delete: Optional[bool] = False
+    will_delete: Optional[bool] = False
 
 
 class WorkspaceClientCapabilities(Model):
@@ -126,10 +150,25 @@ class WorkspaceClientCapabilities(Model):
     execute_command: Optional[ExecuteCommandClientCapabilities] = None
     workspace_folders: Optional[bool] = False
     configuration: Optional[bool] = False
+    semantic_tokens: Optional[SemanticTokensWorkspaceClientCapabilities] = None
+    code_lens: Optional[CodeLensWorkspaceClientCapabilities] = None
+    file_operations: Optional[FileOperationsClientCapabilities] = None
 
 
 class WindowClientCapabilities(Model):
     work_done_progress: Optional[bool] = False
+    show_message: Optional[ShowMessageRequestClientCapabilities] = None
+    show_document: Optional[ShowDocumentClientCapabilities] = None
+
+
+class MarkdownClientCapabilities(Model):
+    parser: str
+    version: Optional[str] = None
+
+
+class GeneralClientCapabilities(Model):
+    regular_expressions: Optional[RegularExpressionsClientCapabilities] = None
+    markdown: Optional[MarkdownClientCapabilities] = None
 
 
 class TextDocumentSyncOptionsServerCapabilities(Model):
@@ -140,14 +179,25 @@ class TextDocumentSyncOptionsServerCapabilities(Model):
     save: Optional[Union[bool, SaveOptions]] = None
 
 
+class WorkspaceFileOperationsServerCapabilities(Model):
+    did_create: Optional[FileOperationRegistrationOptions] = None
+    will_create: Optional[FileOperationRegistrationOptions] = None
+    did_rename: Optional[FileOperationRegistrationOptions] = None
+    will_rename: Optional[FileOperationRegistrationOptions] = None
+    did_delete: Optional[FileOperationRegistrationOptions] = None
+    will_delete: Optional[FileOperationRegistrationOptions] = None
+
+
 class WorkspaceServerCapabilities(Model):
     workspace_folders: Optional[WorkspaceFoldersServerCapabilities] = None
+    file_operations: Optional[WorkspaceFileOperationsServerCapabilities] = None
 
 
 class ClientCapabilities(Model):
     workspace: Optional[WorkspaceClientCapabilities] = None
     text_document: Optional[TextDocumentClientCapabilities] = None
     window: Optional[WindowClientCapabilities] = None
+    general: Optional[GeneralClientCapabilities] = None
     experimental: Optional[Any] = None
 
     def get_capability(self, field: str, default: Any = None) -> Any:
@@ -171,6 +221,7 @@ class InitializeParams(WorkDoneProgressParams):
     root_uri: Optional[str] = None
     capabilities: ClientCapabilities
     client_info: Optional[ClientInfo] = None
+    locale: Optional[str] = None
     root_path: Optional[str] = None
     initialization_options: Optional[Any] = None
     trace: Optional[Trace] = Trace.Off
@@ -185,10 +236,10 @@ class ServerCapabilities(Model):
     declaration_provider: Optional[Union[bool, DeclarationOptions,
                                          DeclarationRegistrationOptions]] = None
     definition_provider: Optional[Union[bool, DefinitionOptions]] = None
-    type_definition_provider: Optional[Union[bool,
-                                             TypeDefinitionOptions, TypeDefinitionRegistrationOptions]] = None
-    implementation_provider: Optional[Union[bool,
-                                            ImplementationOptions, ImplementationRegistrationOptions]] = None
+    type_definition_provider: Optional[Union[bool, TypeDefinitionOptions,
+                                             TypeDefinitionRegistrationOptions]] = None
+    implementation_provider: Optional[Union[bool, ImplementationOptions,
+                                            ImplementationRegistrationOptions]] = None
     references_provider: Optional[Union[bool, ReferenceOptions]] = None
     document_highlight_provider: Optional[Union[bool, DocumentHighlightOptions]] = None
     document_symbol_provider: Optional[Union[bool, DocumentSymbolOptions]] = None
@@ -202,11 +253,19 @@ class ServerCapabilities(Model):
                                                        DocumentRangeFormattingOptions]] = None
     document_on_type_formatting_provider: Optional[DocumentOnTypeFormattingOptions] = None
     rename_provider: Optional[Union[bool, RenameOptions]] = None
-    folding_range_provider: Optional[Union[bool,
-                                           FoldingRangeOptions, FoldingRangeRegistrationOptions]] = None
+    folding_range_provider: Optional[Union[bool, FoldingRangeOptions,
+                                           FoldingRangeRegistrationOptions]] = None
     execute_command_provider: Optional[ExecuteCommandOptions] = None
-    selection_range_provider: Optional[Union[bool,
-                                             SelectionRangeOptions, SelectionRangeRegistrationOptions]] = None
+    selection_range_provider: Optional[Union[bool, SelectionRangeOptions,
+                                             SelectionRangeRegistrationOptions]] = None
+    linked_editing_range_provider: Optional[Union[bool, LinkedEditingRangeOptions,
+                                                  LinkedEditingRangeRegistrationOptions]] = None
+    call_hierarchy_provider: Optional[Union[bool, CallHierarchyOptions,
+                                            CallHierarchyRegistrationOptions]] = None
+    semantic_tokens_provider: Optional[Union[SemanticTokensOptions,
+                                             SemanticTokensRegistrationOptions]] = None
+    moniker_provider: Optional[Union[bool, MonikerOptions,
+                                     MonikerRegistrationOptions]] = None
     workspace_symbol_provider: Optional[bool] = None
     workspace: Optional[WorkspaceServerCapabilities] = None
     experimental: Optional[Any] = None

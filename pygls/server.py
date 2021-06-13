@@ -28,6 +28,8 @@ from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, Con
                              ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
                              ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
                              WorkspaceEdit)
+from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
+from pygls.progress import Progress
 from pygls.protocol import LanguageServerProtocol
 from pygls.workspace import Workspace
 
@@ -274,7 +276,7 @@ class LanguageServer(Server):
         return self.lsp.fm.feature(feature_name, options)
 
     def get_configuration(self, params: ConfigurationParams,
-                          callback: ConfigCallbackType = None) -> Future:
+                          callback: Optional[ConfigCallbackType] = None) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
@@ -282,17 +284,35 @@ class LanguageServer(Server):
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
+    def log_trace(self, message: str, verbose: Optional[str] = None) -> None:
+        """Sends trace notification to the client."""
+        self.lsp.log_trace(message, verbose)
+
+    @property
+    def progress(self) -> Progress:
+        """Gets the object to manage client's progress bar."""
+        return self.lsp.progress
+
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]):
         """Sends diagnostic notification to the client."""
         self.lsp.publish_diagnostics(doc_uri, diagnostics)
 
-    def register_capability(self, params: RegistrationParams, callback):
+    def register_capability(self, params: RegistrationParams,
+                            callback: Optional[Callable[[], None]] = None) -> Future:
         """Register a new capability on the client."""
         return self.lsp.register_capability(params, callback)
 
-    def register_capability_async(self, params: RegistrationParams):
+    def register_capability_async(self, params: RegistrationParams) -> asyncio.Future:
         """Register a new capability on the client. Should be called with `await`"""
         return self.lsp.register_capability_async(params)
+
+    def semantic_tokens_refresh(self, callback: Optional[Callable[[], None]] = None) -> Future:
+        """Request a refresh of all semantic tokens."""
+        return self.lsp.semantic_tokens_refresh(callback)
+
+    def semantic_tokens_refresh_async(self) -> asyncio.Future:
+        """Request a refresh of all semantic tokens. Should be called with `await`"""
+        return self.lsp.semantic_tokens_refresh_async()
 
     def send_notification(self, method: str, params: object = None) -> None:
         """Sends notification to the client."""
@@ -302,6 +322,15 @@ class LanguageServer(Server):
     def server_capabilities(self) -> ServerCapabilities:
         """Return server capabilities."""
         return self.lsp.server_capabilities
+
+    def show_document(self, params: ShowDocumentParams,
+                      callback: Optional[ShowDocumentCallbackType] = None) -> Future:
+        """Display a particular document in the user interface."""
+        return self.lsp.show_document(params, callback)
+
+    def show_document_async(self, params: ShowDocumentParams) -> asyncio.Future:
+        """Display a particular document in the user interface. Should be called with `await`"""
+        return self.lsp.show_document_async(params)
 
     def show_message(self, message, msg_type=MessageType.Info) -> None:
         """Sends message to the client to display message."""
@@ -315,11 +344,12 @@ class LanguageServer(Server):
         """Decorator that mark function to execute it in a thread."""
         return self.lsp.thread()
 
-    def unregister_capability(self, params: UnregistrationParams, callback):
+    def unregister_capability(self, params: UnregistrationParams,
+                              callback: Optional[Callable[[], None]] = None) -> Future:
         """Unregister a new capability on the client."""
         return self.lsp.unregister_capability(params, callback)
 
-    def unregister_capability_async(self, params: UnregistrationParams):
+    def unregister_capability_async(self, params: UnregistrationParams) -> asyncio.Future:
         """Unregister a new capability on the client. Should be called with `await`"""
         return self.lsp.unregister_capability_async(params)
 

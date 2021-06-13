@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Language Features - Signature Help --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 import enum
@@ -39,6 +39,7 @@ class SignatureHelpInformationParameterInformationClientCapabilities(Model):
 class SignatureHelpInformationClientCapabilities(Model):
     documentation_format: Optional[List[MarkupKind]] = None
     parameter_information: Optional[SignatureHelpInformationParameterInformationClientCapabilities] = None
+    active_parameter_support: Optional[bool] = False
 
 
 class SignatureHelpClientCapabilities(Model):
@@ -67,6 +68,7 @@ class SignatureInformation(Model):
     label: str
     documentation: Optional[Union[str, MarkupContent]] = None
     parameters: Optional[List[ParameterInformation]] = None
+    active_parameter: Optional[int] = None
 
 
 class SignatureHelp(Model):

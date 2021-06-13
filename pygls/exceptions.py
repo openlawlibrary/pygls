@@ -109,6 +109,36 @@ class JsonRpcContentModified(JsonRpcException):
     MESSAGE = 'Content Modified'
 
 
+class JsonRpcServerNotInitialized(JsonRpcException):
+    CODE = -32002
+    MESSAGE = 'ServerNotInitialized'
+
+
+class JsonRpcUnknownErrorCode(JsonRpcException):
+    CODE = -32001
+    MESSAGE = 'UnknownErrorCode'
+
+
+class JsonRpcReservedErrorRangeStart(JsonRpcException):
+    CODE = -32099
+    MESSAGE = 'jsonrpcReservedErrorRangeStart'
+
+
+class JsonRpcReservedErrorRangeEnd(JsonRpcException):
+    CODE = -32000
+    MESSAGE = 'jsonrpcReservedErrorRangeEnd'
+
+
+class LspReservedErrorRangeStart(JsonRpcException):
+    CODE = -32899
+    MESSAGE = 'lspReservedErrorRangeStart'
+
+
+class LspReservedErrorRangeEnd(JsonRpcException):
+    CODE = -32800
+    MESSAGE = 'lspReservedErrorRangeEnd'
+
+
 class JsonRpcServerError(JsonRpcException):
 
     def __init__(self, message, code, data=None):
@@ -136,11 +166,11 @@ _EXCEPTIONS = (
 )
 
 
-class PyglsException(Exception):
+class PyglsError(Exception):
     pass
 
 
-class CommandAlreadyRegisteredError(PyglsException):
+class CommandAlreadyRegisteredError(PyglsError):
 
     def __init__(self, command_name):
         self.command_name = command_name
@@ -149,7 +179,7 @@ class CommandAlreadyRegisteredError(PyglsException):
         return f'Command "{self.command_name}" is already registered.'
 
 
-class FeatureAlreadyRegisteredError(PyglsException):
+class FeatureAlreadyRegisteredError(PyglsError):
 
     def __init__(self, feature_name):
         self.feature_name = feature_name
@@ -158,7 +188,7 @@ class FeatureAlreadyRegisteredError(PyglsException):
         return f'Feature "{self.feature_name}" is already registered.'
 
 
-class MethodTypeNotRegisteredError(PyglsException):
+class MethodTypeNotRegisteredError(PyglsError):
 
     def __init__(self, name):
         self.name = name
@@ -167,11 +197,11 @@ class MethodTypeNotRegisteredError(PyglsException):
         return f'"{self.name}" is not added to `pygls.lsp.LSP_METHODS_MAP`.'
 
 
-class ThreadDecoratorError(PyglsException):
+class ThreadDecoratorError(PyglsError):
     pass
 
 
-class ValidationError(PyglsException):
+class ValidationError(PyglsError):
 
     def __init__(self, errors=None):
         self.errors = errors or []

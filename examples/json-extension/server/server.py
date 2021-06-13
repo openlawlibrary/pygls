@@ -31,6 +31,9 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              DidOpenTextDocumentParams, MessageType, Position,
                              Range, Registration, RegistrationParams,
                              Unregistration, UnregistrationParams)
+from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
+                                              WorkDoneProgressEnd,
+                                              WorkDoneProgressReport)
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -40,6 +43,7 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
+    CMD_PROGRESS = 'progress'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
     CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
@@ -145,6 +149,25 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
     _validate(ls, params)
+
+
+@json_server.command(JsonLanguageServer.CMD_PROGRESS)
+async def progress(ls: JsonLanguageServer, *args):
+    """Create and start the progress on the client."""
+    token = 'token'
+    # Create
+    await ls.progress.create_async(token)
+    # Begin
+    ls.progress.begin(token, WorkDoneProgressBegin(title='Indexing', percentage=0))
+    # Report
+    for i in range(1, 10):
+        ls.progress.report(
+            token,
+            WorkDoneProgressReport(message=f'{i * 10}%', percentage= i * 10),
+        )
+        await asyncio.sleep(2)
+    # End
+    ls.progress.end(token, WorkDoneProgressEnd(message='Finished'))
 
 
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)

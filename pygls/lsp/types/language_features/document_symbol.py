@@ -21,7 +21,7 @@ https://microsoft.github.io/language-server-protocol/specification
 
 -- Language Features - Document Symbol --
 
-Class attributes are named with camel-case notation because client is expecting
+Class attributes are named with camel case notation because client is expecting
 that.
 """
 import enum
@@ -61,18 +61,32 @@ class SymbolKind(enum.IntEnum):
     TypeParameter = 26
 
 
+class SymbolTag(enum.IntEnum):
+    Deprecated = 1
+
+
 class WorkspaceCapabilitiesSymbolKind(Model):
     value_set: Optional[List[SymbolKind]] = None
+
+
+class WorkspaceCapabilitiesTagSupport(Model):
+    value_set: List[SymbolKind]
+
+
+class DocumentSymbolCapabilitiesTagSupport(Model):
+    value_set: List[SymbolTag]
 
 
 class DocumentSymbolClientCapabilities(Model):
     dynamic_registration: Optional[bool] = False
     symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
     hierarchical_document_symbol_support: Optional[bool] = False
+    tag_support: Optional[WorkspaceCapabilitiesTagSupport] = None
+    label_support: Optional[bool] = False
 
 
 class DocumentSymbolOptions(WorkDoneProgressOptions):
-    pass
+    label: Optional[str] = None
 
 
 class DocumentSymbolParams(WorkDoneProgressParams, PartialResultParams):
@@ -86,6 +100,7 @@ class DocumentSymbol(Model):
     selection_range: Range
     detail: Optional[str] = None
     children: Optional[List['DocumentSymbol']] = None
+    tags: Optional[List[SymbolTag]] = None
     deprecated: Optional[bool] = False
 
 
@@ -97,4 +112,5 @@ class SymbolInformation(Model):
     kind: SymbolKind
     location: Location
     container_name: Optional[str] = None
+    tags: Optional[List[SymbolTag]] = None
     deprecated: Optional[bool] = False

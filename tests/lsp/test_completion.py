@@ -19,7 +19,6 @@ import unittest
 from pygls.lsp.methods import COMPLETION
 from pygls.lsp.types import (CompletionItem, CompletionItemKind, CompletionList, CompletionOptions,
                              CompletionParams, Position, TextDocumentIdentifier)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -73,8 +72,20 @@ class TestCompletions(unittest.TestCase):
         assert response['items'][0]['label'] == 'test1'
         assert response['items'][0]['kind'] == CompletionItemKind.Method
         assert response['items'][0]['preselect'] == True
-        assert 'deprecated' not in response['items'][0]
-
+        assert response['items'][0]['deprecated'] == False
+        assert 'tags' not in response['items'][0]
+        assert 'detail' not in response['items'][0]
+        assert 'documentation' not in response['items'][0]
+        assert 'sort_text' not in response['items'][0]
+        assert 'filter_text' not in response['items'][0]
+        assert 'insert_text' not in response['items'][0]
+        assert 'insert_text_format' not in response['items'][0]
+        assert 'insert_text_mode' not in response['items'][0]
+        assert 'text_edit' not in response['items'][0]
+        assert 'additional_text_edits' not in response['items'][0]
+        assert 'commit_characters' not in response['items'][0]
+        assert 'command' not in response['items'][0]
+        assert 'data' not in response['items'][0]
 
 
 if __name__ == '__main__':

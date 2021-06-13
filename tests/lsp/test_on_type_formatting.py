@@ -20,7 +20,6 @@ from typing import List, Optional
 from pygls.lsp.methods import ON_TYPE_FORMATTING
 from pygls.lsp.types import (DocumentOnTypeFormattingOptions, DocumentOnTypeFormattingParams,
                              FormattingOptions, Position, Range, TextDocumentIdentifier, TextEdit)
-from pygls.server import LanguageServer
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -108,7 +107,6 @@ class TestOnTypeFormatting(unittest.TestCase):
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
-
 
 
 if __name__ == '__main__':
