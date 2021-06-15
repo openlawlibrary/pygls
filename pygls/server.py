@@ -19,6 +19,7 @@ import logging
 import re
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
+from functools import partial
 from multiprocessing.pool import ThreadPool
 from threading import Event
 from typing import Any, Callable, List, Optional, TypeVar
@@ -130,6 +131,7 @@ class Server:
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
+        self._protool_cls = protocol_cls
         self._max_workers = max_workers
         self._server = None
         self._stop_event = None
@@ -196,7 +198,7 @@ class Server:
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting server on %s:%s', host, port)
+        logger.info('Starting TCP server on %s:%s', host, port)
 
         self._stop_event = Event()
         self._server = self.loop.run_until_complete(
@@ -207,6 +209,38 @@ class Server:
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
+            self.shutdown()
+
+    def start_websocket(self, host, port, path='/'):
+        """Starts WebSocket server."""
+        try:
+            import websockets
+        except ImportError:
+            logger.error('Websocket server requires extra dependency! Run pip install pygls[ws].')
+            sys.exit(1)
+
+        from pygls.ws import WebsocketJsonRPCProtocol, WebSocketTransportAdapter, ws_read
+
+        logger.info('Starting WebSocket server on {}:{}'.format(host, port))
+
+        # Wrap with websocket protocol
+        self.lsp = WebsocketJsonRPCProtocol(self._protool_cls)
+
+        self._stop_event = Event()
+        ws_server = websockets.serve(
+            partial(ws_read, ls=self, stop_event=self._stop_event, proxy=self.lsp.data_received),
+            host,
+            port
+        )
+        self._server = ws_server.ws_server
+
+        self.loop.run_until_complete(ws_server)
+        try:
+            self.loop.run_forever()
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        finally:
+            self._stop_event.set()
             self.shutdown()
 
     @property
