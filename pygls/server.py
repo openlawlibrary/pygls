@@ -216,7 +216,7 @@ class Server:
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting TCP server on {}:{}'.format(host, port))
+        logger.info('Starting TCP server on %s:%s', host, port)
 
         self._stop_event = Event()
         self._server = self.loop.run_until_complete(
