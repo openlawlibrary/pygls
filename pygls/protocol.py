@@ -188,7 +188,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.transport = None
         self._message_buf = []
 
-        self._send_only_data = False
+        self._send_only_body = False
 
     def __call__(self):
         return self
@@ -375,8 +375,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
-
-            if not self._send_only_data:
+            if not self._send_only_body:
                 header = (
                     f'Content-Length: {len(body)}\r\n'
                     f'Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n'

@@ -24,8 +24,6 @@ from multiprocessing.pool import ThreadPool
 from threading import Event
 from typing import Any, Callable, List, Optional, TypeVar
 
-import websockets
-
 from pygls import IS_WIN
 from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
                              ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
@@ -106,7 +104,7 @@ class WebSocketTransportAdapter:
     Write method sends data via the WebSocket interface.
     """
 
-    def __init__(self, ws: websockets.WebSocketServerProtocol, loop):
+    def __init__(self, ws, loop):
         self._ws = ws
         self._loop = loop
 
@@ -231,17 +229,21 @@ class Server:
         finally:
             self.shutdown()
 
-    def start_websocket(self, host, port, path='/'):
+    def start_ws(self, host, port):
         """Starts WebSocket server."""
+        try:
+            import websockets
+        except ImportError:
+            logger.error('Run `pip install pygls[ws]` to install `websockets`.')
+            sys.exit(1)
+
         logger.info('Starting WebSocket server on {}:{}'.format(host, port))
 
-        # TODO: Handle the path
         self._stop_event = Event()
-        self.lsp._send_only_data = True  # Don't send headers within the payload
+        self.lsp._send_only_body = True  # Don't send headers within the payload
 
-        async def connection_made(websocket, cur_path):
+        async def connection_made(websocket, _):
             """Handle new connection wrapped in the WebSocket."""
-            # TODO: How to handle the path argument?
             self.lsp.transport = WebSocketTransportAdapter(websocket, self.loop)
             async for message in websocket:
                 self.lsp._procedure_handler(
