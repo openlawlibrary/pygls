@@ -27,7 +27,11 @@ def add_arguments(parser):
 
     parser.add_argument(
         "--tcp", action="store_true",
-        help="Use TCP server instead of stdio"
+        help="Use TCP server"
+    )
+    parser.add_argument(
+        "--ws", action="store_true",
+        help="Use WS server"
     )
     parser.add_argument(
         "--host", default="127.0.0.1",
@@ -46,6 +50,8 @@ def main():
 
     if args.tcp:
         json_server.start_tcp(args.host, args.port)
+    elif args.ws:
+        json_server.start_ws(args.host, args.port)
     else:
         json_server.start_io()
 

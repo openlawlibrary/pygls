@@ -211,7 +211,7 @@ class Server:
         finally:
             self.shutdown()
 
-    def start_websocket(self, host, port, path='/'):
+    def start_ws(self, host, port, path='/'):
         """Starts WebSocket server."""
         try:
             import websockets
@@ -219,7 +219,7 @@ class Server:
             logger.error('Websocket server requires extra dependency! Run pip install pygls[ws].')
             sys.exit(1)
 
-        from pygls.ws import WebsocketJsonRPCProtocol, WebSocketTransportAdapter, ws_read
+        from pygls.ws import WebsocketJsonRPCProtocol, ws_reader
 
         logger.info('Starting WebSocket server on {}:{}'.format(host, port))
 
@@ -228,7 +228,7 @@ class Server:
 
         self._stop_event = Event()
         ws_server = websockets.serve(
-            partial(ws_read, ls=self, stop_event=self._stop_event, proxy=self.lsp.data_received),
+            partial(ws_reader, ls=self, stop_event=self._stop_event, proxy=self.lsp.data_received),
             host,
             port
         )

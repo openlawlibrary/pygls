@@ -29,6 +29,19 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "Launch Server [WebSocket]",
+            "type": "python",
+            "request": "launch",
+            "module": "server",
+            "args": ["--ws"],
+            "justMyCode": false,
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ],
     "compounds": [

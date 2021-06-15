@@ -10,7 +10,7 @@ from pygls.protocol import JsonRPCProtocol
 logger = logging.getLogger(__name__)
 
 
-async def ws_read(ls, websocket, stop_event, proxy):
+async def ws_reader(ls, websocket, stop_event, proxy):
     """Handle new connection wrapped in the WebSocket."""
     ls.lsp.transport = WebSocketTransportAdapter(websocket, ls.loop)
 
