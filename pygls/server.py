@@ -114,7 +114,7 @@ class WebSocketTransportAdapter:
 
     def write(self, data: Any) -> None:
         """Create a task to write specified data into a WebSocket."""
-        asyncio.create_task(self._ws.send(data))
+        asyncio.ensure_future(self._ws.send(data))
 
 
 class Server:
