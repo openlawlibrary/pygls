@@ -15,6 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
+import json
 import logging
 import re
 import sys
@@ -30,7 +31,7 @@ from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, Con
                              WorkspaceEdit)
 from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
 from pygls.progress import Progress
-from pygls.protocol import LanguageServerProtocol
+from pygls.protocol import LanguageServerProtocol, deserialize_message
 from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
@@ -95,6 +96,25 @@ class StdOutTransportAdapter:
     def write(self, data):
         self.wfile.write(data)
         self.wfile.flush()
+
+
+class WebSocketTransportAdapter:
+    """Protocol adapter which calls write method.
+
+    Write method sends data via the WebSocket interface.
+    """
+
+    def __init__(self, ws, loop):
+        self._ws = ws
+        self._loop = loop
+
+    def close(self) -> None:
+        """Stop the WebSocket server."""
+        self._ws.close()
+
+    def write(self, data: Any) -> None:
+        """Create a task to write specified data into a WebSocket."""
+        asyncio.ensure_future(self._ws.send(data))
 
 
 class Server:
@@ -196,7 +216,7 @@ class Server:
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
-        logger.info('Starting server on %s:%s', host, port)
+        logger.info('Starting TCP server on %s:%s', host, port)
 
         self._stop_event = Event()
         self._server = self.loop.run_until_complete(
@@ -207,6 +227,39 @@ class Server:
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
+            self.shutdown()
+
+    def start_ws(self, host, port):
+        """Starts WebSocket server."""
+        try:
+            import websockets
+        except ImportError:
+            logger.error('Run `pip install pygls[ws]` to install `websockets`.')
+            sys.exit(1)
+
+        logger.info('Starting WebSocket server on {}:{}'.format(host, port))
+
+        self._stop_event = Event()
+        self.lsp._send_only_body = True  # Don't send headers within the payload
+
+        async def connection_made(websocket, _):
+            """Handle new connection wrapped in the WebSocket."""
+            self.lsp.transport = WebSocketTransportAdapter(websocket, self.loop)
+            async for message in websocket:
+                self.lsp._procedure_handler(
+                    json.loads(message, object_hook=deserialize_message)
+                )
+
+        start_server = websockets.serve(connection_made, host, port)
+        self._server = start_server.ws_server
+        self.loop.run_until_complete(start_server)
+
+        try:
+            self.loop.run_forever()
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        finally:
+            self._stop_event.set()
             self.shutdown()
 
     @property
