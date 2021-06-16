@@ -590,7 +590,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         self.client_capabilities = params.capabilities
         self.server_capabilities = ServerCapabilitiesBuilder(
             self.client_capabilities,
-            self.fm.features.keys(),
+            {**self.fm.features, **self.fm.builtin_features}.keys(),
             self.fm.feature_options,
             list(self.fm.commands.keys()),
             self._server.sync_kind,
