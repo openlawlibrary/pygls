@@ -37,8 +37,8 @@ from pygls.lsp.types.language_features.document_symbol import (WorkspaceCapabili
 
 
 class WorkspaceFoldersServerCapabilities(Model):
-    supported: Optional[bool] = False
-    change_notifications: Optional[Union[bool, str]] = None
+    supported: Optional[bool]
+    change_notifications: Optional[Union[bool, str]]
 
 
 class WorkspaceFolder(Model):
@@ -56,7 +56,7 @@ class DidChangeWorkspaceFoldersParams(Model):
 
 
 class DidChangeConfigurationClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DidChangeConfigurationParams(Model):
@@ -64,8 +64,8 @@ class DidChangeConfigurationParams(Model):
 
 
 class ConfigurationItem(Model):
-    scope_uri: Optional[str] = None
-    section: Optional[str] = None
+    scope_uri: Optional[str]
+    section: Optional[str]
 
 
 class ConfigurationParams(Model):
@@ -73,7 +73,7 @@ class ConfigurationParams(Model):
 
 
 class DidChangeWatchedFilesClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class WatchKind(enum.IntFlag):
@@ -84,7 +84,7 @@ class WatchKind(enum.IntFlag):
 
 class FileSystemWatcher(Model):
     glob_pattern: str
-    kind: Optional[WatchKind] = WatchKind.Create | WatchKind.Change | WatchKind.Delete
+    kind: Optional[WatchKind]
 
 
 class DidChangeWatchedFilesRegistrationOptions(Model):
@@ -107,9 +107,9 @@ class DidChangeWatchedFilesParams(Model):
 
 
 class WorkspaceSymbolClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
-    tag_support: Optional[WorkspaceCapabilitiesTagSupport] = None
+    dynamic_registration: Optional[bool]
+    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind]
+    tag_support: Optional[WorkspaceCapabilitiesTagSupport]
 
 
 class WorkspaceSymbolOptions(WorkDoneProgressOptions):
@@ -125,7 +125,7 @@ class WorkspaceSymbolParams(WorkDoneProgressParams, PartialResultParams):
 
 
 class ExecuteCommandClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class ExecuteCommandOptions(WorkDoneProgressOptions):
@@ -138,17 +138,17 @@ class ExecuteCommandRegistrationOptions(ExecuteCommandOptions):
 
 class ExecuteCommandParams(WorkDoneProgressParams):
     command: str
-    arguments: Optional[List[Any]] = None
+    arguments: Optional[List[Any]]
 
 
 class ApplyWorkspaceEditParams(Model):
     edit: WorkspaceEdit
-    label: Optional[str] = None
+    label: Optional[str]
 
 
 class ApplyWorkspaceEditResponse(Model):
     applied: bool
-    failure_reason: Optional[str] = None
+    failure_reason: Optional[str]
 
 
 class DidOpenTextDocumentParams(Model):
@@ -156,8 +156,8 @@ class DidOpenTextDocumentParams(Model):
 
 
 class TextDocumentContentChangeEvent(Model):
-    range: Optional[Range] = None
-    range_length: Optional[NumType] = None
+    range: Optional[Range]
+    range_length: Optional[NumType]
     text: str = ''
 
 
@@ -188,7 +188,7 @@ class SaveOptions(Model):
 
 class DidSaveTextDocumentParams(Model):
     text_document: TextDocumentIdentifier
-    text: Optional[str] = None
+    text: Optional[str]
 
 
 class DidCloseTextDocumentParams(Model):
@@ -196,7 +196,7 @@ class DidCloseTextDocumentParams(Model):
 
 
 class TextDocumentSyncClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    will_save: Optional[bool] = False
-    will_save_wait_until: Optional[bool] = False
-    did_save: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    will_save: Optional[bool]
+    will_save_wait_until: Optional[bool]
+    did_save: Optional[bool]

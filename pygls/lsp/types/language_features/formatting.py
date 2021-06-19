@@ -31,7 +31,7 @@ from pygls.lsp.types.basic_structures import (Model, TextDocumentIdentifier,
 
 
 class DocumentFormattingClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DocumentFormattingOptions(WorkDoneProgressOptions):
@@ -41,9 +41,9 @@ class DocumentFormattingOptions(WorkDoneProgressOptions):
 class FormattingOptions(Model):
     tab_size: int
     insert_spaces: bool
-    trim_trailing_whitespace: Optional[bool] = False
-    insert_final_newline: Optional[bool] = False
-    trim_final_newlines: Optional[bool] = False
+    trim_trailing_whitespace: Optional[bool]
+    insert_final_newline: Optional[bool]
+    trim_final_newlines: Optional[bool]
 
 
 class DocumentFormattingParams(WorkDoneProgressParams):

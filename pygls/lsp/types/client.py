@@ -32,7 +32,7 @@ from pygls.lsp.types.basic_structures import Model
 class Registration(Model):
     id: str
     method: str
-    register_options: Optional[Any] = None
+    register_options: Optional[Any]
 
 
 class RegistrationParams(Model):

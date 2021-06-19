@@ -31,8 +31,8 @@ from pygls.lsp.types.basic_structures import (Model, TextDocumentPositionParams,
 
 
 class DefinitionClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    link_support: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    link_support: Optional[bool]
 
 
 class DefinitionOptions(WorkDoneProgressOptions):

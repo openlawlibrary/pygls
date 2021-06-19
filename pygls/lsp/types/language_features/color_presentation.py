@@ -40,5 +40,5 @@ class ColorPresentationParams(WorkDoneProgressParams, PartialResultParams):
 
 class ColorPresentation(Model):
     label: str
-    text_edit: Optional[TextEdit] = None
-    additional_text_edits: Optional[List[TextEdit]] = None
+    text_edit: Optional[TextEdit]
+    additional_text_edits: Optional[List[TextEdit]]

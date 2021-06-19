@@ -34,7 +34,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
 
 
 class DocumentHighlightClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DocumentHighlightOptions(WorkDoneProgressOptions):
@@ -57,4 +57,4 @@ class DocumentHighlightKind(enum.IntEnum):
 
 class DocumentHighlight(Model):
     range: Range
-    kind: Optional[DocumentHighlightKind] = DocumentHighlightKind.Text
+    kind: Optional[DocumentHighlightKind]

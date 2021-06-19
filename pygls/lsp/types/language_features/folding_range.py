@@ -34,9 +34,9 @@ from pygls.lsp.types.basic_structures import (Model, NumType, PartialResultParam
 
 
 class FoldingRangeClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    range_limit: Optional[NumType] = None
-    line_folding_only: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    range_limit: Optional[NumType]
+    line_folding_only: Optional[bool]
 
 
 class FoldingRangeOptions(WorkDoneProgressOptions):
@@ -62,6 +62,6 @@ class FoldingRangeKind(str, enum.Enum):
 class FoldingRange(Model):
     start_line: int
     end_line: int
-    start_character: Optional[int] = None
-    end_character: Optional[int] = None
-    kind: Optional[FoldingRangeKind] = None
+    start_character: Optional[int]
+    end_character: Optional[int]
+    kind: Optional[FoldingRangeKind]

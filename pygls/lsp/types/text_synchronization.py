@@ -38,9 +38,9 @@ class TextDocumentSyncKind(enum.IntEnum):
 
 
 class TextDocumentSyncOptions(Model):
-    open_close: Optional[bool] = False
-    change: Optional[TextDocumentSyncKind] = TextDocumentSyncKind.NONE
+    open_close: Optional[bool]
+    change: Optional[TextDocumentSyncKind]
 
 
 class TextDocumentSaveRegistrationOptions(TextDocumentRegistrationOptions):
-    include_text: Optional[bool] = False
+    include_text: Optional[bool]

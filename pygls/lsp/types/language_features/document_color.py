@@ -33,7 +33,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
 
 
 class DocumentColorClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DocumentColorOptions(WorkDoneProgressOptions):

@@ -36,17 +36,17 @@ class FileOperationPatternKind(str, enum.Enum):
 
 
 class FileOperationPatternOptions(Model):
-    ignore_case: Optional[bool] = False
+    ignore_case: Optional[bool]
 
 
 class FileOperationPattern(Model):
     glob: str
-    matches: Optional[FileOperationPatternKind] = None
-    options: Optional[FileOperationPatternOptions] = None
+    matches: Optional[FileOperationPatternKind]
+    options: Optional[FileOperationPatternOptions]
 
 
 class FileOperationFilter(Model):
-    scheme: Optional[str] = None
+    scheme: Optional[str]
     pattern: FileOperationPattern
 
 

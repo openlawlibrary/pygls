@@ -66,7 +66,7 @@ class SymbolTag(enum.IntEnum):
 
 
 class WorkspaceCapabilitiesSymbolKind(Model):
-    value_set: Optional[List[SymbolKind]] = None
+    value_set: Optional[List[SymbolKind]]
 
 
 class WorkspaceCapabilitiesTagSupport(Model):
@@ -78,15 +78,15 @@ class DocumentSymbolCapabilitiesTagSupport(Model):
 
 
 class DocumentSymbolClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind] = None
-    hierarchical_document_symbol_support: Optional[bool] = False
-    tag_support: Optional[WorkspaceCapabilitiesTagSupport] = None
-    label_support: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    symbol_kind: Optional[WorkspaceCapabilitiesSymbolKind]
+    hierarchical_document_symbol_support: Optional[bool]
+    tag_support: Optional[WorkspaceCapabilitiesTagSupport]
+    label_support: Optional[bool]
 
 
 class DocumentSymbolOptions(WorkDoneProgressOptions):
-    label: Optional[str] = None
+    label: Optional[str]
 
 
 class DocumentSymbolParams(WorkDoneProgressParams, PartialResultParams):
@@ -98,10 +98,10 @@ class DocumentSymbol(Model):
     kind: SymbolKind
     range: Range
     selection_range: Range
-    detail: Optional[str] = None
-    children: Optional[List['DocumentSymbol']] = None
-    tags: Optional[List[SymbolTag]] = None
-    deprecated: Optional[bool] = False
+    detail: Optional[str]
+    children: Optional[List['DocumentSymbol']]
+    tags: Optional[List[SymbolTag]]
+    deprecated: Optional[bool]
 
 
 DocumentSymbol.update_forward_refs()
@@ -111,6 +111,6 @@ class SymbolInformation(Model):
     name: str
     kind: SymbolKind
     location: Location
-    container_name: Optional[str] = None
-    tags: Optional[List[SymbolTag]] = None
-    deprecated: Optional[bool] = False
+    container_name: Optional[str]
+    tags: Optional[List[SymbolTag]]
+    deprecated: Optional[bool]
