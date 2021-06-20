@@ -156,7 +156,7 @@ class CompletionItem(Model):
 
 class CompletionList(Model):
     is_incomplete: bool
-    items: List[CompletionItem] = []
+    items: List[CompletionItem]
 
     def add_item(self, completion_item):
         self.items.append(completion_item)

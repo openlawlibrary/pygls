@@ -93,12 +93,12 @@ from pygls.lsp.types.workspace import (DidChangeConfigurationClientCapabilities,
 
 
 class ClientInfo(Model):
-    name: str = 'unknown'
+    name: str
     version: Optional[str]
 
 
 class ServerInfo(Model):
-    name: str = 'unknown'
+    name: str
     version: Optional[str]
 
 

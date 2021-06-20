@@ -158,7 +158,7 @@ class DidOpenTextDocumentParams(Model):
 class TextDocumentContentChangeEvent(Model):
     range: Optional[Range]
     range_length: Optional[NumType]
-    text: str = ''
+    text: str
 
 
 class TextDocumentContentChangeTextEvent(Model):
@@ -183,7 +183,7 @@ class WillSaveTextDocumentParams(Model):
 
 
 class SaveOptions(Model):
-    include_text: bool = False
+    include_text: Optional[bool]
 
 
 class DidSaveTextDocumentParams(Model):
