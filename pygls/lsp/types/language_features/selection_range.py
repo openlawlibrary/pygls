@@ -33,7 +33,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Positi
 
 
 class SelectionRangeClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class SelectionRangeOptions(WorkDoneProgressOptions):
@@ -54,7 +54,7 @@ class SelectionRangeParams(WorkDoneProgressParams, PartialResultParams):
 
 class SelectionRange(Model):
     range: Range
-    parent: Optional['SelectionRange'] = None
+    parent: Optional['SelectionRange']
 
 
 SelectionRange.update_forward_refs()

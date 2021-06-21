@@ -54,14 +54,6 @@ class Model(BaseModel):
             'from_': 'from'
         }
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
-
-        # Serialize (.json()) fields that has default value which is not None
-        for name, field in self.__fields__.items():
-            if getattr(field, 'default', None) is not None:
-                self.__fields_set__.add(name)
-
 
 class JsonRpcMessage(Model):
     """A base json rpc message defined by LSP."""
@@ -238,7 +230,7 @@ class SetTraceParams(Model):
 
 class RegularExpressionsClientCapabilities(Model):
     engine: str
-    version: Optional[str] = None
+    version: Optional[str]
 
 
 class ResolveSupportClientCapabilities(Model):
@@ -249,7 +241,7 @@ class LocationLink(Model):
     target_uri: str
     target_range: Range
     target_selection_range: Range
-    origin_selection_range: Optional[Range] = None
+    origin_selection_range: Optional[Range]
 
 
 class DiagnosticSeverity(enum.IntEnum):
@@ -276,19 +268,19 @@ class CodeDescription(Model):
 class Diagnostic(Model):
     range: Range
     message: str
-    severity: Optional[DiagnosticSeverity] = None
-    code: Optional[Union[int, str]] = None
-    code_description: Optional[CodeDescription] = None
-    source: Optional[str] = None
-    related_information: Optional[List[DiagnosticRelatedInformation]] = None
-    tags: Optional[List[DiagnosticTag]] = None
-    data: Optional[Any] = None
+    severity: Optional[DiagnosticSeverity]
+    code: Optional[Union[int, str]]
+    code_description: Optional[CodeDescription]
+    source: Optional[str]
+    related_information: Optional[List[DiagnosticRelatedInformation]]
+    tags: Optional[List[DiagnosticTag]]
+    data: Optional[Any]
 
 
 class Command(Model):
     title: str
     command: str
-    arguments: Optional[List[Any]] = None
+    arguments: Optional[List[Any]]
 
 
 class TextEdit(Model):
@@ -302,8 +294,8 @@ class AnnotatedTextEdit(TextEdit):
 
 class ChangeAnnotation(Model):
     label: str
-    needs_confirmation: Optional[bool] = False
-    description: Optional[str] = None
+    needs_confirmation: Optional[bool]
+    description: Optional[str]
 
 
 class ResourceOperationKind(str, enum.Enum):
@@ -313,40 +305,40 @@ class ResourceOperationKind(str, enum.Enum):
 
 
 class CreateFileOptions(Model):
-    overwrite: Optional[bool] = False
-    ignore_if_exists: Optional[bool] = False
+    overwrite: Optional[bool]
+    ignore_if_exists: Optional[bool]
 
 
 class CreateFile(Model):
     kind: ResourceOperationKind = ResourceOperationKind.Create
     uri: str
-    options: Optional[CreateFileOptions] = None
-    annotation_id: Optional[ChangeAnnotationIdentifier] = None
+    options: Optional[CreateFileOptions]
+    annotation_id: Optional[ChangeAnnotationIdentifier]
 
 
 class RenameFileOptions(Model):
-    overwrite: Optional[bool] = False
-    ignore_if_exists: Optional[bool] = False
+    overwrite: Optional[bool]
+    ignore_if_exists: Optional[bool]
 
 
 class RenameFile(Model):
     kind: ResourceOperationKind = ResourceOperationKind.Rename
     old_uri: str
     new_uri: str
-    options: Optional[RenameFileOptions] = None
-    annotation_id: Optional[ChangeAnnotationIdentifier] = None
+    options: Optional[RenameFileOptions]
+    annotation_id: Optional[ChangeAnnotationIdentifier]
 
 
 class DeleteFileOptions(Model):
-    recursive: Optional[bool] = False
-    ignore_if_exists: Optional[bool] = False
+    recursive: Optional[bool]
+    ignore_if_exists: Optional[bool]
 
 
 class DeleteFile(Model):
     kind: ResourceOperationKind = ResourceOperationKind.Delete
     uri: str
-    options: Optional[DeleteFileOptions] = None
-    annotation_id: Optional[ChangeAnnotationIdentifier] = None
+    options: Optional[DeleteFileOptions]
+    annotation_id: Optional[ChangeAnnotationIdentifier]
 
 
 class FailureHandlingKind(str, enum.Enum):
@@ -357,15 +349,15 @@ class FailureHandlingKind(str, enum.Enum):
 
 
 class ChangeAnnotationSupport(Model):
-    groups_on_label: Optional[bool] = False
+    groups_on_label: Optional[bool]
 
 
 class WorkspaceEditClientCapabilities(Model):
-    document_changes: Optional[bool] = False
-    resource_operations: Optional[List[ResourceOperationKind]] = None
-    failure_handling: Optional[FailureHandlingKind] = None
-    normalizes_line_endings: Optional[bool] = False
-    change_annotation_support: Optional[ChangeAnnotationSupport] = None
+    document_changes: Optional[bool]
+    resource_operations: Optional[List[ResourceOperationKind]]
+    failure_handling: Optional[FailureHandlingKind]
+    normalizes_line_endings: Optional[bool]
+    change_annotation_support: Optional[ChangeAnnotationSupport]
 
 
 class TextDocumentIdentifier(Model):
@@ -398,20 +390,20 @@ class TextDocumentPositionParams(Model):
 
 
 class DocumentFilter(Model):
-    language: Optional[str] = None
-    scheme: Optional[str] = None
-    pattern: Optional[str] = None
+    language: Optional[str]
+    scheme: Optional[str]
+    pattern: Optional[str]
 
 
 DocumentSelector = List[DocumentFilter]
 
 
 class StaticRegistrationOptions(Model):
-    id: Optional[str] = None
+    id: Optional[str]
 
 
 class TextDocumentRegistrationOptions(Model):
-    document_selector: Optional[DocumentSelector] = None
+    document_selector: Optional[DocumentSelector]
 
 
 class MarkupKind(str, enum.Enum):
@@ -425,9 +417,9 @@ class MarkupContent(Model):
 
 
 class WorkspaceEdit(Model):
-    changes: Optional[Dict[str, List[TextEdit]]] = None
-    document_changes: Optional[Any] = None
-    change_annotations: Optional[Dict[ChangeAnnotationIdentifier, ChangeAnnotation]] = None
+    changes: Optional[Dict[str, List[TextEdit]]]
+    document_changes: Optional[Any]
+    change_annotations: Optional[Dict[ChangeAnnotationIdentifier, ChangeAnnotation]]
 
     @root_validator
     def check_result_or_error(cls, values):
@@ -450,21 +442,21 @@ class WorkspaceEdit(Model):
 class WorkDoneProgressBegin(Model):
     kind: str = 'begin'
     title: str
-    cancellable: Optional[bool] = False
-    message: Optional[str] = None
-    percentage: Optional[NumType] = None
+    cancellable: Optional[bool]
+    message: Optional[str]
+    percentage: Optional[NumType]
 
 
 class WorkDoneProgressReport(Model):
     kind: str = 'report'
-    cancellable: Optional[bool] = False
-    message: Optional[str] = None
-    percentage: Optional[NumType] = None
+    cancellable: Optional[bool]
+    message: Optional[str]
+    percentage: Optional[NumType]
 
 
 class WorkDoneProgressEnd(Model):
     kind: str = 'end'
-    message: Optional[str] = None
+    message: Optional[str]
 
 
 class WorkDoneProgressParams(Model):

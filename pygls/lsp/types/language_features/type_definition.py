@@ -33,8 +33,8 @@ from pygls.lsp.types.basic_structures import (Model, StaticRegistrationOptions,
 
 
 class TypeDefinitionClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    link_support: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    link_support: Optional[bool]
 
 
 class TypeDefinitionOptions(WorkDoneProgressOptions):

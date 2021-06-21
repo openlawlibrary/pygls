@@ -33,7 +33,7 @@ from pygls.lsp.types.basic_structures import (Model, Range, StaticRegistrationOp
 
 
 class LinkedEditingRangeClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class LinkedEditingRangeOptions(WorkDoneProgressOptions):
@@ -50,4 +50,4 @@ class LinkedEditingRangeParams(TextDocumentPositionParams, WorkDoneProgressParam
 
 class LinkedEditingRanges(Model):
     ranges: List[Range]
-    word_pattern: Optional[str] = None
+    word_pattern: Optional[str]

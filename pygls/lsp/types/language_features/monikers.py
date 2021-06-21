@@ -34,7 +34,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams,
 
 
 class MonikerClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class MonikerOptions(WorkDoneProgressOptions):
@@ -67,4 +67,4 @@ class Moniker(Model):
     scheme: str
     identifier: str
     unique: UniquenessLevel
-    kind: Optional[MonikerKind] = None
+    kind: Optional[MonikerKind]

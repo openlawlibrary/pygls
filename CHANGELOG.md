@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
+- Remove defaults from all optional fields on protocol-defined types
+  - Explicitly defaulting to None was redundant; defaulting them to other values
+    made them not optional after all
+
 ### Fixed
 
 ## [0.11.0] - 06/18/2021

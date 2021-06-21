@@ -32,7 +32,7 @@ from pygls.lsp.types.language_features.formatting import FormattingOptions
 
 
 class DocumentRangeFormattingClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DocumentRangeFormattingOptions(WorkDoneProgressOptions):

@@ -32,12 +32,12 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
 
 
 class DocumentLinkClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    tooltip_support: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    tooltip_support: Optional[bool]
 
 
 class DocumentLinkOptions(WorkDoneProgressOptions):
-    resolve_provider: Optional[bool] = False
+    resolve_provider: Optional[bool]
 
 
 class DocumentLinkParams(WorkDoneProgressParams, PartialResultParams):
@@ -46,6 +46,6 @@ class DocumentLinkParams(WorkDoneProgressParams, PartialResultParams):
 
 class DocumentLink(Model):
     range: Range
-    target: Optional[str] = None
-    tooltip: Optional[str] = None
-    data: Optional[Any] = None
+    target: Optional[str]
+    tooltip: Optional[str]
+    data: Optional[Any]

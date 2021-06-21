@@ -32,8 +32,8 @@ from pygls.lsp.types.basic_structures import (MarkupContent, MarkupKind, Model, 
 
 
 class HoverClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    content_format: Optional[List[MarkupKind]] = None
+    dynamic_registration: Optional[bool]
+    content_format: Optional[List[MarkupKind]]
 
 
 class HoverOptions(WorkDoneProgressOptions):
@@ -54,4 +54,4 @@ MarkedStringType = Union[str, MarkedString]
 
 class Hover(Model):
     contents: Union[MarkedStringType, List[MarkedStringType], MarkupContent]
-    range: Optional[Range] = None
+    range: Optional[Range]

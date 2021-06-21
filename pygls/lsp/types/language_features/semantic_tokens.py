@@ -34,7 +34,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams, Range,
 
 
 class SemanticTokensWorkspaceClientCapabilities(Model):
-    refresh_support: Optional[bool] = False
+    refresh_support: Optional[bool]
 
 
 class SemanticTokenTypes(str, enum.Enum):
@@ -85,12 +85,12 @@ class SemanticTokensLegend(Model):
 
 
 class SemanticTokensRequestsFull(Model):
-    delta: Optional[bool] = False
+    delta: Optional[bool]
 
 
 class SemanticTokensRequests(Model):
-    range: Optional[Union[bool, Dict]] = None
-    full: Optional[Union[bool, SemanticTokensRequestsFull]] = None
+    range: Optional[Union[bool, Dict]]
+    full: Optional[Union[bool, SemanticTokensRequestsFull]]
 
 
 class SemanticTokensClientCapabilities(Model):
@@ -98,15 +98,15 @@ class SemanticTokensClientCapabilities(Model):
     token_types: List[str]
     token_modifiers: List[str]
     formats: List[TokenFormat]
-    overlapping_token_support: Optional[bool] = False
-    multiline_token_support: Optional[bool] = False
-    dynamic_registration: Optional[bool] = False
+    overlapping_token_support: Optional[bool]
+    multiline_token_support: Optional[bool]
+    dynamic_registration: Optional[bool]
 
 
 class SemanticTokensOptions(WorkDoneProgressOptions):
     legend: SemanticTokensLegend
-    range: Optional[Union[bool, Dict]] = None
-    full: Optional[Union[bool, SemanticTokensRequestsFull]] = None
+    range: Optional[Union[bool, Dict]]
+    full: Optional[Union[bool, SemanticTokensRequestsFull]]
 
 
 class SemanticTokensRegistrationOptions(TextDocumentRegistrationOptions, SemanticTokensOptions, StaticRegistrationOptions):
@@ -119,7 +119,7 @@ class SemanticTokensParams(WorkDoneProgressParams, PartialResultParams):
 
 class SemanticTokens(Model):
     data: List[int]
-    result_id: Optional[str] = None
+    result_id: Optional[str]
 
 
 class SemanticTokensPartialResult(Model):
@@ -134,12 +134,12 @@ class SemanticTokensDeltaParams(WorkDoneProgressParams, PartialResultParams):
 class SemanticTokensEdit(Model):
     start: int
     delete_count: int
-    data: Optional[List[int]] = None
+    data: Optional[List[int]]
 
 
 class SemanticTokensDelta(Model):
     edits: List[SemanticTokensEdit]
-    result_id: Optional[str] = None
+    result_id: Optional[str]
 
 
 class SemanticTokensDeltaPartialResult(Model):

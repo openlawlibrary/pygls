@@ -72,7 +72,7 @@ class TestCompletions(unittest.TestCase):
         assert response['items'][0]['label'] == 'test1'
         assert response['items'][0]['kind'] == CompletionItemKind.Method
         assert response['items'][0]['preselect'] == True
-        assert response['items'][0]['deprecated'] == False
+        assert 'deprecated' not in response['items'][0]
         assert 'tags' not in response['items'][0]
         assert 'detail' not in response['items'][0]
         assert 'documentation' not in response['items'][0]

@@ -36,14 +36,14 @@ class PrepareSupportDefaultBehavior(enum.IntEnum):
 
 
 class RenameClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
-    prepare_support: Optional[bool] = False
-    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior] = None
-    honors_change_annotations: Optional[bool] = False
+    dynamic_registration: Optional[bool]
+    prepare_support: Optional[bool]
+    prepare_support_default_behavior: Optional[PrepareSupportDefaultBehavior]
+    honors_change_annotations: Optional[bool]
 
 
 class RenameOptions(WorkDoneProgressOptions):
-    prepare_provider: Optional[bool] = False
+    prepare_provider: Optional[bool]
 
 
 class RenameParams(TextDocumentPositionParams, WorkDoneProgressParams):

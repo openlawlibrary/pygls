@@ -32,12 +32,12 @@ from pygls.lsp.types.language_features.formatting import FormattingOptions
 
 
 class DocumentOnTypeFormattingClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class DocumentOnTypeFormattingOptions(WorkDoneProgressOptions):
     first_trigger_character: str
-    more_trigger_character: Optional[List[str]] = None
+    more_trigger_character: Optional[List[str]]
 
 
 class DocumentOnTypeFormattingParams(TextDocumentPositionParams):

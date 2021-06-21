@@ -35,7 +35,7 @@ from pygls.lsp.types.language_features.document_symbol import SymbolKind, Symbol
 
 
 class CallHierarchyClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class CallHierarchyOptions(WorkDoneProgressOptions):
@@ -58,9 +58,9 @@ class CallHierarchyItem(Model):
     uri: str
     range: Range
     selection_range: Range
-    tags: Optional[List[SymbolTag]] = None
-    detail: Optional[str] = None
-    data: Optional[Any] = None
+    tags: Optional[List[SymbolTag]]
+    detail: Optional[str]
+    data: Optional[Any]
 
 
 class CallHierarchyIncomingCallsParams(WorkDoneProgressParams, PartialResultParams):

@@ -30,18 +30,18 @@ from pygls.lsp.types.basic_structures import Diagnostic, DiagnosticTag, Model, N
 
 
 class PublishDiagnosticsTagSupportClientCapabilities(Model):
-    value_set: Optional[List[DiagnosticTag]] = None
+    value_set: Optional[List[DiagnosticTag]]
 
 
 class PublishDiagnosticsClientCapabilities(Model):
-    related_information: Optional[bool] = False
-    tag_support: Optional[PublishDiagnosticsTagSupportClientCapabilities] = None
-    version_support: Optional[bool] = False
-    code_description_support: Optional[bool] = False
-    data_support: Optional[bool] = False
+    related_information: Optional[bool]
+    tag_support: Optional[PublishDiagnosticsTagSupportClientCapabilities]
+    version_support: Optional[bool]
+    code_description_support: Optional[bool]
+    data_support: Optional[bool]
 
 
 class PublishDiagnosticsParams(Model):
     uri: str
     diagnostics: List[Diagnostic]
-    version: Optional[NumType] = None
+    version: Optional[NumType]

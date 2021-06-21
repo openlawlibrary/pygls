@@ -32,7 +32,7 @@ from pygls.lsp.types.basic_structures import (Model, PartialResultParams,
 
 
 class ReferenceClientCapabilities(Model):
-    dynamic_registration: Optional[bool] = False
+    dynamic_registration: Optional[bool]
 
 
 class ReferenceOptions(WorkDoneProgressOptions):

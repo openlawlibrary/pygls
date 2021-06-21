@@ -49,18 +49,18 @@ class MessageActionItem(Model):
 class ShowMessageRequestParams(Model):
     type: MessageType
     message: str
-    actions: Optional[List[MessageActionItem]] = None
+    actions: Optional[List[MessageActionItem]]
 
 
 class ShowDocumentClientCapabilities(Model):
-    support: Optional[bool] = False
+    support: Optional[bool]
 
 
 class ShowDocumentParams(Model):
     uri: URI
-    external: Optional[bool] = False
-    take_focus: Optional[bool] = False
-    selection: Optional[Range] = None
+    external: Optional[bool]
+    take_focus: Optional[bool]
+    selection: Optional[Range]
 
 
 class ShowDocumentResult(Model):
@@ -68,11 +68,11 @@ class ShowDocumentResult(Model):
 
 
 class ShowMessageRequestActionItem(Model):
-    additional_properties_support: Optional[bool] = False
+    additional_properties_support: Optional[bool]
 
 
 class ShowMessageRequestClientCapabilities(Model):
-    message_action_item: Optional[ShowMessageRequestActionItem] = None
+    message_action_item: Optional[ShowMessageRequestActionItem]
 
 
 class LogMessageParams(Model):
