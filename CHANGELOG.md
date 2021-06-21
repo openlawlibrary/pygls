@@ -11,11 +11,19 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
-- Remove defaults from all optional fields on protocol-defined types
-  - Explicitly defaulting to None was redundant; defaulting them to other values
-    made them not optional after all
+### Fixed
+
+## [0.11.1] - 06/21/2021
+
+### Added
+
+### Changed
+
+- Remove defaults from all optional fields on protocol-defined types ([#198])
 
 ### Fixed
+
+[#198]: https://github.com/openlawlibrary/pygls/pull/198
 
 ## [0.11.0] - 06/18/2021
 
@@ -269,7 +277,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.1...HEAD
+[0.11.1]: https://github.com/openlawlibrary/pygls/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/openlawlibrary/pygls/compare/v0.10.3...v0.11.0
 [0.10.3]: https://github.com/openlawlibrary/pygls/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/openlawlibrary/pygls/compare/v0.10.1...v0.10.2
