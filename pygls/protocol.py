@@ -15,6 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
+import enum
 import functools
 import json
 import logging
@@ -92,6 +93,13 @@ def dict_to_object(**d):
         json.dumps(d),
         object_hook=lambda p: namedtuple(type_name, p.keys(), rename=True)(*p.values())
     )
+
+
+def default_serializer(o):
+    """JSON serializer for complex objects that do not extend pydantic BaseModel class."""
+    if isinstance(o, enum.Enum):
+        return o.value
+    return o.__dict__
 
 
 def deserialize_command(params):
@@ -371,7 +379,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            body = data.json(by_alias=True, exclude_unset=True)
+            body = data.json(by_alias=True, exclude_unset=True, encoder=default_serializer)
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
