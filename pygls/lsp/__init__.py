@@ -64,12 +64,12 @@ LSP_METHODS_MAP = {
     # Workspace
     WORKSPACE_APPLY_EDIT: (None, ApplyWorkspaceEditResponse, ApplyWorkspaceEditParams, ),
     WORKSPACE_CODE_LENS_REFRESH: (None, None, None),
-    WORKSPACE_CONFIGURATION: (None, List[Any], ConfigurationParams, ),
+    WORKSPACE_CONFIGURATION: (None, ConfigurationParams, List[Any], ),
     WORKSPACE_DID_CHANGE_CONFIGURATION: (None, DidChangeConfigurationParams, None, ),
     WORKSPACE_DID_CHANGE_WATCHED_FILES: (None, DidChangeWatchedFilesParams, None, ),
     WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS: (None, DidChangeWorkspaceFoldersParams, None, ),
     WORKSPACE_EXECUTE_COMMAND: (None, ExecuteCommandParams, Optional[Any], ),
-    WORKSPACE_FOLDERS: (None, Optional[List[WorkspaceFolder]], None, ),
+    WORKSPACE_FOLDERS: (None, None, Optional[List[WorkspaceFolder]], ),
     WORKSPACE_SEMANTIC_TOKENS_REFRESH: (None, None, None),
     WORKSPACE_SYMBOL: (None, WorkspaceSymbolParams, Optional[List[SymbolInformation]], ),
     # Text Document Synchronization
