@@ -33,7 +33,7 @@ def completions(params: CompletionParams):
         ]
     )
 
-server.start_tcp('localhost', 8080)
+server.start_tcp('127.0.0.1', 8080)
 ```
 
 Show completion list on the client:

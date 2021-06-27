@@ -45,10 +45,10 @@ code:
 
    server = LanguageServer()
 
-   server.start_tcp('localhost', 8080)
+   server.start_tcp('127.0.0.1', 8080)
 
 After running the code above, server will start listening for incoming
-``Json RPC`` requests on ``http://localhost:8080``.
+``Json RPC`` requests on ``http://127.0.0.1:8080``.
 
 Register Features and Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
