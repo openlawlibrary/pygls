@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Use `127.0.0.1` for tests and examples to avoid Docker issues ([#165])
+
 ## [0.11.1] - 06/21/2021
 
 ### Added
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+[#165]: https://github.com/openlawlibrary/pygls/issues/165
 [#198]: https://github.com/openlawlibrary/pygls/pull/198
 
 ## [0.11.0] - 06/18/2021
