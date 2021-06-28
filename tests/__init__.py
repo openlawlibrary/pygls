@@ -17,6 +17,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import pytest
+
 from pygls import IS_WIN
 
 unix_only = pytest.mark.skipif(IS_WIN, reason="Unix only")
@@ -25,7 +26,3 @@ windows_only = pytest.mark.skipif(not IS_WIN, reason="Windows only")
 CMD_ASYNC = 'cmd_async'
 CMD_SYNC = 'cmd_sync'
 CMD_THREAD = 'cmd_thread'
-
-FEATURE_ASYNC = 'feature_async'
-FEATURE_SYNC = 'feature_sync'
-FEATURE_THREAD = 'feature_thread'
