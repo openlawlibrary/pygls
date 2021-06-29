@@ -24,7 +24,7 @@ from pygls.lsp.types import (ClientCapabilities, DidOpenTextDocumentParams, Exec
                              InitializeParams, TextDocumentItem)
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
-from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD, FEATURE_ASYNC, FEATURE_SYNC, FEATURE_THREAD
+from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
 CALL_TIMEOUT = 2
 
@@ -71,36 +71,6 @@ def test_bf_text_document_did_open(client_server):
     sleep(1)
 
     assert len(server.lsp.workspace.documents) == 1
-
-
-def test_feature_async(client_server):
-    client, server = client_server
-
-    is_called, thread_id = client.lsp.send_request(FEATURE_ASYNC, {}) \
-                                     .result(timeout=CALL_TIMEOUT)
-
-    assert is_called
-    assert thread_id == server.thread_id
-
-
-def test_feature_sync(client_server):
-    client, server = client_server
-
-    is_called, thread_id = client.lsp.send_request(FEATURE_SYNC, {}) \
-                                     .result(timeout=CALL_TIMEOUT)
-
-    assert is_called
-    assert thread_id == server.thread_id
-
-
-def test_feature_thread(client_server):
-    client, server = client_server
-
-    is_called, thread_id = client.lsp.send_request(FEATURE_THREAD, {}) \
-                                     .result(timeout=CALL_TIMEOUT)
-
-    assert is_called
-    assert thread_id != server.thread_id
 
 
 def test_command_async(client_server):

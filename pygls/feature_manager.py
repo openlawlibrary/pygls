@@ -123,10 +123,13 @@ class FeatureManager:
                 logger.error('Command "%s" is already registered.', command_name)
                 raise CommandAlreadyRegisteredError(command_name)
 
-            self._commands[command_name] = wrap_with_server(f, self.server)
-
-            # Assign help attributes for thread decorator
             assign_help_attrs(f, command_name, ATTR_COMMAND_TYPE)
+
+            wrapped = wrap_with_server(f, self.server)
+            # Assign help attributes for thread decorator
+            assign_help_attrs(wrapped, command_name, ATTR_COMMAND_TYPE)
+
+            self._commands[command_name] = wrapped
 
             logger.info('Command "%s" is successfully registered.', command_name)
 
@@ -157,10 +160,13 @@ class FeatureManager:
                 logger.error('Feature "%s" is already registered.', feature_name)
                 raise FeatureAlreadyRegisteredError(feature_name)
 
-            self._features[feature_name] = wrap_with_server(f, self.server)
-
-            # Assign help attributes for thread decorator
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
+
+            wrapped = wrap_with_server(f, self.server)
+            # Assign help attributes for thread decorator
+            assign_help_attrs(wrapped, feature_name, ATTR_FEATURE_TYPE)
+
+            self._features[feature_name] = wrapped
 
             if options:
                 options_type = get_method_registration_options_type(feature_name)
