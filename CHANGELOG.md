@@ -13,7 +13,19 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+## [0.11.2] - 07/23/2021
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Fix feature manager ([#203])
 - Use `127.0.0.1` for tests and examples to avoid Docker issues ([#165])
+
+[#203]: https://github.com/openlawlibrary/pygls/issues/203
+[#165]: https://github.com/openlawlibrary/pygls/issues/165
 
 ## [0.11.1] - 06/21/2021
 
@@ -25,7 +37,6 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
-[#165]: https://github.com/openlawlibrary/pygls/issues/165
 [#198]: https://github.com/openlawlibrary/pygls/pull/198
 
 ## [0.11.0] - 06/18/2021
@@ -280,7 +291,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.2...HEAD
+[0.11.2]: https://github.com/openlawlibrary/pygls/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/openlawlibrary/pygls/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/openlawlibrary/pygls/compare/v0.10.3...v0.11.0
 [0.10.3]: https://github.com/openlawlibrary/pygls/compare/v0.10.2...v0.10.3
