@@ -44,10 +44,6 @@ function getClientOptions(): LanguageClientOptions {
     };
 }
 
-function isStartedInDebugMode(): boolean {
-    return process.env.VSCODE_DEBUG_MODE === "true";
-}
-
 function startLangServerTCP(addr: number): LanguageClient {
     const serverOptions: ServerOptions = () => {
         return new Promise((resolve /*, reject */) => {
