@@ -83,7 +83,7 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext): void {
-    if (isStartedInDebugMode()) {
+    if (context.extensionMode === ExtensionMode.Development) {
         // Development - Run the server manually
         client = startLangServerTCP(2087);
     } else {
