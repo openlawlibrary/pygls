@@ -22,7 +22,9 @@ from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COMPLETION, DECLARATION, 
                                TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE, TEXT_DOCUMENT_DID_CLOSE,
                                TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_SAVE,
                                TEXT_DOCUMENT_LINKED_EDITING_RANGE, TEXT_DOCUMENT_MONIKER,
-                               TEXT_DOCUMENT_SEMANTIC_TOKENS, TEXT_DOCUMENT_WILL_SAVE,
+                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
+                               TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE, TEXT_DOCUMENT_WILL_SAVE,
                                TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL, TYPE_DEFINITION,
                                WORKSPACE_DID_CREATE_FILES, WORKSPACE_DID_DELETE_FILES,
                                WORKSPACE_DID_RENAME_FILES, WORKSPACE_SYMBOL,
@@ -30,12 +32,12 @@ from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COMPLETION, DECLARATION, 
                                WORKSPACE_WILL_RENAME_FILES)
 from pygls.lsp.types import (CodeLensOptions, CompletionOptions, DocumentLinkOptions,
                              ExecuteCommandOptions, ImplementationOptions, SaveOptions,
+                             SemanticTokensOptions, SemanticTokensRegistrationOptions,
+                             SemanticTokensRequestsFull,
                              ServerCapabilities, SignatureHelpOptions,
                              TextDocumentSyncOptionsServerCapabilities, TypeDefinitionOptions,
                              WorkspaceFileOperationsServerCapabilities,
                              WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities)
-from pygls.lsp.types.language_features.semantic_tokens import (SemanticTokensLegend,
-                                                               SemanticTokensOptions)
 
 
 class ServerCapabilitiesBuilder:
@@ -229,15 +231,40 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_semantic_tokens(self):
-        value = self._provider_options(TEXT_DOCUMENT_SEMANTIC_TOKENS,
-                                       default=SemanticTokensOptions(
-                                           legend=SemanticTokensLegend(
-                                               token_types=[],
-                                               token_modifiers=[],
-                                           ),
-                                       ))
-        if value is not None:
+
+        providers = [
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE
+        ]
+
+        for provider in providers:
+            value = self._provider_options(provider, None)
+            if value:
+                break
+
+        if value is None:
+            return self
+
+        if isinstance(value, SemanticTokensRegistrationOptions):
             self.server_cap.semantic_tokens_provider = value
+            return self
+
+        full_support = (
+            SemanticTokensRequestsFull(delta=True)
+            if TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA in self.features
+            else TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
+        )
+
+        options = SemanticTokensOptions(
+            legend=value,
+            full=full_support or None,
+            range=TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE in self.features or None
+        )
+
+        if options.full or options.range:
+            self.server_cap.semantic_tokens_provider = options
+
         return self
 
     def _with_linked_editing_range(self):
