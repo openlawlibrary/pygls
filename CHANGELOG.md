@@ -11,7 +11,15 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
+- Update json-example to include an example semantic tokens method ([204])
+
 ### Fixed
+
+- Fix how the `semantic_tokens_provider` field of `ServerCapabilities` is computed ([213])
+
+[#204]: https://github.com/openlawlibrary/pygls/issues/204
+[#213]: https://github.com/openlawlibrary/pygls/pulls/213
+
 
 ## [0.11.2] - 07/23/2021
 

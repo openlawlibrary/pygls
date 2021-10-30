@@ -1,6 +1,7 @@
 # Contributors (alphabetical)
 
 - [@augb](https://github.com/augb)
+- [Alex Carney](https://github.com/alcarney)
 - [Brett Cannon](https://github.com/brettcannon/)
 - [Daniel Elero](https://github.com/danixeee)
 - [Daniel Miller](https://github.com/millerdev)
