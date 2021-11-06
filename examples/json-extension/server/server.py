@@ -16,13 +16,15 @@
 ############################################################################
 import asyncio
 import json
+import re
 import time
 import uuid
 from json import JSONDecodeError
 from typing import Optional
 
 from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
-                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN)
+                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN, 
+                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL)
 from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              CompletionParams, ConfigurationItem,
                              ConfigurationParams, Diagnostic,
@@ -30,6 +32,7 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              DidCloseTextDocumentParams,
                              DidOpenTextDocumentParams, MessageType, Position,
                              Range, Registration, RegistrationParams,
+                             SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
                              Unregistration, UnregistrationParams)
 from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
                                               WorkDoneProgressEnd,
@@ -149,6 +152,47 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
     _validate(ls, params)
+
+
+@json_server.feature(
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    SemanticTokensLegend(
+        token_types = ["operator"],
+        token_modifiers = []
+    )
+)
+def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
+    """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
+    for details on how semantic tokens are encoded."""
+    
+    TOKENS = re.compile('".*"(?=:)')
+    
+    uri = params.text_document.uri
+    doc = ls.workspace.get_document(uri)
+
+    last_line = 0
+    last_start = 0
+
+    data = []
+
+    for lineno, line in enumerate(doc.lines):
+        last_start = 0
+
+        for match in TOKENS.finditer(line):
+            start, end = match.span()
+            data += [
+                (lineno - last_line),
+                (start - last_start),
+                (end - start),
+                0, 
+                0
+            ]
+
+            last_line = lineno
+            last_start = start
+
+    return SemanticTokens(data=data)
+
 
 
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)

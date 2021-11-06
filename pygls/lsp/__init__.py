@@ -108,17 +108,17 @@ LSP_METHODS_MAP = {
         Optional[List[Moniker]],
     ),
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL: (
-        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
         SemanticTokensParams,
         Union[SemanticTokensPartialResult, Optional[SemanticTokens]],
     ),
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA: (
-        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
         SemanticTokensDeltaParams,
         Union[SemanticTokensDeltaPartialResult, Optional[Union[SemanticTokens, SemanticTokensDelta]]],
     ),
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE: (
-        Union[SemanticTokensOptions, SemanticTokensRegistrationOptions],
+        Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
         SemanticTokensRangeParams,
         Union[SemanticTokensPartialResult, Optional[SemanticTokens]],
 
