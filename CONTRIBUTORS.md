@@ -14,3 +14,4 @@
 - [Tomoya Tanjo](https://github.com/tom-tan)
 - [yorodm](https://github.com/yorodm)
 - [bollwyvl](https://github.com/bollwyvl)
+- [Dillan Mills](https://github.com/DillanCMills)

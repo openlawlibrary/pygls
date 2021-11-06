@@ -15,11 +15,12 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- Fix example extension client not detecting debug mode appropriately ([#193])
 - Fix how the `semantic_tokens_provider` field of `ServerCapabilities` is computed ([213])
 
+[#193]: https://github.com/openlawlibrary/pygls/issues/193
 [#204]: https://github.com/openlawlibrary/pygls/issues/204
 [#213]: https://github.com/openlawlibrary/pygls/pulls/213
-
 
 ## [0.11.2] - 07/23/2021
 
