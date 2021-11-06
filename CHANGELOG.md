@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+## [0.11.3] - 09/30/2021
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Fix example extension client not detecting debug mode appropriately ([#193])
+
+[#193]: https://github.com/openlawlibrary/pygls/issues/193
+
 ## [0.11.2] - 07/23/2021
 
 ### Added

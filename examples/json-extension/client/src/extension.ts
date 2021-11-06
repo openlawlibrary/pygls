@@ -20,7 +20,7 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, workspace } from "vscode";
+import { ExtensionContext, ExtensionMode, workspace } from "vscode";
 import {
     LanguageClient,
     LanguageClientOptions,
@@ -42,10 +42,6 @@ function getClientOptions(): LanguageClientOptions {
             fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
         },
     };
-}
-
-function isStartedInDebugMode(): boolean {
-    return process.env.VSCODE_DEBUG_MODE === "true";
 }
 
 function startLangServerTCP(addr: number): LanguageClient {
@@ -83,7 +79,7 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext): void {
-    if (isStartedInDebugMode()) {
+    if (context.extensionMode === ExtensionMode.Development) {
         // Development - Run the server manually
         client = startLangServerTCP(2087);
     } else {
