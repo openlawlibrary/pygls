@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
+### Fixed
+
+## [0.11.3] - 11/06/2021
+
+### Added
+
+### Changed
+
 - Update json-example to include an example semantic tokens method ([204])
 
 ### Fixed
@@ -300,7 +308,8 @@ and this project adheres to [Semantic Versioning][semver].
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.2...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.11.3...HEAD
+[0.11.3]: https://github.com/openlawlibrary/pygls/compare/v0.11.2...v0.11.3
 [0.11.2]: https://github.com/openlawlibrary/pygls/compare/v0.11.1...v0.11.2
 [0.11.1]: https://github.com/openlawlibrary/pygls/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/openlawlibrary/pygls/compare/v0.10.3...v0.11.0
