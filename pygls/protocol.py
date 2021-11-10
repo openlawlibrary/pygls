@@ -29,6 +29,7 @@ from functools import partial
 from itertools import zip_longest
 from typing import Callable, List, Optional
 
+from pygls import IS_PYODIDE
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.constants import ATTR_FEATURE_TYPE
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
@@ -376,6 +377,11 @@ class JsonRPCProtocol(asyncio.Protocol):
     def _send_data(self, data):
         """Sends data to the client."""
         if not data:
+            return
+
+        if IS_PYODIDE:
+            from js import post_message  # type: ignore
+            post_message(data.json(by_alias=True, exclude_unset=True, encoder=default_serializer))
             return
 
         try:
