@@ -8,6 +8,7 @@
 | _Esbonio Language Server_| [Alex Carney](https://github.com/alcarney) | [esbonio](https://github.com/swyddfa/esbonio) | Language server for [Sphinx](https://www.sphinx-doc.org/en/master/) documentation projects |
 | _Hy Language Server_     | [Rintaro Okamura](https://github.com/rinx) | [hy-language-server](https://github.com/rinx/hy-language-server) | Hy language server wrapping [Jedhy](https://github.com/ekaschalk/jedhy) |
 | _Jedi Language Server_   | [Samuel Roeca](https://softwarejourneyman.com/pages/about.html#about) | [jedi-language-server](https://github.com/pappasam/jedi-language-server)   | Python language server wrapping [Jedi](https://github.com/davidhalter/jedi)                                                   |
+| _Stata Language Server_   | [Hai Bo](https://github.com/HankBO) | [stata-language-server](https://github.com/HankBO/stata-language-server)   | Language server for [Stata](https://www.stata.com/)  |
 | _zc.buildout Language Server_   | [Jérome Perrin](https://github.com/perrinjerome) | [zc.buildout.languageserver](https://github.com/perrinjerome/vscode-zc-buildout)   | Language server for [zc.buildout](http://docs.buildout.org/en/latest/) profiles.  |
 
 ## _(alphabetic by name, maintainer)_
