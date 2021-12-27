@@ -19,13 +19,13 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
                              ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
 from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
                               ThreadDecoratorError, ValidationError)
-from pygls.lsp import get_method_registration_options_type, is_instance
+from pygls.lsp import get_method_registration_options_type, is_instance, LSP_METHODS_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ class FeatureManager:
         return self._commands
 
     def feature(
-        self, feature_name: str, options: Optional[Any] = None,
+        self, feature_name: str, options: Optional[Any] = None, types: Optional[Tuple[Any, Any, Any]] = None
     ) -> Callable:
         """Decorator used to register LSP features.
 
@@ -159,6 +159,9 @@ class FeatureManager:
             if feature_name in self._features:
                 logger.error('Feature "%s" is already registered.', feature_name)
                 raise FeatureAlreadyRegisteredError(feature_name)
+
+            if types is not None:
+                LSP_METHODS_MAP[feature_name] = types
 
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 

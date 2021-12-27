@@ -22,7 +22,7 @@ import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 from threading import Event
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, List, Optional, Tuple, TypeVar
 
 from pygls import IS_WIN
 from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
@@ -317,7 +317,8 @@ class LanguageServer(Server):
         return self.lsp.client_capabilities
 
     def feature(
-        self, feature_name: str, options: Optional[Any] = None,
+        self, feature_name: str, options: Optional[Any] = None, types: Optional[Tuple[Any, Any, Any]] = None
+    
     ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
@@ -325,8 +326,14 @@ class LanguageServer(Server):
             @ls.feature('textDocument/completion', triggerCharacters=['.'])
             def completions(ls, params: CompletionRequest):
                 return CompletionList(False, [CompletionItem("Completion 1")])
+
+            @ls.feature('$custom_definition', types=(
+                None, DefinitionParams, List[Location]
+            ))
+            def custom_definition(ls, params: DefinitionParams) -> List[Location]:
+                return get_definition_list(params)
         """
-        return self.lsp.fm.feature(feature_name, options)
+        return self.lsp.fm.feature(feature_name, options, types)
 
     def get_configuration(self, params: ConfigurationParams,
                           callback: Optional[ConfigCallbackType] = None) -> Future:
