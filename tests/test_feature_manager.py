@@ -15,13 +15,14 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
+from typing import List
 
 import pytest
 from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
                               ValidationError)
 from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
-from pygls.lsp import methods
-from pygls.lsp.types import CompletionOptions
+from pygls.lsp import methods, LSP_METHODS_MAP
+from pygls.lsp.types import CompletionOptions, DefinitionParams, Location
 
 
 def test_has_ls_param_or_annotation():
@@ -107,14 +108,25 @@ def test_register_features(feature_manager):
     @feature_manager.feature(methods.CODE_LENS)
     def code_lens():
         pass
+    
+    CUSTOM_METHOD_NAME = "custom_go_to_definition"
+    CUSTOM_METHOD_TYPES = (None, DefinitionParams, List[Location])
+
+    @feature_manager.feature(CUSTOM_METHOD_NAME, types=CUSTOM_METHOD_TYPES)
+    def custom_go_to_definition():
+        pass
 
     reg_features = feature_manager.features.keys()
 
     assert methods.COMPLETION in reg_features
     assert methods.CODE_LENS in reg_features
+    assert CUSTOM_METHOD_NAME in reg_features
 
     assert feature_manager.features[methods.COMPLETION] is completions
     assert feature_manager.features[methods.CODE_LENS] is code_lens
+    assert feature_manager.features[CUSTOM_METHOD_NAME] is custom_go_to_definition
+
+    assert LSP_METHODS_MAP[CUSTOM_METHOD_NAME] == CUSTOM_METHOD_TYPES
 
 
 def test_register_same_command_twice_error(feature_manager):

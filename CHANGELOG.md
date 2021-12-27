@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Support custom method not included in LSP specification
+
 ### Changed
 
 ### Fixed
