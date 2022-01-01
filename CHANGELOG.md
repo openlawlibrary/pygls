@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Changed
 
+- Upgraded Python support to 3.10, dropping support for 3.6
+- Dependency updates, notably Pydantic 1.9 and Websockets 10
+
 ### Fixed
 
 ## [0.11.3] - 11/06/2021

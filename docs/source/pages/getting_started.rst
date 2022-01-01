@@ -79,7 +79,7 @@ Register Features and Commands
        return 'Hello World!'
 
 Features that are currently supported by the LSP specification can be
-found in `pygls.lps.methods`_ module, while corresponding request/response
+found in `pygls.lsp.methods`_ module, while corresponding request/response
 classes can be found in `pygls.lsp.types`_ module.
 
 Advanced usage
