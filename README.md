@@ -1,3 +1,6 @@
+| :exclamation:  Do you love pygls? Want to get paid to work on it? Email dgreisen@openlawlib.org if you are interested in a part-time (~40hr/mo) paid position! |
+|-----------------------------------------|
+
 # _pygls_
 
 [![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![Build Status](https://dev.azure.com/openlawlibrary/pygls/_apis/build/status/openlawlibrary.pygls?branchName=master)](https://dev.azure.com/openlawlibrary/pygls/_build/latest?definitionId=2&branchName=master) ![!pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
