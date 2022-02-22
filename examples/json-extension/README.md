@@ -4,7 +4,7 @@
 
 1. `python -m venv env`
 1. `python -m pip install -e .` from root directory
-1. Create `.vscode/settings.json` file and set `python.pythonPath` to point to your python environment where `pygls` is installed
+1. Create `.vscode/settings.json` file and set `python.interpreterPath` to point to your python environment where `pygls` is installed
 
 ## Install Client Dependencies
 
