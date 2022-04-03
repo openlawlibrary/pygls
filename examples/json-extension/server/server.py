@@ -197,7 +197,7 @@ def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)
 async def progress(ls: JsonLanguageServer, *args):
     """Create and start the progress on the client."""
-    token = 'token'
+    token = str(uuid.uuid4())
     # Create
     await ls.progress.create_async(token)
     # Begin
