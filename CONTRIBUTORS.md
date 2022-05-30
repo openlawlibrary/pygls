@@ -11,6 +11,7 @@
 - [Matej Kašťák](https://github.com/MatejKastak)
 - [Max O'Cull](https://github.com/Maxattax97)
 - [Samuel Roeca](https://github.com/pappasam)
+- [Tom BH](https://github.com/tombh)
 - [Tomoya Tanjo](https://github.com/tom-tan)
 - [yorodm](https://github.com/yorodm)
 - [bollwyvl](https://github.com/bollwyvl)
