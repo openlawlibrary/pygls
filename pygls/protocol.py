@@ -379,7 +379,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             return
 
         try:
-            body = data.json(by_alias=True, exclude_unset=True, encoder=default_serializer)
+            body = data.json(by_alias=True, exclude_none=True, encoder=default_serializer)
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
