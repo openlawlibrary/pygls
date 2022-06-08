@@ -13,7 +13,7 @@ In order to setup and run the example extension, you need following software
 installed:
 
 * `Visual Studio Code <https://code.visualstudio.com/>`_ editor
-* `Python 3.6+ <https://www.python.org/downloads/>`_
+* `Python 3.7+ <https://www.python.org/downloads/>`_
 * `vscode-python <https://marketplace.visualstudio.com/items?itemName=ms-python.python>`_ extension
 * A clone of the `pygls <https://github.com/openlawlibrary/pygls>`_ repository
 

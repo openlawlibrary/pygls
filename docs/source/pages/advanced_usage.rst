@@ -106,7 +106,7 @@ What is a feature in *pygls*? In terms of language servers and the
 a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
 such as: *code completion*, *formatting*, *code lens*, etc. Features
-that are available can be found in `pygls.lps.methods`_ module.
+that are available can be found in `pygls.lsp.methods`_ module.
 
 *Built-In* Features
 ~~~~~~~~~~~~~~~~~~~
@@ -176,7 +176,7 @@ please take a look at the :ref:`tutorial <tutorial>`.
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*pygls* supports ``python 3.6+`` which has a keyword ``async`` to
+*pygls* supports ``python 3.7+`` which has a keyword ``async`` to
 specify coroutines.
 
 The code snippet below shows how to register a command as a coroutine:
@@ -256,6 +256,7 @@ while or you are new to threading in Python, check out Python's
 ``multithreading`` and `GIL <https://en.wikipedia.org/wiki/Global_interpreter_lock>`__
 before messing with threads.
 
+.. _passing-instance:
 
 Passing Language Server Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
