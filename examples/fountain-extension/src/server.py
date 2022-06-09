@@ -1,0 +1,27 @@
+import re
+from pygls.lsp.types.basic_structures import WorkDoneProgressBegin
+from pygls.server import LanguageServer
+from pygls.lsp.methods import COMPLETION
+from pygls.lsp.types import (CompletionItem, CompletionParams, CompletionList, CompletionOptions, workspace)
+
+# The following imports are required for the glue code in 'server.ts'
+import json  
+from pygls.protocol import deserialize_message
+
+server = LanguageServer()
+
+CHARACTER = re.compile(r"^[A-Z][A-Z ]+$", re.MULTILINE)
+
+@server.feature(COMPLETION, CompletionOptions(trigger_characters=['.']))
+def on_completion(ls: LanguageServer, params: CompletionParams) -> CompletionList:
+    """Completion suggestions for character names."""
+
+    uri = params.text_document.uri
+    doc = ls.workspace.get_document(uri)
+
+    characters = set(CHARACTER.findall(doc.source))
+
+    return CompletionList(
+        is_incomplete=False,
+        items=[CompletionItem(label=character) for character in characters]
+    )
