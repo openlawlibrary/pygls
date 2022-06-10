@@ -16,22 +16,17 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import asyncio
-import os
-from threading import Thread
-
-import pygls.lsp.methods
 import pytest
-from pygls import uris
+from pygls import uris, IS_PYODIDE
 from pygls.feature_manager import FeatureManager
-from pygls.lsp.methods import INITIALIZE
-from pygls.lsp.types import ClientCapabilities, InitializeParams
-from pygls.server import LanguageServer
 from pygls.workspace import Document, Workspace
 
-from .ls_setup import setup_ls_features
+from .ls_setup import (
+    NativeClientServer,
+    PyodideClientServer,
+    setup_ls_features,
+)
 
-from ._init_server_stall_fix_hack import retry_stalled_init_fix_hack
 
 DOC = """document
 for
@@ -41,72 +36,9 @@ with "😋" unicode.
 DOC_URI = uris.from_fs_path(__file__)
 
 
-class ClientServer:
-    def __init__(self):
-        # Client to Server pipe
-        csr, csw = os.pipe()
-        # Server to client pipe
-        scr, scw = os.pipe()
-
-        # Setup Server
-        self.server = LanguageServer()
-        self.server_thread = Thread(
-            target=self.server.start_io,
-            args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb")),
-        )
-        self.server_thread.daemon = True
-
-        # Setup client
-        self.client = LanguageServer(asyncio.new_event_loop())
-        self.client_thread = Thread(
-            target=self.client.start_io,
-            args=(os.fdopen(scr, "rb"), os.fdopen(csw, "wb")),
-        )
-        self.client_thread.daemon = True
-
-    @classmethod
-    def decorate(cls):
-        return pytest.mark.parametrize(
-            'client_server',
-            [cls],
-            indirect=True
-        )
-
-    def start(self):
-        self.server_thread.start()
-        self.server.thread_id = self.server_thread.ident
-        self.client_thread.start()
-        self.initialize()
-
-    def stop(self):
-        shutdown_response = self.client.lsp.send_request(
-            pygls.lsp.methods.SHUTDOWN
-        ).result()
-        assert shutdown_response is None
-        self.client.lsp.notify(pygls.lsp.methods.EXIT)
-        self.server_thread.join()
-        self.client._stop_event.set()
-        try:
-            self.client.loop._signal_handlers.clear()  # HACK ?
-        except AttributeError:
-            pass
-        self.client_thread.join()
-
-    @retry_stalled_init_fix_hack()
-    def initialize(self):
-        response = self.client.lsp.send_request(
-            INITIALIZE,
-            InitializeParams(
-                process_id=12345,
-                root_uri="file://",
-                capabilities=ClientCapabilities()
-            ),
-        ).result(timeout=1)
-        assert "capabilities" in response
-
-    def __iter__(self):
-        yield self.client
-        yield self.server
+ClientServer = NativeClientServer
+if IS_PYODIDE:
+    ClientServer = PyodideClientServer
 
 
 @pytest.fixture(autouse=True)
