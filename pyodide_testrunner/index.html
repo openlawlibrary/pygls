@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pygls Testsuite</title>
+
+    <style>
+        @media (prefers-color-scheme: dark) {
+            * {
+                background-color: #222;
+                color: white;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <pre id="console"></pre>
+    </div>
+    <button id="exit-code" disabled></button>
+    <script>
+        let log = document.getElementById("console")
+        let exitCode = document.getElementById("exit-code")
+
+        function print(event) {
+            log.innerText += event.data
+        }
+
+        // Use a web worker to prevent freezing the UI
+        function runTests(whl) {
+            let worker = new Worker(`test-runner.js?whl=${whl}`)
+            worker.addEventListener('message', (event) => {
+
+                if (event.data.exitCode !== undefined) {
+                    exitCode.innerText = event.data.exitCode
+                    exitCode.disabled = false
+                    return
+                }
+
+                print(event)
+            })
+        }
+
+        let queryParams = new URLSearchParams(window.location.search)
+        runTests(queryParams.get('whl'))
+
+    </script>
+</body>
+
+</html>
