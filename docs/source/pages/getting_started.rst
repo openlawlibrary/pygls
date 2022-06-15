@@ -58,7 +58,7 @@ Register Features and Commands
 
 .. code:: python
 
-    @server.feature(COMPLETION, trigger_characters=[','])
+    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
     def completions(params: CompletionParams):
         """Returns completion items."""
         return CompletionList(
