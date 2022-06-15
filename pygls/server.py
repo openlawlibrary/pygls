@@ -328,9 +328,9 @@ class LanguageServer(Server):
         """Decorator used to register LSP features.
 
         Example:
-            @ls.feature('textDocument/completion', triggerCharacters=['.'])
-            def completions(ls, params: CompletionRequest):
-                return CompletionList(False, [CompletionItem("Completion 1")])
+            @ls.feature('textDocument/completion', CompletionOptions(trigger_characters=['.']))
+            def completions(ls, params: CompletionParams):
+                return CompletionList(is_incomplete=False, items=[CompletionItem("Completion 1")])
         """
         return self.lsp.fm.feature(feature_name, options)
 
