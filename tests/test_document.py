@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import re
+
 from pygls.lsp.types import Position, Range, TextDocumentContentChangeEvent, TextDocumentSyncKind
 from pygls.workspace import (Document, position_from_utf16, position_to_utf16, range_from_utf16,
                              range_to_utf16)
@@ -206,7 +208,7 @@ def test_offset_at_position(doc):
 
 def test_word_at_position(doc):
     """
-    Return the position under the cursor (or last in line if past the end)
+    Return word under the cursor (or last in line if past the end)
     """
     assert doc.word_at_position(Position(line=0, character=8)) == 'document'
     assert doc.word_at_position(Position(line=0, character=1000)) == 'document'
@@ -214,3 +216,15 @@ def test_word_at_position(doc):
     assert doc.word_at_position(Position(line=2, character=0)) == 'testing'
     assert doc.word_at_position(Position(line=3, character=10)) == 'unicode'
     assert doc.word_at_position(Position(line=4, character=0)) == ''
+    assert doc.word_at_position(Position(line=4, character=0)) == ''
+    re_start_word = re.compile(r'[A-Za-z_0-9.]*$')
+    re_end_word = re.compile(r'^[A-Za-z_0-9.]*')
+    assert doc.word_at_position(
+        Position(
+            line=3,
+            character=10,
+        ),
+        re_start_word=re_start_word,
+        re_end_word=re_end_word
+    ) == 'unicode.'
+
