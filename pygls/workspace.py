@@ -20,7 +20,7 @@ import io
 import logging
 import os
 import re
-from typing import List
+from typing import List, Pattern
 
 from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
                              TextDocumentItem, TextDocumentSyncKind,
@@ -276,9 +276,30 @@ class Document(object):
                 return f.read()
         return self._source
 
-    def word_at_position(self, position: Position) -> str:
-        """
-        Get the word under the cursor returning the start and end positions.
+    def word_at_position(
+            self,
+            position: Position,
+            re_start_word: Pattern = RE_START_WORD,
+            re_end_word: Pattern = RE_END_WORD
+    ) -> str:
+        """Return the word at position.
+
+    Arguments:
+        position (Position):
+            The line and character offset.
+        re_start_word (Pattern):
+            The regular expression for extracting the word backward from
+            position.  Specifically, the first match from a re.findall
+            call on the line up to the character value of position.  The
+            default pattern is '[A-Za-z_0-9]*$'.
+        re_end_word (Pattern):
+            The regular expression for extracting the word forward from
+            position.  Specifically, the last match from a re.findall
+            call on the line from the character value of position.  The
+            default pattern is '^[A-Za-z_0-9]*'.
+
+    Returns:
+        The word (obtained by concatenating the two matches) at position.
         """
         lines = self.lines
         if position.line >= len(lines):
@@ -292,8 +313,8 @@ class Document(object):
 
         # Take end of start and start of end to find word
         # These are guaranteed to match, even if they match the empty string
-        m_start = RE_START_WORD.findall(start)
-        m_end = RE_END_WORD.findall(end)
+        m_start = re_start_word.findall(start)
+        m_end = re_end_word.findall(end)
 
         return m_start[0] + m_end[-1]
 

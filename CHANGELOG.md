@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Added
 
+- Allow custom word matching for `Document.word_at_point`
+
 ### Changed
 
 - Upgraded Python support to 3.10, dropping support for 3.6
