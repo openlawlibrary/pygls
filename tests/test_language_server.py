@@ -19,6 +19,7 @@ from time import sleep
 
 import pytest
 
+from pygls import IS_PYODIDE
 from pygls.lsp.methods import (
     INITIALIZE,
     TEXT_DOCUMENT_DID_OPEN,
@@ -84,6 +85,7 @@ def test_bf_text_document_did_open(client_server):
     assert len(server.lsp.workspace.documents) == 1
 
 
+@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
 def test_command_async(client_server):
     client, server = client_server
 
@@ -95,6 +97,7 @@ def test_command_async(client_server):
     assert thread_id == server.thread_id
 
 
+@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
 def test_command_sync(client_server):
     client, server = client_server
 
@@ -106,6 +109,7 @@ def test_command_sync(client_server):
     assert thread_id == server.thread_id
 
 
+@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
 def test_command_thread(client_server):
     client, server = client_server
 
