@@ -101,6 +101,23 @@ class StdOutTransportAdapter:
         self.wfile.flush()
 
 
+class PyodideTransportAdapter:
+    """Protocol adapter which overrides write method.
+
+    Write method sends data to stdout.
+    """
+
+    def __init__(self, wfile):
+        self.wfile = wfile
+
+    def close(self):
+        self.wfile.close()
+
+    def write(self, data):
+        self.wfile.write(data)
+        self.wfile.flush()
+
+
 class WebSocketTransportAdapter:
     """Protocol adapter which calls write method.
 
@@ -217,6 +234,16 @@ class Server:
             pass
         finally:
             self.shutdown()
+
+    def start_pyodide(self):
+
+        logger.info('Starting Pyodide server')
+
+        # Note: We don't actually start anything running as the main event
+        # loop will be handled by the web platform.
+        transport = PyodideTransportAdapter(sys.stdout)
+        self.lsp.connection_made(transport)
+        self.lsp._send_only_body = True  # Don't send headers within the payload
 
     def start_tcp(self, host, port):
         """Starts TCP server."""
