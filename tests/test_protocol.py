@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import io
 import json
 from concurrent.futures import Future
 from functools import partial
@@ -25,8 +26,16 @@ import pytest
 
 from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
 from pygls.lsp import Model, get_method_params_type
-from pygls.lsp.types import ClientCapabilities, InitializeParams, InitializeResult
-from pygls.protocol import JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage
+from pygls.lsp.types import (
+    ClientCapabilities,
+    CompletionItem,
+    CompletionItemKind,
+    InitializeParams,
+    InitializeResult,
+    ProgressParams,
+    WorkDoneProgressBegin,
+)
+from pygls.protocol import JsonRPCNotification, JsonRPCProtocol, JsonRPCRequestMessage, JsonRPCResponseMessage
 from pygls.protocol import deserialize_message as _deserialize_message
 
 TEST_METHOD = 'test_method'
@@ -94,6 +103,47 @@ def test_deserialize_notification_message_bad_params_should_raise_error():
         json.loads(params, object_hook=deserialize_message)
 
 
+@pytest.mark.parametrize(
+    "params, expected",
+    [
+        (
+            ProgressParams(
+                token="id1",
+                value=WorkDoneProgressBegin(
+                    title="Begin progress",
+                    percentage=0,
+                )
+            ),
+            {
+                "jsonrpc": "2.0",
+                "method": "test/notification",
+                "params": {
+                    "token": "id1",
+                    "value": {
+                        "kind": "begin",
+                        "percentage": 0,
+                        "title": "Begin progress"
+                    }
+                }
+            }
+        ),
+    ]
+)
+def test_serialize_notification_message(params, expected):
+    """Ensure that we can serialize notification messages, retaining all expected fields."""
+
+    buffer = io.StringIO()
+
+    protocol = JsonRPCProtocol(None)
+    protocol._send_only_body = True
+    protocol.connection_made(buffer)
+
+    protocol.notify("test/notification", params=params)
+    actual = json.loads(buffer.getvalue())
+
+    assert actual == expected
+
+
 def test_deserialize_response_message():
     params = '''
     {
@@ -109,7 +159,6 @@ def test_deserialize_response_message():
     assert result.id == "id"
     assert result.result == "1"
     assert result.error is None
-
 
 def test_deserialize_request_message_with_registered_type__should_return_instance():
     params = '''
@@ -161,6 +210,51 @@ def test_deserialize_request_message_without_registered_type__should_return_name
     assert type(result.params).__name__ == "Object"
     assert result.params.field_a == "test_a"
     assert result.params.field_b.inner_field == "test_inner"
+
+
+@pytest.mark.parametrize(
+    "result, expected",
+    [
+        (None, {"jsonrpc": "2.0", "id": "1", "result": None}),
+        (
+            [
+                CompletionItem(label='example-one'),
+                CompletionItem(
+                    label='example-two',
+                    kind=CompletionItemKind.Class,
+                    preselect=False,
+                    deprecated=True
+                ),
+            ],
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": [
+                    {"label": "example-one"},
+                    {
+                        "label": "example-two",
+                        "kind": 7, # CompletionItemKind.Class
+                        "preselect": False,
+                        "deprecated": True
+                    }
+                ]
+            }
+        ),
+    ]
+)
+def test_serialize_response_message(result, expected):
+    """Ensure that we can serialize response messages, retaining all expected fields."""
+
+    buffer = io.StringIO()
+
+    protocol = JsonRPCProtocol(None)
+    protocol._send_only_body = True
+    protocol.connection_made(buffer)
+
+    protocol._send_response("1", result=result)
+    actual = json.loads(buffer.getvalue())
+
+    assert actual == expected
 
 
 def test_data_received_without_content_type_should_handle_message(client_server):
@@ -278,4 +372,3 @@ def test_ignore_unknown_notification(client_server):
 
     # Remove mock
     server.lsp._execute_notification = fn
-
