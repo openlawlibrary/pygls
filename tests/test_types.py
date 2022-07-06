@@ -31,16 +31,22 @@ def test_position():
 def test_range():
     assert Range(
         start=Position(line=1, character=2), end=Position(line=3, character=4)
-    ) == Range(start=Position(line=1, character=2), end=Position(line=3, character=4))
+    ) == Range(
+        start=Position(line=1, character=2), end=Position(line=3, character=4)
+    )
     assert Range(
         start=Position(line=0, character=2), end=Position(line=3, character=4)
-    ) != Range(start=Position(line=1, character=2), end=Position(line=3, character=4))
+    ) != Range(
+        start=Position(line=1, character=2), end=Position(line=3, character=4)
+    )
     assert (
-        Range(start=Position(line=0, character=2), end=Position(line=3, character=4))
+        Range(start=Position(line=0, character=2),
+              end=Position(line=3, character=4))
         != "something else"
     )
     assert "1:2-3:4" == repr(
-        Range(start=Position(line=1, character=2), end=Position(line=3, character=4))
+        Range(start=Position(line=1, character=2),
+              end=Position(line=3, character=4))
     )
 
 
@@ -48,30 +54,35 @@ def test_location():
     assert Location(
         uri="file:///document.txt",
         range=Range(
-            start=Position(line=1, character=2), end=Position(line=3, character=4)
+            start=Position(line=1, character=2),
+            end=Position(line=3, character=4)
         ),
     ) == Location(
         uri="file:///document.txt",
         range=Range(
-            start=Position(line=1, character=2), end=Position(line=3, character=4)
+            start=Position(line=1, character=2),
+            end=Position(line=3, character=4)
         ),
     )
     assert Location(
         uri="file:///document.txt",
         range=Range(
-            start=Position(line=1, character=2), end=Position(line=3, character=4)
+            start=Position(line=1, character=2),
+            end=Position(line=3, character=4)
         ),
     ) != Location(
         uri="file:///another.txt",
         range=Range(
-            start=Position(line=1, character=2), end=Position(line=3, character=4)
+            start=Position(line=1, character=2),
+            end=Position(line=3, character=4)
         ),
     )
     assert (
         Location(
             uri="file:///document.txt",
             range=Range(
-                start=Position(line=1, character=2), end=Position(line=3, character=4)
+                start=Position(line=1, character=2),
+                end=Position(line=3, character=4)
             ),
         )
         != "something else"
@@ -80,7 +91,8 @@ def test_location():
         Location(
             uri="file:///document.txt",
             range=Range(
-                start=Position(line=1, character=2), end=Position(line=3, character=4)
+                start=Position(line=1, character=2),
+                end=Position(line=3, character=4)
             ),
         )
     )

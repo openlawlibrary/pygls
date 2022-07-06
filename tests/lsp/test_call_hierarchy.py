@@ -85,14 +85,16 @@ class TestCallHierarchy(unittest.TestCase):
             TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE,
             CallHierarchyOptions(),
         )
-        def f(params: CallHierarchyPrepareParams) -> Optional[List[CallHierarchyItem]]:
+        def f1(
+            params: CallHierarchyPrepareParams
+        ) -> Optional[List[CallHierarchyItem]]:
             if params.text_document.uri == "file://return.list":
                 return [CALL_HIERARCHY_ITEM]
             else:
                 return None
 
         @cls.server.feature(TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS)
-        def f(
+        def f2(
             params: CallHierarchyIncomingCallsParams,
         ) -> Optional[List[CallHierarchyIncomingCall]]:
             return [
@@ -108,7 +110,7 @@ class TestCallHierarchy(unittest.TestCase):
             ]
 
         @cls.server.feature(TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS)
-        def f(
+        def f3(
             params: CallHierarchyOutgoingCallsParams,
         ) -> Optional[List[CallHierarchyOutgoingCall]]:
             return [

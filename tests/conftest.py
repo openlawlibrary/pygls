@@ -106,7 +106,9 @@ class ClientServer:
         response = self.client.lsp.send_request(
             INITIALIZE,
             InitializeParams(
-                process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
+                process_id=12345,
+                root_uri="file://",
+                capabilities=ClientCapabilities()
             ),
         ).result(timeout=CALL_TIMEOUT)
 

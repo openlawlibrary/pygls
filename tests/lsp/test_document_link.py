@@ -66,7 +66,7 @@ class TestDocumentLink(unittest.TestCase):
         capabilities = self.server.server_capabilities
 
         assert capabilities.document_link_provider
-        assert capabilities.document_link_provider.resolve_provider == True
+        assert capabilities.document_link_provider.resolve_provider
 
     def test_document_link_return_list(self):
         response = self.client.lsp.send_request(

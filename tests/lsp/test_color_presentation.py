@@ -78,7 +78,8 @@ class TestColorPresentation(unittest.TestCase):
         """From specs:
 
         This request has no special capabilities and registration options since
-        it is send as a resolve request for the textDocument/documentColor request.
+        it is send as a resolve request for the textDocument/documentColor
+        request.
         """
 
     def test_color_presentation(self):
@@ -102,15 +103,17 @@ class TestColorPresentation(unittest.TestCase):
         assert response[0]["textEdit"]["range"]["end"]["line"] == 1
         assert response[0]["textEdit"]["range"]["end"]["character"] == 1
 
-        assert response[0]["additionalTextEdits"][0]["range"]["start"]["line"] == 1
-        assert response[0]["additionalTextEdits"][0]["range"]["start"]["character"] == 1
-        assert response[0]["additionalTextEdits"][0]["range"]["end"]["line"] == 2
-        assert response[0]["additionalTextEdits"][0]["range"]["end"]["character"] == 2
+        range = response[0]["additionalTextEdits"][0]["range"]
+        assert range["start"]["line"] == 1
+        assert range["start"]["character"] == 1
+        assert range["end"]["line"] == 2
+        assert range["end"]["character"] == 2
 
-        assert response[0]["additionalTextEdits"][1]["range"]["start"]["line"] == 2
-        assert response[0]["additionalTextEdits"][1]["range"]["start"]["character"] == 2
-        assert response[0]["additionalTextEdits"][1]["range"]["end"]["line"] == 3
-        assert response[0]["additionalTextEdits"][1]["range"]["end"]["character"] == 3
+        range = response[0]["additionalTextEdits"][1]["range"]
+        assert range["start"]["line"] == 2
+        assert range["start"]["character"] == 2
+        assert range["end"]["line"] == 3
+        assert range["end"]["character"] == 3
 
 
 if __name__ == "__main__":

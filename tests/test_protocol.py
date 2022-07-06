@@ -137,7 +137,10 @@ def test_deserialize_notification_message_bad_params_should_raise_error():
     ],
 )
 def test_serialize_notification_message(params, expected):
-    """Ensure that we can serialize notification messages, retaining all expected fields."""
+    """
+    Ensure that we can serialize notification messages, retaining all
+    expected fields.
+    """
 
     buffer = io.StringIO()
 
@@ -168,7 +171,7 @@ def test_deserialize_response_message():
     assert result.error is None
 
 
-def test_deserialize_request_message_with_registered_type__should_return_instance():
+def test_deserialize_request_message_with_registered_type():
     params = """
     {
         "jsonrpc": "2.0",
@@ -195,7 +198,7 @@ def test_deserialize_request_message_with_registered_type__should_return_instanc
     assert result.params.field_b.inner_field == "test_inner"
 
 
-def test_deserialize_request_message_without_registered_type__should_return_namedtuple():
+def test_deserialize_request_message_without_registered_type():
     params = """
     {
         "jsonrpc": "2.0",
@@ -251,7 +254,10 @@ def test_deserialize_request_message_without_registered_type__should_return_name
     ],
 )
 def test_serialize_response_message(result, expected):
-    """Ensure that we can serialize response messages, retaining all expected fields."""
+    """
+    Ensure that we can serialize response messages, retaining all expected
+    fields.
+    """
 
     buffer = io.StringIO()
 
@@ -265,7 +271,7 @@ def test_serialize_response_message(result, expected):
     assert actual == expected
 
 
-def test_data_received_without_content_type_should_handle_message(client_server):
+def test_data_received_without_content_type(client_server):
     _, server = client_server
     body = json.dumps(
         {

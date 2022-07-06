@@ -125,7 +125,7 @@ class TestDocumentSymbol(unittest.TestCase):
         assert response[0]["location"]["range"]["end"]["line"] == 1
         assert response[0]["location"]["range"]["end"]["character"] == 1
         assert response[0]["containerName"] == "container"
-        assert response[0]["deprecated"] == False
+        assert not response[0]["deprecated"]
 
     def test_document_symbol_return_document_symbol_list(self):
         response = self.client.lsp.send_request(
@@ -150,7 +150,7 @@ class TestDocumentSymbol(unittest.TestCase):
         assert response[0]["selectionRange"]["end"]["line"] == 10
         assert response[0]["selectionRange"]["end"]["character"] == 10
         assert response[0]["detail"] == "detail"
-        assert response[0]["deprecated"] == True
+        assert response[0]["deprecated"]
 
         assert response[0]["children"][0]["name"] == "inner_symbol"
         assert response[0]["children"][0]["kind"] == SymbolKind.Number
@@ -158,10 +158,11 @@ class TestDocumentSymbol(unittest.TestCase):
         assert response[0]["children"][0]["range"]["start"]["character"] == 0
         assert response[0]["children"][0]["range"]["end"]["line"] == 1
         assert response[0]["children"][0]["range"]["end"]["character"] == 1
-        assert response[0]["children"][0]["selectionRange"]["start"]["line"] == 0
-        assert response[0]["children"][0]["selectionRange"]["start"]["character"] == 0
-        assert response[0]["children"][0]["selectionRange"]["end"]["line"] == 1
-        assert response[0]["children"][0]["selectionRange"]["end"]["character"] == 1
+        range = response[0]["children"][0]["selectionRange"]
+        assert range["start"]["line"] == 0
+        assert range["start"]["character"] == 0
+        assert range["end"]["line"] == 1
+        assert range["end"]["character"] == 1
 
         assert "children" not in response[0]["children"][0]
 

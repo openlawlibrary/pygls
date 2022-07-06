@@ -69,7 +69,7 @@ class TestCodeLens(unittest.TestCase):
         capabilities = self.server.server_capabilities
 
         assert capabilities.code_lens_provider
-        assert capabilities.code_lens_provider.resolve_provider == False
+        assert not capabilities.code_lens_provider.resolve_provider
 
     def test_code_lens_return_list(self):
         response = self.client.lsp.send_request(

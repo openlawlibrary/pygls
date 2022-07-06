@@ -41,14 +41,20 @@ class TestCodeAction(unittest.TestCase):
         cls.client, cls.server = cls.client_server
 
         @cls.server.feature(
-            CODE_ACTION, CodeActionOptions(code_action_kinds=[CodeActionKind.Refactor])
+            CODE_ACTION,
+            CodeActionOptions(code_action_kinds=[CodeActionKind.Refactor])
         )
-        def f(params: CodeActionParams) -> Optional[List[Union[Command, CodeAction]]]:
+        def f(
+            params: CodeActionParams
+        ) -> Optional[List[Union[Command, CodeAction]]]:
             if params.text_document.uri == "file://return.list":
                 return [
                     CodeAction(title="action1"),
                     CodeAction(title="action2", kind=CodeActionKind.Refactor),
-                    Command(title="cmd1", command="cmd1", arguments=[1, "two"]),
+                    Command(
+                        title="cmd1", command="cmd1",
+                        arguments=[1, "two"]
+                    ),
                 ]
             else:
                 return None

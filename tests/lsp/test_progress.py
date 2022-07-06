@@ -44,11 +44,13 @@ class TestCodeLens(unittest.TestCase):
 
         @cls.server.feature(
             CODE_LENS,
-            CodeLensOptions(resolve_provider=False, work_done_progress=PROGRESS_TOKEN),
+            CodeLensOptions(resolve_provider=False,
+                            work_done_progress=PROGRESS_TOKEN),
         )
         def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
             cls.server.lsp.progress.begin(
-                PROGRESS_TOKEN, WorkDoneProgressBegin(title="starting", percentage=0)
+                PROGRESS_TOKEN, WorkDoneProgressBegin(
+                    title="starting", percentage=0)
             )
             cls.server.lsp.progress.report(
                 PROGRESS_TOKEN,
@@ -72,8 +74,9 @@ class TestCodeLens(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.code_lens_provider
-        assert capabilities.code_lens_provider.work_done_progress == PROGRESS_TOKEN
+        provider = capabilities.code_lens_provider
+        assert provider
+        assert provider.work_done_progress == PROGRESS_TOKEN
 
     def test_progress_notifications(self):
         self.client.lsp.send_request(
@@ -98,7 +101,8 @@ class TestCodeLens(unittest.TestCase):
             "message": "doing",
             "percentage": 50,
         }
-        assert self.notifications[2].value == {"kind": "end", "message": "done"}
+        assert self.notifications[2].value == {
+            "kind": "end", "message": "done"}
 
 
 if __name__ == "__main__":
