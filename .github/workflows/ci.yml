@@ -44,6 +44,29 @@ jobs:
       - name: tox
         run: tox -e py
 
+  test-pyodide:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Python "3.10"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+
+          sudo apt update
+          sudo apt install chromium-browser chromium-chromedriver
+
+          python -m pip install --upgrade pip
+          python -m pip install -r pyodide_testrunner/requirements.txt
+
+      - name: Run Testsuite
+        run: python pyodide_testrunner/run.py
+
   build:
     runs-on: ubuntu-latest
 
