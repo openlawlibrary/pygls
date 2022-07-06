@@ -41,7 +41,9 @@ class TestRangeFormatting(unittest.TestCase):
             RANGE_FORMATTING,
             DocumentRangeFormattingOptions(),
         )
-        def f(params: DocumentRangeFormattingParams) -> Optional[List[TextEdit]]:
+        def f(
+            params: DocumentRangeFormattingParams
+        ) -> Optional[List[TextEdit]]:
             if params.text_document.uri == "file://return.list":
                 return [
                     TextEdit(

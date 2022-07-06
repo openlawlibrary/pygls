@@ -56,7 +56,11 @@ async def test_io_connection_lost():
     server = LanguageServer(loop=asyncio.new_event_loop())
     server.lsp.connection_made = Mock()
     server_thread = Thread(
-        target=server.start_io, args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb"))
+        target=server.start_io,
+        args=(
+            os.fdopen(csr, "rb"),
+            os.fdopen(scw, "wb")
+        )
     )
     server_thread.daemon = True
     server_thread.start()

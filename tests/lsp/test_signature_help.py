@@ -76,9 +76,10 @@ class TestSignatureHelp(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.signature_help_provider
-        assert capabilities.signature_help_provider.trigger_characters == ["a", "b"]
-        assert capabilities.signature_help_provider.retrigger_characters == ["c", "d"]
+        provider = capabilities.signature_help_provider
+        assert provider
+        assert provider.trigger_characters == ["a", "b"]
+        assert provider.retrigger_characters == ["c", "d"]
 
     def test_signature_help_return_signature_help(self):
         response = self.client.lsp.send_request(

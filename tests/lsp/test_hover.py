@@ -69,7 +69,8 @@ class TestHover(unittest.TestCase):
                 ),
                 "file://return.markup_content": Hover(
                     range=range,
-                    contents=MarkupContent(kind=MarkupKind.Markdown, value="value"),
+                    contents=MarkupContent(
+                        kind=MarkupKind.Markdown, value="value"),
                 ),
             }.get(params.text_document.uri, None)
 
@@ -88,7 +89,8 @@ class TestHover(unittest.TestCase):
         response = self.client.lsp.send_request(
             HOVER,
             HoverParams(
-                text_document=TextDocumentIdentifier(uri="file://return.marked_string"),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.marked_string"),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)

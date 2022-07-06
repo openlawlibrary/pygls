@@ -44,7 +44,9 @@ class TestOnTypeFormatting(unittest.TestCase):
                 more_trigger_character=[",", "."],
             ),
         )
-        def f(params: DocumentOnTypeFormattingParams) -> Optional[List[TextEdit]]:
+        def f(
+            params: DocumentOnTypeFormattingParams
+        ) -> Optional[List[TextEdit]]:
             if params.text_document.uri == "file://return.list":
                 return [
                     TextEdit(
@@ -69,11 +71,15 @@ class TestOnTypeFormatting(unittest.TestCase):
 
         assert capabilities.document_on_type_formatting_provider
         assert (
-            capabilities.document_on_type_formatting_provider.first_trigger_character
+            capabilities
+            .document_on_type_formatting_provider
+            .first_trigger_character
             == ":"
         )
         assert (
-            capabilities.document_on_type_formatting_provider.more_trigger_character
+            capabilities
+            .document_on_type_formatting_provider
+            .more_trigger_character
             == [",", "."]
         )
 

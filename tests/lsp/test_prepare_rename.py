@@ -36,7 +36,9 @@ class TestRepareRename(unittest.TestCase):
         cls.client, cls.server = cls.client_server
 
         @cls.server.feature(PREPARE_RENAME)
-        def f(params: PrepareRenameParams) -> Optional[Union[Range, PrepareRename]]:
+        def f(
+            params: PrepareRenameParams
+        ) -> Optional[Union[Range, PrepareRename]]:
             return {  # type: ignore
                 "file://return.range": Range(
                     start=Position(line=0, character=0),
@@ -64,7 +66,8 @@ class TestRepareRename(unittest.TestCase):
         response = self.client.lsp.send_request(
             PREPARE_RENAME,
             PrepareRenameParams(
-                text_document=TextDocumentIdentifier(uri="file://return.range"),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.range"),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)

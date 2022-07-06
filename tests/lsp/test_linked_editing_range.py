@@ -40,7 +40,9 @@ class TestLinkedEditingRange(unittest.TestCase):
             TEXT_DOCUMENT_LINKED_EDITING_RANGE,
             LinkedEditingRangeOptions(),
         )
-        def f(params: LinkedEditingRangeParams) -> Optional[LinkedEditingRanges]:
+        def f(
+            params: LinkedEditingRangeParams
+        ) -> Optional[LinkedEditingRanges]:
             if params.text_document.uri == "file://return.ranges":
                 return LinkedEditingRanges(
                     ranges=[
@@ -73,7 +75,8 @@ class TestLinkedEditingRange(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_LINKED_EDITING_RANGE,
             LinkedEditingRangeParams(
-                text_document=TextDocumentIdentifier(uri="file://return.ranges"),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.ranges"),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)

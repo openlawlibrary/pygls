@@ -37,6 +37,13 @@ from pygls.lsp.types import (
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
+SemanticTokenReturnType = Optional[
+    Union[
+        SemanticTokensPartialResult,
+        Optional[SemanticTokens]
+    ]
+]
+
 
 class TestSemanticTokensFullMissingLegend(unittest.TestCase):
     @classmethod
@@ -71,12 +78,13 @@ class TestSemanticTokensFull(unittest.TestCase):
         @cls.server.feature(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
             SemanticTokensLegend(
-                token_types=["keyword", "operator"], token_modifiers=["readonly"]
+                token_types=["keyword", "operator"],
+                token_modifiers=["readonly"]
             ),
         )
         def f(
             params: SemanticTokensParams,
-        ) -> Optional[Union[SemanticTokensPartialResult, Optional[SemanticTokens]]]:
+        ) -> SemanticTokenReturnType:
             if params.text_document.uri == "file://return.tokens":
                 return SemanticTokens(data=[0, 0, 3, 0, 0])
 
@@ -89,12 +97,13 @@ class TestSemanticTokensFull(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.semantic_tokens_provider.full
-        assert capabilities.semantic_tokens_provider.legend.token_types == [
+        provider = capabilities.semantic_tokens_provider
+        assert provider.full
+        assert provider.legend.token_types == [
             "keyword",
             "operator",
         ]
-        assert capabilities.semantic_tokens_provider.legend.token_modifiers == [
+        assert provider.legend.token_modifiers == [
             "readonly"
         ]
 
@@ -102,7 +111,8 @@ class TestSemanticTokensFull(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
             SemanticTokensParams(
-                text_document=TextDocumentIdentifier(uri="file://return.tokens")
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.tokens")
             ),
         ).result(timeout=CALL_TIMEOUT)
 
@@ -121,7 +131,7 @@ class TestSemanticTokensFull(unittest.TestCase):
         assert response is None
 
 
-class TestSemanticTokensFullDeltaMissingLegend(unittest.TestCase):
+class TestSemanticTokensFullDeltaMissingLegendIsNone(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client_server = ClientServer()
@@ -154,7 +164,8 @@ class TestSemanticTokensFullDeltaMissingLegend(unittest.TestCase):
         @cls.server.feature(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
             SemanticTokensLegend(
-                token_types=["keyword", "operator"], token_modifiers=["readonly"]
+                token_types=["keyword", "operator"],
+                token_modifiers=["readonly"]
             ),
         )
         def f(
@@ -172,14 +183,15 @@ class TestSemanticTokensFullDeltaMissingLegend(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.semantic_tokens_provider.full == SemanticTokensRequestsFull(
+        provider = capabilities.semantic_tokens_provider
+        assert provider.full == SemanticTokensRequestsFull(
             delta=True
         )
-        assert capabilities.semantic_tokens_provider.legend.token_types == [
+        assert provider.legend.token_types == [
             "keyword",
             "operator",
         ]
-        assert capabilities.semantic_tokens_provider.legend.token_modifiers == [
+        assert provider.legend.token_modifiers == [
             "readonly"
         ]
 
@@ -187,7 +199,8 @@ class TestSemanticTokensFullDeltaMissingLegend(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
             SemanticTokensDeltaParams(
-                text_document=TextDocumentIdentifier(uri="file://return.tokens"),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.tokens"),
                 previous_result_id="id",
             ),
         ).result(timeout=CALL_TIMEOUT)
@@ -241,12 +254,13 @@ class TestSemanticTokensRange(unittest.TestCase):
         @cls.server.feature(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
             SemanticTokensLegend(
-                token_types=["keyword", "operator"], token_modifiers=["readonly"]
+                token_types=["keyword", "operator"],
+                token_modifiers=["readonly"]
             ),
         )
         def f(
             params: SemanticTokensRangeParams,
-        ) -> Optional[Union[SemanticTokensPartialResult, Optional[SemanticTokens]]]:
+        ) -> SemanticTokenReturnType:
             if params.text_document.uri == "file://return.tokens":
                 return SemanticTokens(data=[0, 0, 3, 0, 0])
 
@@ -259,12 +273,13 @@ class TestSemanticTokensRange(unittest.TestCase):
     def test_capabilities(self):
         capabilities = self.server.server_capabilities
 
-        assert capabilities.semantic_tokens_provider.range
-        assert capabilities.semantic_tokens_provider.legend.token_types == [
+        provider = capabilities.semantic_tokens_provider
+        assert provider.range
+        assert provider.legend.token_types == [
             "keyword",
             "operator",
         ]
-        assert capabilities.semantic_tokens_provider.legend.token_modifiers == [
+        assert provider.legend.token_modifiers == [
             "readonly"
         ]
 
@@ -272,7 +287,8 @@ class TestSemanticTokensRange(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
             SemanticTokensRangeParams(
-                text_document=TextDocumentIdentifier(uri="file://return.tokens"),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.tokens"),
                 range=Range(
                     start=Position(line=0, character=0),
                     end=Position(line=10, character=80),
