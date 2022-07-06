@@ -17,8 +17,11 @@
 import asyncio
 
 import pytest
-from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
-                              ValidationError)
+from pygls.exceptions import (
+    CommandAlreadyRegisteredError,
+    FeatureAlreadyRegisteredError,
+    ValidationError,
+)
 from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
 from pygls.lsp import methods
 from pygls.lsp.types import CompletionOptions
@@ -41,14 +44,15 @@ def test_has_ls_param_or_annotation():
 def test_register_command_validation_error(feature_manager):
 
     with pytest.raises(ValidationError):
-        @feature_manager.command(' \n\t')
+
+        @feature_manager.command(" \n\t")
         def cmd1():  # pylint: disable=unused-variable
             pass
 
 
 def test_register_commands(feature_manager):
-    cmd1_name = 'cmd1'
-    cmd2_name = 'cmd2'
+    cmd1_name = "cmd1"
+    cmd2_name = "cmd2"
 
     @feature_manager.command(cmd1_name)
     def cmd1():
@@ -68,7 +72,8 @@ def test_register_commands(feature_manager):
 
 
 def test_register_feature_with_valid_options(feature_manager):
-    options = CompletionOptions(trigger_characters=['!'])
+    options = CompletionOptions(trigger_characters=["!"])
+
     @feature_manager.feature(methods.COMPLETION, options)
     def completions():
         pass
@@ -84,22 +89,23 @@ def test_register_feature_with_valid_options(feature_manager):
 
 
 def test_register_feature_with_wrong_options(feature_manager):
-
     class Options:
         pass
 
     with pytest.raises(
         TypeError,
-        match=(f"Options of method \"{methods.COMPLETION}\" should be instance of type "
-               "<class 'pygls.lsp.types.language_features.completion.CompletionOptions'>")  # noqa
+        match=(
+            f'Options of method "{methods.COMPLETION}" should be instance of type '
+            "<class 'pygls.lsp.types.language_features.completion.CompletionOptions'>"
+        ),  # noqa
     ):
+
         @feature_manager.feature(methods.COMPLETION, Options())
         def completions():
             pass
 
 
 def test_register_features(feature_manager):
-
     @feature_manager.feature(methods.COMPLETION)
     def completions():
         pass
@@ -121,11 +127,11 @@ def test_register_same_command_twice_error(feature_manager):
 
     with pytest.raises(CommandAlreadyRegisteredError):
 
-        @feature_manager.command('cmd1')
+        @feature_manager.command("cmd1")
         def cmd1():  # pylint: disable=unused-variable
             pass
 
-        @feature_manager.command('cmd1')
+        @feature_manager.command("cmd1")
         def cmd2():  # pylint: disable=unused-variable
             pass
 
@@ -171,6 +177,7 @@ def test_wrap_with_server_thread():
 
     def f(ls):
         assert isinstance(ls, Server)
+
     f.execute_in_thread = True
 
     wrapped = wrap_with_server(f, Server())

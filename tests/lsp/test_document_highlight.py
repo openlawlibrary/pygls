@@ -18,8 +18,15 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import DOCUMENT_HIGHLIGHT
-from pygls.lsp.types import (DocumentHighlight, DocumentHighlightKind, DocumentHighlightOptions,
-                             DocumentHighlightParams, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    DocumentHighlight,
+    DocumentHighlightKind,
+    DocumentHighlightOptions,
+    DocumentHighlightParams,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,16 +42,16 @@ class TestDocumentHighlight(unittest.TestCase):
             DocumentHighlightOptions(),
         )
         def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     DocumentHighlight(
-                       range=Range(
+                        range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
                     ),
                     DocumentHighlight(
-                       range=Range(
+                        range=Range(
                             start=Position(line=1, character=1),
                             end=Position(line=2, character=2),
                         ),
@@ -69,30 +76,30 @@ class TestDocumentHighlight(unittest.TestCase):
         response = self.client.lsp.send_request(
             DOCUMENT_HIGHLIGHT,
             DocumentHighlightParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-        assert 'kind' not in response[0]
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 1
+        assert response[0]["range"]["end"]["character"] == 1
+        assert "kind" not in response[0]
 
-        assert response[1]['range']['start']['line'] == 1
-        assert response[1]['range']['start']['character'] == 1
-        assert response[1]['range']['end']['line'] == 2
-        assert response[1]['range']['end']['character'] == 2
-        assert response[1]['kind'] == DocumentHighlightKind.Write
+        assert response[1]["range"]["start"]["line"] == 1
+        assert response[1]["range"]["start"]["character"] == 1
+        assert response[1]["range"]["end"]["line"] == 2
+        assert response[1]["range"]["end"]["character"] == 2
+        assert response[1]["kind"] == DocumentHighlightKind.Write
 
     def test_document_highlight_return_none(self):
         response = self.client.lsp.send_request(
             DOCUMENT_HIGHLIGHT,
             DocumentHighlightParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
                 position=Position(line=0, character=0),
             ),
         ).result(timeout=CALL_TIMEOUT)
@@ -100,5 +107,5 @@ class TestDocumentHighlight(unittest.TestCase):
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

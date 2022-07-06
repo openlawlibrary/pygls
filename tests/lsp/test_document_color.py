@@ -18,8 +18,15 @@ import unittest
 from typing import List
 
 from pygls.lsp.methods import DOCUMENT_COLOR
-from pygls.lsp.types import (Color, ColorInformation, DocumentColorOptions, DocumentColorParams,
-                             Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    Color,
+    ColorInformation,
+    DocumentColorOptions,
+    DocumentColorParams,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -59,21 +66,22 @@ class TestDocumentColor(unittest.TestCase):
     def test_document_color(self):
         response = self.client.lsp.send_request(
             DOCUMENT_COLOR,
-            DocumentColorParams(text_document=TextDocumentIdentifier(uri='file://return.list')),
+            DocumentColorParams(
+                text_document=TextDocumentIdentifier(uri="file://return.list")
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
-        assert response[0]['color']['red'] == 0.5
-        assert response[0]['color']['green'] == 0.5
-        assert response[0]['color']['blue'] == 0.5
-        assert response[0]['color']['alpha'] == 0.5
+        assert response[0]["color"]["red"] == 0.5
+        assert response[0]["color"]["green"] == 0.5
+        assert response[0]["color"]["blue"] == 0.5
+        assert response[0]["color"]["alpha"] == 0.5
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 1
+        assert response[0]["range"]["end"]["character"] == 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

@@ -18,8 +18,15 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import REFERENCES
-from pygls.lsp.types import (Location, Position, Range, ReferenceContext, ReferenceOptions,
-                             ReferenceParams, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    Location,
+    Position,
+    Range,
+    ReferenceContext,
+    ReferenceOptions,
+    ReferenceParams,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,10 +42,10 @@ class TestReferences(unittest.TestCase):
             ReferenceOptions(),
         )
         def f(params: ReferenceParams) -> Optional[List[Location]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     Location(
-                        uri='uri',
+                        uri="uri",
                         range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
@@ -63,37 +70,37 @@ class TestReferences(unittest.TestCase):
         response = self.client.lsp.send_request(
             REFERENCES,
             ReferenceParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
                 position=Position(line=0, character=0),
                 context=ReferenceContext(
                     include_declaration=True,
                 ),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['uri'] == 'uri'
+        assert response[0]["uri"] == "uri"
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 1
+        assert response[0]["range"]["end"]["character"] == 1
 
     def test_references_return_none(self):
         response = self.client.lsp.send_request(
             REFERENCES,
             ReferenceParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
                 position=Position(line=0, character=0),
                 context=ReferenceContext(
                     include_declaration=True,
                 ),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

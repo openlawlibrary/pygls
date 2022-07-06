@@ -18,8 +18,15 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import TEXT_DOCUMENT_MONIKER
-from pygls.lsp.types import (Moniker, MonikerKind, MonikerOptions, MonikerParams, Position,
-                             TextDocumentIdentifier, UniquenessLevel)
+from pygls.lsp.types import (
+    Moniker,
+    MonikerKind,
+    MonikerOptions,
+    MonikerParams,
+    Position,
+    TextDocumentIdentifier,
+    UniquenessLevel,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,11 +42,11 @@ class TestMoniker(unittest.TestCase):
             MonikerOptions(),
         )
         def f(params: MonikerParams) -> Optional[List[Moniker]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     Moniker(
-                        scheme='test_scheme',
-                        identifier='test_identifier',
+                        scheme="test_scheme",
+                        identifier="test_identifier",
                         unique=UniquenessLevel.Global,
                         kind=MonikerKind.Local,
                     ),
@@ -62,30 +69,29 @@ class TestMoniker(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_MONIKER,
             MonikerParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
                 position=Position(line=0, character=0),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['scheme'] == 'test_scheme'
-        assert response[0]['identifier'] == 'test_identifier'
-        assert response[0]['unique'] == 'global'
-        assert response[0]['kind'] == 'local'
+        assert response[0]["scheme"] == "test_scheme"
+        assert response[0]["identifier"] == "test_identifier"
+        assert response[0]["unique"] == "global"
+        assert response[0]["kind"] == "local"
 
     def test_references_return_none(self):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_MONIKER,
             MonikerParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
                 position=Position(line=0, character=0),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

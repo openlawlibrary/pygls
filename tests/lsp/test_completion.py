@@ -17,8 +17,15 @@
 import unittest
 
 from pygls.lsp.methods import COMPLETION
-from pygls.lsp.types import (CompletionItem, CompletionItemKind, CompletionList, CompletionOptions,
-                             CompletionParams, Position, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    CompletionItem,
+    CompletionItemKind,
+    CompletionList,
+    CompletionOptions,
+    CompletionParams,
+    Position,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -31,18 +38,22 @@ class TestCompletions(unittest.TestCase):
 
         @cls.server.feature(
             COMPLETION,
-            CompletionOptions(trigger_characters=[','], all_commit_characters=[':'], resolve_provider=True)
+            CompletionOptions(
+                trigger_characters=[","],
+                all_commit_characters=[":"],
+                resolve_provider=True,
+            ),
         )
         def f(params: CompletionParams) -> CompletionList:
             return CompletionList(
                 is_incomplete=False,
                 items=[
                     CompletionItem(
-                        label='test1',
+                        label="test1",
                         kind=CompletionItemKind.Method,
                         preselect=True,
                     ),
-                ]
+                ],
             )
 
         cls.client_server.start()
@@ -55,38 +66,38 @@ class TestCompletions(unittest.TestCase):
         capabilities = self.server.server_capabilities
 
         assert capabilities.completion_provider
-        assert capabilities.completion_provider.trigger_characters == [',']
-        assert capabilities.completion_provider.all_commit_characters == [':']
+        assert capabilities.completion_provider.trigger_characters == [","]
+        assert capabilities.completion_provider.all_commit_characters == [":"]
         assert capabilities.completion_provider.resolve_provider is True
 
     def test_completions(self):
         response = self.client.lsp.send_request(
             COMPLETION,
             CompletionParams(
-                text_document=TextDocumentIdentifier(uri='file://test.test'),
-                position=Position(line=0, character=0)
-            )
+                text_document=TextDocumentIdentifier(uri="file://test.test"),
+                position=Position(line=0, character=0),
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
-        assert response['isIncomplete'] == False
-        assert response['items'][0]['label'] == 'test1'
-        assert response['items'][0]['kind'] == CompletionItemKind.Method
-        assert response['items'][0]['preselect'] == True
-        assert 'deprecated' not in response['items'][0]
-        assert 'tags' not in response['items'][0]
-        assert 'detail' not in response['items'][0]
-        assert 'documentation' not in response['items'][0]
-        assert 'sort_text' not in response['items'][0]
-        assert 'filter_text' not in response['items'][0]
-        assert 'insert_text' not in response['items'][0]
-        assert 'insert_text_format' not in response['items'][0]
-        assert 'insert_text_mode' not in response['items'][0]
-        assert 'text_edit' not in response['items'][0]
-        assert 'additional_text_edits' not in response['items'][0]
-        assert 'commit_characters' not in response['items'][0]
-        assert 'command' not in response['items'][0]
-        assert 'data' not in response['items'][0]
+        assert response["isIncomplete"] == False
+        assert response["items"][0]["label"] == "test1"
+        assert response["items"][0]["kind"] == CompletionItemKind.Method
+        assert response["items"][0]["preselect"] == True
+        assert "deprecated" not in response["items"][0]
+        assert "tags" not in response["items"][0]
+        assert "detail" not in response["items"][0]
+        assert "documentation" not in response["items"][0]
+        assert "sort_text" not in response["items"][0]
+        assert "filter_text" not in response["items"][0]
+        assert "insert_text" not in response["items"][0]
+        assert "insert_text_format" not in response["items"][0]
+        assert "insert_text_mode" not in response["items"][0]
+        assert "text_edit" not in response["items"][0]
+        assert "additional_text_edits" not in response["items"][0]
+        assert "commit_characters" not in response["items"][0]
+        assert "command" not in response["items"][0]
+        assert "data" not in response["items"][0]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

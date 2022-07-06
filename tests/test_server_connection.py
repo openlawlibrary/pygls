@@ -18,17 +18,23 @@ async def test_tcp_connection_lost():
     server.lsp.connection_lost = Mock()
 
     # Run the server over TCP in a separate thread
-    server_thread = Thread(target=server.start_tcp, args=('127.0.0.1', 0, ))
+    server_thread = Thread(
+        target=server.start_tcp,
+        args=(
+            "127.0.0.1",
+            0,
+        ),
+    )
     server_thread.daemon = True
     server_thread.start()
 
     # Wait for server to be ready
     while server._server is None:
-        await asyncio.sleep(.5)
+        await asyncio.sleep(0.5)
 
     # Simulate client's connection
     port = server._server.sockets[0].getsockname()[1]
-    reader, writer = await asyncio.open_connection('127.0.0.1', port)
+    reader, writer = await asyncio.open_connection("127.0.0.1", port)
     await asyncio.sleep(1)
 
     assert server.lsp.connection_made.called
@@ -38,6 +44,7 @@ async def test_tcp_connection_lost():
     await asyncio.sleep(1)
 
     assert server.lsp.connection_lost.called
+
 
 @pytest.mark.asyncio
 async def test_io_connection_lost():
@@ -49,15 +56,14 @@ async def test_io_connection_lost():
     server = LanguageServer(loop=asyncio.new_event_loop())
     server.lsp.connection_made = Mock()
     server_thread = Thread(
-        target=server.start_io,
-        args=(os.fdopen(csr, 'rb'), os.fdopen(scw, 'wb'))
+        target=server.start_io, args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb"))
     )
     server_thread.daemon = True
     server_thread.start()
 
     # Wait for server to be ready
     while not server.lsp.connection_made.called:
-        await asyncio.sleep(.5)
+        await asyncio.sleep(0.5)
 
     # Pipe is closed (client's process is terminated)
     os.close(csw)
