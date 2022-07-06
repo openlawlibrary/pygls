@@ -33,7 +33,7 @@ from pygls.lsp.types import (
 )
 from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
-from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD
+from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
 
 def _initialize_server(server):

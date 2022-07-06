@@ -19,7 +19,7 @@
 import pytest
 
 from pygls import uris
-from tests import unix_only, windows_only
+from . import unix_only, windows_only
 
 
 @unix_only

@@ -29,7 +29,7 @@ from pygls.lsp.types import ClientCapabilities, InitializeParams
 from pygls.server import LanguageServer
 from pygls.workspace import Document, Workspace
 
-from tests.ls_setup import setup_ls_features
+from .ls_setup import setup_ls_features
 
 from ._init_server_stall_fix_hack import retry_stalled_init_fix_hack
 

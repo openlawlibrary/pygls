@@ -25,7 +25,7 @@ from pygls.lsp.methods import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
 )
 
-from tests.conftest import ClientServer
+from ...conftest import ClientServer
 
 
 class ConfiguredLS(ClientServer):
