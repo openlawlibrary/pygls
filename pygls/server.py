@@ -165,7 +165,7 @@ class Server:
         elif not IS_PYODIDE:
             asyncio.set_event_loop(asyncio.SelectorEventLoop())
 
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = loop or asyncio.new_event_loop()
 
         try:
             if not IS_PYODIDE:
