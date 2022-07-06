@@ -16,7 +16,7 @@
 ############################################################################
 import threading
 
-from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD
+from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
 
 def setup_ls_features(server):

@@ -31,7 +31,7 @@ from pygls.workspace import (
     range_from_utf16,
     range_to_utf16,
 )
-from tests.conftest import DOC, DOC_URI
+from .conftest import DOC, DOC_URI
 
 
 def test_document_empty_edit():

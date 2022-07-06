@@ -29,7 +29,7 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
 )
 
-from tests.conftest import ClientServer
+from ...conftest import ClientServer
 
 SemanticTokenReturnType = Optional[
     Union[

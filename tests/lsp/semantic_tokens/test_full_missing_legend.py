@@ -25,7 +25,7 @@ from pygls.lsp.types import (
     SemanticTokensParams
 )
 
-from tests.conftest import ClientServer
+from ...conftest import ClientServer
 
 
 class ConfiguredLS(ClientServer):
