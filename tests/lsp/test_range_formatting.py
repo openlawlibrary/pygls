@@ -18,8 +18,15 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import RANGE_FORMATTING
-from pygls.lsp.types import (DocumentRangeFormattingOptions, DocumentRangeFormattingParams,
-                             FormattingOptions, Position, Range, TextDocumentIdentifier, TextEdit)
+from pygls.lsp.types import (
+    DocumentRangeFormattingOptions,
+    DocumentRangeFormattingParams,
+    FormattingOptions,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+    TextEdit,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,14 +42,14 @@ class TestRangeFormatting(unittest.TestCase):
             DocumentRangeFormattingOptions(),
         )
         def f(params: DocumentRangeFormattingParams) -> Optional[List[TextEdit]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     TextEdit(
                         range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
-                        new_text='text',
+                        new_text="text",
                     )
                 ]
             else:
@@ -63,7 +70,7 @@ class TestRangeFormatting(unittest.TestCase):
         response = self.client.lsp.send_request(
             RANGE_FORMATTING,
             DocumentRangeFormattingParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
                 range=Range(
                     start=Position(line=0, character=0),
                     end=Position(line=1, character=1),
@@ -80,17 +87,17 @@ class TestRangeFormatting(unittest.TestCase):
 
         assert response
 
-        assert response[0]['newText'] == 'text'
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
+        assert response[0]["newText"] == "text"
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 1
+        assert response[0]["range"]["end"]["character"] == 1
 
     def test_range_formatting_return_none(self):
         response = self.client.lsp.send_request(
             RANGE_FORMATTING,
             DocumentRangeFormattingParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
                 range=Range(
                     start=Position(line=0, character=0),
                     end=Position(line=1, character=1),
@@ -108,6 +115,5 @@ class TestRangeFormatting(unittest.TestCase):
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

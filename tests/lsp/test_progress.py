@@ -18,11 +18,7 @@ import unittest
 from typing import List, Optional
 
 import time
-from pygls.lsp.methods import (
-    CODE_LENS,
-    PROGRESS_NOTIFICATION
-
-)
+from pygls.lsp.methods import CODE_LENS, PROGRESS_NOTIFICATION
 from pygls.lsp.types import (
     CodeLens,
     CodeLensParams,
@@ -30,13 +26,13 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
     WorkDoneProgressEnd,
-    WorkDoneProgressReport
+    WorkDoneProgressReport,
 )
 from pygls.lsp.types.basic_structures import ProgressParams
 from ..conftest import CALL_TIMEOUT, ClientServer
 
 
-PROGRESS_TOKEN = 'token'
+PROGRESS_TOKEN = "token"
 
 
 class TestCodeLens(unittest.TestCase):
@@ -48,29 +44,22 @@ class TestCodeLens(unittest.TestCase):
 
         @cls.server.feature(
             CODE_LENS,
-            CodeLensOptions(
-                resolve_provider=False,
-                work_done_progress=PROGRESS_TOKEN
-            ),
+            CodeLensOptions(resolve_provider=False, work_done_progress=PROGRESS_TOKEN),
         )
         def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
             cls.server.lsp.progress.begin(
-                PROGRESS_TOKEN,
-                WorkDoneProgressBegin(title='starting', percentage=0)
+                PROGRESS_TOKEN, WorkDoneProgressBegin(title="starting", percentage=0)
             )
             cls.server.lsp.progress.report(
                 PROGRESS_TOKEN,
-                WorkDoneProgressReport(message='doing', percentage=50),
+                WorkDoneProgressReport(message="doing", percentage=50),
             )
             cls.server.lsp.progress.end(
-                PROGRESS_TOKEN,
-                WorkDoneProgressEnd(message='done')
+                PROGRESS_TOKEN, WorkDoneProgressEnd(message="done")
             )
             return None
 
-        @cls.client.feature(
-            PROGRESS_NOTIFICATION
-        )
+        @cls.client.feature(PROGRESS_NOTIFICATION)
         def f2(params):
             cls.notifications.append(params)
 
@@ -90,8 +79,8 @@ class TestCodeLens(unittest.TestCase):
         self.client.lsp.send_request(
             CODE_LENS,
             CodeLensParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                work_done_token=PROGRESS_TOKEN
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
+                work_done_token=PROGRESS_TOKEN,
             ),
         ).result(timeout=CALL_TIMEOUT)
 
@@ -100,15 +89,17 @@ class TestCodeLens(unittest.TestCase):
         assert len(self.notifications) == 3
         assert self.notifications[0].token == PROGRESS_TOKEN
         assert self.notifications[0].value == {
-            'kind': 'begin', 'title': 'starting', 'percentage': 0
+            "kind": "begin",
+            "title": "starting",
+            "percentage": 0,
         }
         assert self.notifications[1].value == {
-            'kind': 'report', 'message': 'doing', 'percentage': 50
+            "kind": "report",
+            "message": "doing",
+            "percentage": 50,
         }
-        assert self.notifications[2].value == {
-            'kind': 'end', 'message': 'done'
-        }
+        assert self.notifications[2].value == {"kind": "end", "message": "done"}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

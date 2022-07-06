@@ -17,13 +17,25 @@
 import unittest
 from typing import List, Optional
 
-from pygls.lsp.methods import (TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS,
-                               TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS,
-                               TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE)
-from pygls.lsp.types import (CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams,
-                             CallHierarchyItem, CallHierarchyOptions, CallHierarchyOutgoingCall,
-                             CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams,
-                             Position, Range, SymbolKind, SymbolTag, TextDocumentIdentifier)
+from pygls.lsp.methods import (
+    TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS,
+    TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS,
+    TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE,
+)
+from pygls.lsp.types import (
+    CallHierarchyIncomingCall,
+    CallHierarchyIncomingCallsParams,
+    CallHierarchyItem,
+    CallHierarchyOptions,
+    CallHierarchyOutgoingCall,
+    CallHierarchyOutgoingCallsParams,
+    CallHierarchyPrepareParams,
+    Position,
+    Range,
+    SymbolKind,
+    SymbolTag,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -46,21 +58,21 @@ CALL_HIERARCHY_ITEM = CallHierarchyItem(
 
 
 def check_call_hierarchy_item_response(item):
-        assert item['name'] == 'test_name'
-        assert item['kind'] == SymbolKind.File
-        assert item['uri'] == 'test_uri'
-        assert item['range']['start']['line'] == 0
-        assert item['range']['start']['character'] == 0
-        assert item['range']['end']['line'] == 1
-        assert item['range']['end']['character'] == 1
-        assert item['selectionRange']['start']['line'] == 1
-        assert item['selectionRange']['start']['character'] == 1
-        assert item['selectionRange']['end']['line'] == 2
-        assert item['selectionRange']['end']['character'] == 2
-        assert len(item['tags']) == 1
-        assert item['tags'][0] == SymbolTag.Deprecated
-        assert item['detail'] == 'test_detail'
-        assert item['data'] == 'test_data'
+    assert item["name"] == "test_name"
+    assert item["kind"] == SymbolKind.File
+    assert item["uri"] == "test_uri"
+    assert item["range"]["start"]["line"] == 0
+    assert item["range"]["start"]["character"] == 0
+    assert item["range"]["end"]["line"] == 1
+    assert item["range"]["end"]["character"] == 1
+    assert item["selectionRange"]["start"]["line"] == 1
+    assert item["selectionRange"]["start"]["character"] == 1
+    assert item["selectionRange"]["end"]["line"] == 2
+    assert item["selectionRange"]["end"]["character"] == 2
+    assert len(item["tags"]) == 1
+    assert item["tags"][0] == SymbolTag.Deprecated
+    assert item["detail"] == "test_detail"
+    assert item["data"] == "test_data"
 
 
 class TestCallHierarchy(unittest.TestCase):
@@ -69,19 +81,20 @@ class TestCallHierarchy(unittest.TestCase):
         cls.client_server = ClientServer()
         cls.client, cls.server = cls.client_server
 
-
         @cls.server.feature(
             TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE,
             CallHierarchyOptions(),
         )
         def f(params: CallHierarchyPrepareParams) -> Optional[List[CallHierarchyItem]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [CALL_HIERARCHY_ITEM]
             else:
                 return None
 
         @cls.server.feature(TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS)
-        def f(params: CallHierarchyIncomingCallsParams) -> Optional[List[CallHierarchyIncomingCall]]:
+        def f(
+            params: CallHierarchyIncomingCallsParams,
+        ) -> Optional[List[CallHierarchyIncomingCall]]:
             return [
                 CallHierarchyIncomingCall(
                     from_=params.item,
@@ -95,7 +108,9 @@ class TestCallHierarchy(unittest.TestCase):
             ]
 
         @cls.server.feature(TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS)
-        def f(params: CallHierarchyOutgoingCallsParams) -> Optional[List[CallHierarchyOutgoingCall]]:
+        def f(
+            params: CallHierarchyOutgoingCallsParams,
+        ) -> Optional[List[CallHierarchyOutgoingCall]]:
             return [
                 CallHierarchyOutgoingCall(
                     to=params.item,
@@ -123,9 +138,9 @@ class TestCallHierarchy(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE,
             CallHierarchyPrepareParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
                 position=Position(line=0, character=0),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         check_call_hierarchy_item_response(response[0])
@@ -134,9 +149,9 @@ class TestCallHierarchy(unittest.TestCase):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE,
             CallHierarchyPrepareParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
                 position=Position(line=0, character=0),
-            )
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
@@ -144,33 +159,33 @@ class TestCallHierarchy(unittest.TestCase):
     def test_call_hierarchy_incoming_calls_return_list(self):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_CALL_HIERARCHY_INCOMING_CALLS,
-            CallHierarchyIncomingCallsParams(item=CALL_HIERARCHY_ITEM)
+            CallHierarchyIncomingCallsParams(item=CALL_HIERARCHY_ITEM),
         ).result(timeout=CALL_TIMEOUT)
 
         item = response[0]
 
-        check_call_hierarchy_item_response(item['from'])
+        check_call_hierarchy_item_response(item["from"])
 
-        assert item['fromRanges'][0]['start']['line'] == 2
-        assert item['fromRanges'][0]['start']['character'] == 2
-        assert item['fromRanges'][0]['end']['line'] == 3
-        assert item['fromRanges'][0]['end']['character'] == 3
+        assert item["fromRanges"][0]["start"]["line"] == 2
+        assert item["fromRanges"][0]["start"]["character"] == 2
+        assert item["fromRanges"][0]["end"]["line"] == 3
+        assert item["fromRanges"][0]["end"]["character"] == 3
 
     def test_call_hierarchy_outgoing_calls_return_list(self):
         response = self.client.lsp.send_request(
             TEXT_DOCUMENT_CALL_HIERARCHY_OUTGOING_CALLS,
-            CallHierarchyOutgoingCallsParams(item=CALL_HIERARCHY_ITEM)
+            CallHierarchyOutgoingCallsParams(item=CALL_HIERARCHY_ITEM),
         ).result(timeout=CALL_TIMEOUT)
 
         item = response[0]
 
-        check_call_hierarchy_item_response(item['to'])
+        check_call_hierarchy_item_response(item["to"])
 
-        assert item['fromRanges'][0]['start']['line'] == 3
-        assert item['fromRanges'][0]['start']['character'] == 3
-        assert item['fromRanges'][0]['end']['line'] == 4
-        assert item['fromRanges'][0]['end']['character'] == 4
+        assert item["fromRanges"][0]["start"]["line"] == 3
+        assert item["fromRanges"][0]["start"]["character"] == 3
+        assert item["fromRanges"][0]["end"]["line"] == 4
+        assert item["fromRanges"][0]["end"]["character"] == 4
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

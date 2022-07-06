@@ -34,4 +34,3 @@ def setup_ls_features(server):
     @server.command(CMD_SYNC)
     def cmd_test2(ls, *args):  # pylint: disable=unused-variable
         return True, threading.get_ident()
-

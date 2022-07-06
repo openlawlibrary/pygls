@@ -18,8 +18,13 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import FOLDING_RANGE
-from pygls.lsp.types import (FoldingRange, FoldingRangeKind, FoldingRangeOptions,
-                             FoldingRangeParams, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    FoldingRange,
+    FoldingRangeKind,
+    FoldingRangeOptions,
+    FoldingRangeParams,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,7 +40,7 @@ class TestFoldingRange(unittest.TestCase):
             FoldingRangeOptions(),
         )
         def f(params: FoldingRangeParams) -> Optional[List[FoldingRange]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     FoldingRange(
                         start_line=0,
@@ -63,29 +68,28 @@ class TestFoldingRange(unittest.TestCase):
         response = self.client.lsp.send_request(
             FOLDING_RANGE,
             FoldingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['startLine'] == 0
-        assert response[0]['endLine'] == 0
-        assert response[0]['startCharacter'] == 1
-        assert response[0]['endCharacter'] == 1
-        assert response[0]['kind'] == FoldingRangeKind.Comment
+        assert response[0]["startLine"] == 0
+        assert response[0]["endLine"] == 0
+        assert response[0]["startCharacter"] == 1
+        assert response[0]["endCharacter"] == 1
+        assert response[0]["kind"] == FoldingRangeKind.Comment
 
     def test_folding_range_return_none(self):
         response = self.client.lsp.send_request(
             FOLDING_RANGE,
             FoldingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

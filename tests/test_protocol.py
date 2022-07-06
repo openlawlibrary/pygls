@@ -35,10 +35,15 @@ from pygls.lsp.types import (
     ProgressParams,
     WorkDoneProgressBegin,
 )
-from pygls.protocol import JsonRPCNotification, JsonRPCProtocol, JsonRPCRequestMessage, JsonRPCResponseMessage
+from pygls.protocol import (
+    JsonRPCNotification,
+    JsonRPCProtocol,
+    JsonRPCRequestMessage,
+    JsonRPCResponseMessage,
+)
 from pygls.protocol import deserialize_message as _deserialize_message
 
-TEST_METHOD = 'test_method'
+TEST_METHOD = "test_method"
 
 
 class FeatureParams(Model):
@@ -55,12 +60,14 @@ TEST_LSP_METHODS_MAP = {
 
 deserialize_message = partial(
     _deserialize_message,
-    get_params_type=partial(get_method_params_type, lsp_methods_map=TEST_LSP_METHODS_MAP)
+    get_params_type=partial(
+        get_method_params_type, lsp_methods_map=TEST_LSP_METHODS_MAP
+    ),
 )
 
 
 def test_deserialize_notification_message_valid_params():
-    params = '''
+    params = """
     {
         "jsonrpc": "2.0",
         "method": "test_method",
@@ -71,7 +78,7 @@ def test_deserialize_notification_message_valid_params():
             }
         }
     }
-    '''
+    """
 
     result = json.loads(params, object_hook=deserialize_message)
 
@@ -86,7 +93,7 @@ def test_deserialize_notification_message_valid_params():
 
 
 def test_deserialize_notification_message_bad_params_should_raise_error():
-    params = '''
+    params = """
     {
         "jsonrpc": "2.0",
         "method": "test_method",
@@ -97,7 +104,7 @@ def test_deserialize_notification_message_bad_params_should_raise_error():
             }
         }
     }
-    '''
+    """
 
     with pytest.raises(JsonRpcInvalidParams):
         json.loads(params, object_hook=deserialize_message)
@@ -112,7 +119,7 @@ def test_deserialize_notification_message_bad_params_should_raise_error():
                 value=WorkDoneProgressBegin(
                     title="Begin progress",
                     percentage=0,
-                )
+                ),
             ),
             {
                 "jsonrpc": "2.0",
@@ -122,12 +129,12 @@ def test_deserialize_notification_message_bad_params_should_raise_error():
                     "value": {
                         "kind": "begin",
                         "percentage": 0,
-                        "title": "Begin progress"
-                    }
-                }
-            }
+                        "title": "Begin progress",
+                    },
+                },
+            },
         ),
-    ]
+    ],
 )
 def test_serialize_notification_message(params, expected):
     """Ensure that we can serialize notification messages, retaining all expected fields."""
@@ -145,13 +152,13 @@ def test_serialize_notification_message(params, expected):
 
 
 def test_deserialize_response_message():
-    params = '''
+    params = """
     {
         "jsonrpc": "2.0",
         "id": "id",
         "result": "1"
     }
-    '''
+    """
     result = json.loads(params, object_hook=deserialize_message)
 
     assert isinstance(result, JsonRPCResponseMessage)
@@ -160,8 +167,9 @@ def test_deserialize_response_message():
     assert result.result == "1"
     assert result.error is None
 
+
 def test_deserialize_request_message_with_registered_type__should_return_instance():
-    params = '''
+    params = """
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -173,7 +181,7 @@ def test_deserialize_request_message_with_registered_type__should_return_instanc
             }
         }
     }
-    '''
+    """
     result = json.loads(params, object_hook=deserialize_message)
 
     assert isinstance(result, JsonRPCRequestMessage)
@@ -188,7 +196,7 @@ def test_deserialize_request_message_with_registered_type__should_return_instanc
 
 
 def test_deserialize_request_message_without_registered_type__should_return_namedtuple():
-    params = '''
+    params = """
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -200,7 +208,7 @@ def test_deserialize_request_message_without_registered_type__should_return_name
             }
         }
     }
-    '''
+    """
     result = json.loads(params, object_hook=deserialize_message)
 
     assert isinstance(result, JsonRPCRequestMessage)
@@ -218,12 +226,12 @@ def test_deserialize_request_message_without_registered_type__should_return_name
         (None, {"jsonrpc": "2.0", "id": "1", "result": None}),
         (
             [
-                CompletionItem(label='example-one'),
+                CompletionItem(label="example-one"),
                 CompletionItem(
-                    label='example-two',
+                    label="example-two",
                     kind=CompletionItemKind.Class,
                     preselect=False,
-                    deprecated=True
+                    deprecated=True,
                 ),
             ],
             {
@@ -233,14 +241,14 @@ def test_deserialize_request_message_without_registered_type__should_return_name
                     {"label": "example-one"},
                     {
                         "label": "example-two",
-                        "kind": 7, # CompletionItemKind.Class
+                        "kind": 7,  # CompletionItemKind.Class
                         "preselect": False,
-                        "deprecated": True
-                    }
-                ]
-            }
+                        "deprecated": True,
+                    },
+                ],
+            },
         ),
-    ]
+    ],
 )
 def test_serialize_response_message(result, expected):
     """Ensure that we can serialize response messages, retaining all expected fields."""
@@ -259,50 +267,62 @@ def test_serialize_response_message(result, expected):
 
 def test_data_received_without_content_type_should_handle_message(client_server):
     _, server = client_server
-    body = json.dumps({
-        "jsonrpc": "2.0",
-        "method": "test",
-        "params": 1,
-    })
-    message = '\r\n'.join((
-        'Content-Length: ' + str(len(body)),
-        '',
-        body,
-    ))
-    data = bytes(message, 'utf-8')
+    body = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "method": "test",
+            "params": 1,
+        }
+    )
+    message = "\r\n".join(
+        (
+            "Content-Length: " + str(len(body)),
+            "",
+            body,
+        )
+    )
+    data = bytes(message, "utf-8")
     server.lsp.data_received(data)
 
 
 def test_data_received_content_type_first_should_handle_message(client_server):
     _, server = client_server
-    body = json.dumps({
-        "jsonrpc": "2.0",
-        "method": "test",
-        "params": 1,
-    })
-    message = '\r\n'.join((
-        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
-        'Content-Length: ' + str(len(body)),
-        '',
-        body,
-    ))
-    data = bytes(message, 'utf-8')
+    body = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "method": "test",
+            "params": 1,
+        }
+    )
+    message = "\r\n".join(
+        (
+            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
+            "Content-Length: " + str(len(body)),
+            "",
+            body,
+        )
+    )
+    data = bytes(message, "utf-8")
     server.lsp.data_received(data)
 
 
 def dummy_message(param=1):
-    body = json.dumps({
-        "jsonrpc": "2.0",
-        "method": "test",
-        "params": param,
-    })
-    message = '\r\n'.join((
-        'Content-Length: ' + str(len(body)),
-        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
-        '',
-        body,
-    ))
-    return bytes(message, 'utf-8')
+    body = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "method": "test",
+            "params": param,
+        }
+    )
+    message = "\r\n".join(
+        (
+            "Content-Length: " + str(len(body)),
+            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
+            "",
+            body,
+        )
+    )
+    return bytes(message, "utf-8")
 
 
 def test_data_received_single_message_should_handle_message(client_server):
@@ -322,26 +342,30 @@ def test_data_received_partial_message_should_handle_message(client_server):
 def test_data_received_multi_message_should_handle_messages(client_server):
     _, server = client_server
     messages = (dummy_message(i) for i in range(3))
-    data = b''.join(messages)
+    data = b"".join(messages)
     server.lsp.data_received(data)
 
 
 def test_data_received_error_should_raise_jsonrpc_error(client_server):
     _, server = client_server
-    body = json.dumps({
-        "jsonrpc": "2.0",
-        "id": "err",
-        "error": {
-            "code": -1,
-            "message": "message for you sir",
-        },
-    })
-    message = '\r\n'.join([
-        'Content-Length: ' + str(len(body)),
-        'Content-Type: application/vscode-jsonrpc; charset=utf-8',
-        '',
-        body,
-    ]).encode("utf-8")
+    body = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": "err",
+            "error": {
+                "code": -1,
+                "message": "message for you sir",
+            },
+        }
+    )
+    message = "\r\n".join(
+        [
+            "Content-Length: " + str(len(body)),
+            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
+            "",
+            body,
+        ]
+    ).encode("utf-8")
     future = server.lsp._server_request_futures["err"] = Future()
     server.lsp.data_received(message)
     with pytest.raises(JsonRpcException, match="message for you sir"):

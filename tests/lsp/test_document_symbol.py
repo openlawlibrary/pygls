@@ -18,9 +18,17 @@ import unittest
 from typing import List, Union
 
 from pygls.lsp.methods import DOCUMENT_SYMBOL
-from pygls.lsp.types import (DocumentSymbol, DocumentSymbolOptions, DocumentSymbolParams, Location,
-                             Position, Range, SymbolInformation, SymbolKind,
-                             TextDocumentIdentifier)
+from pygls.lsp.types import (
+    DocumentSymbol,
+    DocumentSymbolOptions,
+    DocumentSymbolParams,
+    Location,
+    Position,
+    Range,
+    SymbolInformation,
+    SymbolKind,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,23 +43,25 @@ class TestDocumentSymbol(unittest.TestCase):
             DOCUMENT_SYMBOL,
             DocumentSymbolOptions(),
         )
-        def f(params: DocumentSymbolParams) -> Union[List[SymbolInformation], List[DocumentSymbol]]:
+        def f(
+            params: DocumentSymbolParams,
+        ) -> Union[List[SymbolInformation], List[DocumentSymbol]]:
             symbol_info = SymbolInformation(
-                name='symbol',
+                name="symbol",
                 kind=SymbolKind.Namespace,
                 location=Location(
-                    uri='uri',
+                    uri="uri",
                     range=Range(
                         start=Position(line=0, character=0),
                         end=Position(line=1, character=1),
                     ),
                 ),
-                container_name='container',
+                container_name="container",
                 deprecated=False,
             )
 
             document_symbol_inner = DocumentSymbol(
-                name='inner_symbol',
+                name="inner_symbol",
                 kind=SymbolKind.Number,
                 range=Range(
                     start=Position(line=0, character=0),
@@ -64,7 +74,7 @@ class TestDocumentSymbol(unittest.TestCase):
             )
 
             document_symbol = DocumentSymbol(
-                name='symbol',
+                name="symbol",
                 kind=SymbolKind.Object,
                 range=Range(
                     start=Position(line=0, character=0),
@@ -74,14 +84,14 @@ class TestDocumentSymbol(unittest.TestCase):
                     start=Position(line=0, character=0),
                     end=Position(line=10, character=10),
                 ),
-                detail='detail',
+                detail="detail",
                 children=[document_symbol_inner],
                 deprecated=True,
             )
 
-            return {    # type: ignore
-                'file://return.symbol_information_list': [symbol_info],
-                'file://return.document_symbol_list': [document_symbol],
+            return {  # type: ignore
+                "file://return.symbol_information_list": [symbol_info],
+                "file://return.document_symbol_list": [document_symbol],
             }.get(params.text_document.uri, None)
 
         cls.client_server.start()
@@ -99,59 +109,62 @@ class TestDocumentSymbol(unittest.TestCase):
         response = self.client.lsp.send_request(
             DOCUMENT_SYMBOL,
             DocumentSymbolParams(
-                text_document=TextDocumentIdentifier(uri='file://return.symbol_information_list'),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.symbol_information_list"
+                ),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['name'] == 'symbol'
-        assert response[0]['kind'] == SymbolKind.Namespace
-        assert response[0]['location']['uri'] == 'uri'
-        assert response[0]['location']['range']['start']['line'] == 0
-        assert response[0]['location']['range']['start']['character'] == 0
-        assert response[0]['location']['range']['end']['line'] == 1
-        assert response[0]['location']['range']['end']['character'] == 1
-        assert response[0]['containerName'] == 'container'
-        assert response[0]['deprecated'] == False
+        assert response[0]["name"] == "symbol"
+        assert response[0]["kind"] == SymbolKind.Namespace
+        assert response[0]["location"]["uri"] == "uri"
+        assert response[0]["location"]["range"]["start"]["line"] == 0
+        assert response[0]["location"]["range"]["start"]["character"] == 0
+        assert response[0]["location"]["range"]["end"]["line"] == 1
+        assert response[0]["location"]["range"]["end"]["character"] == 1
+        assert response[0]["containerName"] == "container"
+        assert response[0]["deprecated"] == False
 
     def test_document_symbol_return_document_symbol_list(self):
         response = self.client.lsp.send_request(
             DOCUMENT_SYMBOL,
             DocumentSymbolParams(
-                text_document=TextDocumentIdentifier(uri='file://return.document_symbol_list'),
+                text_document=TextDocumentIdentifier(
+                    uri="file://return.document_symbol_list"
+                ),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['name'] == 'symbol'
-        assert response[0]['kind'] == SymbolKind.Object
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 10
-        assert response[0]['range']['end']['character'] == 10
-        assert response[0]['selectionRange']['start']['line'] == 0
-        assert response[0]['selectionRange']['start']['character'] == 0
-        assert response[0]['selectionRange']['end']['line'] == 10
-        assert response[0]['selectionRange']['end']['character'] == 10
-        assert response[0]['detail'] == 'detail'
-        assert response[0]['deprecated'] == True
+        assert response[0]["name"] == "symbol"
+        assert response[0]["kind"] == SymbolKind.Object
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 10
+        assert response[0]["range"]["end"]["character"] == 10
+        assert response[0]["selectionRange"]["start"]["line"] == 0
+        assert response[0]["selectionRange"]["start"]["character"] == 0
+        assert response[0]["selectionRange"]["end"]["line"] == 10
+        assert response[0]["selectionRange"]["end"]["character"] == 10
+        assert response[0]["detail"] == "detail"
+        assert response[0]["deprecated"] == True
 
-        assert response[0]['children'][0]['name'] == 'inner_symbol'
-        assert response[0]['children'][0]['kind'] == SymbolKind.Number
-        assert response[0]['children'][0]['range']['start']['line'] == 0
-        assert response[0]['children'][0]['range']['start']['character'] == 0
-        assert response[0]['children'][0]['range']['end']['line'] == 1
-        assert response[0]['children'][0]['range']['end']['character'] == 1
-        assert response[0]['children'][0]['selectionRange']['start']['line'] == 0
-        assert response[0]['children'][0]['selectionRange']['start']['character'] == 0
-        assert response[0]['children'][0]['selectionRange']['end']['line'] == 1
-        assert response[0]['children'][0]['selectionRange']['end']['character'] == 1
+        assert response[0]["children"][0]["name"] == "inner_symbol"
+        assert response[0]["children"][0]["kind"] == SymbolKind.Number
+        assert response[0]["children"][0]["range"]["start"]["line"] == 0
+        assert response[0]["children"][0]["range"]["start"]["character"] == 0
+        assert response[0]["children"][0]["range"]["end"]["line"] == 1
+        assert response[0]["children"][0]["range"]["end"]["character"] == 1
+        assert response[0]["children"][0]["selectionRange"]["start"]["line"] == 0
+        assert response[0]["children"][0]["selectionRange"]["start"]["character"] == 0
+        assert response[0]["children"][0]["selectionRange"]["end"]["line"] == 1
+        assert response[0]["children"][0]["selectionRange"]["end"]["character"] == 1
 
-        assert 'children' not in response[0]['children'][0]
+        assert "children" not in response[0]["children"][0]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-

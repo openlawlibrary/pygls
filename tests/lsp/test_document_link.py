@@ -18,8 +18,14 @@ import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import DOCUMENT_LINK
-from pygls.lsp.types import (DocumentLink, DocumentLinkOptions, DocumentLinkParams, Position,
-                             Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    DocumentLink,
+    DocumentLinkOptions,
+    DocumentLinkParams,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
 from ..conftest import CALL_TIMEOUT, ClientServer
 
@@ -35,16 +41,16 @@ class TestDocumentLink(unittest.TestCase):
             DocumentLinkOptions(resolve_provider=True),
         )
         def f(params: DocumentLinkParams) -> Optional[List[DocumentLink]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     DocumentLink(
                         range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
-                        target='target',
-                        tooltip='tooltip',
-                        data='data',
+                        target="target",
+                        tooltip="tooltip",
+                        data="data",
                     ),
                 ]
             else:
@@ -66,31 +72,30 @@ class TestDocumentLink(unittest.TestCase):
         response = self.client.lsp.send_request(
             DOCUMENT_LINK,
             DocumentLinkParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
+                text_document=TextDocumentIdentifier(uri="file://return.list"),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-        assert response[0]['target'] == 'target'
-        assert response[0]['tooltip'] == 'tooltip'
-        assert response[0]['data'] == 'data'
+        assert response[0]["range"]["start"]["line"] == 0
+        assert response[0]["range"]["start"]["character"] == 0
+        assert response[0]["range"]["end"]["line"] == 1
+        assert response[0]["range"]["end"]["character"] == 1
+        assert response[0]["target"] == "target"
+        assert response[0]["tooltip"] == "tooltip"
+        assert response[0]["data"] == "data"
 
     def test_document_link_return_none(self):
         response = self.client.lsp.send_request(
             DOCUMENT_LINK,
             DocumentLinkParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
+                text_document=TextDocumentIdentifier(uri="file://return.none"),
             ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response is None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-
