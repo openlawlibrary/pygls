@@ -19,8 +19,6 @@
 import asyncio
 import os
 from threading import Thread
-from time import sleep
-from typing import List
 
 import pygls.lsp.methods
 import pytest
@@ -33,7 +31,6 @@ from pygls.workspace import Document, Workspace
 
 from tests.ls_setup import setup_ls_features
 
-CALL_TIMEOUT = 3
 
 DOC = """document
 for
@@ -43,16 +40,7 @@ with "😋" unicode.
 DOC_URI = uris.from_fs_path(__file__)
 
 
-def pytest_sessionfinish(session, exitstatus):
-    """whole test run finishes."""
-    sleep(CALL_TIMEOUT)
-    for cs in ClientServer._to_stop:
-        cs._stop()
-
-
 class ClientServer:
-    _to_stop: List["ClientServer"] = []
-
     def __init__(self):
         # Client to Server pipe
         csr, csw = os.pipe()
@@ -75,6 +63,14 @@ class ClientServer:
         )
         self.client_thread.daemon = True
 
+    @classmethod
+    def decorate(cls):
+        return pytest.mark.parametrize(
+            'client_server',
+            [cls],
+            indirect=True
+        )
+
     def start(self):
         self.server_thread.start()
         self.server.thread_id = self.server_thread.ident
@@ -84,12 +80,9 @@ class ClientServer:
         self.initialize()
 
     def stop(self):
-        ClientServer._to_stop.append(self)
-
-    def _stop(self):
         shutdown_response = self.client.lsp.send_request(
             pygls.lsp.methods.SHUTDOWN
-        ).result(timeout=CALL_TIMEOUT)
+        ).result()
         assert shutdown_response is None
         # Exit the server
         self.client.lsp.notify(pygls.lsp.methods.EXIT)
@@ -110,7 +103,7 @@ class ClientServer:
                 root_uri="file://",
                 capabilities=ClientCapabilities()
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ).result()
 
         assert "capabilities" in response
 
@@ -119,19 +112,37 @@ class ClientServer:
         yield self.server
 
 
-@pytest.fixture(scope="session", autouse=True)
-def client_server():
-    """A fixture to setup a client/server"""
-    client_server = ClientServer()
-    setup_ls_features(client_server.server)
+@pytest.fixture(autouse=True)
+def client_server(request):
+    print("a", end=", ")
+    if hasattr(request, 'param'):
+        print("b1", end=", ")
+        LS = request.param
+        LS()
+        client_server = LS()
+        print("c1", end=", ")
+    else:
+        print("b2", end=", ")
+        client_server = ClientServer()
+        setup_ls_features(client_server.server)
+        print("c2", end=", ")
 
     client_server.start()
-
+    print("d", end=", ")
     client, server = client_server
 
+    print("e")
+    # try:
+    print("before", end=", ")
     yield client, server
+    print("after", end=", ")
 
+    # finally:
+    print("stopping..", end=", ")
     client_server.stop()
+    print("stopped.", end=", ")
+
+    print("end.", end=", ")
 
 
 @pytest.fixture

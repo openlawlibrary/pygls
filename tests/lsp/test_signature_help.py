@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import Optional
 
 from pygls.lsp.methods import SIGNATURE_HELP
@@ -30,16 +30,14 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
 )
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestSignatureHelp(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             SIGNATURE_HELP,
             SignatureHelpOptions(
                 trigger_characters=["a", "b"],
@@ -67,97 +65,96 @@ class TestSignatureHelp(unittest.TestCase):
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
+    provider = capabilities.signature_help_provider
+    assert provider
+    assert provider.trigger_characters == ["a", "b"]
+    assert provider.retrigger_characters == ["c", "d"]
 
-        provider = capabilities.signature_help_provider
-        assert provider
-        assert provider.trigger_characters == ["a", "b"]
-        assert provider.retrigger_characters == ["c", "d"]
 
-    def test_signature_help_return_signature_help(self):
-        response = self.client.lsp.send_request(
-            SIGNATURE_HELP,
-            SignatureHelpParams(
-                text_document=TextDocumentIdentifier(
-                    uri="file://return.signature_help"
-                ),
-                position=Position(line=0, character=0),
-                context=SignatureHelpContext(
-                    trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
-                    is_retrigger=True,
-                    trigger_character="a",
-                    active_signature_help=SignatureHelp(
-                        signatures=[
-                            SignatureInformation(
-                                label="label",
-                                documentation="documentation",
-                                parameters=[
-                                    ParameterInformation(
-                                        label=(0, 0),
-                                        documentation="documentation",
-                                    ),
-                                ],
-                            ),
-                        ],
-                        active_signature=0,
-                        active_parameter=0,
-                    ),
+@ConfiguredLS.decorate()
+def test_signature_help_return_signature_help(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        SIGNATURE_HELP,
+        SignatureHelpParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.signature_help"
+            ),
+            position=Position(line=0, character=0),
+            context=SignatureHelpContext(
+                trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
+                is_retrigger=True,
+                trigger_character="a",
+                active_signature_help=SignatureHelp(
+                    signatures=[
+                        SignatureInformation(
+                            label="label",
+                            documentation="documentation",
+                            parameters=[
+                                ParameterInformation(
+                                    label=(0, 0),
+                                    documentation="documentation",
+                                ),
+                            ],
+                        ),
+                    ],
+                    active_signature=0,
+                    active_parameter=0,
                 ),
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response
+    assert response
 
-        assert response["activeParameter"] == 0
-        assert response["activeSignature"] == 0
+    assert response["activeParameter"] == 0
+    assert response["activeSignature"] == 0
 
-        assert response["signatures"][0]["label"] == "label"
-        assert response["signatures"][0]["documentation"] == "documentation"
-        assert response["signatures"][0]["parameters"][0]["label"] == [0, 0]
-        assert (
-            response["signatures"][0]["parameters"][0]["documentation"]
-            == "documentation"
-        )
+    assert response["signatures"][0]["label"] == "label"
+    assert response["signatures"][0]["documentation"] == "documentation"
+    assert response["signatures"][0]["parameters"][0]["label"] == [0, 0]
+    assert (
+        response["signatures"][0]["parameters"][0]["documentation"]
+        == "documentation"
+    )
 
-    def test_signature_help_return_none(self):
-        response = self.client.lsp.send_request(
-            SIGNATURE_HELP,
-            SignatureHelpParams(
-                text_document=TextDocumentIdentifier(uri="file://return.none"),
-                position=Position(line=0, character=0),
-                context=SignatureHelpContext(
-                    trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
-                    is_retrigger=True,
-                    trigger_character="a",
-                    active_signature_help=SignatureHelp(
-                        signatures=[
-                            SignatureInformation(
-                                label="label",
-                                documentation="documentation",
-                                parameters=[
-                                    ParameterInformation(
-                                        label=(0, 0),
-                                        documentation="documentation",
-                                    ),
-                                ],
-                            ),
-                        ],
-                        active_signature=0,
-                        active_parameter=0,
-                    ),
+
+@ConfiguredLS.decorate()
+def test_signature_help_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        SIGNATURE_HELP,
+        SignatureHelpParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            position=Position(line=0, character=0),
+            context=SignatureHelpContext(
+                trigger_kind=SignatureHelpTriggerKind.TriggerCharacter,
+                is_retrigger=True,
+                trigger_character="a",
+                active_signature_help=SignatureHelp(
+                    signatures=[
+                        SignatureInformation(
+                            label="label",
+                            documentation="documentation",
+                            parameters=[
+                                ParameterInformation(
+                                    label=(0, 0),
+                                    documentation="documentation",
+                                ),
+                            ],
+                        ),
+                    ],
+                    active_signature=0,
+                    active_parameter=0,
                 ),
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response is None
-
-
-if __name__ == "__main__":
-    unittest.main()
+    assert response is None

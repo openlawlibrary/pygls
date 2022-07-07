@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List
 
 from pygls.lsp.methods import COLOR_PRESENTATION
@@ -28,16 +28,14 @@ from pygls.lsp.types import (
     TextEdit,
 )
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestColorPresentation(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(COLOR_PRESENTATION)
+        @self.server.feature(COLOR_PRESENTATION)
         def f(params: ColorPresentationParams) -> List[ColorPresentation]:
             return [
                 ColorPresentation(
@@ -68,53 +66,48 @@ class TestColorPresentation(unittest.TestCase):
                 )
             ]
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities():
+    """From specs:
 
-    def test_capabilities(self):
-        """From specs:
+    This request has no special capabilities and registration options since
+    it is send as a resolve request for the textDocument/documentColor
+    request.
+    """
 
-        This request has no special capabilities and registration options since
-        it is send as a resolve request for the textDocument/documentColor
-        request.
-        """
 
-    def test_color_presentation(self):
-        response = self.client.lsp.send_request(
-            COLOR_PRESENTATION,
-            ColorPresentationParams(
-                text_document=TextDocumentIdentifier(uri="file://return.list"),
-                color=Color(red=0.6, green=0.2, blue=0.3, alpha=0.5),
-                range=Range(
-                    start=Position(line=0, character=0),
-                    end=Position(line=3, character=3),
-                ),
+@ConfiguredLS.decorate()
+def test_color_presentation(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        COLOR_PRESENTATION,
+        ColorPresentationParams(
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            color=Color(red=0.6, green=0.2, blue=0.3, alpha=0.5),
+            range=Range(
+                start=Position(line=0, character=0),
+                end=Position(line=3, character=3),
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response[0]["label"] == "label1"
-        assert response[0]["textEdit"]["newText"] == "te"
+    assert response[0]["label"] == "label1"
+    assert response[0]["textEdit"]["newText"] == "te"
 
-        assert response[0]["textEdit"]["range"]["start"]["line"] == 0
-        assert response[0]["textEdit"]["range"]["start"]["character"] == 0
-        assert response[0]["textEdit"]["range"]["end"]["line"] == 1
-        assert response[0]["textEdit"]["range"]["end"]["character"] == 1
+    assert response[0]["textEdit"]["range"]["start"]["line"] == 0
+    assert response[0]["textEdit"]["range"]["start"]["character"] == 0
+    assert response[0]["textEdit"]["range"]["end"]["line"] == 1
+    assert response[0]["textEdit"]["range"]["end"]["character"] == 1
 
-        range = response[0]["additionalTextEdits"][0]["range"]
-        assert range["start"]["line"] == 1
-        assert range["start"]["character"] == 1
-        assert range["end"]["line"] == 2
-        assert range["end"]["character"] == 2
+    range = response[0]["additionalTextEdits"][0]["range"]
+    assert range["start"]["line"] == 1
+    assert range["start"]["character"] == 1
+    assert range["end"]["line"] == 2
+    assert range["end"]["character"] == 2
 
-        range = response[0]["additionalTextEdits"][1]["range"]
-        assert range["start"]["line"] == 2
-        assert range["start"]["character"] == 2
-        assert range["end"]["line"] == 3
-        assert range["end"]["character"] == 3
-
-
-if __name__ == "__main__":
-    unittest.main()
+    range = response[0]["additionalTextEdits"][1]["range"]
+    assert range["start"]["line"] == 2
+    assert range["start"]["character"] == 2
+    assert range["end"]["line"] == 3
+    assert range["end"]["character"] == 3
