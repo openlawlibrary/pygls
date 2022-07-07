@@ -31,6 +31,7 @@ from pygls.workspace import Document, Workspace
 
 from tests.ls_setup import setup_ls_features
 
+from ._init_server_stall_fix_hack import retry_stalled_init_fix_hack
 
 DOC = """document
 for
@@ -74,9 +75,7 @@ class ClientServer:
     def start(self):
         self.server_thread.start()
         self.server.thread_id = self.server_thread.ident
-
         self.client_thread.start()
-
         self.initialize()
 
     def stop(self):
@@ -84,10 +83,8 @@ class ClientServer:
             pygls.lsp.methods.SHUTDOWN
         ).result()
         assert shutdown_response is None
-        # Exit the server
         self.client.lsp.notify(pygls.lsp.methods.EXIT)
         self.server_thread.join()
-        # Exit the client
         self.client._stop_event.set()
         try:
             self.client.loop._signal_handlers.clear()  # HACK ?
@@ -95,6 +92,7 @@ class ClientServer:
             pass
         self.client_thread.join()
 
+    @retry_stalled_init_fix_hack()
     def initialize(self):
         response = self.client.lsp.send_request(
             INITIALIZE,
@@ -103,8 +101,7 @@ class ClientServer:
                 root_uri="file://",
                 capabilities=ClientCapabilities()
             ),
-        ).result()
-
+        ).result(timeout=1)
         assert "capabilities" in response
 
     def __iter__(self):
@@ -114,35 +111,19 @@ class ClientServer:
 
 @pytest.fixture(autouse=True)
 def client_server(request):
-    print("a", end=", ")
     if hasattr(request, 'param'):
-        print("b1", end=", ")
-        LS = request.param
-        LS()
-        client_server = LS()
-        print("c1", end=", ")
+        ConfiguredClientServer = request.param
+        client_server = ConfiguredClientServer()
     else:
-        print("b2", end=", ")
         client_server = ClientServer()
         setup_ls_features(client_server.server)
-        print("c2", end=", ")
 
     client_server.start()
-    print("d", end=", ")
     client, server = client_server
 
-    print("e")
-    # try:
-    print("before", end=", ")
     yield client, server
-    print("after", end=", ")
 
-    # finally:
-    print("stopping..", end=", ")
     client_server.stop()
-    print("stopped.", end=", ")
-
-    print("end.", end=", ")
 
 
 @pytest.fixture
