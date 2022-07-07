@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional
 
 from pygls.lsp.methods import REFERENCES
@@ -28,16 +28,14 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
 )
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestReferences(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             REFERENCES,
             ReferenceOptions(),
         )
@@ -55,52 +53,51 @@ class TestReferences(unittest.TestCase):
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
+    assert capabilities.references_provider
 
-        assert capabilities.references_provider
 
-    def test_references_return_list(self):
-        response = self.client.lsp.send_request(
-            REFERENCES,
-            ReferenceParams(
-                text_document=TextDocumentIdentifier(uri="file://return.list"),
-                position=Position(line=0, character=0),
-                context=ReferenceContext(
-                    include_declaration=True,
-                ),
+@ConfiguredLS.decorate()
+def test_references_return_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        REFERENCES,
+        ReferenceParams(
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            position=Position(line=0, character=0),
+            context=ReferenceContext(
+                include_declaration=True,
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response
+    assert response
 
-        assert response[0]["uri"] == "uri"
+    assert response[0]["uri"] == "uri"
 
-        assert response[0]["range"]["start"]["line"] == 0
-        assert response[0]["range"]["start"]["character"] == 0
-        assert response[0]["range"]["end"]["line"] == 1
-        assert response[0]["range"]["end"]["character"] == 1
+    assert response[0]["range"]["start"]["line"] == 0
+    assert response[0]["range"]["start"]["character"] == 0
+    assert response[0]["range"]["end"]["line"] == 1
+    assert response[0]["range"]["end"]["character"] == 1
 
-    def test_references_return_none(self):
-        response = self.client.lsp.send_request(
-            REFERENCES,
-            ReferenceParams(
-                text_document=TextDocumentIdentifier(uri="file://return.none"),
-                position=Position(line=0, character=0),
-                context=ReferenceContext(
-                    include_declaration=True,
-                ),
+
+@ConfiguredLS.decorate()
+def test_references_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        REFERENCES,
+        ReferenceParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            position=Position(line=0, character=0),
+            context=ReferenceContext(
+                include_declaration=True,
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response is None
-
-
-if __name__ == "__main__":
-    unittest.main()
+    assert response is None

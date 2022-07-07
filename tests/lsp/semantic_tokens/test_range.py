@@ -14,21 +14,29 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from typing import Optional, Union
 
-from typing import List, Optional
-
-from pygls.lsp.methods import TEXT_DOCUMENT_MONIKER
+from pygls.lsp.methods import (
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+)
 from pygls.lsp.types import (
-    Moniker,
-    MonikerKind,
-    MonikerOptions,
-    MonikerParams,
     Position,
+    Range,
+    SemanticTokens,
+    SemanticTokensLegend,
+    SemanticTokensPartialResult,
+    SemanticTokensRangeParams,
     TextDocumentIdentifier,
-    UniquenessLevel,
 )
 
-from ..conftest import ClientServer
+from tests.conftest import ClientServer
+
+SemanticTokenReturnType = Optional[
+    Union[
+        SemanticTokensPartialResult,
+        Optional[SemanticTokens]
+    ]
+]
 
 
 class ConfiguredLS(ClientServer):
@@ -36,21 +44,17 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            TEXT_DOCUMENT_MONIKER,
-            MonikerOptions(),
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+            SemanticTokensLegend(
+                token_types=["keyword", "operator"],
+                token_modifiers=["readonly"]
+            ),
         )
-        def f(params: MonikerParams) -> Optional[List[Moniker]]:
-            if params.text_document.uri == "file://return.list":
-                return [
-                    Moniker(
-                        scheme="test_scheme",
-                        identifier="test_identifier",
-                        unique=UniquenessLevel.Global,
-                        kind=MonikerKind.Local,
-                    ),
-                ]
-            else:
-                return None
+        def f(
+            params: SemanticTokensRangeParams,
+        ) -> SemanticTokenReturnType:
+            if params.text_document.uri == "file://return.tokens":
+                return SemanticTokens(data=[0, 0, 3, 0, 0])
 
 
 @ConfiguredLS.decorate()
@@ -58,36 +62,48 @@ def test_capabilities(client_server):
     _, server = client_server
     capabilities = server.server_capabilities
 
-    assert capabilities.moniker_provider
+    provider = capabilities.semantic_tokens_provider
+    assert provider.range
+    assert provider.legend.token_types == [
+        "keyword",
+        "operator",
+    ]
+    assert provider.legend.token_modifiers == [
+        "readonly"
+    ]
 
 
 @ConfiguredLS.decorate()
-def test_moniker_return_list(client_server):
+def test_semantic_tokens_range_return_tokens(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        TEXT_DOCUMENT_MONIKER,
-        MonikerParams(
-            text_document=TextDocumentIdentifier(uri="file://return.list"),
-            position=Position(line=0, character=0),
+        TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+        SemanticTokensRangeParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.tokens"),
+            range=Range(
+                start=Position(line=0, character=0),
+                end=Position(line=10, character=80),
+            ),
         ),
     ).result()
 
     assert response
 
-    assert response[0]["scheme"] == "test_scheme"
-    assert response[0]["identifier"] == "test_identifier"
-    assert response[0]["unique"] == "global"
-    assert response[0]["kind"] == "local"
+    assert response["data"] == [0, 0, 3, 0, 0]
 
 
 @ConfiguredLS.decorate()
-def test_references_return_none(client_server):
+def test_semantic_tokens_range_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        TEXT_DOCUMENT_MONIKER,
-        MonikerParams(
+        TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+        SemanticTokensRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
-            position=Position(line=0, character=0),
+            range=Range(
+                start=Position(line=0, character=0),
+                end=Position(line=10, character=80),
+            ),
         ),
     ).result()
 

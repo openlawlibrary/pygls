@@ -35,8 +35,6 @@ from pygls.protocol import LanguageServerProtocol
 from pygls.server import LanguageServer
 from tests import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
-CALL_TIMEOUT = 2
-
 
 def _initialize_server(server):
     server.lsp.lsp_initialize(
@@ -60,7 +58,7 @@ def test_bf_initialize(client_server):
             "rootUri": root_uri,
             "capabilities": ClientCapabilities(),
         },
-    ).result(timeout=CALL_TIMEOUT)
+    ).result()
 
     assert server.process_id == process_id
     assert server.workspace.root_uri == root_uri
@@ -91,7 +89,7 @@ def test_command_async(client_server):
 
     is_called, thread_id = client.lsp.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_ASYNC)
-    ).result(timeout=CALL_TIMEOUT)
+    ).result()
 
     assert is_called
     assert thread_id == server.thread_id
@@ -102,7 +100,7 @@ def test_command_sync(client_server):
 
     is_called, thread_id = client.lsp.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_SYNC)
-    ).result(timeout=CALL_TIMEOUT)
+    ).result()
 
     assert is_called
     assert thread_id == server.thread_id
@@ -113,7 +111,7 @@ def test_command_thread(client_server):
 
     is_called, thread_id = client.lsp.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_THREAD)
-    ).result(timeout=CALL_TIMEOUT)
+    ).result()
 
     assert is_called
     assert thread_id != server.thread_id

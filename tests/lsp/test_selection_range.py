@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
 from typing import List, Optional
 
 from pygls.lsp.methods import SELECTION_RANGE
@@ -27,16 +26,14 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
 )
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestSelectionRange(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             SELECTION_RANGE,
             SelectionRangeOptions(),
         )
@@ -61,54 +58,53 @@ class TestSelectionRange(unittest.TestCase):
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
-
-        assert capabilities.selection_range_provider
-
-    def test_selection_range_return_list(self):
-        response = self.client.lsp.send_request(
-            SELECTION_RANGE,
-            SelectionRangeParams(
-                query="query",
-                text_document=TextDocumentIdentifier(uri="file://return.list"),
-                positions=[Position(line=0, character=0)],
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        root = response[0]
-        assert root["range"]["start"]["line"] == 0
-        assert root["range"]["start"]["character"] == 0
-        assert root["range"]["end"]["line"] == 10
-        assert root["range"]["end"]["character"] == 10
-        assert "parent" not in root
-
-        assert response[1]["range"]["start"]["line"] == 0
-        assert response[1]["range"]["start"]["character"] == 0
-        assert response[1]["range"]["end"]["line"] == 1
-        assert response[1]["range"]["end"]["character"] == 1
-        assert response[1]["parent"] == root
-
-    def test_selection_range_return_none(self):
-        response = self.client.lsp.send_request(
-            SELECTION_RANGE,
-            SelectionRangeParams(
-                query="query",
-                text_document=TextDocumentIdentifier(uri="file://return.none"),
-                positions=[Position(line=0, character=0)],
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response is None
+    assert capabilities.selection_range_provider
 
 
-if __name__ == "__main__":
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_selection_range_return_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        SELECTION_RANGE,
+        SelectionRangeParams(
+            query="query",
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            positions=[Position(line=0, character=0)],
+        ),
+    ).result()
+
+    assert response
+
+    root = response[0]
+    assert root["range"]["start"]["line"] == 0
+    assert root["range"]["start"]["character"] == 0
+    assert root["range"]["end"]["line"] == 10
+    assert root["range"]["end"]["character"] == 10
+    assert "parent" not in root
+
+    assert response[1]["range"]["start"]["line"] == 0
+    assert response[1]["range"]["start"]["character"] == 0
+    assert response[1]["range"]["end"]["line"] == 1
+    assert response[1]["range"]["end"]["character"] == 1
+    assert response[1]["parent"] == root
+
+
+@ConfiguredLS.decorate()
+def test_selection_range_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        SELECTION_RANGE,
+        SelectionRangeParams(
+            query="query",
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            positions=[Position(line=0, character=0)],
+        ),
+    ).result()
+
+    assert response is None
