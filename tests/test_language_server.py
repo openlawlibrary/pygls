@@ -84,6 +84,12 @@ def test_bf_text_document_did_open(client_server):
 
     assert len(server.lsp.workspace.documents) == 1
 
+    document = server.workspace.get_document(__file__)
+    assert document.uri == __file__
+    assert document.version == 1
+    assert document.source == "test"
+    assert document.language_id == "python"
+
 
 @pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
 def test_command_async(client_server):

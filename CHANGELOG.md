@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning][semver].
 
 ### Fixed
 
+- `Document` objects now expose a text document's `language_id`
+
 ## [0.12] - 04/07/2022
 
 ### Added
