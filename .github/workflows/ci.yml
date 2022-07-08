@@ -1,12 +1,8 @@
 name: CI
 
 on:
-  push:
-    paths-ignore:
-      - "examples/json-extension/**"
-  pull_request:
-    paths-ignore:
-      - "examples/json-extension/**"
+  - push
+  - pull_request
 
 jobs:
   test:
