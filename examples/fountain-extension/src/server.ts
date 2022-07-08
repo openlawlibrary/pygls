@@ -3,6 +3,16 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js")
 /* @ts-ignore */
 import * as languageServer from "./server.py";
 
+function patchedStdout(data) {
+    if (!data.trim()) {
+        return
+    }
+
+    // Uncomment to see messages sent from the language server
+    // console.log(data)
+    postMessage(JSON.parse(data))
+}
+
 async function initPyodide() {
 
     console.log("Initializing pyodide.")
@@ -15,6 +25,7 @@ async function initPyodide() {
     console.log("Installing dependencies.")
     await pyodide.loadPackage(["micropip"])
     await pyodide.runPythonAsync(`
+        import sys
         import micropip
         await micropip.install('pygls')
 
@@ -23,6 +34,9 @@ async function initPyodide() {
     `)
 
     console.log("Loading server.")
+
+    // Patch stdout to redirect the output.
+    pyodide.globals.get('sys').stdout.write = patchedStdout
     await pyodide.runPythonAsync(languageServer)
 
     return pyodide
@@ -30,26 +44,16 @@ async function initPyodide() {
 
 const pyodideReady = initPyodide()
 
-/* @ts-ignore */
-self.post_message = (json_string) => {
-
-    // Uncomment to see messages sent from the language server
-    // console.log(json_string)
-
-    let obj = JSON.parse(json_string)
-    postMessage(obj)
-}
-
 onmessage = async (event) => {
     let pyodide = await pyodideReady
 
+    // Uncomment to see messages from the client
+    // console.log(event.data)
+
     /* @ts-ignore */
     self.client_message = JSON.stringify(event.data)
-    const response = await pyodide.runPythonAsync(`
+    await pyodide.runPythonAsync(`
         from js import client_message
-
-        # Uncomment to see the messages sent from the client
-        # print(client_message)
 
         message = json.loads(client_message, object_hook=deserialize_message)
         server.lsp._procedure_handler(message)

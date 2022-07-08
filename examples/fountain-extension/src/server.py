@@ -1,14 +1,14 @@
 import re
-from pygls.lsp.types.basic_structures import WorkDoneProgressBegin
 from pygls.server import LanguageServer
 from pygls.lsp.methods import COMPLETION
-from pygls.lsp.types import (CompletionItem, CompletionParams, CompletionList, CompletionOptions, workspace)
+from pygls.lsp.types import (CompletionItem, CompletionParams, CompletionList, CompletionOptions)
 
 # The following imports are required for the glue code in 'server.ts'
-import json  
+import json
 from pygls.protocol import deserialize_message
 
 server = LanguageServer()
+server.start_pyodide()
 
 CHARACTER = re.compile(r"^[A-Z][A-Z ]+$", re.MULTILINE)
 
