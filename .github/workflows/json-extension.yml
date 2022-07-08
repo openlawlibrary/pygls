@@ -1,14 +1,8 @@
 name: JSON language server
 
 on:
-  push:
-    paths:
-      - ".github/workflows/json-extension.yml"
-      - "examples/json-extension/**"
-  pull_request:
-    paths:
-      - ".github/workflows/json-extension.yml"
-      - "examples/json-extension/**"
+  - push
+  - pull_request
 
 jobs:
   build:
