@@ -32,9 +32,6 @@ from lsprotocol.types import (
 from ..conftest import ClientServer
 
 
-PROGRESS_TOKEN = "token"
-
-
 class ConfiguredLS(ClientServer):
     def __init__(self):
         super().__init__()
@@ -47,15 +44,15 @@ class ConfiguredLS(ClientServer):
         )
         def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
             self.server.lsp.progress.begin(
-                PROGRESS_TOKEN, WorkDoneProgressBegin(
+                params.work_done_token, WorkDoneProgressBegin(
                     kind='begin', title="starting", percentage=0)
             )
             self.server.lsp.progress.report(
-                PROGRESS_TOKEN,
+                params.work_done_token,
                 WorkDoneProgressReport(kind='report', message="doing", percentage=50),
             )
             self.server.lsp.progress.end(
-                PROGRESS_TOKEN, WorkDoneProgressEnd(kind='end', message="done")
+                params.work_done_token, WorkDoneProgressEnd(kind='end', message="done")
             )
             return None
 
@@ -81,23 +78,25 @@ def test_progress_notifications(client_server):
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
-            work_done_token=PROGRESS_TOKEN,
+            work_done_token='token',
         ),
     ).result()
 
     time.sleep(0.1)
 
     assert len(client.notifications) == 3
-    assert client.notifications[0].token == PROGRESS_TOKEN
+    assert client.notifications[0].token == 'token'
     assert client.notifications[0].value == {
         "kind": "begin",
         "title": "starting",
         "percentage": 0,
     }
+    assert client.notifications[1].token == 'token'
     assert client.notifications[1].value == {
         "kind": "report",
         "message": "doing",
         "percentage": 50,
     }
+    assert client.notifications[2].token == 'token'
     assert client.notifications[2].value == {
         "kind": "end", "message": "done"}
