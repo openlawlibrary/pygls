@@ -15,8 +15,10 @@
 # limitations under the License.                                           #
 ############################################################################
 
+import asyncio
 from typing import List, Optional
 
+import pytest
 from lsprotocol.types import TEXT_DOCUMENT_CODE_LENS, PROGRESS
 from lsprotocol.types import (
     CodeLens,
@@ -27,8 +29,11 @@ from lsprotocol.types import (
     WorkDoneProgressBegin,
     WorkDoneProgressEnd,
     WorkDoneProgressReport,
+    WorkDoneProgressCancelParams,
+    WorkDoneProgressCreateParams,
 )
 from ..conftest import ClientServer
+from pygls import IS_PYODIDE
 
 
 class ConfiguredLS(ClientServer):
@@ -41,23 +46,35 @@ class ConfiguredLS(ClientServer):
             CodeLensOptions(resolve_provider=False,
                             work_done_progress=True),
         )
-        def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
+        async def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
+            token = params.work_done_token
+            assert token
             self.server.lsp.progress.begin(
-                params.work_done_token, WorkDoneProgressBegin(
-                    kind='begin', title="starting", percentage=0)
+                token,
+                WorkDoneProgressBegin(kind='begin', title="starting", percentage=0),
             )
-            self.server.lsp.progress.report(
-                params.work_done_token,
-                WorkDoneProgressReport(kind='report', message="doing", percentage=50),
-            )
-            self.server.lsp.progress.end(
-                params.work_done_token, WorkDoneProgressEnd(kind='end', message="done")
-            )
+            await asyncio.sleep(0.1)
+            if self.server.lsp.progress.tokens[token].cancelled():
+                self.server.lsp.progress.end(
+                    token, WorkDoneProgressEnd(kind='end', message="cancelled")
+                )
+            else:
+                self.server.lsp.progress.report(
+                    token,
+                    WorkDoneProgressReport(kind='report', message="doing", percentage=50),
+                )
+                self.server.lsp.progress.end(token, WorkDoneProgressEnd(kind='end', message="done"))
             return None
 
         @self.client.feature(PROGRESS)
         def f2(params):
             self.client.notifications.append(params)
+            if params.value["kind"] == "begin" and "cancel" in params.token:
+                # client cancels the progress token
+                self.client.lsp.notify(
+                    WINDOW_WORK_DONE_PROGRESS_CANCEL,
+                    WorkDoneProgressCancelParams(token=params.token),
+                )
 
 
 @ConfiguredLS.decorate()
@@ -70,30 +87,53 @@ def test_capabilities(client_server):
     assert provider.work_done_progress
 
 
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 @ConfiguredLS.decorate()
-def test_progress_notifications(client_server):
+async def test_progress_notifications(client_server):
     client, _ = client_server
     client.lsp.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
-            text_document=TextDocumentIdentifier(uri="file://return.none"),
-            work_done_token='token',
+            text_document=TextDocumentIdentifier(uri="file://client_initiated_token"),
+            work_done_token="token",
         ),
     ).result()
 
-    assert len(client.notifications) == 3
-    assert client.notifications[0].token == 'token'
-    assert client.notifications[0].value == {
-        "kind": "begin",
-        "title": "starting",
-        "percentage": 0,
+    assert [notif.value for notif in client.notifications] == [
+        {
+            "kind": "begin",
+            "title": "starting",
+            "percentage": 0,
+        },
+        {
+            "kind": "report",
+            "message": "doing",
+            "percentage": 50,
+        },
+        {"kind": "end", "message": "done"},
+    ]
+    assert {notif.token for notif in client.notifications} == {"token"}
+
+
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
+@ConfiguredLS.decorate()
+def test_progress_cancel_notifications(client_server):
+    client, _ = client_server
+    client.lsp.send_request(
+        CODE_LENS,
+        CodeLensParams(
+            text_document=TextDocumentIdentifier(uri="file://client_initiated_token"),
+            work_done_token="token_with_cancellation",
+        ),
+    ).result()
+    assert [notif.value for notif in client.notifications] == [
+        {
+            "kind": "begin",
+            "title": "starting",
+            "percentage": 0,
+        },
+        {"kind": "end", "message": "cancelled"},
+    ]
+    assert {notif.token for notif in client.notifications} == {
+        "token_with_cancellation"
     }
-    assert client.notifications[1].token == 'token'
-    assert client.notifications[1].value == {
-        "kind": "report",
-        "message": "doing",
-        "percentage": 50,
-    }
-    assert client.notifications[2].token == 'token'
-    assert client.notifications[2].value == {
-        "kind": "end", "message": "done"}
