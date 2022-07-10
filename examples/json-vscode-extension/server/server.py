@@ -202,9 +202,13 @@ async def progress(ls: JsonLanguageServer, *args):
     # Create
     await ls.progress.create_async(token)
     # Begin
-    ls.progress.begin(token, WorkDoneProgressBegin(title='Indexing', percentage=0))
+    ls.progress.begin(token, WorkDoneProgressBegin(title='Indexing', percentage=0, cancellable=True))
     # Report
     for i in range(1, 10):
+        # Check for cancellation from client
+        if ls.progress.tokens[token].cancelled():
+            # ... and stop the computation if client cancelled
+            return
         ls.progress.report(
             token,
             WorkDoneProgressReport(message=f'{i * 10}%', percentage= i * 10),
