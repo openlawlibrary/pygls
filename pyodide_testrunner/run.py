@@ -12,6 +12,7 @@ from multiprocessing import Process, Queue
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 
 
@@ -88,13 +89,15 @@ def main():
         driver.get(f'http://localhost:{port}?whl={whl}')
 
         wait = WebDriverWait(driver, 120)
-        button = wait.until(EC.element_to_be_clickable((By.ID, 'exit-code')))
+        try:
+            button = wait.until(EC.element_to_be_clickable((By.ID, 'exit-code')))
+            exit_code = int(button.text)
+        except WebDriverException as e:
+            print(f'Error while running test: {e!r}')
+            exit_code = 1
 
         console = driver.find_element(By.ID, 'console')
         print(console.text)
-
-        exit_code = int(button.text)
-
     finally:
         if hasattr(server_process, "kill"):
             server_process.kill()
