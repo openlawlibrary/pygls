@@ -329,6 +329,7 @@ class LanguageServer(Server):
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
     """
+    lsp: LanguageServerProtocol
 
     default_error_message = "Unexpected error in LSP server, see server's logs for details"
     """
