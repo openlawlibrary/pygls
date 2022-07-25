@@ -14,100 +14,105 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional
 
 from pygls.lsp.methods import RANGE_FORMATTING
-from pygls.lsp.types import (DocumentRangeFormattingOptions, DocumentRangeFormattingParams,
-                             FormattingOptions, Position, Range, TextDocumentIdentifier, TextEdit)
+from pygls.lsp.types import (
+    DocumentRangeFormattingOptions,
+    DocumentRangeFormattingParams,
+    FormattingOptions,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+    TextEdit,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestRangeFormatting(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             RANGE_FORMATTING,
             DocumentRangeFormattingOptions(),
         )
-        def f(params: DocumentRangeFormattingParams) -> Optional[List[TextEdit]]:
-            if params.text_document.uri == 'file://return.list':
+        def f(
+            params: DocumentRangeFormattingParams
+        ) -> Optional[List[TextEdit]]:
+            if params.text_document.uri == "file://return.list":
                 return [
                     TextEdit(
                         range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
-                        new_text='text',
+                        new_text="text",
                     )
                 ]
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
+    assert capabilities.document_range_formatting_provider
 
-        assert capabilities.document_range_formatting_provider
 
-    def test_range_formatting_return_list(self):
-        response = self.client.lsp.send_request(
-            RANGE_FORMATTING,
-            DocumentRangeFormattingParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
-                range=Range(
-                    start=Position(line=0, character=0),
-                    end=Position(line=1, character=1),
-                ),
-                options=FormattingOptions(
-                    tab_size=2,
-                    insert_spaces=True,
-                    trim_trailing_whitespace=True,
-                    insert_final_newline=True,
-                    trim_final_newlines=True,
-                ),
+@ConfiguredLS.decorate()
+def test_range_formatting_return_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        RANGE_FORMATTING,
+        DocumentRangeFormattingParams(
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            range=Range(
+                start=Position(line=0, character=0),
+                end=Position(line=1, character=1),
             ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        assert response[0]['newText'] == 'text'
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-
-    def test_range_formatting_return_none(self):
-        response = self.client.lsp.send_request(
-            RANGE_FORMATTING,
-            DocumentRangeFormattingParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                range=Range(
-                    start=Position(line=0, character=0),
-                    end=Position(line=1, character=1),
-                ),
-                options=FormattingOptions(
-                    tab_size=2,
-                    insert_spaces=True,
-                    trim_trailing_whitespace=True,
-                    insert_final_newline=True,
-                    trim_final_newlines=True,
-                ),
+            options=FormattingOptions(
+                tab_size=2,
+                insert_spaces=True,
+                trim_trailing_whitespace=True,
+                insert_final_newline=True,
+                trim_final_newlines=True,
             ),
-        ).result(timeout=CALL_TIMEOUT)
+        ),
+    ).result()
 
-        assert response is None
+    assert response
+
+    assert response[0]["newText"] == "text"
+    assert response[0]["range"]["start"]["line"] == 0
+    assert response[0]["range"]["start"]["character"] == 0
+    assert response[0]["range"]["end"]["line"] == 1
+    assert response[0]["range"]["end"]["character"] == 1
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_range_formatting_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        RANGE_FORMATTING,
+        DocumentRangeFormattingParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            range=Range(
+                start=Position(line=0, character=0),
+                end=Position(line=1, character=1),
+            ),
+            options=FormattingOptions(
+                tab_size=2,
+                insert_spaces=True,
+                trim_trailing_whitespace=True,
+                insert_final_newline=True,
+                trim_final_newlines=True,
+            ),
+        ),
+    ).result()
 
+    assert response is None

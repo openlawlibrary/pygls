@@ -14,15 +14,11 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional
 
 import time
-from pygls.lsp.methods import (
-    CODE_LENS,
-    PROGRESS_NOTIFICATION
-
-)
+from pygls.lsp.methods import CODE_LENS, PROGRESS_NOTIFICATION
 from pygls.lsp.types import (
     CodeLens,
     CodeLensParams,
@@ -30,85 +26,78 @@ from pygls.lsp.types import (
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
     WorkDoneProgressEnd,
-    WorkDoneProgressReport
+    WorkDoneProgressReport,
 )
 from pygls.lsp.types.basic_structures import ProgressParams
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-PROGRESS_TOKEN = 'token'
+PROGRESS_TOKEN = "token"
 
 
-class TestCodeLens(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
-        cls.notifications: List[ProgressParams] = []
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
+        self.client.notifications: List[ProgressParams] = []
 
-        @cls.server.feature(
+        @self.server.feature(
             CODE_LENS,
-            CodeLensOptions(
-                resolve_provider=False,
-                work_done_progress=PROGRESS_TOKEN
-            ),
+            CodeLensOptions(resolve_provider=False,
+                            work_done_progress=PROGRESS_TOKEN),
         )
         def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
-            cls.server.lsp.progress.begin(
-                PROGRESS_TOKEN,
-                WorkDoneProgressBegin(title='starting', percentage=0)
+            self.server.lsp.progress.begin(
+                PROGRESS_TOKEN, WorkDoneProgressBegin(
+                    title="starting", percentage=0)
             )
-            cls.server.lsp.progress.report(
+            self.server.lsp.progress.report(
                 PROGRESS_TOKEN,
-                WorkDoneProgressReport(message='doing', percentage=50),
+                WorkDoneProgressReport(message="doing", percentage=50),
             )
-            cls.server.lsp.progress.end(
-                PROGRESS_TOKEN,
-                WorkDoneProgressEnd(message='done')
+            self.server.lsp.progress.end(
+                PROGRESS_TOKEN, WorkDoneProgressEnd(message="done")
             )
             return None
 
-        @cls.client.feature(
-            PROGRESS_NOTIFICATION
-        )
+        @self.client.feature(PROGRESS_NOTIFICATION)
         def f2(params):
-            cls.notifications.append(params)
-
-        cls.client_server.start()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
-
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
-
-        assert capabilities.code_lens_provider
-        assert capabilities.code_lens_provider.work_done_progress == PROGRESS_TOKEN
-
-    def test_progress_notifications(self):
-        self.client.lsp.send_request(
-            CODE_LENS,
-            CodeLensParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                work_done_token=PROGRESS_TOKEN
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        time.sleep(0.1)
-
-        assert len(self.notifications) == 3
-        assert self.notifications[0].token == PROGRESS_TOKEN
-        assert self.notifications[0].value == {
-            'kind': 'begin', 'title': 'starting', 'percentage': 0
-        }
-        assert self.notifications[1].value == {
-            'kind': 'report', 'message': 'doing', 'percentage': 50
-        }
-        assert self.notifications[2].value == {
-            'kind': 'end', 'message': 'done'
-        }
+            self.client.notifications.append(params)
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
+
+    provider = capabilities.code_lens_provider
+    assert provider
+    assert provider.work_done_progress == PROGRESS_TOKEN
+
+
+@ConfiguredLS.decorate()
+def test_progress_notifications(client_server):
+    client, _ = client_server
+    client.lsp.send_request(
+        CODE_LENS,
+        CodeLensParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            work_done_token=PROGRESS_TOKEN,
+        ),
+    ).result()
+
+    time.sleep(0.1)
+
+    assert len(client.notifications) == 3
+    assert client.notifications[0].token == PROGRESS_TOKEN
+    assert client.notifications[0].value == {
+        "kind": "begin",
+        "title": "starting",
+        "percentage": 0,
+    }
+    assert client.notifications[1].value == {
+        "kind": "report",
+        "message": "doing",
+        "percentage": 50,
+    }
+    assert client.notifications[2].value == {
+        "kind": "end", "message": "done"}

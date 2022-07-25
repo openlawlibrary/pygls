@@ -1,8 +1,6 @@
 ############################################################################
-# Original work Copyright 2018 Palantir Technologies, Inc.                 #
-# Original work licensed under the MIT License.                            #
-# See ThirdPartyNotices.txt in the project root for license information.   #
-# All modifications Copyright (c) Open Law Library. All rights reserved.   #
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License")           #
 # you may not use this file except in compliance with the License.         #
@@ -16,12 +14,34 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import os
-import sys
+from typing import Optional, Union
 
-__version__ = "0.12"
+from pygls.lsp.methods import (
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+)
+from pygls.lsp.types import (
+    SemanticTokens,
+    SemanticTokensParams,
+    SemanticTokensPartialResult,
+)
 
-IS_WIN = os.name == 'nt'
-IS_PYODIDE = 'pyodide' in sys.modules
+from ...conftest import ClientServer
 
-pygls = 'pygls'
+
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
+
+        @self.server.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE)
+        def f(
+            params: SemanticTokensParams,
+        ) -> Union[SemanticTokensPartialResult, Optional[SemanticTokens]]:
+            return SemanticTokens(data=[0, 0, 3, 0, 0])
+
+
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
+
+    assert capabilities.semantic_tokens_provider is None

@@ -14,28 +14,31 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional
 
 from pygls.lsp.methods import FOLDING_RANGE
-from pygls.lsp.types import (FoldingRange, FoldingRangeKind, FoldingRangeOptions,
-                             FoldingRangeParams, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    FoldingRange,
+    FoldingRangeKind,
+    FoldingRangeOptions,
+    FoldingRangeParams,
+    TextDocumentIdentifier,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestFoldingRange(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             FOLDING_RANGE,
             FoldingRangeOptions(),
         )
         def f(params: FoldingRangeParams) -> Optional[List[FoldingRange]]:
-            if params.text_document.uri == 'file://return.list':
+            if params.text_document.uri == "file://return.list":
                 return [
                     FoldingRange(
                         start_line=0,
@@ -48,44 +51,42 @@ class TestFoldingRange(unittest.TestCase):
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
-
-        assert capabilities.folding_range_provider
-
-    def test_folding_range_return_list(self):
-        response = self.client.lsp.send_request(
-            FOLDING_RANGE,
-            FoldingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        assert response[0]['startLine'] == 0
-        assert response[0]['endLine'] == 0
-        assert response[0]['startCharacter'] == 1
-        assert response[0]['endCharacter'] == 1
-        assert response[0]['kind'] == FoldingRangeKind.Comment
-
-    def test_folding_range_return_none(self):
-        response = self.client.lsp.send_request(
-            FOLDING_RANGE,
-            FoldingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response is None
+    assert capabilities.folding_range_provider
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_folding_range_return_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        FOLDING_RANGE,
+        FoldingRangeParams(
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+        ),
+    ).result()
 
+    assert response
+
+    assert response[0]["startLine"] == 0
+    assert response[0]["endLine"] == 0
+    assert response[0]["startCharacter"] == 1
+    assert response[0]["endCharacter"] == 1
+    assert response[0]["kind"] == FoldingRangeKind.Comment
+
+
+@ConfiguredLS.decorate()
+def test_folding_range_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        FOLDING_RANGE,
+        FoldingRangeParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+        ),
+    ).result()
+
+    assert response is None

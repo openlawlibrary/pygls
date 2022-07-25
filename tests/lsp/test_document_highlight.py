@@ -14,37 +14,44 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional
 
 from pygls.lsp.methods import DOCUMENT_HIGHLIGHT
-from pygls.lsp.types import (DocumentHighlight, DocumentHighlightKind, DocumentHighlightOptions,
-                             DocumentHighlightParams, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    DocumentHighlight,
+    DocumentHighlightKind,
+    DocumentHighlightOptions,
+    DocumentHighlightParams,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestDocumentHighlight(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             DOCUMENT_HIGHLIGHT,
             DocumentHighlightOptions(),
         )
-        def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
-            if params.text_document.uri == 'file://return.list':
+        def f(
+            params: DocumentHighlightParams
+        ) -> Optional[List[DocumentHighlight]]:
+            if params.text_document.uri == "file://return.list":
                 return [
                     DocumentHighlight(
-                       range=Range(
+                        range=Range(
                             start=Position(line=0, character=0),
                             end=Position(line=1, character=1),
                         ),
                     ),
                     DocumentHighlight(
-                       range=Range(
+                        range=Range(
                             start=Position(line=1, character=1),
                             end=Position(line=2, character=2),
                         ),
@@ -54,51 +61,50 @@ class TestDocumentHighlight(unittest.TestCase):
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
-
-        assert capabilities.document_highlight_provider
-
-    def test_document_highlight_return_list(self):
-        response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
-                text_document=TextDocumentIdentifier(uri='file://return.list'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
-        assert 'kind' not in response[0]
-
-        assert response[1]['range']['start']['line'] == 1
-        assert response[1]['range']['start']['character'] == 1
-        assert response[1]['range']['end']['line'] == 2
-        assert response[1]['range']['end']['character'] == 2
-        assert response[1]['kind'] == DocumentHighlightKind.Write
-
-    def test_document_highlight_return_none(self):
-        response = self.client.lsp.send_request(
-            DOCUMENT_HIGHLIGHT,
-            DocumentHighlightParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response is None
+    assert capabilities.document_highlight_provider
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_document_highlight_return_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DOCUMENT_HIGHLIGHT,
+        DocumentHighlightParams(
+            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
+
+    assert response
+
+    assert response[0]["range"]["start"]["line"] == 0
+    assert response[0]["range"]["start"]["character"] == 0
+    assert response[0]["range"]["end"]["line"] == 1
+    assert response[0]["range"]["end"]["character"] == 1
+    assert "kind" not in response[0]
+
+    assert response[1]["range"]["start"]["line"] == 1
+    assert response[1]["range"]["start"]["character"] == 1
+    assert response[1]["range"]["end"]["line"] == 2
+    assert response[1]["range"]["end"]["character"] == 2
+    assert response[1]["kind"] == DocumentHighlightKind.Write
+
+
+@ConfiguredLS.decorate()
+def test_document_highlight_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DOCUMENT_HIGHLIGHT,
+        DocumentHighlightParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
+
+    assert response is None

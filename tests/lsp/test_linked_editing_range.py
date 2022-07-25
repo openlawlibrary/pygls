@@ -14,28 +14,34 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import Optional
 
 from pygls.lsp.methods import TEXT_DOCUMENT_LINKED_EDITING_RANGE
-from pygls.lsp.types import (LinkedEditingRangeOptions, LinkedEditingRangeParams,
-                             LinkedEditingRanges, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    LinkedEditingRangeOptions,
+    LinkedEditingRangeParams,
+    LinkedEditingRanges,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestLinkedEditingRange(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             TEXT_DOCUMENT_LINKED_EDITING_RANGE,
             LinkedEditingRangeOptions(),
         )
-        def f(params: LinkedEditingRangeParams) -> Optional[LinkedEditingRanges]:
-            if params.text_document.uri == 'file://return.ranges':
+        def f(
+            params: LinkedEditingRangeParams
+        ) -> Optional[LinkedEditingRanges]:
+            if params.text_document.uri == "file://return.ranges":
                 return LinkedEditingRanges(
                     ranges=[
                         Range(
@@ -47,55 +53,54 @@ class TestLinkedEditingRange(unittest.TestCase):
                             end=Position(line=2, character=2),
                         ),
                     ],
-                    word_pattern='pattern',
+                    word_pattern="pattern",
                 )
             else:
                 return None
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
-
-        assert capabilities.linked_editing_range_provider
-
-    def test_linked_editing_ranges_return_ranges(self):
-        response = self.client.lsp.send_request(
-            TEXT_DOCUMENT_LINKED_EDITING_RANGE,
-            LinkedEditingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.ranges'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        assert response['ranges'][0]['start']['line'] == 0
-        assert response['ranges'][0]['start']['character'] == 0
-        assert response['ranges'][0]['end']['line'] == 1
-        assert response['ranges'][0]['end']['character'] == 1
-        assert response['ranges'][1]['start']['line'] == 1
-        assert response['ranges'][1]['start']['character'] == 1
-        assert response['ranges'][1]['end']['line'] == 2
-        assert response['ranges'][1]['end']['character'] == 2
-        assert response['wordPattern'] == 'pattern'
-
-    def test_linked_editing_ranges_return_none(self):
-        response = self.client.lsp.send_request(
-            TEXT_DOCUMENT_LINKED_EDITING_RANGE,
-            LinkedEditingRangeParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response is None
+    assert capabilities.linked_editing_range_provider
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_linked_editing_ranges_return_ranges(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+        LinkedEditingRangeParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.ranges"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
+    assert response
+
+    assert response["ranges"][0]["start"]["line"] == 0
+    assert response["ranges"][0]["start"]["character"] == 0
+    assert response["ranges"][0]["end"]["line"] == 1
+    assert response["ranges"][0]["end"]["character"] == 1
+    assert response["ranges"][1]["start"]["line"] == 1
+    assert response["ranges"][1]["start"]["character"] == 1
+    assert response["ranges"][1]["end"]["line"] == 2
+    assert response["ranges"][1]["end"]["character"] == 2
+    assert response["wordPattern"] == "pattern"
+
+
+@ConfiguredLS.decorate()
+def test_linked_editing_ranges_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+        LinkedEditingRangeParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
+
+    assert response is None

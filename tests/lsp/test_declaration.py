@@ -14,26 +14,33 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import List, Optional, Union
 
 from pygls.lsp.methods import DECLARATION
-from pygls.lsp.types import (DeclarationOptions, DeclarationParams, Location, LocationLink,
-                             Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    DeclarationOptions,
+    DeclarationParams,
+    Location,
+    LocationLink,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestDeclaration(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(DECLARATION, DeclarationOptions())
-        def f(params: DeclarationParams) -> Optional[Union[Location, List[Location], List[LocationLink]]]:
+        @self.server.feature(DECLARATION, DeclarationOptions())
+        def f(
+            params: DeclarationParams,
+        ) -> Optional[Union[Location, List[Location], List[LocationLink]]]:
             location = Location(
-                uri='uri',
+                uri="uri",
                 range=Range(
                     start=Position(line=0, character=0),
                     end=Position(line=1, character=1),
@@ -41,7 +48,7 @@ class TestDeclaration(unittest.TestCase):
             )
 
             location_link = LocationLink(
-                target_uri='uri',
+                target_uri="uri",
                 target_range=Range(
                     start=Position(line=0, character=0),
                     end=Position(line=1, character=1),
@@ -56,93 +63,102 @@ class TestDeclaration(unittest.TestCase):
                 ),
             )
 
-            return {    # type: ignore
-                'file://return.location': location,
-                'file://return.location_list': [location],
-                'file://return.location_link_list': [location_link],
+            return {  # type: ignore
+                "file://return.location": location,
+                "file://return.location_list": [location],
+                "file://return.location_link_list": [location_link],
             }.get(params.text_document.uri, None)
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
+    assert capabilities.declaration_provider
 
-        assert capabilities.declaration_provider
 
-    def test_declaration_return_location(self):
-        response = self.client.lsp.send_request(
-            DECLARATION,
-            DeclarationParams(
-                text_document=TextDocumentIdentifier(uri='file://return.location'),
-                position=Position(line=0, character=0),
+@ConfiguredLS.decorate()
+def test_declaration_return_location(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DECLARATION,
+        DeclarationParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.location"
             ),
-        ).result(timeout=CALL_TIMEOUT)
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
-        assert response['uri'] == 'uri'
+    assert response["uri"] == "uri"
 
-        assert response['range']['start']['line'] == 0
-        assert response['range']['start']['character'] == 0
-        assert response['range']['end']['line'] == 1
-        assert response['range']['end']['character'] == 1
+    assert response["range"]["start"]["line"] == 0
+    assert response["range"]["start"]["character"] == 0
+    assert response["range"]["end"]["line"] == 1
+    assert response["range"]["end"]["character"] == 1
 
-    def test_declaration_return_location_list(self):
-        response = self.client.lsp.send_request(
-            DECLARATION,
-            DeclarationParams(
-                text_document=TextDocumentIdentifier(uri='file://return.location_list'),
-                position=Position(line=0, character=0),
+
+@ConfiguredLS.decorate()
+def test_declaration_return_location_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DECLARATION,
+        DeclarationParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.location_list"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
+
+    assert response[0]["uri"] == "uri"
+
+    assert response[0]["range"]["start"]["line"] == 0
+    assert response[0]["range"]["start"]["character"] == 0
+    assert response[0]["range"]["end"]["line"] == 1
+    assert response[0]["range"]["end"]["character"] == 1
+
+
+@ConfiguredLS.decorate()
+def test_declaration_return_location_link_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DECLARATION,
+        DeclarationParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.location_link_list"
             ),
-        ).result(timeout=CALL_TIMEOUT)
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
-        assert response[0]['uri'] == 'uri'
+    assert response[0]["targetUri"] == "uri"
 
-        assert response[0]['range']['start']['line'] == 0
-        assert response[0]['range']['start']['character'] == 0
-        assert response[0]['range']['end']['line'] == 1
-        assert response[0]['range']['end']['character'] == 1
+    assert response[0]["targetRange"]["start"]["line"] == 0
+    assert response[0]["targetRange"]["start"]["character"] == 0
+    assert response[0]["targetRange"]["end"]["line"] == 1
+    assert response[0]["targetRange"]["end"]["character"] == 1
 
-    def test_declaration_return_location_link_list(self):
-        response = self.client.lsp.send_request(
-            DECLARATION,
-            DeclarationParams(
-                text_document=TextDocumentIdentifier(uri='file://return.location_link_list'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
+    assert response[0]["targetSelectionRange"]["start"]["line"] == 0
+    assert response[0]["targetSelectionRange"]["start"]["character"] == 0
+    assert response[0]["targetSelectionRange"]["end"]["line"] == 2
+    assert response[0]["targetSelectionRange"]["end"]["character"] == 2
 
-        assert response[0]['targetUri'] == 'uri'
-
-        assert response[0]['targetRange']['start']['line'] == 0
-        assert response[0]['targetRange']['start']['character'] == 0
-        assert response[0]['targetRange']['end']['line'] == 1
-        assert response[0]['targetRange']['end']['character'] == 1
-
-        assert response[0]['targetSelectionRange']['start']['line'] == 0
-        assert response[0]['targetSelectionRange']['start']['character'] == 0
-        assert response[0]['targetSelectionRange']['end']['line'] == 2
-        assert response[0]['targetSelectionRange']['end']['character'] == 2
-
-        assert response[0]['originSelectionRange']['start']['line'] == 0
-        assert response[0]['originSelectionRange']['start']['character'] == 0
-        assert response[0]['originSelectionRange']['end']['line'] == 3
-        assert response[0]['originSelectionRange']['end']['character'] == 3
-
-    def test_declaration_return_none(self):
-        response = self.client.lsp.send_request(
-            DECLARATION,
-            DeclarationParams(
-                text_document=TextDocumentIdentifier(uri='file://return.none'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response is None
+    assert response[0]["originSelectionRange"]["start"]["line"] == 0
+    assert response[0]["originSelectionRange"]["start"]["character"] == 0
+    assert response[0]["originSelectionRange"]["end"]["line"] == 3
+    assert response[0]["originSelectionRange"]["end"]["character"] == 3
 
 
-if __name__ == '__main__':
-    unittest.main()
+@ConfiguredLS.decorate()
+def test_declaration_return_none(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        DECLARATION,
+        DeclarationParams(
+            text_document=TextDocumentIdentifier(uri="file://return.none"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
+    assert response is None

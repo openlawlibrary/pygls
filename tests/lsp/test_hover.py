@@ -14,23 +14,30 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import unittest
+
 from typing import Optional
 
 from pygls.lsp.methods import HOVER
-from pygls.lsp.types import (Hover, HoverOptions, HoverParams, MarkedString, MarkupContent,
-                             MarkupKind, Position, Range, TextDocumentIdentifier)
+from pygls.lsp.types import (
+    Hover,
+    HoverOptions,
+    HoverParams,
+    MarkedString,
+    MarkupContent,
+    MarkupKind,
+    Position,
+    Range,
+    TextDocumentIdentifier,
+)
 
-from ..conftest import CALL_TIMEOUT, ClientServer
+from ..conftest import ClientServer
 
 
-class TestHover(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.client_server = ClientServer()
-        cls.client, cls.server = cls.client_server
+class ConfiguredLS(ClientServer):
+    def __init__(self):
+        super().__init__()
 
-        @cls.server.feature(
+        @self.server.feature(
             HOVER,
             HoverOptions(),
         )
@@ -41,102 +48,106 @@ class TestHover(unittest.TestCase):
             )
 
             return {
-                'file://return.marked_string': Hover(
+                "file://return.marked_string": Hover(
                     range=range,
                     contents=MarkedString(
-                        language='language',
-                        value='value',
+                        language="language",
+                        value="value",
                     ),
                 ),
-                'file://return.marked_string_list': Hover(
+                "file://return.marked_string_list": Hover(
                     range=range,
                     contents=[
                         MarkedString(
-                            language='language',
-                            value='value',
+                            language="language",
+                            value="value",
                         ),
-                        'str type'
+                        "str type",
                     ],
                 ),
-                'file://return.markup_content': Hover(
+                "file://return.markup_content": Hover(
                     range=range,
                     contents=MarkupContent(
-                        kind=MarkupKind.Markdown,
-                        value='value'
-                    ),
+                        kind=MarkupKind.Markdown, value="value"),
                 ),
             }.get(params.text_document.uri, None)
 
-        cls.client_server.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.client_server.stop()
+@ConfiguredLS.decorate()
+def test_capabilities(client_server):
+    _, server = client_server
+    capabilities = server.server_capabilities
 
-    def test_capabilities(self):
-        capabilities = self.server.server_capabilities
+    assert capabilities.hover_provider
 
-        assert capabilities.hover_provider
 
-    def test_hover_return_marked_string(self):
-        response = self.client.lsp.send_request(
-            HOVER,
-            HoverParams(
-                text_document=TextDocumentIdentifier(uri='file://return.marked_string'),
-                position=Position(line=0, character=0),
+@ConfiguredLS.decorate()
+def test_hover_return_marked_string(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        HOVER,
+        HoverParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.marked_string"),
+            position=Position(line=0, character=0),
+        ),
+    ).result()
+
+    assert response
+
+    assert response["contents"]["language"] == "language"
+    assert response["contents"]["value"] == "value"
+
+    assert response["range"]["start"]["line"] == 0
+    assert response["range"]["start"]["character"] == 0
+    assert response["range"]["end"]["line"] == 1
+    assert response["range"]["end"]["character"] == 1
+
+
+@ConfiguredLS.decorate()
+def test_hover_return_marked_string_list(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        HOVER,
+        HoverParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.marked_string_list"
             ),
-        ).result(timeout=CALL_TIMEOUT)
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
-        assert response
+    assert response
 
-        assert response['contents']['language'] == 'language'
-        assert response['contents']['value'] == 'value'
+    assert response["contents"][0]["language"] == "language"
+    assert response["contents"][0]["value"] == "value"
+    assert response["contents"][1] == "str type"
 
-        assert response['range']['start']['line'] == 0
-        assert response['range']['start']['character'] == 0
-        assert response['range']['end']['line'] == 1
-        assert response['range']['end']['character'] == 1
+    assert response["range"]["start"]["line"] == 0
+    assert response["range"]["start"]["character"] == 0
+    assert response["range"]["end"]["line"] == 1
+    assert response["range"]["end"]["character"] == 1
 
-    def test_hover_return_marked_string_list(self):
-        response = self.client.lsp.send_request(
-            HOVER,
-            HoverParams(
-                text_document=TextDocumentIdentifier(uri='file://return.marked_string_list'),
-                position=Position(line=0, character=0),
+
+@ConfiguredLS.decorate()
+def test_hover_return_markup_content(client_server):
+    client, _ = client_server
+    response = client.lsp.send_request(
+        HOVER,
+        HoverParams(
+            text_document=TextDocumentIdentifier(
+                uri="file://return.markup_content"
             ),
-        ).result(timeout=CALL_TIMEOUT)
+            position=Position(line=0, character=0),
+        ),
+    ).result()
 
-        assert response
+    assert response
 
-        assert response['contents'][0]['language'] == 'language'
-        assert response['contents'][0]['value'] == 'value'
-        assert response['contents'][1] == 'str type'
+    assert response["contents"]["kind"] == MarkupKind.Markdown
+    assert response["contents"]["value"] == "value"
 
-        assert response['range']['start']['line'] == 0
-        assert response['range']['start']['character'] == 0
-        assert response['range']['end']['line'] == 1
-        assert response['range']['end']['character'] == 1
-
-    def test_hover_return_markup_content(self):
-        response = self.client.lsp.send_request(
-            HOVER,
-            HoverParams(
-                text_document=TextDocumentIdentifier(uri='file://return.markup_content'),
-                position=Position(line=0, character=0),
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response
-
-        assert response['contents']['kind'] == MarkupKind.Markdown
-        assert response['contents']['value'] == 'value'
-
-        assert response['range']['start']['line'] == 0
-        assert response['range']['start']['character'] == 0
-        assert response['range']['end']['line'] == 1
-        assert response['range']['end']['character'] == 1
-
-
-if __name__ == '__main__':
-    unittest.main()
-
+    assert response["range"]["start"]["line"] == 0
+    assert response["range"]["start"]["character"] == 0
+    assert response["range"]["end"]["line"] == 1
+    assert response["range"]["end"]["character"] == 1

@@ -20,7 +20,7 @@ import io
 import logging
 import os
 import re
-from typing import List, Pattern
+from typing import List, Optional, Pattern
 
 from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
                              TextDocumentItem, TextDocumentSyncKind,
@@ -160,11 +160,19 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
 
 class Document(object):
 
-    def __init__(self, uri, source=None, version=None, local=True,
-                 sync_kind=TextDocumentSyncKind.INCREMENTAL):
+    def __init__(
+        self,
+        uri: str,
+        source: Optional[str] = None,
+        version: Optional[NumType] = None,
+        language_id: Optional[str] = None,
+        local: bool = True,
+        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.INCREMENTAL
+    ):
         self.uri = uri
         self.version = version
         self.path = to_fs_path(uri)
+        self.language_id = language_id
         self.filename = os.path.basename(self.path)
 
         self._local = local
@@ -333,12 +341,20 @@ class Workspace(object):
             for folder in workspace_folders:
                 self.add_folder(folder)
 
-    def _create_document(self,
-                         doc_uri: str,
-                         source: str = None,
-                         version: NumType = None) -> Document:
-        return Document(doc_uri, source=source, version=version,
-                        sync_kind=self._sync_kind)
+    def _create_document(
+        self,
+        doc_uri: str,
+        source: Optional[str] = None,
+        version: Optional[NumType] = None,
+        language_id: Optional[str] = None,
+    ) -> Document:
+        return Document(
+            doc_uri,
+            source=source,
+            version=version,
+            language_id=language_id,
+            sync_kind=self._sync_kind
+        )
 
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
@@ -372,7 +388,8 @@ class Workspace(object):
         self._docs[doc_uri] = self._create_document(
             doc_uri,
             source=text_document.text,
-            version=text_document.version
+            version=text_document.version,
+            language_id=text_document.language_id,
         )
 
     def remove_document(self, doc_uri: str):

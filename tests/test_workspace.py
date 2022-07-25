@@ -23,13 +23,18 @@ from pygls.lsp.types import TextDocumentItem, WorkspaceFolder
 from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)
-DOC_TEXT = '''test'''
-DOC = TextDocumentItem(uri=DOC_URI, language_id='plaintext', version=0, text=DOC_TEXT)
+DOC_TEXT = """test"""
+DOC = TextDocumentItem(
+    uri=DOC_URI,
+    language_id="plaintext",
+    version=0,
+    text=DOC_TEXT
+)
 
 
 def test_add_folder(workspace):
     dir_uri = os.path.dirname(DOC_URI)
-    dir_name = 'test'
+    dir_name = "test"
     workspace.add_folder(WorkspaceFolder(uri=dir_uri, name=dir_name))
     assert workspace.folders[dir_uri].name == dir_name
 
@@ -54,7 +59,7 @@ def test_put_document(workspace):
 
 def test_remove_folder(workspace):
     dir_uri = os.path.dirname(DOC_URI)
-    dir_name = 'test'
+    dir_name = "test"
     workspace.add_folder(WorkspaceFolder(uri=dir_uri, name=dir_name))
     workspace.remove_folder(dir_uri)
 
@@ -69,10 +74,10 @@ def test_remove_document(workspace):
 
 
 def test_workspace_folders():
-    wf1 = WorkspaceFolder(uri='/ws/f1', name='ws1')
-    wf2 = WorkspaceFolder(uri='/ws/f2', name='ws2')
+    wf1 = WorkspaceFolder(uri="/ws/f1", name="ws1")
+    wf2 = WorkspaceFolder(uri="/ws/f2", name="ws2")
 
-    workspace = Workspace('/ws', workspace_folders=[wf1, wf2])
+    workspace = Workspace("/ws", workspace_folders=[wf1, wf2])
 
-    assert workspace.folders['/ws/f1'] is wf1
-    assert workspace.folders['/ws/f2'] is wf2
+    assert workspace.folders["/ws/f1"] is wf1
+    assert workspace.folders["/ws/f2"] is wf2
