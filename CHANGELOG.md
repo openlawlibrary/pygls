@@ -6,14 +6,15 @@ The format is based on [Keep a Changelog][keepachangelog],
 and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
-
 ### Added
-
 ### Changed
-
 ### Fixed
 
+## [0.12.1] - 01/08/2022
+### Changed
 - `Document` objects now expose a text document's `language_id`
+- Various Pyodide improvements
+- Improved tests for more reliable CI
 
 ## [0.12] - 04/07/2022
 
