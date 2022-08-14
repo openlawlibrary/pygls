@@ -25,7 +25,7 @@ from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEA
                              ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
 from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
                               ThreadDecoratorError, ValidationError)
-from pygls.lsp import get_method_registration_options_type, is_instance
+from pygls.lsp import get_method_options_type, is_instance
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ class FeatureManager:
             self._features[feature_name] = wrapped
 
             if options:
-                options_type = get_method_registration_options_type(feature_name)
+                options_type = get_method_options_type(feature_name)
                 if options_type and not is_instance(options, options_type):
                     raise TypeError(
                         (f'Options of method "{feature_name}"'
