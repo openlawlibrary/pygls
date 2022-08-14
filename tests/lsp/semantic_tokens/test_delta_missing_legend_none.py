@@ -16,12 +16,12 @@
 ############################################################################
 from typing import Optional, Union
 
-from pygls.lsp.types import (
+from lsprotocol.types import (
     SemanticTokens,
     SemanticTokensDeltaParams,
     SemanticTokensPartialResult,
 )
-from pygls.lsp.methods import (
+from lsprotocol.types import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
 )
 

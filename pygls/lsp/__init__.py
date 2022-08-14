@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import Any, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
-import attrs
 from lsprotocol.types import (
     ALL_TYPES_MAP,
     METHOD_TO_TYPES,
@@ -24,16 +23,20 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
     SemanticTokensLegend,
-    SemanticTokensRegistrationOptions
+    SemanticTokensRegistrationOptions,
+    ShowDocumentResult
 )
 from typeguard import check_type
 
 from pygls.exceptions import MethodTypeNotRegisteredError
 
+ConfigCallbackType = Callable[[List[Any]], None]
+ShowDocumentCallbackType = Callable[[ShowDocumentResult], None]
+
 METHOD_TO_OPTIONS = {
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL:  Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA:  Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE:  Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
 }
 
 
@@ -88,6 +91,7 @@ def get_method_options_type(
         raise MethodTypeNotRegisteredError(method_name)
 
     return options_type
+
 
 def get_method_params_type(method_name, lsp_methods_map=METHOD_TO_TYPES):
     try:

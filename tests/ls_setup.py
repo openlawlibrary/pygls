@@ -20,10 +20,13 @@ import os
 import threading
 
 import pytest
-from pygls.lsp.methods import EXIT, INITIALIZE, SHUTDOWN
-from pygls.lsp.types import ClientCapabilities, InitializeParams
-from pygls.protocol import deserialize_message
-
+from lsprotocol.types import (
+    EXIT,
+    INITIALIZE,
+    SHUTDOWN,
+    ClientCapabilities,
+    InitializeParams,
+)
 from pygls.server import LanguageServer
 
 
@@ -60,8 +63,9 @@ class PyodideTestTransportAdapter:
         ...
 
     def write(self, data):
+        object_hook = self.dest.lsp._deserialize_message
         self.dest.lsp._procedure_handler(
-            json.loads(data, object_hook=deserialize_message)
+            json.loads(data, object_hook=object_hook)
         )
 
 
@@ -104,7 +108,7 @@ class PyodideClientServer:
             )
         ).result(timeout=CALL_TIMEOUT)
 
-        assert 'capabilities' in response
+        assert response.capabilities is not None
 
     def __iter__(self):
         yield self.client
@@ -121,6 +125,7 @@ class NativeClientServer:
         # Setup Server
         self.server = LanguageServer()
         self.server_thread = threading.Thread(
+            name='Server Thread',
             target=self.server.start_io,
             args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb")),
         )
@@ -129,6 +134,7 @@ class NativeClientServer:
         # Setup client
         self.client = LanguageServer(asyncio.new_event_loop())
         self.client_thread = threading.Thread(
+            name='Client Thread',
             target=self.client.start_io,
             args=(os.fdopen(scr, "rb"), os.fdopen(csw, "wb")),
         )
@@ -174,7 +180,7 @@ class NativeClientServer:
                 capabilities=ClientCapabilities()
             ),
         ).result(timeout=timeout)
-        assert "capabilities" in response
+        assert response.capabilities is not None
 
     def __iter__(self):
         yield self.client

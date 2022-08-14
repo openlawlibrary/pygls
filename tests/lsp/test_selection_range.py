@@ -16,8 +16,8 @@
 ############################################################################
 from typing import List, Optional
 
-from pygls.lsp.methods import SELECTION_RANGE
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_SELECTION_RANGE
+from lsprotocol.types import (
     Position,
     Range,
     SelectionRange,
@@ -34,7 +34,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            SELECTION_RANGE,
+            TEXT_DOCUMENT_SELECTION_RANGE,
             SelectionRangeOptions(),
         )
         def f(params: SelectionRangeParams) -> Optional[List[SelectionRange]]:
@@ -71,9 +71,9 @@ def test_capabilities(client_server):
 def test_selection_range_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        SELECTION_RANGE,
+        TEXT_DOCUMENT_SELECTION_RANGE,
         SelectionRangeParams(
-            query="query",
+            # query="query",
             text_document=TextDocumentIdentifier(uri="file://return.list"),
             positions=[Position(line=0, character=0)],
         ),
@@ -82,26 +82,26 @@ def test_selection_range_return_list(client_server):
     assert response
 
     root = response[0]
-    assert root["range"]["start"]["line"] == 0
-    assert root["range"]["start"]["character"] == 0
-    assert root["range"]["end"]["line"] == 10
-    assert root["range"]["end"]["character"] == 10
-    assert "parent" not in root
+    assert root.range.start.line == 0
+    assert root.range.start.character == 0
+    assert root.range.end.line == 10
+    assert root.range.end.character == 10
+    assert root.parent is None
 
-    assert response[1]["range"]["start"]["line"] == 0
-    assert response[1]["range"]["start"]["character"] == 0
-    assert response[1]["range"]["end"]["line"] == 1
-    assert response[1]["range"]["end"]["character"] == 1
-    assert response[1]["parent"] == root
+    assert response[1].range.start.line == 0
+    assert response[1].range.start.character == 0
+    assert response[1].range.end.line == 1
+    assert response[1].range.end.character == 1
+    assert response[1].parent == root
 
 
 @ConfiguredLS.decorate()
 def test_selection_range_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        SELECTION_RANGE,
+        TEXT_DOCUMENT_SELECTION_RANGE,
         SelectionRangeParams(
-            query="query",
+            # query="query",
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             positions=[Position(line=0, character=0)],
         ),

@@ -17,8 +17,8 @@
 
 from typing import Optional
 
-from pygls.lsp.methods import TEXT_DOCUMENT_LINKED_EDITING_RANGE
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_LINKED_EDITING_RANGE
+from lsprotocol.types import (
     LinkedEditingRangeOptions,
     LinkedEditingRangeParams,
     LinkedEditingRanges,
@@ -81,15 +81,15 @@ def test_linked_editing_ranges_return_ranges(client_server):
 
     assert response
 
-    assert response["ranges"][0]["start"]["line"] == 0
-    assert response["ranges"][0]["start"]["character"] == 0
-    assert response["ranges"][0]["end"]["line"] == 1
-    assert response["ranges"][0]["end"]["character"] == 1
-    assert response["ranges"][1]["start"]["line"] == 1
-    assert response["ranges"][1]["start"]["character"] == 1
-    assert response["ranges"][1]["end"]["line"] == 2
-    assert response["ranges"][1]["end"]["character"] == 2
-    assert response["wordPattern"] == "pattern"
+    assert response.ranges[0].start.line == 0
+    assert response.ranges[0].start.character == 0
+    assert response.ranges[0].end.line == 1
+    assert response.ranges[0].end.character == 1
+    assert response.ranges[1].start.line == 1
+    assert response.ranges[1].start.character == 1
+    assert response.ranges[1].end.line == 2
+    assert response.ranges[1].end.character == 2
+    assert response.word_pattern == "pattern"
 
 
 @ConfiguredLS.decorate()

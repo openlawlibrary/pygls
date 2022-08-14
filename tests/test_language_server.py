@@ -20,12 +20,12 @@ from time import sleep
 import pytest
 
 from pygls import IS_PYODIDE
-from pygls.lsp.methods import (
+from lsprotocol.types import (
     INITIALIZE,
     TEXT_DOCUMENT_DID_OPEN,
     WORKSPACE_EXECUTE_COMMAND,
 )
-from pygls.lsp.types import (
+from lsprotocol.types import (
     ClientCapabilities,
     DidOpenTextDocumentParams,
     ExecuteCommandParams,
@@ -54,16 +54,16 @@ def test_bf_initialize(client_server):
 
     response = client.lsp.send_request(
         INITIALIZE,
-        {
-            "processId": process_id,
-            "rootUri": root_uri,
-            "capabilities": ClientCapabilities(),
-        },
+        InitializeParams(
+            process_id=process_id,
+            root_uri=root_uri,
+            capabilities=ClientCapabilities(),
+        ),
     ).result()
 
     assert server.process_id == process_id
     assert server.workspace.root_uri == root_uri
-    assert "capabilities" in response
+    assert response.capabilities is not None
 
 
 def test_bf_text_document_did_open(client_server):

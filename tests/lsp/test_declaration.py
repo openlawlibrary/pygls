@@ -17,8 +17,8 @@
 
 from typing import List, Optional, Union
 
-from pygls.lsp.methods import DECLARATION
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_DECLARATION
+from lsprotocol.types import (
     DeclarationOptions,
     DeclarationParams,
     Location,
@@ -35,7 +35,7 @@ class ConfiguredLS(ClientServer):
     def __init__(self):
         super().__init__()
 
-        @self.server.feature(DECLARATION, DeclarationOptions())
+        @self.server.feature(TEXT_DOCUMENT_DECLARATION, DeclarationOptions())
         def f(
             params: DeclarationParams,
         ) -> Optional[Union[Location, List[Location], List[LocationLink]]]:
@@ -82,7 +82,7 @@ def test_capabilities(client_server):
 def test_declaration_return_location(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DECLARATION,
+        TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.location"
@@ -91,19 +91,19 @@ def test_declaration_return_location(client_server):
         ),
     ).result()
 
-    assert response["uri"] == "uri"
+    assert response.uri == "uri"
 
-    assert response["range"]["start"]["line"] == 0
-    assert response["range"]["start"]["character"] == 0
-    assert response["range"]["end"]["line"] == 1
-    assert response["range"]["end"]["character"] == 1
+    assert response.range.start.line == 0
+    assert response.range.start.character == 0
+    assert response.range.end.line == 1
+    assert response.range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_declaration_return_location_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DECLARATION,
+        TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.location_list"),
@@ -111,19 +111,19 @@ def test_declaration_return_location_list(client_server):
         ),
     ).result()
 
-    assert response[0]["uri"] == "uri"
+    assert response[0].uri == "uri"
 
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 1
-    assert response[0]["range"]["end"]["character"] == 1
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 1
+    assert response[0].range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_declaration_return_location_link_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DECLARATION,
+        TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.location_link_list"
@@ -132,29 +132,29 @@ def test_declaration_return_location_link_list(client_server):
         ),
     ).result()
 
-    assert response[0]["targetUri"] == "uri"
+    assert response[0].target_uri == "uri"
 
-    assert response[0]["targetRange"]["start"]["line"] == 0
-    assert response[0]["targetRange"]["start"]["character"] == 0
-    assert response[0]["targetRange"]["end"]["line"] == 1
-    assert response[0]["targetRange"]["end"]["character"] == 1
+    assert response[0].target_range.start.line == 0
+    assert response[0].target_range.start.character == 0
+    assert response[0].target_range.end.line == 1
+    assert response[0].target_range.end.character == 1
 
-    assert response[0]["targetSelectionRange"]["start"]["line"] == 0
-    assert response[0]["targetSelectionRange"]["start"]["character"] == 0
-    assert response[0]["targetSelectionRange"]["end"]["line"] == 2
-    assert response[0]["targetSelectionRange"]["end"]["character"] == 2
+    assert response[0].target_selection_range.start.line == 0
+    assert response[0].target_selection_range.start.character == 0
+    assert response[0].target_selection_range.end.line == 2
+    assert response[0].target_selection_range.end.character == 2
 
-    assert response[0]["originSelectionRange"]["start"]["line"] == 0
-    assert response[0]["originSelectionRange"]["start"]["character"] == 0
-    assert response[0]["originSelectionRange"]["end"]["line"] == 3
-    assert response[0]["originSelectionRange"]["end"]["character"] == 3
+    assert response[0].origin_selection_range.start.line == 0
+    assert response[0].origin_selection_range.start.character == 0
+    assert response[0].origin_selection_range.end.line == 3
+    assert response[0].origin_selection_range.end.character == 3
 
 
 @ConfiguredLS.decorate()
 def test_declaration_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DECLARATION,
+        TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             position=Position(line=0, character=0),

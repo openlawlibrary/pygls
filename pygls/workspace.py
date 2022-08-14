@@ -22,9 +22,11 @@ import os
 import re
 from typing import List, Optional, Pattern
 
-from pygls.lsp.types import (NumType, Position, Range, TextDocumentContentChangeEvent,
-                             TextDocumentItem, TextDocumentSyncKind,
-                             VersionedTextDocumentIdentifier, WorkspaceFolder)
+from lsprotocol.types import (
+    Position, Range, TextDocumentContentChangeEvent,
+    TextDocumentItem, TextDocumentSyncKind,
+    VersionedTextDocumentIdentifier, WorkspaceFolder
+)
 from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -164,10 +166,10 @@ class Document(object):
         self,
         uri: str,
         source: Optional[str] = None,
-        version: Optional[NumType] = None,
+        version: Optional[int] = None,
         language_id: Optional[str] = None,
         local: bool = True,
-        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.INCREMENTAL
+        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental
     ):
         self.uri = uri
         self.version = version
@@ -178,21 +180,24 @@ class Document(object):
         self._local = local
         self._source = source
 
-        self._is_sync_kind_full = sync_kind == TextDocumentSyncKind.FULL
-        self._is_sync_kind_incremental = sync_kind == TextDocumentSyncKind.INCREMENTAL
-        self._is_sync_kind_none = sync_kind == TextDocumentSyncKind.NONE
+        self._is_sync_kind_full = sync_kind == TextDocumentSyncKind.Full
+        self._is_sync_kind_incremental = sync_kind == TextDocumentSyncKind.Incremental
+        self._is_sync_kind_none = sync_kind == TextDocumentSyncKind.None_
 
     def __str__(self):
         return str(self.uri)
 
     def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply an INCREMENTAL text change to the document"""
+        """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
         change_range = change.range
 
-        (start_line, start_col), (end_line, end_col) = \
-            range_from_utf16(lines, change_range)  # type: ignore
+        range = range_from_utf16(lines, change_range)  # type: ignore
+        start_line = range.start.line
+        start_col = range.start.character
+        end_line = range.end.line
+        end_col = range.end.character
 
         # Check for an edit occurring at the very end of the file
         if start_line == len(lines):
@@ -223,11 +228,11 @@ class Document(object):
         self._source = new.getvalue()
 
     def _apply_full_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply a FULL text change to the document."""
+        """Apply a ``Full`` text change to the document."""
         self._source = change.text
 
     def _apply_none_change(self, change: TextDocumentContentChangeEvent) -> None:
-        """Apply a NONE text change to the document
+        """Apply a ``None`` text change to the document
 
         Currently does nothing, provided for consistency.
         """
@@ -236,14 +241,14 @@ class Document(object):
     def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind
 
-        Performs either INCREMENTAL, FULL, or NONE synchronization based on
+        Performs either ``Incremental``, ``Full``, or ``None`` synchronization based on
         both the Client request and server capabilities.
 
-        INCREMENTAL versus FULL synchronization:
-            Even if a server accepts INCREMENTAL SyncKinds, clients may request
-            a FULL SyncKind. In LSP 3.x, clients make this request by omitting
+        ``Incremental`` versus ``Full`` synchronization:
+            Even if a server accepts ``Incremantal`` SyncKinds, clients may request
+            a ``Full`` SyncKind. In LSP 3.x, clients make this request by omitting
             both Range and RangeLength from their request. Consequently, the
-            attributes "range" and "rangeLength" will be missing from FULL
+            attributes "range" and "rangeLength" will be missing from ``Full``
             content update client requests in the pygls Python library.
 
         NOTE: After adding pydantic models, "range" and "rangeLength" fileds
@@ -274,7 +279,8 @@ class Document(object):
     def offset_at_position(self, position: Position) -> int:
         """Return the character offset pointed at by the given position."""
         lines = self.lines
-        row, col = position_from_utf16(lines, position)
+        pos = position_from_utf16(lines, position)
+        row, col = pos.line, pos.character
         return col + sum(len(line) for line in lines[:row])
 
     @property
@@ -313,7 +319,8 @@ class Document(object):
         if position.line >= len(lines):
             return ''
 
-        row, col = position_from_utf16(lines, position)
+        pos = position_from_utf16(lines, position)
+        row, col = pos.line, pos.character
         line = lines[row]
         # Split word in two
         start = line[:col]
@@ -345,7 +352,7 @@ class Workspace(object):
         self,
         doc_uri: str,
         source: Optional[str] = None,
-        version: Optional[NumType] = None,
+        version: Optional[int] = None,
         language_id: Optional[str] = None,
     ) -> Document:
         return Document(

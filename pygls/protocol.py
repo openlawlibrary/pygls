@@ -27,7 +27,7 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import lru_cache, partial
 from itertools import zip_longest
-from typing import Any, Dict, Callable, List, Optional, Type, Union
+from typing import Any, Callable, List, Optional, Type, Union
 
 import attrs
 from cattrs.errors import ClassValidationError
@@ -35,35 +35,41 @@ from lsprotocol import converters
 
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.constants import ATTR_FEATURE_TYPE
-from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
-                              JsonRpcMethodNotFound, JsonRpcRequestCancelled)
-from pygls.feature_manager import (FeatureManager, assign_help_attrs, is_thread_function)
-from pygls.lsp import (ConfigCallbackType, ShowDocumentCallbackType)
-from lsprotocol.types import (CANCEL_REQUEST, CLIENT_REGISTER_CAPABILITY,
-                               CLIENT_UNREGISTER_CAPABILITY, EXIT, INITIALIZE, INITIALIZED,
-                               METHOD_TO_TYPES, LOG_TRACE, SET_TRACE, SHUTDOWN,
-                               TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_CLOSE,
-                               TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                               WINDOW_LOG_MESSAGE, WINDOW_SHOW_DOCUMENT, WINDOW_SHOW_MESSAGE,
-                               WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
-                               WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS, WORKSPACE_EXECUTE_COMMAND,
-                               WORKSPACE_SEMANTIC_TOKENS_REFRESH)
-from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditResponse, Diagnostic,
-                             DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
-                             DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-                             ExecuteCommandParams, InitializeParams, InitializeResult,
-                             LogMessageParams, MessageType, PublishDiagnosticsParams,
-                             RegistrationParams, ShowMessageParams, UnregistrationParams,
-                             WorkspaceEdit)
-from pygls.lsp.types.basic_structures import (ConfigCallbackType, LogTraceParams, SetTraceParams,
-                                              Trace)
-from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
-from pygls.lsp.types.workspace import ConfigurationParams
+from pygls.exceptions import (
+    JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
+    JsonRpcMethodNotFound, JsonRpcRequestCancelled
+)
+from pygls.feature_manager import FeatureManager, assign_help_attrs, is_thread_function
+from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
+from lsprotocol.types import (
+    CANCEL_REQUEST, CLIENT_REGISTER_CAPABILITY,
+    CLIENT_UNREGISTER_CAPABILITY, EXIT, INITIALIZE, INITIALIZED,
+    METHOD_TO_TYPES, LOG_TRACE, SET_TRACE, SHUTDOWN,
+    TEXT_DOCUMENT_DID_CHANGE, TEXT_DOCUMENT_DID_CLOSE,
+    TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
+    WINDOW_LOG_MESSAGE, WINDOW_SHOW_DOCUMENT, WINDOW_SHOW_MESSAGE,
+    WORKSPACE_APPLY_EDIT, WORKSPACE_CONFIGURATION,
+    WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS, WORKSPACE_EXECUTE_COMMAND,
+    WORKSPACE_SEMANTIC_TOKENS_REFRESH
+)
+from lsprotocol.types import (
+    ApplyWorkspaceEditParams,
+    ConfigurationParams, Diagnostic,
+    DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    ExecuteCommandParams, InitializeParams, InitializeResult,
+    LogMessageParams, LogTraceParams, MessageType, PublishDiagnosticsParams,
+    RegistrationParams, ResponseErrorMessage, SetTraceParams,
+    ShowDocumentParams, ShowMessageParams,
+    TraceValues, UnregistrationParams, WorkspaceApplyEditResponse,
+    WorkspaceEdit
+)
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 converter = converters.get_converter()
+
 
 def call_user_feature(base_func, method_name):
     """Wraps generic LSP features and calls user registered feature
@@ -113,6 +119,7 @@ class JsonRPCNotification:
     jsonrpc: str
     params: Any = attrs.field(converter=dict_to_object)
 
+
 @attrs.define
 class JsonRPCRequestMessage:
     """A class that represents a generic json rpc request message.
@@ -134,6 +141,7 @@ class JsonRPCResponseMessage:
     id: Union[int, str]
     jsonrpc: str
     result: Any = attrs.field(converter=dict_to_object)
+
 
 def default_serializer(o):
     """JSON serializer for complex objects that do not extend pydantic BaseModel class."""
@@ -648,7 +656,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace_folders = params.workspace_folders or []
         self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
 
-        self.trace = Trace.Off
+        self.trace = TraceValues.Off
 
         return InitializeResult(capabilities=self.server_capabilities)
 
@@ -684,7 +692,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Puts document to the workspace."""
         self.workspace.put_document(params.text_document)
 
-    @lsp_method(SET_TRACE_NOTIFICATION)
+    @lsp_method(SET_TRACE)
     def lsp_set_trace(self, params: SetTraceParams) -> None:
         """Changes server trace value."""
         self.trace = params.value
@@ -736,14 +744,14 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def log_trace(self, message: str, verbose: Optional[str] = None) -> None:
         """Sends trace notification to the client."""
-        if self.trace == Trace.Off:
+        if self.trace == TraceValues.Off:
             return
 
         params = LogTraceParams(message=message)
-        if verbose and self.trace == Trace.Verbose:
+        if verbose and self.trace == TraceValues.VERBOSE:
             params.verbose = verbose
 
-        self.notify(LOG_TRACE_NOTIFICATION, params)
+        self.notify(LOG_TRACE, params)
 
     def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]) -> None:
         """Sends diagnostic notification to the client."""

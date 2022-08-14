@@ -17,8 +17,8 @@
 
 from typing import List
 
-from pygls.lsp.methods import COLOR_PRESENTATION
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_COLOR_PRESENTATION
+from lsprotocol.types import (
     Color,
     ColorPresentation,
     ColorPresentationParams,
@@ -35,7 +35,7 @@ class ConfiguredLS(ClientServer):
     def __init__(self):
         super().__init__()
 
-        @self.server.feature(COLOR_PRESENTATION)
+        @self.server.feature(TEXT_DOCUMENT_COLOR_PRESENTATION)
         def f(params: ColorPresentationParams) -> List[ColorPresentation]:
             return [
                 ColorPresentation(
@@ -68,20 +68,10 @@ class ConfiguredLS(ClientServer):
 
 
 @ConfiguredLS.decorate()
-def test_capabilities():
-    """From specs:
-
-    This request has no special capabilities and registration options since
-    it is send as a resolve request for the textDocument/documentColor
-    request.
-    """
-
-
-@ConfiguredLS.decorate()
 def test_color_presentation(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        COLOR_PRESENTATION,
+        TEXT_DOCUMENT_COLOR_PRESENTATION,
         ColorPresentationParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
             color=Color(red=0.6, green=0.2, blue=0.3, alpha=0.5),
@@ -92,22 +82,22 @@ def test_color_presentation(client_server):
         ),
     ).result()
 
-    assert response[0]["label"] == "label1"
-    assert response[0]["textEdit"]["newText"] == "te"
+    assert response[0].label == "label1"
+    assert response[0].text_edit.new_text == "te"
 
-    assert response[0]["textEdit"]["range"]["start"]["line"] == 0
-    assert response[0]["textEdit"]["range"]["start"]["character"] == 0
-    assert response[0]["textEdit"]["range"]["end"]["line"] == 1
-    assert response[0]["textEdit"]["range"]["end"]["character"] == 1
+    assert response[0].text_edit.range.start.line == 0
+    assert response[0].text_edit.range.start.character == 0
+    assert response[0].text_edit.range.end.line == 1
+    assert response[0].text_edit.range.end.character == 1
 
-    range = response[0]["additionalTextEdits"][0]["range"]
-    assert range["start"]["line"] == 1
-    assert range["start"]["character"] == 1
-    assert range["end"]["line"] == 2
-    assert range["end"]["character"] == 2
+    range = response[0].additional_text_edits[0].range
+    assert range.start.line == 1
+    assert range.start.character == 1
+    assert range.end.line == 2
+    assert range.end.character == 2
 
-    range = response[0]["additionalTextEdits"][1]["range"]
-    assert range["start"]["line"] == 2
-    assert range["start"]["character"] == 2
-    assert range["end"]["line"] == 3
-    assert range["end"]["character"] == 3
+    range = response[0].additional_text_edits[1].range
+    assert range.start.line == 2
+    assert range.start.character == 2
+    assert range.end.line == 3
+    assert range.end.character == 3

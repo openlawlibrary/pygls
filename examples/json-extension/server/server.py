@@ -22,10 +22,10 @@ import uuid
 from json import JSONDecodeError
 from typing import Optional
 
-from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
-                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN, 
+from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
+                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
                                TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL)
-from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
+from lsprotocol.types import (CompletionItem, CompletionList, CompletionOptions,
                              CompletionParams, ConfigurationItem,
                              ConfigurationParams, Diagnostic,
                              DidChangeTextDocumentParams,
@@ -33,10 +33,9 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              DidOpenTextDocumentParams, MessageType, Position,
                              Range, Registration, RegistrationParams,
                              SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
-                             Unregistration, UnregistrationParams)
-from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
-                                              WorkDoneProgressEnd,
-                                              WorkDoneProgressReport)
+                             Unregistration, UnregistrationParams,
+                             WorkDoneProgressBegin, WorkDoneProgressEnd,
+                             WorkDoneProgressReport)
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -98,7 +97,7 @@ def _validate_json(source):
     return diagnostics
 
 
-@json_server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
+@json_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
 def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Returns completion items."""
     return CompletionList(
@@ -164,9 +163,9 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
     """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
     for details on how semantic tokens are encoded."""
-    
+
     TOKENS = re.compile('".*"(?=:)')
-    
+
     uri = params.text_document.uri
     doc = ls.workspace.get_document(uri)
 
@@ -184,7 +183,7 @@ def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
                 (lineno - last_line),
                 (start - last_start),
                 (end - start),
-                0, 
+                0,
                 0
             ]
 
@@ -220,7 +219,7 @@ async def register_completions(ls: JsonLanguageServer, *args):
     params = RegistrationParams(registrations=[
                 Registration(
                     id=str(uuid.uuid4()),
-                    method=COMPLETION,
+                    method=TEXT_DOCUMENT_COMPLETION,
                     register_options={"triggerCharacters": "[':']"})
              ])
     response = await ls.register_capability_async(params)
@@ -292,7 +291,7 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
 async def unregister_completions(ls: JsonLanguageServer, *args):
     """Unregister completions method on the client."""
     params = UnregistrationParams(unregisterations=[
-        Unregistration(id=str(uuid.uuid4()), method=COMPLETION)
+        Unregistration(id=str(uuid.uuid4()), method=TEXT_DOCUMENT_COMPLETION)
     ])
     response = await ls.unregister_capability_async(params)
     if response is None:
