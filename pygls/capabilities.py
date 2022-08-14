@@ -14,30 +14,56 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.lsp.methods import (CODE_ACTION, CODE_LENS, COMPLETION, DECLARATION, DEFINITION,
-                               DOCUMENT_COLOR, DOCUMENT_HIGHLIGHT, DOCUMENT_LINK, DOCUMENT_SYMBOL,
-                               FOLDING_RANGE, FORMATTING, HOVER, IMPLEMENTATION,
-                               ON_TYPE_FORMATTING, RANGE_FORMATTING, REFERENCES, RENAME,
-                               SELECTION_RANGE, SIGNATURE_HELP,
-                               TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE, TEXT_DOCUMENT_DID_CLOSE,
-                               TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_SAVE,
-                               TEXT_DOCUMENT_LINKED_EDITING_RANGE, TEXT_DOCUMENT_MONIKER,
-                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
-                               TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE, TEXT_DOCUMENT_WILL_SAVE,
-                               TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL, TYPE_DEFINITION,
-                               WORKSPACE_DID_CREATE_FILES, WORKSPACE_DID_DELETE_FILES,
-                               WORKSPACE_DID_RENAME_FILES, WORKSPACE_SYMBOL,
-                               WORKSPACE_WILL_CREATE_FILES, WORKSPACE_WILL_DELETE_FILES,
-                               WORKSPACE_WILL_RENAME_FILES)
-from pygls.lsp.types import (CodeLensOptions, CompletionOptions, DocumentLinkOptions,
-                             ExecuteCommandOptions, ImplementationOptions, SaveOptions,
-                             SemanticTokensOptions, SemanticTokensRegistrationOptions,
-                             SemanticTokensRequestsFull,
-                             ServerCapabilities, SignatureHelpOptions,
-                             TextDocumentSyncOptionsServerCapabilities, TypeDefinitionOptions,
-                             WorkspaceFileOperationsServerCapabilities,
-                             WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities)
+from functools import reduce
+from typing import Any
+
+from lsprotocol.types import (
+    TEXT_DOCUMENT_CODE_ACTION, TEXT_DOCUMENT_CODE_LENS,
+    TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DECLARATION,
+    TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DOCUMENT_COLOR,
+    TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT, TEXT_DOCUMENT_DOCUMENT_LINK,
+    TEXT_DOCUMENT_DOCUMENT_SYMBOL, TEXT_DOCUMENT_FOLDING_RANGE,
+    TEXT_DOCUMENT_FORMATTING, TEXT_DOCUMENT_HOVER,
+    TEXT_DOCUMENT_IMPLEMENTATION, TEXT_DOCUMENT_ON_TYPE_FORMATTING,
+    TEXT_DOCUMENT_RANGE_FORMATTING, TEXT_DOCUMENT_REFERENCES,
+    TEXT_DOCUMENT_RENAME, TEXT_DOCUMENT_SELECTION_RANGE,
+    TEXT_DOCUMENT_SIGNATURE_HELP, TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
+    TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
+    TEXT_DOCUMENT_DID_SAVE, TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+    TEXT_DOCUMENT_MONIKER, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA, TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+    TEXT_DOCUMENT_WILL_SAVE, TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
+    TEXT_DOCUMENT_TYPE_DEFINITION, WORKSPACE_DID_CREATE_FILES,
+    WORKSPACE_DID_DELETE_FILES, WORKSPACE_DID_RENAME_FILES,
+    WORKSPACE_SYMBOL, WORKSPACE_WILL_CREATE_FILES,
+    WORKSPACE_WILL_DELETE_FILES, WORKSPACE_WILL_RENAME_FILES
+)
+from lsprotocol.types import (
+    ClientCapabilities, CodeLensOptions, CompletionOptions,
+    DocumentLinkOptions, ExecuteCommandOptions, ImplementationOptions,
+    SaveOptions, SemanticTokensOptions, SemanticTokensRegistrationOptions,
+    SemanticTokensOptionsFullType1, ServerCapabilities,
+    ServerCapabilitiesWorkspaceType, SignatureHelpOptions,
+    TextDocumentSyncOptions, TypeDefinitionOptions,
+    FileOperationOptions, WorkspaceFoldersServerCapabilities
+)
+
+
+def get_capability(
+    client_capabilities: ClientCapabilities, field: str, default: Any = None
+) -> Any:
+    """Check if ClientCapabilities has some nested value without raising
+    AttributeError.
+    e.g. get_capability('text_document.synchronization.will_save')
+    """
+    try:
+        value = reduce(getattr, field.split("."), client_capabilities)
+    except AttributeError:
+        return default
+
+    # If we reach the desired leaf value but it's None, return the default.
+    value = default if value is None else value
+    return
 
 
 class ServerCapabilitiesBuilder:
@@ -71,13 +97,17 @@ class ServerCapabilitiesBuilder:
             or TEXT_DOCUMENT_DID_CLOSE in self.features
         )
         will_save = (
-            self.client_capabilities.get_capability(
-                'text_document.synchronization.will_save')
+            get_capability(
+                self.client_capabilities,
+                'text_document.synchronization.will_save'
+            )
             and TEXT_DOCUMENT_WILL_SAVE in self.features
         )
         will_save_wait_until = (
-            self.client_capabilities.get_capability(
-                'text_document.synchronization.will_save_wait_until')
+            get_capability(
+                self.client_capabilities,
+                'text_document.synchronization.will_save_wait_until'
+            )
             and TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
         )
         if TEXT_DOCUMENT_DID_SAVE in self.features:
@@ -89,7 +119,7 @@ class ServerCapabilitiesBuilder:
         else:
             save = False
 
-        self.server_cap.text_document_sync = TextDocumentSyncOptionsServerCapabilities(
+        self.server_cap.text_document_sync = TextDocumentSyncOptions(
             open_close=open_close,
             change=self.sync_kind,
             will_save=will_save,
@@ -100,115 +130,121 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_completion(self):
-        value = self._provider_options(COMPLETION, default=CompletionOptions())
+        value = self._provider_options(TEXT_DOCUMENT_COMPLETION, default=CompletionOptions())
         if value is not None:
             self.server_cap.completion_provider = value
         return self
 
     def _with_hover(self):
-        value = self._provider_options(HOVER)
+        value = self._provider_options(TEXT_DOCUMENT_HOVER)
         if value is not None:
             self.server_cap.hover_provider = value
         return self
 
     def _with_signature_help(self):
-        value = self._provider_options(SIGNATURE_HELP, default=SignatureHelpOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_SIGNATURE_HELP, default=SignatureHelpOptions()
+        )
         if value is not None:
             self.server_cap.signature_help_provider = value
         return self
 
     def _with_declaration(self):
-        value = self._provider_options(DECLARATION)
+        value = self._provider_options(TEXT_DOCUMENT_DECLARATION)
         if value is not None:
             self.server_cap.declaration_provider = value
         return self
 
     def _with_definition(self):
-        value = self._provider_options(DEFINITION)
+        value = self._provider_options(TEXT_DOCUMENT_DEFINITION)
         if value is not None:
             self.server_cap.definition_provider = value
         return self
 
     def _with_type_definition(self):
-        value = self._provider_options(TYPE_DEFINITION, default=TypeDefinitionOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_TYPE_DEFINITION, default=TypeDefinitionOptions()
+        )
         if value is not None:
             self.server_cap.type_definition_provider = value
         return self
 
     def _with_implementation(self):
-        value = self._provider_options(IMPLEMENTATION, default=ImplementationOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_IMPLEMENTATION, default=ImplementationOptions()
+        )
         if value is not None:
             self.server_cap.implementation_provider = value
         return self
 
     def _with_references(self):
-        value = self._provider_options(REFERENCES)
+        value = self._provider_options(TEXT_DOCUMENT_REFERENCES)
         if value is not None:
             self.server_cap.references_provider = value
         return self
 
     def _with_document_highlight(self):
-        value = self._provider_options(DOCUMENT_HIGHLIGHT)
+        value = self._provider_options(TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT)
         if value is not None:
             self.server_cap.document_highlight_provider = value
         return self
 
     def _with_document_symbol(self):
-        value = self._provider_options(DOCUMENT_SYMBOL)
+        value = self._provider_options(TEXT_DOCUMENT_DOCUMENT_SYMBOL)
         if value is not None:
             self.server_cap.document_symbol_provider = value
         return self
 
     def _with_code_action(self):
-        value = self._provider_options(CODE_ACTION)
+        value = self._provider_options(TEXT_DOCUMENT_CODE_ACTION)
         if value is not None:
             self.server_cap.code_action_provider = value
         return self
 
     def _with_code_lens(self):
-        value = self._provider_options(CODE_LENS, default=CodeLensOptions())
+        value = self._provider_options(TEXT_DOCUMENT_CODE_LENS, default=CodeLensOptions())
         if value is not None:
             self.server_cap.code_lens_provider = value
         return self
 
     def _with_document_link(self):
-        value = self._provider_options(DOCUMENT_LINK, default=DocumentLinkOptions())
+        value = self._provider_options(TEXT_DOCUMENT_DOCUMENT_LINK, default=DocumentLinkOptions())
         if value is not None:
             self.server_cap.document_link_provider = value
         return self
 
     def _with_color(self):
-        value = self._provider_options(DOCUMENT_COLOR)
+        value = self._provider_options(TEXT_DOCUMENT_DOCUMENT_COLOR)
         if value is not None:
             self.server_cap.color_provider = value
         return self
 
     def _with_document_formatting(self):
-        value = self._provider_options(FORMATTING)
+        value = self._provider_options(TEXT_DOCUMENT_FORMATTING)
         if value is not None:
             self.server_cap.document_formatting_provider = value
         return self
 
     def _with_document_range_formatting(self):
-        value = self._provider_options(RANGE_FORMATTING)
+        value = self._provider_options(TEXT_DOCUMENT_RANGE_FORMATTING)
         if value is not None:
             self.server_cap.document_range_formatting_provider = value
         return self
 
     def _with_document_on_type_formatting(self):
-        value = self._provider_options(ON_TYPE_FORMATTING)
+        value = self._provider_options(TEXT_DOCUMENT_ON_TYPE_FORMATTING)
         if value is not None:
             self.server_cap.document_on_type_formatting_provider = value
         return self
 
     def _with_rename(self):
-        value = self._provider_options(RENAME)
+        value = self._provider_options(TEXT_DOCUMENT_RENAME)
         if value is not None:
             self.server_cap.rename_provider = value
         return self
 
     def _with_folding_range(self):
-        value = self._provider_options(FOLDING_RANGE)
+        value = self._provider_options(TEXT_DOCUMENT_FOLDING_RANGE)
         if value is not None:
             self.server_cap.folding_range_provider = value
         return self
@@ -219,13 +255,13 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_selection_range(self):
-        value = self._provider_options(SELECTION_RANGE)
+        value = self._provider_options(TEXT_DOCUMENT_SELECTION_RANGE)
         if value is not None:
             self.server_cap.selection_range_provider = value
         return self
 
     def _with_call_hierarchy(self):
-        value = self._provider_options(TEXT_DOCUMENT_CALL_HIERARCHY_PREPARE)
+        value = self._provider_options(TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY)
         if value is not None:
             self.server_cap.call_hierarchy_provider = value
         return self
@@ -250,11 +286,10 @@ class ServerCapabilitiesBuilder:
             self.server_cap.semantic_tokens_provider = value
             return self
 
-        full_support = (
-            SemanticTokensRequestsFull(delta=True)
-            if TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA in self.features
-            else TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
-        )
+        if TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA in self.features:
+            full_support = SemanticTokensOptionsFullType1(delta=True)
+        else:
+            full_support = TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
 
         options = SemanticTokensOptions(
             legend=value,
@@ -287,10 +322,10 @@ class ServerCapabilitiesBuilder:
 
     def _with_workspace_capabilities(self):
         # File operations
-        file_operations = WorkspaceFileOperationsServerCapabilities()
+        file_operations = FileOperationOptions()
 
         will_create = (
-            self.client_capabilities.get_capability('workspace.fileOperations.willCreate')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.willCreate')
             if WORKSPACE_WILL_CREATE_FILES in self.features
             else None
         )
@@ -298,7 +333,7 @@ class ServerCapabilitiesBuilder:
             file_operations.will_create = will_create
 
         did_create = (
-            self.client_capabilities.get_capability('workspace.fileOperations.didCreate')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.didCreate')
             if WORKSPACE_DID_CREATE_FILES in self.features
             else None
         )
@@ -306,7 +341,7 @@ class ServerCapabilitiesBuilder:
             file_operations.did_create = did_create
 
         will_rename = (
-            self.client_capabilities.get_capability('workspace.fileOperations.willRename')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.willRename')
             if WORKSPACE_WILL_RENAME_FILES in self.features
             else None
         )
@@ -314,7 +349,7 @@ class ServerCapabilitiesBuilder:
             file_operations.will_rename = will_rename
 
         did_rename = (
-            self.client_capabilities.get_capability('workspace.fileOperations.didRename')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.didRename')
             if WORKSPACE_DID_RENAME_FILES in self.features
             else None
         )
@@ -322,7 +357,7 @@ class ServerCapabilitiesBuilder:
             file_operations.did_rename = did_rename
 
         will_delete = (
-            self.client_capabilities.get_capability('workspace.fileOperations.willDelete')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.willDelete')
             if WORKSPACE_WILL_DELETE_FILES in self.features
             else None
         )
@@ -330,14 +365,14 @@ class ServerCapabilitiesBuilder:
             file_operations.will_delete = will_delete
 
         did_delete = (
-            self.client_capabilities.get_capability('workspace.fileOperations.didDelete')
+            get_capability(self.client_capabilities, 'workspace.fileOperations.didDelete')
             if WORKSPACE_DID_DELETE_FILES in self.features
             else None
         )
         if did_delete is not None:
             file_operations.did_delete = did_delete
 
-        self.server_cap.workspace = WorkspaceServerCapabilities(
+        self.server_cap.workspace = ServerCapabilitiesWorkspaceType(
             workspace_folders=WorkspaceFoldersServerCapabilities(
                 supported=True,
                 change_notifications=True,

@@ -17,8 +17,8 @@
 
 from typing import List, Optional
 
-from pygls.lsp.methods import REFERENCES
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_REFERENCES
+from lsprotocol.types import (
     Location,
     Position,
     Range,
@@ -36,7 +36,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            REFERENCES,
+            TEXT_DOCUMENT_REFERENCES,
             ReferenceOptions(),
         )
         def f(params: ReferenceParams) -> Optional[List[Location]]:
@@ -66,7 +66,7 @@ def test_capabilities(client_server):
 def test_references_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        REFERENCES,
+        TEXT_DOCUMENT_REFERENCES,
         ReferenceParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
             position=Position(line=0, character=0),
@@ -78,19 +78,19 @@ def test_references_return_list(client_server):
 
     assert response
 
-    assert response[0]["uri"] == "uri"
+    assert response[0].uri == "uri"
 
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 1
-    assert response[0]["range"]["end"]["character"] == 1
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 1
+    assert response[0].range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_references_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        REFERENCES,
+        TEXT_DOCUMENT_REFERENCES,
         ReferenceParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             position=Position(line=0, character=0),

@@ -19,7 +19,7 @@ from typing import Optional
 
 import pytest
 from mock import Mock
-from pygls.lsp.types import (DidCloseTextDocumentParams,
+from lsprotocol.types import (DidCloseTextDocumentParams,
                              DidOpenTextDocumentParams, TextDocumentIdentifier,
                              TextDocumentItem)
 from pygls.workspace import Document, Workspace

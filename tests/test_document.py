@@ -18,10 +18,10 @@
 ############################################################################
 import re
 
-from pygls.lsp.types import (
+from lsprotocol.types import (
     Position,
     Range,
-    TextDocumentContentChangeEvent,
+    TextDocumentContentChangeEvent_Type1,
     TextDocumentSyncKind,
 )
 from pygls.workspace import (
@@ -36,7 +36,7 @@ from .conftest import DOC, DOC_URI
 
 def test_document_empty_edit():
     doc = Document("file:///uri", "")
-    change = TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=0, character=0),
             end=Position(line=0, character=0)
@@ -52,7 +52,7 @@ def test_document_end_of_file_edit():
     old = ["print 'a'\n", "print 'b'\n"]
     doc = Document("file:///uri", "".join(old))
 
-    change = TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=2, character=0),
             end=Position(line=2, character=0)
@@ -72,8 +72,8 @@ def test_document_end_of_file_edit():
 def test_document_full_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
     doc = Document("file:///uri", "".join(old),
-                   sync_kind=TextDocumentSyncKind.FULL)
-    change = TextDocumentContentChangeEvent(
+                   sync_kind=TextDocumentSyncKind.Full)
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=1, character=4),
             end=Position(line=2, character=11)
@@ -86,8 +86,8 @@ def test_document_full_edit():
     assert doc.lines == ["print a, b"]
 
     doc = Document("file:///uri", "".join(old),
-                   sync_kind=TextDocumentSyncKind.FULL)
-    change = TextDocumentContentChangeEvent(range=None, text="print a, b")
+                   sync_kind=TextDocumentSyncKind.Full)
+    change = TextDocumentContentChangeEvent_Type1(range=None, text="print a, b")
     doc.apply_change(change)
 
     assert doc.lines == ["print a, b"]
@@ -95,7 +95,7 @@ def test_document_full_edit():
 
 def test_document_line_edit():
     doc = Document("file:///uri", "itshelloworld")
-    change = TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=0, character=3),
             end=Position(line=0, character=8)
@@ -115,9 +115,9 @@ def test_document_lines(doc):
 def test_document_multiline_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
     doc = Document(
-        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.INCREMENTAL
+        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Incremental
     )
-    change = TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=1, character=4),
             end=Position(line=2, character=11)
@@ -130,9 +130,9 @@ def test_document_multiline_edit():
     assert doc.lines == ["def hello(a, b):\n", "    print a, b\n"]
 
     doc = Document(
-        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.INCREMENTAL
+        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Incremental
     )
-    change = TextDocumentContentChangeEvent(
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=1, character=4),
             end=Position(line=2, character=11)
@@ -147,8 +147,8 @@ def test_document_multiline_edit():
 def test_document_no_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
     doc = Document("file:///uri", "".join(old),
-                   sync_kind=TextDocumentSyncKind.NONE)
-    change = TextDocumentContentChangeEvent(
+                   sync_kind=TextDocumentSyncKind.None_)
+    change = TextDocumentContentChangeEvent_Type1(
         range=Range(
             start=Position(line=1, character=4),
             end=Position(line=2, character=11)
