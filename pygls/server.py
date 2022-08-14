@@ -30,7 +30,7 @@ from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, Con
                              WorkspaceEdit)
 from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
 from pygls.progress import Progress
-from pygls.protocol import LanguageServerProtocol, deserialize_message
+from pygls.protocol import LanguageServerProtocol
 from pygls.workspace import Workspace
 
 if not IS_PYODIDE:
@@ -278,7 +278,7 @@ class Server:
             self.lsp.transport = WebSocketTransportAdapter(websocket, self.loop)
             async for message in websocket:
                 self.lsp._procedure_handler(
-                    json.loads(message, object_hook=deserialize_message)
+                    json.loads(message, object_hook=self.lsp._deserialize_message)
                 )
 
         start_server = websockets.serve(connection_made, host, port)

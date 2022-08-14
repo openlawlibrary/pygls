@@ -40,11 +40,12 @@ class JsonRpcException(Exception):
         return hash((self.code, self.message))
 
     @staticmethod
-    def from_dict(error):
+    def from_error(error):
         for exc_class in _EXCEPTIONS:
-            if exc_class.supports_code(error['code']):
-                return exc_class(**error)
-        return JsonRpcException(**error)
+            if exc_class.supports_code(error.code):
+                return exc_class(code=error.code, message=error.message, data=error.data)
+
+        return JsonRpcException(code=error.code, message=error.message, data=error.data)
 
     @classmethod
     def supports_code(cls, code):
