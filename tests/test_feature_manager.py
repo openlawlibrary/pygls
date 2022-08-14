@@ -96,7 +96,7 @@ def test_register_feature_with_wrong_options(feature_manager):
         TypeError,
         match=(
             f'Options of method "{methods.COMPLETION}" should be instance of type '
-            "<class 'pygls.lsp.types.language_features.completion.CompletionOptions'>"
+            "<class 'lsprotocol.types.CompletionOptions'>"
         ),  # noqa
     ):
 
