@@ -164,6 +164,8 @@ class NativeClientServer:
 
     @retry_stalled_init_fix_hack()
     def initialize(self):
+
+        timeout = None if 'DISABLE_TIMEOUT' in os.environ else 1
         response = self.client.lsp.send_request(
             INITIALIZE,
             InitializeParams(
@@ -171,7 +173,7 @@ class NativeClientServer:
                 root_uri="file://",
                 capabilities=ClientCapabilities()
             ),
-        ).result(timeout=1)
+        ).result(timeout=timeout)
         assert "capabilities" in response
 
     def __iter__(self):
