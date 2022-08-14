@@ -36,32 +36,6 @@ METHOD_TO_OPTIONS = {
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE:  Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
 }
 
-@attrs.define
-class JsonRPCNotification:
-    """A class that represents json rpc notification message."""
-
-    jsonrpc: str
-    method: str
-    params: Any
-
-@attrs.define
-class JsonRPCRequestMessage:
-    """A class that represents json rpc request message."""
-
-    jsonrpc: str
-    id: Union[int, str]
-    method: str
-    params: Any
-
-
-@attrs.define
-class JsonRPCResponseMessage:
-    """A class that represents json rpc response message."""
-
-    jsonrpc: str
-    id: Union[int, str]
-    result: Union[Any, None] = attrs.field(default=None)
-
 
 def get_method_registration_options_type(
     method_name, lsp_methods_map=METHOD_TO_TYPES
