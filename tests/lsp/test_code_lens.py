@@ -16,8 +16,8 @@
 ############################################################################
 from typing import List, Optional
 
-from pygls.lsp.methods import CODE_LENS
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_CODE_LENS
+from lsprotocol.types import (
     CodeLens,
     CodeLensOptions,
     CodeLensParams,
@@ -35,7 +35,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            CODE_LENS,
+            TEXT_DOCUMENT_CODE_LENS,
             CodeLensOptions(resolve_provider=False),
         )
         def f(params: CodeLensParams) -> Optional[List[CodeLens]]:
@@ -70,26 +70,26 @@ def test_capabilities(client_server):
 def test_code_lens_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        CODE_LENS,
+        TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://return.list")
         ),
     ).result()
 
-    assert response[0]["data"] == "some data"
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 1
-    assert response[0]["range"]["end"]["character"] == 1
-    assert response[0]["command"]["title"] == "cmd1"
-    assert response[0]["command"]["command"] == "cmd1"
+    assert response[0].data == "some data"
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 1
+    assert response[0].range.end.character == 1
+    assert response[0].command.title == "cmd1"
+    assert response[0].command.command == "cmd1"
 
 
 @ConfiguredLS.decorate()
 def test_code_lens_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        CODE_LENS,
+        TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://return.none")
         ),

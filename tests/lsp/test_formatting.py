@@ -17,8 +17,8 @@
 
 from typing import List, Optional
 
-from pygls.lsp.methods import FORMATTING
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_FORMATTING
+from lsprotocol.types import (
     DocumentFormattingOptions,
     DocumentFormattingParams,
     FormattingOptions,
@@ -36,7 +36,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            FORMATTING,
+            TEXT_DOCUMENT_FORMATTING,
             DocumentFormattingOptions(),
         )
         def f(params: DocumentFormattingParams) -> Optional[List[TextEdit]]:
@@ -66,7 +66,7 @@ def test_capabilities(client_server):
 def test_document_formatting_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        FORMATTING,
+        TEXT_DOCUMENT_FORMATTING,
         DocumentFormattingParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
             options=FormattingOptions(
@@ -81,18 +81,18 @@ def test_document_formatting_return_list(client_server):
 
     assert response
 
-    assert response[0]["newText"] == "text"
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 1
-    assert response[0]["range"]["end"]["character"] == 1
+    assert response[0].new_text == "text"
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 1
+    assert response[0].range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_document_formatting_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        FORMATTING,
+        TEXT_DOCUMENT_FORMATTING,
         DocumentFormattingParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             options=FormattingOptions(

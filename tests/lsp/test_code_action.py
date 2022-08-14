@@ -16,8 +16,8 @@
 ############################################################################
 from typing import List, Optional, Union
 
-from pygls.lsp.methods import CODE_ACTION
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_CODE_ACTION
+from lsprotocol.types import (
     CodeAction,
     CodeActionContext,
     CodeActionKind,
@@ -38,7 +38,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            CODE_ACTION,
+            TEXT_DOCUMENT_CODE_ACTION,
             CodeActionOptions(code_action_kinds=[CodeActionKind.Refactor])
         )
         def f(
@@ -72,7 +72,7 @@ def test_capabilities(client_server):
 def test_code_action_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        CODE_ACTION,
+        TEXT_DOCUMENT_CODE_ACTION,
         CodeActionParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
             range=Range(
@@ -94,19 +94,19 @@ def test_code_action_return_list(client_server):
         ),
     ).result()
 
-    assert response[0]["title"] == "action1"
-    assert response[1]["title"] == "action2"
-    assert response[1]["kind"] == CodeActionKind.Refactor
-    assert response[2]["title"] == "cmd1"
-    assert response[2]["command"] == "cmd1"
-    assert response[2]["arguments"] == [1, "two"]
+    assert response[0].title == "action1"
+    assert response[1].title == "action2"
+    assert response[1].kind == CodeActionKind.Refactor
+    assert response[2].title == "cmd1"
+    assert response[2].command == "cmd1"
+    assert response[2].arguments == [1, "two"]
 
 
 @ConfiguredLS.decorate()
 def test_code_action_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        CODE_ACTION,
+        TEXT_DOCUMENT_CODE_ACTION,
         CodeActionParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             range=Range(

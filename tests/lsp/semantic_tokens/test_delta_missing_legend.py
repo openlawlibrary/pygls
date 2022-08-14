@@ -16,15 +16,15 @@
 ############################################################################
 from typing import Optional, Union
 
-from pygls.lsp.methods import (
+from lsprotocol.types import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
 )
-from pygls.lsp.types import (
+from lsprotocol.types import (
     SemanticTokens,
     SemanticTokensDeltaParams,
     SemanticTokensLegend,
     SemanticTokensPartialResult,
-    SemanticTokensRequestsFull,
+    SemanticTokensOptionsFullType1,
     TextDocumentIdentifier,
 )
 
@@ -55,9 +55,7 @@ def test_capabilities(client_server):
     capabilities = server.server_capabilities
 
     provider = capabilities.semantic_tokens_provider
-    assert provider.full == SemanticTokensRequestsFull(
-        delta=True
-    )
+    assert provider.full == SemanticTokensOptionsFullType1(delta=True)
     assert provider.legend.token_types == [
         "keyword",
         "operator",
@@ -81,7 +79,7 @@ def test_semantic_tokens_full_delta_return_tokens(client_server):
 
     assert response
 
-    assert response["data"] == [0, 0, 3, 0, 0]
+    assert response.data == [0, 0, 3, 0, 0]
 
 
 @ConfiguredLS.decorate()

@@ -17,8 +17,8 @@
 
 from typing import Optional
 
-from pygls.lsp.methods import RENAME
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_RENAME
+from lsprotocol.types import (
     CreateFile,
     CreateFileOptions,
     DeleteFile,
@@ -75,7 +75,7 @@ workspace_edit = {
             ],
         ),
         CreateFile(
-            kind=ResourceOperationKind.Create,
+            kind=ResourceOperationKind.Create.value,
             uri="create file",
             options=CreateFileOptions(
                 overwrite=True,
@@ -83,7 +83,7 @@ workspace_edit = {
             ),
         ),
         RenameFile(
-            kind=ResourceOperationKind.Rename,
+            kind=ResourceOperationKind.Rename.value,
             old_uri="rename old uri",
             new_uri="rename new uri",
             options=RenameFileOptions(
@@ -92,11 +92,11 @@ workspace_edit = {
             ),
         ),
         DeleteFile(
-            kind=ResourceOperationKind.Delete,
+            kind=ResourceOperationKind.Delete.value,
             uri="delete file",
             options=DeleteFileOptions(
                 recursive=True,
-                ignore_if_exists=True,
+                ignore_if_not_exists=True,
             ),
         ),
     ], }
@@ -107,7 +107,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            RENAME,
+            TEXT_DOCUMENT_RENAME,
             RenameOptions(prepare_provider=True),
         )
         def f(params: RenameParams) -> Optional[WorkspaceEdit]:
@@ -130,7 +130,7 @@ def test_capabilities(client_server):
 def test_rename_return_workspace_edit(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        RENAME,
+        TEXT_DOCUMENT_RENAME,
         RenameParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.workspace_edit"
@@ -142,55 +142,55 @@ def test_rename_return_workspace_edit(client_server):
 
     assert response
 
-    changes = response["changes"]["uri1"]
-    assert changes[0]["newText"] == "text1"
-    assert changes[0]["range"]["start"]["line"] == 0
-    assert changes[0]["range"]["start"]["character"] == 0
-    assert changes[0]["range"]["end"]["line"] == 1
-    assert changes[0]["range"]["end"]["character"] == 1
+    changes = response.changes["uri1"]
+    assert changes[0].new_text == "text1"
+    assert changes[0].range.start.line == 0
+    assert changes[0].range.start.character == 0
+    assert changes[0].range.end.line == 1
+    assert changes[0].range.end.character == 1
 
-    assert changes[1]["newText"] == "text2"
-    assert changes[1]["range"]["start"]["line"] == 1
-    assert changes[1]["range"]["start"]["character"] == 1
-    assert changes[1]["range"]["end"]["line"] == 2
-    assert changes[1]["range"]["end"]["character"] == 2
+    assert changes[1].new_text == "text2"
+    assert changes[1].range.start.line == 1
+    assert changes[1].range.start.character == 1
+    assert changes[1].range.end.line == 2
+    assert changes[1].range.end.character == 2
 
-    changes = response["documentChanges"]
-    assert changes[0]["textDocument"]["uri"] == "uri"
-    assert changes[0]["textDocument"]["version"] == 3
-    assert changes[0]["edits"][0]["newText"] == "text3"
-    assert changes[0]["edits"][0]["range"]["start"]["line"] == 2
+    changes = response.document_changes
+    assert changes[0].text_document.uri == "uri"
+    assert changes[0].text_document.version == 3
+    assert changes[0].edits[0].new_text == "text3"
+    assert changes[0].edits[0].range.start.line == 2
     assert (
-        changes[0]["edits"][0]["range"]["start"]["character"]
+        changes[0].edits[0].range.start.character
         == 2
     )
-    assert changes[0]["edits"][0]["range"]["end"]["line"] == 3
+    assert changes[0].edits[0].range.end.line == 3
     assert (
-        changes[0]["edits"][0]["range"]["end"]["character"] == 3
+        changes[0].edits[0].range.end.character == 3
     )
 
-    assert changes[1]["kind"] == ResourceOperationKind.Create
-    assert changes[1]["uri"] == "create file"
-    assert changes[1]["options"]["ignoreIfExists"]
-    assert changes[1]["options"]["overwrite"]
+    assert changes[1].kind == ResourceOperationKind.Create.value
+    assert changes[1].uri == "create file"
+    assert changes[1].options.ignore_if_exists
+    assert changes[1].options.overwrite
 
-    assert changes[2]["kind"] == ResourceOperationKind.Rename
-    assert changes[2]["newUri"] == "rename new uri"
-    assert changes[2]["oldUri"] == "rename old uri"
-    assert changes[2]["options"]["ignoreIfExists"]
-    assert changes[2]["options"]["overwrite"]
+    assert changes[2].kind == ResourceOperationKind.Rename.value
+    assert changes[2].new_uri == "rename new uri"
+    assert changes[2].old_uri == "rename old uri"
+    assert changes[2].options.ignore_if_exists
+    assert changes[2].options.overwrite
 
-    assert changes[3]["kind"] == ResourceOperationKind.Delete
-    assert changes[3]["uri"] == "delete file"
-    assert changes[3]["options"]["ignoreIfExists"]
-    assert changes[3]["options"]["recursive"]
+    assert changes[3].kind == ResourceOperationKind.Delete.value
+    assert changes[3].uri == "delete file"
+    assert changes[3].options.ignore_if_not_exists
+    assert changes[3].options.recursive
 
 
 @ConfiguredLS.decorate()
 def test_rename_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        RENAME,
+        TEXT_DOCUMENT_RENAME,
         RenameParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             position=Position(line=0, character=0),
