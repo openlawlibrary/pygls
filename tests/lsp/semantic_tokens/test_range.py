@@ -16,10 +16,10 @@
 ############################################################################
 from typing import Optional, Union
 
-from pygls.lsp.methods import (
+from lsprotocol.types import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
 )
-from pygls.lsp.types import (
+from lsprotocol.types import (
     Position,
     Range,
     SemanticTokens,
@@ -90,7 +90,7 @@ def test_semantic_tokens_range_return_tokens(client_server):
 
     assert response
 
-    assert response["data"] == [0, 0, 3, 0, 0]
+    assert response.data == [0, 0, 3, 0, 0]
 
 
 @ConfiguredLS.decorate()

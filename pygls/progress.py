@@ -2,11 +2,13 @@ import asyncio
 from concurrent.futures import Future
 from typing import Dict
 
-from pygls.lsp.methods import (PROGRESS_NOTIFICATION, WINDOW_WORK_DONE_PROGRESS_CANCEL,
-                               WINDOW_WORK_DONE_PROGRESS_CREATE)
-from pygls.lsp.types.basic_structures import (ProgressParams, ProgressToken, WorkDoneProgressBegin,
-                                              WorkDoneProgressEnd, WorkDoneProgressReport)
-from pygls.lsp.types.window import WorkDoneProgressCancelParams, WorkDoneProgressCreateParams
+from lsprotocol.types import (
+    PROGRESS, WINDOW_WORK_DONE_PROGRESS_CANCEL,
+    WINDOW_WORK_DONE_PROGRESS_CREATE,
+    ProgressParams, ProgressToken, WorkDoneProgressBegin,
+    WorkDoneProgressEnd, WorkDoneProgressReport,
+    WorkDoneProgressCancelParams, WorkDoneProgressCreateParams
+)
 from pygls.protocol import LanguageServerProtocol
 
 
@@ -70,7 +72,7 @@ class Progress:
 
     def begin(self, token: ProgressToken, value: WorkDoneProgressBegin) -> None:
         return self._lsp.notify(
-            PROGRESS_NOTIFICATION,
+            PROGRESS,
             ProgressParams(
                 token=token,
                 value=value
@@ -78,7 +80,7 @@ class Progress:
         )
 
     def report(self, token: ProgressToken, value: WorkDoneProgressReport) -> None:
-        self._lsp.notify(PROGRESS_NOTIFICATION, ProgressParams(token=token, value=value))
+        self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))
 
     def end(self, token: ProgressToken, value: WorkDoneProgressEnd) -> None:
-        self._lsp.notify(PROGRESS_NOTIFICATION, ProgressParams(token=token, value=value))
+        self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))
