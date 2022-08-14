@@ -17,8 +17,8 @@
 
 from typing import List, Union
 
-from pygls.lsp.methods import DOCUMENT_SYMBOL
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_DOCUMENT_SYMBOL
+from lsprotocol.types import (
     DocumentSymbol,
     DocumentSymbolOptions,
     DocumentSymbolParams,
@@ -38,7 +38,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            DOCUMENT_SYMBOL,
+            TEXT_DOCUMENT_DOCUMENT_SYMBOL,
             DocumentSymbolOptions(),
         )
         def f(
@@ -105,7 +105,7 @@ def test_capabilities(client_server):
 def test_document_symbol_return_symbol_information_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DOCUMENT_SYMBOL,
+        TEXT_DOCUMENT_DOCUMENT_SYMBOL,
         DocumentSymbolParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.symbol_information_list"
@@ -115,22 +115,22 @@ def test_document_symbol_return_symbol_information_list(client_server):
 
     assert response
 
-    assert response[0]["name"] == "symbol"
-    assert response[0]["kind"] == SymbolKind.Namespace
-    assert response[0]["location"]["uri"] == "uri"
-    assert response[0]["location"]["range"]["start"]["line"] == 0
-    assert response[0]["location"]["range"]["start"]["character"] == 0
-    assert response[0]["location"]["range"]["end"]["line"] == 1
-    assert response[0]["location"]["range"]["end"]["character"] == 1
-    assert response[0]["containerName"] == "container"
-    assert not response[0]["deprecated"]
+    assert response[0].name == "symbol"
+    assert response[0].kind == SymbolKind.Namespace
+    assert response[0].location.uri == "uri"
+    assert response[0].location.range.start.line == 0
+    assert response[0].location.range.start.character == 0
+    assert response[0].location.range.end.line == 1
+    assert response[0].location.range.end.character == 1
+    assert response[0].container_name == "container"
+    assert not response[0].deprecated
 
 
 @ConfiguredLS.decorate()
 def test_document_symbol_return_document_symbol_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DOCUMENT_SYMBOL,
+        TEXT_DOCUMENT_DOCUMENT_SYMBOL,
         DocumentSymbolParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.document_symbol_list"
@@ -140,29 +140,29 @@ def test_document_symbol_return_document_symbol_list(client_server):
 
     assert response
 
-    assert response[0]["name"] == "symbol"
-    assert response[0]["kind"] == SymbolKind.Object
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 10
-    assert response[0]["range"]["end"]["character"] == 10
-    assert response[0]["selectionRange"]["start"]["line"] == 0
-    assert response[0]["selectionRange"]["start"]["character"] == 0
-    assert response[0]["selectionRange"]["end"]["line"] == 10
-    assert response[0]["selectionRange"]["end"]["character"] == 10
-    assert response[0]["detail"] == "detail"
-    assert response[0]["deprecated"]
+    assert response[0].name == "symbol"
+    assert response[0].kind == SymbolKind.Object
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 10
+    assert response[0].range.end.character == 10
+    assert response[0].selection_range.start.line == 0
+    assert response[0].selection_range.start.character == 0
+    assert response[0].selection_range.end.line == 10
+    assert response[0].selection_range.end.character == 10
+    assert response[0].detail == "detail"
+    assert response[0].deprecated
 
-    assert response[0]["children"][0]["name"] == "inner_symbol"
-    assert response[0]["children"][0]["kind"] == SymbolKind.Number
-    assert response[0]["children"][0]["range"]["start"]["line"] == 0
-    assert response[0]["children"][0]["range"]["start"]["character"] == 0
-    assert response[0]["children"][0]["range"]["end"]["line"] == 1
-    assert response[0]["children"][0]["range"]["end"]["character"] == 1
-    range = response[0]["children"][0]["selectionRange"]
-    assert range["start"]["line"] == 0
-    assert range["start"]["character"] == 0
-    assert range["end"]["line"] == 1
-    assert range["end"]["character"] == 1
+    assert response[0].children[0].name == "inner_symbol"
+    assert response[0].children[0].kind == SymbolKind.Number
+    assert response[0].children[0].range.start.line == 0
+    assert response[0].children[0].range.start.character == 0
+    assert response[0].children[0].range.end.line == 1
+    assert response[0].children[0].range.end.character == 1
+    range = response[0].children[0].selection_range
+    assert range.start.line == 0
+    assert range.start.character == 0
+    assert range.end.line == 1
+    assert range.end.character == 1
 
-    assert "children" not in response[0]["children"][0]
+    assert response[0].children[0].children is None

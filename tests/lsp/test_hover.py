@@ -17,12 +17,12 @@
 
 from typing import Optional
 
-from pygls.lsp.methods import HOVER
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_HOVER
+from lsprotocol.types import (
     Hover,
     HoverOptions,
     HoverParams,
-    MarkedString,
+    MarkedString_Type1,
     MarkupContent,
     MarkupKind,
     Position,
@@ -38,7 +38,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            HOVER,
+            TEXT_DOCUMENT_HOVER,
             HoverOptions(),
         )
         def f(params: HoverParams) -> Optional[Hover]:
@@ -50,7 +50,7 @@ class ConfiguredLS(ClientServer):
             return {
                 "file://return.marked_string": Hover(
                     range=range,
-                    contents=MarkedString(
+                    contents=MarkedString_Type1(
                         language="language",
                         value="value",
                     ),
@@ -58,7 +58,7 @@ class ConfiguredLS(ClientServer):
                 "file://return.marked_string_list": Hover(
                     range=range,
                     contents=[
-                        MarkedString(
+                        MarkedString_Type1(
                             language="language",
                             value="value",
                         ),
@@ -85,7 +85,7 @@ def test_capabilities(client_server):
 def test_hover_return_marked_string(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        HOVER,
+        TEXT_DOCUMENT_HOVER,
         HoverParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.marked_string"),
@@ -95,20 +95,20 @@ def test_hover_return_marked_string(client_server):
 
     assert response
 
-    assert response["contents"]["language"] == "language"
-    assert response["contents"]["value"] == "value"
+    assert response.contents.language == "language"
+    assert response.contents.value == "value"
 
-    assert response["range"]["start"]["line"] == 0
-    assert response["range"]["start"]["character"] == 0
-    assert response["range"]["end"]["line"] == 1
-    assert response["range"]["end"]["character"] == 1
+    assert response.range.start.line == 0
+    assert response.range.start.character == 0
+    assert response.range.end.line == 1
+    assert response.range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_hover_return_marked_string_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        HOVER,
+        TEXT_DOCUMENT_HOVER,
         HoverParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.marked_string_list"
@@ -119,21 +119,21 @@ def test_hover_return_marked_string_list(client_server):
 
     assert response
 
-    assert response["contents"][0]["language"] == "language"
-    assert response["contents"][0]["value"] == "value"
-    assert response["contents"][1] == "str type"
+    assert response.contents[0].language == "language"
+    assert response.contents[0].value == "value"
+    assert response.contents[1] == "str type"
 
-    assert response["range"]["start"]["line"] == 0
-    assert response["range"]["start"]["character"] == 0
-    assert response["range"]["end"]["line"] == 1
-    assert response["range"]["end"]["character"] == 1
+    assert response.range.start.line == 0
+    assert response.range.start.character == 0
+    assert response.range.end.line == 1
+    assert response.range.end.character == 1
 
 
 @ConfiguredLS.decorate()
 def test_hover_return_markup_content(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        HOVER,
+        TEXT_DOCUMENT_HOVER,
         HoverParams(
             text_document=TextDocumentIdentifier(
                 uri="file://return.markup_content"
@@ -144,10 +144,10 @@ def test_hover_return_markup_content(client_server):
 
     assert response
 
-    assert response["contents"]["kind"] == MarkupKind.Markdown
-    assert response["contents"]["value"] == "value"
+    assert response.contents.kind == MarkupKind.Markdown
+    assert response.contents.value == "value"
 
-    assert response["range"]["start"]["line"] == 0
-    assert response["range"]["start"]["character"] == 0
-    assert response["range"]["end"]["line"] == 1
-    assert response["range"]["end"]["character"] == 1
+    assert response.range.start.line == 0
+    assert response.range.start.character == 0
+    assert response.range.end.line == 1
+    assert response.range.end.character == 1

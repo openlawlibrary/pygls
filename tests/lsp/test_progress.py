@@ -18,17 +18,17 @@
 from typing import List, Optional
 
 import time
-from pygls.lsp.methods import CODE_LENS, PROGRESS_NOTIFICATION
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_CODE_LENS, PROGRESS
+from lsprotocol.types import (
     CodeLens,
     CodeLensParams,
     CodeLensOptions,
+    ProgressParams,
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
     WorkDoneProgressEnd,
     WorkDoneProgressReport,
 )
-from pygls.lsp.types.basic_structures import ProgressParams
 from ..conftest import ClientServer
 
 
@@ -41,25 +41,25 @@ class ConfiguredLS(ClientServer):
         self.client.notifications: List[ProgressParams] = []
 
         @self.server.feature(
-            CODE_LENS,
+            TEXT_DOCUMENT_CODE_LENS,
             CodeLensOptions(resolve_provider=False,
-                            work_done_progress=PROGRESS_TOKEN),
+                            work_done_progress=True),
         )
         def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
             self.server.lsp.progress.begin(
                 PROGRESS_TOKEN, WorkDoneProgressBegin(
-                    title="starting", percentage=0)
+                    kind='begin', title="starting", percentage=0)
             )
             self.server.lsp.progress.report(
                 PROGRESS_TOKEN,
-                WorkDoneProgressReport(message="doing", percentage=50),
+                WorkDoneProgressReport(kind='report', message="doing", percentage=50),
             )
             self.server.lsp.progress.end(
-                PROGRESS_TOKEN, WorkDoneProgressEnd(message="done")
+                PROGRESS_TOKEN, WorkDoneProgressEnd(kind='end', message="done")
             )
             return None
 
-        @self.client.feature(PROGRESS_NOTIFICATION)
+        @self.client.feature(PROGRESS)
         def f2(params):
             self.client.notifications.append(params)
 
@@ -71,14 +71,14 @@ def test_capabilities(client_server):
 
     provider = capabilities.code_lens_provider
     assert provider
-    assert provider.work_done_progress == PROGRESS_TOKEN
+    assert provider.work_done_progress
 
 
 @ConfiguredLS.decorate()
 def test_progress_notifications(client_server):
     client, _ = client_server
     client.lsp.send_request(
-        CODE_LENS,
+        TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
             work_done_token=PROGRESS_TOKEN,

@@ -17,8 +17,8 @@
 
 from typing import List
 
-from pygls.lsp.methods import DOCUMENT_COLOR
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_DOCUMENT_COLOR
+from lsprotocol.types import (
     Color,
     ColorInformation,
     DocumentColorOptions,
@@ -36,7 +36,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            DOCUMENT_COLOR,
+            TEXT_DOCUMENT_DOCUMENT_COLOR,
             DocumentColorOptions(),
         )
         def f(params: DocumentColorParams) -> List[ColorInformation]:
@@ -63,19 +63,19 @@ def test_capabilities(client_server):
 def test_document_color(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        DOCUMENT_COLOR,
+        TEXT_DOCUMENT_DOCUMENT_COLOR,
         DocumentColorParams(
             text_document=TextDocumentIdentifier(uri="file://return.list")
         ),
     ).result()
 
     assert response
-    assert response[0]["color"]["red"] == 0.5
-    assert response[0]["color"]["green"] == 0.5
-    assert response[0]["color"]["blue"] == 0.5
-    assert response[0]["color"]["alpha"] == 0.5
+    assert response[0].color.red == 0.5
+    assert response[0].color.green == 0.5
+    assert response[0].color.blue == 0.5
+    assert response[0].color.alpha == 0.5
 
-    assert response[0]["range"]["start"]["line"] == 0
-    assert response[0]["range"]["start"]["character"] == 0
-    assert response[0]["range"]["end"]["line"] == 1
-    assert response[0]["range"]["end"]["character"] == 1
+    assert response[0].range.start.line == 0
+    assert response[0].range.start.character == 0
+    assert response[0].range.end.line == 1
+    assert response[0].range.end.character == 1

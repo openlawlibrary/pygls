@@ -21,9 +21,8 @@ import time
 import pytest
 
 from pygls.exceptions import JsonRpcInternalError, PyglsError, JsonRpcException
-from pygls.lsp.methods import WINDOW_SHOW_MESSAGE
+from lsprotocol.types import WINDOW_SHOW_MESSAGE, MessageType
 from pygls.server import LanguageServer
-from pygls.lsp.types import MessageType
 
 from ..conftest import ClientServer
 

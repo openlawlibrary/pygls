@@ -17,8 +17,8 @@
 
 from typing import List, Optional
 
-from pygls.lsp.methods import FOLDING_RANGE
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_FOLDING_RANGE
+from lsprotocol.types import (
     FoldingRange,
     FoldingRangeKind,
     FoldingRangeOptions,
@@ -34,7 +34,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            FOLDING_RANGE,
+            TEXT_DOCUMENT_FOLDING_RANGE,
             FoldingRangeOptions(),
         )
         def f(params: FoldingRangeParams) -> Optional[List[FoldingRange]]:
@@ -64,7 +64,7 @@ def test_capabilities(client_server):
 def test_folding_range_return_list(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        FOLDING_RANGE,
+        TEXT_DOCUMENT_FOLDING_RANGE,
         FoldingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
         ),
@@ -72,18 +72,18 @@ def test_folding_range_return_list(client_server):
 
     assert response
 
-    assert response[0]["startLine"] == 0
-    assert response[0]["endLine"] == 0
-    assert response[0]["startCharacter"] == 1
-    assert response[0]["endCharacter"] == 1
-    assert response[0]["kind"] == FoldingRangeKind.Comment
+    assert response[0].start_line == 0
+    assert response[0].end_line == 0
+    assert response[0].start_character == 1
+    assert response[0].end_character == 1
+    assert response[0].kind == FoldingRangeKind.Comment
 
 
 @ConfiguredLS.decorate()
 def test_folding_range_return_none(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        FOLDING_RANGE,
+        TEXT_DOCUMENT_FOLDING_RANGE,
         FoldingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
         ),
