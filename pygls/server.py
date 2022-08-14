@@ -24,12 +24,15 @@ from threading import Event
 from typing import Any, Callable, List, Optional, TypeVar, Union
 
 from pygls import IS_WIN, IS_PYODIDE
+from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
 from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
-from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
-                             ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
-                             ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
-                             WorkspaceEdit)
-from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
+from lsprotocol.types import (
+    ClientCapabilities,
+    ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
+    ServerCapabilities, ShowDocumentParams,
+    TextDocumentSyncKind, UnregistrationParams,
+    WorkspaceApplyEditResponse, WorkspaceEdit
+)
 from pygls.progress import Progress
 from pygls.protocol import LanguageServerProtocol
 from pygls.workspace import Workspace
@@ -151,9 +154,9 @@ class Server:
                                     `ThreadPoolExecutor`
 
         sync_kind(TextDocumentSyncKind): Text document synchronization option
-            - NONE(0): no synchronization
-            - FULL(1): replace whole text
-            - INCREMENTAL(2): replace text within a given range
+            - None(0): no synchronization
+            - Full(1): replace whole text
+            - Incremental(2): replace text within a given range
 
     Attributes:
         _max_workers(int): Number of workers for thread pool executor
@@ -167,7 +170,7 @@ class Server:
     """
 
     def __init__(self, protocol_cls, loop=None, max_workers=2,
-                 sync_kind=TextDocumentSyncKind.INCREMENTAL):
+                 sync_kind=TextDocumentSyncKind.Incremental):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError('Protocol class should be subclass of asyncio.Protocol')
 
@@ -342,7 +345,7 @@ class LanguageServer(Server):
         self.version = version
         super().__init__(protocol_cls, loop, max_workers)
 
-    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
+    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> WorkspaceApplyEditResponse:
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 

@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from pygls.lsp.methods import COMPLETION
-from pygls.lsp.types import (
+from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
+from lsprotocol.types import (
     CompletionItem,
     CompletionItemKind,
     CompletionList,
@@ -33,7 +33,7 @@ class ConfiguredLS(ClientServer):
         super().__init__()
 
         @self.server.feature(
-            COMPLETION,
+            TEXT_DOCUMENT_COMPLETION,
             CompletionOptions(
                 trigger_characters=[","],
                 all_commit_characters=[":"],
@@ -68,28 +68,28 @@ def test_capabilities(client_server):
 def test_completions(client_server):
     client, _ = client_server
     response = client.lsp.send_request(
-        COMPLETION,
+        TEXT_DOCUMENT_COMPLETION,
         CompletionParams(
             text_document=TextDocumentIdentifier(uri="file://test.test"),
             position=Position(line=0, character=0),
         ),
     ).result()
 
-    assert not response["isIncomplete"]
-    assert response["items"][0]["label"] == "test1"
-    assert response["items"][0]["kind"] == CompletionItemKind.Method
-    assert response["items"][0]["preselect"]
-    assert "deprecated" not in response["items"][0]
-    assert "tags" not in response["items"][0]
-    assert "detail" not in response["items"][0]
-    assert "documentation" not in response["items"][0]
-    assert "sort_text" not in response["items"][0]
-    assert "filter_text" not in response["items"][0]
-    assert "insert_text" not in response["items"][0]
-    assert "insert_text_format" not in response["items"][0]
-    assert "insert_text_mode" not in response["items"][0]
-    assert "text_edit" not in response["items"][0]
-    assert "additional_text_edits" not in response["items"][0]
-    assert "commit_characters" not in response["items"][0]
-    assert "command" not in response["items"][0]
-    assert "data" not in response["items"][0]
+    assert not response.is_incomplete
+    assert response.items[0].label == "test1"
+    assert response.items[0].kind == CompletionItemKind.Method
+    assert response.items[0].preselect
+    assert response.items[0].deprecated is None
+    assert response.items[0].tags is None
+    assert response.items[0].detail is None
+    assert response.items[0].documentation is None
+    assert response.items[0].sort_text is None
+    assert response.items[0].filter_text is None
+    assert response.items[0].insert_text is None
+    assert response.items[0].insert_text_format is None
+    assert response.items[0].insert_text_mode is None
+    assert response.items[0].text_edit is None
+    assert response.items[0].additional_text_edits is None
+    assert response.items[0].commit_characters is None
+    assert response.items[0].command is None
+    assert response.items[0].data is None
