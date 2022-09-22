@@ -282,7 +282,7 @@ class Server:
                     json.loads(message, object_hook=deserialize_message)
                 )
 
-        start_server = websockets.serve(connection_made, host, port)
+        start_server = websockets.serve(connection_made, host, port, loop=self.loop)
         self._server = start_server.ws_server
         self.loop.run_until_complete(start_server)
 

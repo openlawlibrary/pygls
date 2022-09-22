@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning][semver].
   Overrideable in `LanguageServer.report_server_error()`: https://github.com/openlawlibrary/pygls/pull/282
 ### Fixed
 - `_data_recevied()` JSONRPC message parsing errors now caught
+- Fix "Task attached to a different loop" error in `Server.start_ws` ([#268])
 
 ## [0.12.4] - 24/10/2022
 ### Fixed
