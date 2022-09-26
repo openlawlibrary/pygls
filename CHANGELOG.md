@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+## [0.12.2] - 26/09/2022
+### Fixed
+- Relaxed the Python version upper bound to `<4`
+[#266]: https://github.com/openlawlibrary/pygls/pulls/266
+
 ## [0.12.1] - 01/08/2022
 ### Changed
 - `Document` objects now expose a text document's `language_id`
