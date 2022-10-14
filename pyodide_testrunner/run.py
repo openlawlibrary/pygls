@@ -18,6 +18,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # Path to the root of the repo.
 REPO = pathlib.Path(__file__).parent.parent
+BROWSERS = {
+    "chrome": (webdriver.Chrome, webdriver.ChromeOptions),
+    "firefox": (webdriver.Firefox, webdriver.FirefoxOptions),
+}
 
 
 def build_wheel() -> str:
@@ -82,10 +86,12 @@ def main():
     print("Running tests...")
     try:
 
-        options = webdriver.ChromeOptions()
+        driver_cls, options_cls = BROWSERS[os.environ.get('BROWSER', 'chrome')]
+
+        options = options_cls()
         options.headless = 'CI' in os.environ
 
-        driver = webdriver.Chrome(options=options)
+        driver = driver_cls(options=options)
         driver.get(f'http://localhost:{port}?whl={whl}')
 
         wait = WebDriverWait(driver, 120)
