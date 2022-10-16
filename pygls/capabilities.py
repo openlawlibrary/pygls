@@ -62,8 +62,7 @@ def get_capability(
         return default
 
     # If we reach the desired leaf value but it's None, return the default.
-    value = default if value is None else value
-    return
+    return default if value is None else value
 
 
 class ServerCapabilitiesBuilder:
