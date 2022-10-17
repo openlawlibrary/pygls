@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+## [1.0.0alpha] - 17/10/2022
+### Changed
+🚧 Alpha Code (likely contains bugs) 🚧
+BREAKING CHANGE: Replaced `pydantic` with [`lsprotocol`](https://github.com/microsoft/lsprotocol)
+
 ## [0.12.2] - 26/09/2022
 ### Fixed
 - Relaxed the Python version upper bound to `<4`
