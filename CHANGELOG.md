@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Fixed
 - Require Pydantic 1.10.2 when Python is 3.11
 
+## [1.0.0alpha] - 17/10/2022
+### Changed
+🚧 Alpha Code (likely contains bugs) 🚧
+BREAKING CHANGE: Replaced `pydantic` with [`lsprotocol`](https://github.com/microsoft/lsprotocol)
+
 ## [0.12.2] - 26/09/2022
 ### Fixed
 - Relaxed the Python version upper bound to `<4`
