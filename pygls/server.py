@@ -320,14 +320,19 @@ class LanguageServer(Server):
     registered commands/features.
 
     Args:
+        name(str): Name of the server
+        version(str): Version of the server
         protocol_cls(LanguageServerProtocol): LSP or any subclass of it
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
     """
 
-    def __init__(self, loop=None, protocol_cls=LanguageServerProtocol, max_workers: int = 2):
+    def __init__(self, name: str = None, version: str = None, loop=None,
+                 protocol_cls=LanguageServerProtocol, max_workers: int = 2):
         if not issubclass(protocol_cls, LanguageServerProtocol):
             raise TypeError('Protocol class should be subclass of LanguageServerProtocol')
+        self.name = name
+        self.version = version
         super().__init__(protocol_cls, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:

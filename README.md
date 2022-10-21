@@ -17,7 +17,7 @@ from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
 from pygls.lsp import CompletionItem, CompletionList, CompletionOptions, CompletionParams
 
-server = LanguageServer()
+server = LanguageServer('example-server', 'v0.1')
 
 @server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
 def completions(params: CompletionParams):

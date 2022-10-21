@@ -52,8 +52,8 @@ from pygls.lsp.types import (ApplyWorkspaceEditParams, ApplyWorkspaceEditRespons
                              DidCloseTextDocumentParams, DidOpenTextDocumentParams,
                              ExecuteCommandParams, InitializeParams, InitializeResult,
                              LogMessageParams, MessageType, PublishDiagnosticsParams,
-                             RegistrationParams, ShowMessageParams, UnregistrationParams,
-                             WorkspaceEdit)
+                             RegistrationParams, ServerInfo, ShowMessageParams,
+                             UnregistrationParams, WorkspaceEdit)
 from pygls.lsp.types.basic_structures import (ConfigCallbackType, LogTraceParams, SetTraceParams,
                                               Trace)
 from pygls.lsp.types.window import ShowDocumentCallbackType, ShowDocumentParams
@@ -564,6 +564,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         from pygls.progress import Progress
         self.progress = Progress(self)
 
+        if server.name is None or server.version is None:
+            self.server_info = None
+            logger.warning("Name or version is not set. "
+                           "This will be mandatory: "
+                           "https://github.com/openlawlibrary/pygls/pull/276")
+        else:
+            self.server_info = ServerInfo(
+                name=server.name,
+                version=server.version,
+            )
+
         self._register_builtin_features()
 
     def _register_builtin_features(self):
@@ -614,7 +625,10 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         self.trace = Trace.Off
 
-        return InitializeResult(capabilities=self.server_capabilities)
+        return InitializeResult(
+            capabilities=self.server_capabilities,
+            server_info=self.server_info,
+        )
 
     @lsp_method(INITIALIZED)
     def lsp_initialized(self, *args) -> None:

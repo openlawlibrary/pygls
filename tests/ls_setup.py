@@ -71,8 +71,8 @@ class PyodideClientServer:
 
     def __init__(self):
 
-        self.server = LanguageServer()
-        self.client = LanguageServer()
+        self.server = LanguageServer('pygls-server', 'v1')
+        self.client = LanguageServer('pygls-client', 'v1')
 
         self.server.lsp.connection_made(PyodideTestTransportAdapter(self.client))
         self.server.lsp._send_only_body = True
@@ -119,7 +119,7 @@ class NativeClientServer:
         scr, scw = os.pipe()
 
         # Setup Server
-        self.server = LanguageServer()
+        self.server = LanguageServer('server', 'v1')
         self.server_thread = threading.Thread(
             target=self.server.start_io,
             args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb")),
@@ -127,7 +127,7 @@ class NativeClientServer:
         self.server_thread.daemon = True
 
         # Setup client
-        self.client = LanguageServer(asyncio.new_event_loop())
+        self.client = LanguageServer('client', 'v1', asyncio.new_event_loop())
         self.client_thread = threading.Thread(
             target=self.client.start_io,
             args=(os.fdopen(scr, "rb"), os.fdopen(csw, "wb")),

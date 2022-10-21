@@ -131,7 +131,7 @@ def test_allow_custom_protocol_derived_from_lsp():
     class CustomProtocol(LanguageServerProtocol):
         pass
 
-    server = LanguageServer(protocol_cls=CustomProtocol)
+    server = LanguageServer('pygls-test', 'v1', protocol_cls=CustomProtocol)
 
     assert isinstance(server.lsp, CustomProtocol)
 
@@ -141,4 +141,4 @@ def test_forbid_custom_protocol_not_derived_from_lsp():
         pass
 
     with pytest.raises(TypeError):
-        LanguageServer(protocol_cls=CustomProtocol)
+        LanguageServer('pygls-test', 'v1', protocol_cls=CustomProtocol)

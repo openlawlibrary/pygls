@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 ### Added
+
+- Add `name` and `version` arguments to the constructor of `LanguageServer` ([#274])
+
+[#274]: https://github.com/openlawlibrary/pygls/issues/274
+
 ### Changed
 ### Fixed
 
