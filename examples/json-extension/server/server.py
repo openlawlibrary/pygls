@@ -55,11 +55,11 @@ class JsonLanguageServer(LanguageServer):
 
     CONFIGURATION_SECTION = 'jsonServer'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
-json_server = JsonLanguageServer()
+json_server = JsonLanguageServer('pygls-json-example', 'v0.1')
 
 
 def _validate(ls, params):

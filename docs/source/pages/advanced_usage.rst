@@ -30,7 +30,7 @@ The code snippet below shows how to start the server in *TCP* mode.
 
     from pygls.server import LanguageServer
 
-    server = LanguageServer()
+    server = LanguageServer('example-server', 'v0.1')
 
     server.start_tcp('127.0.0.1', 8080)
 
@@ -46,7 +46,7 @@ The code snippet below shows how to start the server in *STDIO* mode.
 
     from pygls.server import LanguageServer
 
-    server = LanguageServer()
+    server = LanguageServer('example-server', 'v0.1')
 
     server.start_io()
 
@@ -62,7 +62,7 @@ The code snippet below shows how to start the server in *WEBSOCKET* mode.
 
     from pygls.server import LanguageServer
 
-    server = LanguageServer()
+    server = LanguageServer('example-server', 'v0.1')
 
     server.start_websocket('0.0.0.0', 1234)
 
@@ -87,7 +87,7 @@ is the minimal setup to setup logging in *pygls*:
 
     logging.basicConfig(filename='pygls.log', filemode='w', level=logging.DEBUG)
 
-    server = LanguageServer()
+    server = LanguageServer('example-server', 'v0.1')
 
     server.start_io()
 

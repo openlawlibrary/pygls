@@ -14,7 +14,7 @@ from pygls.server import LanguageServer
 async def test_tcp_connection_lost():
     loop = asyncio.new_event_loop()
 
-    server = LanguageServer(loop=loop)
+    server = LanguageServer('pygls-test', 'v1', loop=loop)
 
     server.lsp.connection_made = Mock()
     server.lsp.connection_lost = Mock()
@@ -56,7 +56,7 @@ async def test_io_connection_lost():
     # Server to client pipe.
     scr, scw = os.pipe()
 
-    server = LanguageServer(loop=asyncio.new_event_loop())
+    server = LanguageServer('pygls-test', 'v1', loop=asyncio.new_event_loop())
     server.lsp.connection_made = Mock()
     server_thread = Thread(
         target=server.start_io,

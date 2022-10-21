@@ -7,7 +7,7 @@ from pygls.lsp.types import (CompletionItem, CompletionParams, CompletionList, C
 import json
 from pygls.protocol import deserialize_message
 
-server = LanguageServer()
+server = LanguageServer("foutain-language-server", "v0.1")
 server.start_pyodide()
 
 CHARACTER = re.compile(r"^[A-Z][A-Z ]+$", re.MULTILINE)
