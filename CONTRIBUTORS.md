@@ -8,6 +8,7 @@
 - [DeathAxe](https://github.com/deathaxe)
 - [Denis Loginov](https://github.com/dinvlad)
 - [Jérome Perrin](https://github.com/perrinjerome)
+- [Karthik Nadig](https://github.com/karthiknadig)
 - [Laurence Warne](https://github.com/LaurenceWarne)
 - [Matej Kašťák](https://github.com/MatejKastak)
 - [Max O'Cull](https://github.com/Maxattax97)

@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+## [0.12.4] - 24/10/2022
+### Fixed
+- Remove upper bound on Pydantic when Python is <3.11
+
 ## [0.12.3] - 24/10/2022
 ### Fixed
 - Require Pydantic 1.10.2 when Python is 3.11
