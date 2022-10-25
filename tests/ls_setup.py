@@ -69,10 +69,10 @@ class PyodideClientServer:
     """Implementation of the `client_server` fixture for use in a pyodide
     environment."""
 
-    def __init__(self):
+    def __init__(self, LS=LanguageServer):
 
-        self.server = LanguageServer('pygls-server', 'v1')
-        self.client = LanguageServer('pygls-client', 'v1')
+        self.server = LS('pygls-server', 'v1')
+        self.client = LS('pygls-client', 'v1')
 
         self.server.lsp.connection_made(PyodideTestTransportAdapter(self.client))
         self.server.lsp._send_only_body = True
@@ -112,14 +112,14 @@ class PyodideClientServer:
 
 
 class NativeClientServer:
-    def __init__(self):
+    def __init__(self, LS=LanguageServer):
         # Client to Server pipe
         csr, csw = os.pipe()
         # Server to client pipe
         scr, scw = os.pipe()
 
         # Setup Server
-        self.server = LanguageServer('server', 'v1')
+        self.server = LS('server', 'v1')
         self.server_thread = threading.Thread(
             target=self.server.start_io,
             args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb")),
@@ -127,7 +127,7 @@ class NativeClientServer:
         self.server_thread.daemon = True
 
         # Setup client
-        self.client = LanguageServer('client', 'v1', asyncio.new_event_loop())
+        self.client = LS('client', 'v1', asyncio.new_event_loop())
         self.client_thread = threading.Thread(
             target=self.client.start_io,
             args=(os.fdopen(scr, "rb"), os.fdopen(csw, "wb")),

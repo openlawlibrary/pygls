@@ -21,9 +21,10 @@ import re
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Event
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar, Union
 
 from pygls import IS_WIN, IS_PYODIDE
+from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
 from pygls.lsp.types import (ApplyWorkspaceEditResponse, ClientCapabilities, ConfigCallbackType,
                              ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
                              ServerCapabilities, TextDocumentSyncKind, UnregistrationParams,
@@ -327,6 +328,12 @@ class LanguageServer(Server):
                                     `ThreadPoolExecutor`
     """
 
+    default_error_message = "Unexpected error in LSP server, see server's logs for details"
+    """
+    The default error message sent to the user's editor when this server encounters an uncaught
+    exception.
+    """
+
     def __init__(self, name: str = None, version: str = None, loop=None,
                  protocol_cls=LanguageServerProtocol, max_workers: int = 2):
         if not issubclass(protocol_cls, LanguageServerProtocol):
@@ -430,6 +437,37 @@ class LanguageServer(Server):
     def show_message_log(self, message, msg_type=MessageType.Log) -> None:
         """Sends message to the client's output channel."""
         self.lsp.show_message_log(message, msg_type)
+
+    def _report_server_error(self, error: Exception, source: Union[PyglsError, JsonRpcException]):
+        # Prevent recursive error reporting
+        try:
+            self.report_server_error(error, source)
+        except Exception:
+            logger.warning("Failed to report error to client")
+
+    def report_server_error(self, error: Exception, source: Union[PyglsError, JsonRpcException]):
+        """
+        Sends error to the client for displaying.
+
+        By default this fucntion does not handle LSP request errors. This is because LSP requests
+        require direct responses and so already have a mechanism for including unexpected errors
+        in the response body.
+
+        All other errors are "out of band" in the sense that the client isn't explicitly waiting
+        for them. For example diagnostics are returned as notifications, not responses to requests,
+        and so can seemingly be sent at random. Also for example consider JSON RPC serialization
+        and deserialization, if a payload cannot be parsed then the whole request/response cycle
+        cannot be completed and so one of these "out of band" error messages is sent.
+
+        These "out of band" error messages are not a requirement of the LSP spec. Pygls simply
+        offers this behaviour as a recommended default. It is perfectly reasonble to override this
+        default.
+        """
+
+        if source == FeatureRequestError:
+            return
+
+        self.show_message(self.default_error_message, msg_type=MessageType.Error)
 
     def thread(self) -> Callable[[F], F]:
         """Decorator that mark function to execute it in a thread."""

@@ -21,7 +21,6 @@ import json
 import logging
 import re
 import sys
-import traceback
 import uuid
 from collections import namedtuple
 from concurrent.futures import Future
@@ -33,7 +32,8 @@ from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.constants import ATTR_FEATURE_TYPE
 from pygls.exceptions import (JsonRpcException, JsonRpcInternalError, JsonRpcInvalidParams,
                               JsonRpcMethodNotFound, JsonRpcRequestCancelled,
-                              MethodTypeNotRegisteredError)
+                              MethodTypeNotRegisteredError, FeatureNotificationError,
+                              FeatureRequestError)
 from pygls.feature_manager import (FeatureManager, assign_help_attrs, get_help_attrs,
                                    is_thread_function)
 from pygls.lsp import (JsonRPCNotification, JsonRPCRequestMessage, JsonRPCResponseMessage,
@@ -316,8 +316,14 @@ class JsonRPCProtocol(asyncio.Protocol):
             self._execute_notification(handler, params)
         except (KeyError, JsonRpcMethodNotFound):
             logger.warning('Ignoring notification for unknown method "%s"', method_name)
-        except Exception:
-            logger.exception('Failed to handle notification "%s": %s', method_name, params)
+        except Exception as error:
+            logger.exception(
+                'Failed to handle notification "%s": %s',
+                method_name,
+                params,
+                exc_info=True
+            )
+            self._server._report_server_error(error, FeatureNotificationError)
 
     def _handle_request(self, msg_id, method_name, params):
         """Handles a request from the client."""
@@ -330,13 +336,27 @@ class JsonRPCProtocol(asyncio.Protocol):
             else:
                 self._execute_request(msg_id, handler, params)
 
-        except JsonRpcException as e:
-            logger.exception('Failed to handle request %s %s %s', msg_id, method_name, params)
-            self._send_response(msg_id, None, e.to_dict())
-        except Exception:
-            logger.exception('Failed to handle request %s %s %s', msg_id, method_name, params)
+        except JsonRpcException as error:
+            logger.exception(
+                'Failed to handle request %s %s %s',
+                msg_id,
+                method_name,
+                params,
+                exc_info=True
+            )
+            self._send_response(msg_id, None, error.to_dict())
+            self._server._report_server_error(error, FeatureRequestError)
+        except Exception as error:
+            logger.exception(
+                'Failed to handle request %s %s %s',
+                msg_id,
+                method_name,
+                params,
+                exc_info=True
+            )
             err = JsonRpcInternalError.of(sys.exc_info()).to_dict()
             self._send_response(msg_id, None, err)
+            self._server._report_server_error(error, FeatureRequestError)
 
     def _handle_response(self, msg_id, result=None, error=None):
         """Handles a response from the client."""
@@ -355,6 +375,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
+
         if message.jsonrpc != JsonRPCProtocol.VERSION:
             logger.warning('Unknown message "%s"', message)
             return
@@ -377,7 +398,6 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Sends data to the client."""
         if not data:
             return
-
         try:
             body = data.json(by_alias=True, exclude_unset=True, encoder=default_serializer)
             logger.info('Sending data: %s', body)
@@ -392,8 +412,9 @@ class JsonRPCProtocol(asyncio.Protocol):
                 self.transport.write(header + body)
             else:
                 self.transport.write(body.decode('utf-8'))
-        except Exception:
-            logger.error(traceback.format_exc())
+        except Exception as error:
+            logger.exception("Error sending data", exc_info=True)
+            self._server._report_server_error(error, JsonRpcInternalError)
 
     def _send_response(self, msg_id, result=None, error=None):
         """Sends a JSON RPC response to the client.
@@ -427,6 +448,13 @@ class JsonRPCProtocol(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data: bytes):
+        try:
+            self._data_received(data)
+        except Exception as error:
+            logger.exception("Error receiving data", exc_info=True)
+            self._server._report_server_error(error, JsonRpcInternalError)
+
+    def _data_received(self, data: bytes):
         """Method from base class, called when server receives the data"""
         logger.debug('Received %r', data)
 
