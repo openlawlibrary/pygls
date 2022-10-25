@@ -447,6 +447,19 @@ And method invocation example:
 
     server.send_notification('myCustomNotification', 'test data')
 
+Custom Error Reporting
+^^^^^^^^^^^^^^^^^^^^^^
+
+By default Pygls notifies the client to display any occurences of uncaught exceptions in the
+server. To override this behaviour define your own `report_server_error()` method like so:
+
+.. code:: python
+
+    Class CustomLanguageServer(LanguageServer):
+        def report_server_error(self, error: Exception, source: Union[PyglsError, JsonRpcException]):
+            pass
+
+
 Workspace
 ~~~~~~~~~
 

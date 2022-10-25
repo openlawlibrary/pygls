@@ -188,6 +188,14 @@ class FeatureAlreadyRegisteredError(PyglsError):
         return f'Feature "{self.feature_name}" is already registered.'
 
 
+class FeatureRequestError(PyglsError):
+    pass
+
+
+class FeatureNotificationError(PyglsError):
+    pass
+
+
 class MethodTypeNotRegisteredError(PyglsError):
 
     def __init__(self, name):
