@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning][semver].
 
 ## [Unreleased]
 ### Added
+### Changed
+### Fixed
 
+## [0.13.0] - 2/11/2022
+### Added
 - Add `name` and `version` arguments to the constructor of `LanguageServer` ([#274])
-
 [#274]: https://github.com/openlawlibrary/pygls/issues/274
-
 ### Changed
 - Default behaviour change: uncaught errors are now sent as `showMessage` errors to client.
   Overrideable in `LanguageServer.report_server_error()`: https://github.com/openlawlibrary/pygls/pull/282
