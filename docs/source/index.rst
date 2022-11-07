@@ -42,6 +42,7 @@ User Guide
    pages/tutorial
    pages/advanced_usage
    pages/testing
+   pages/migrating-to-v1
 
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
