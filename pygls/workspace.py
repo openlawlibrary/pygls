@@ -24,6 +24,7 @@ from typing import List, Optional, Pattern
 
 from lsprotocol.types import (
     Position, Range, TextDocumentContentChangeEvent,
+    TextDocumentContentChangeEvent_Type1,
     TextDocumentItem, TextDocumentSyncKind,
     VersionedTextDocumentIdentifier, WorkspaceFolder
 )
@@ -187,7 +188,7 @@ class Document(object):
     def __str__(self):
         return str(self.uri)
 
-    def _apply_incremental_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def _apply_incremental_change(self, change: TextDocumentContentChangeEvent_Type1) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
@@ -251,10 +252,8 @@ class Document(object):
             attributes "range" and "rangeLength" will be missing from ``Full``
             content update client requests in the pygls Python library.
 
-        NOTE: After adding pydantic models, "range" and "rangeLength" fileds
-        will be None if not passed by the client
         """
-        if change.range is not None:
+        if isinstance(change, TextDocumentContentChangeEvent_Type1):
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return
