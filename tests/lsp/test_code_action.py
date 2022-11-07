@@ -96,7 +96,7 @@ def test_code_action_return_list(client_server):
 
     assert response[0].title == "action1"
     assert response[1].title == "action2"
-    assert response[1].kind == CodeActionKind.Refactor
+    assert response[1].kind == CodeActionKind.Refactor.value
     assert response[2].title == "cmd1"
     assert response[2].command == "cmd1"
     assert response[2].arguments == [1, "two"]
