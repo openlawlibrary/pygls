@@ -26,17 +26,27 @@ import pytest
 
 from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
 from lsprotocol.types import (
+    PROGRESS,
+    TEXT_DOCUMENT_COMPLETION,
     ClientCapabilities,
     CompletionItem,
     CompletionItemKind,
+    CompletionParams,
     InitializeParams,
     InitializeResult,
     ProgressParams,
+    Position,
     ShutdownResponse,
     TextDocumentCompletionResponse,
+    TextDocumentIdentifier,
     WorkDoneProgressBegin,
 )
-from pygls.protocol import JsonRPCProtocol, JsonRPCRequestMessage
+from pygls.protocol import (
+    JsonRPCProtocol,
+    JsonRPCRequestMessage,
+    JsonRPCResponseMessage,
+    JsonRPCNotification
+)
 
 EXAMPLE_NOTIFICATION = "example/notification"
 EXAMPLE_REQUEST = "example/request"
@@ -47,6 +57,7 @@ class IntResult:
     id: str
     result: int
     jsonrpc: str = attrs.field(default='2.0')
+
 
 @attrs.define
 class ExampleParams:
@@ -64,6 +75,7 @@ class ExampleNotification:
     method: str = EXAMPLE_NOTIFICATION
     params: ExampleParams = attrs.field(default=None)
 
+
 @attrs.define
 class ExampleRequest:
     id: str
@@ -76,6 +88,7 @@ EXAMPLE_LSP_METHODS_MAP = {
     EXAMPLE_NOTIFICATION: (ExampleNotification, None, ExampleParams, None),
     EXAMPLE_REQUEST: (ExampleRequest, None, ExampleParams, None),
 }
+
 
 class ExampleProtocol(JsonRPCProtocol):
 
@@ -115,6 +128,30 @@ def test_deserialize_notification_message_valid_params(protocol):
     assert result.params.field_b.inner_field == "test_inner"
 
 
+def test_deserialize_notification_message_unknown_type(protocol):
+    params = """
+    {
+        "jsonrpc": "2.0",
+        "method": "random",
+        "params": {
+            "field_a": "test_a",
+            "field_b": {
+                "inner_field": "test_inner"
+            }
+        }
+    }
+    """
+
+    result = json.loads(params, object_hook=protocol._deserialize_message)
+
+    assert isinstance(result, JsonRPCNotification)
+    assert result.jsonrpc == "2.0"
+    assert result.method == "random"
+
+    assert result.params.field_a == "test_a"
+    assert result.params.field_b.inner_field == "test_inner"
+
+
 def test_deserialize_notification_message_bad_params_should_raise_error(protocol):
     params = f"""
     {{
@@ -134,20 +171,21 @@ def test_deserialize_notification_message_bad_params_should_raise_error(protocol
 
 
 @pytest.mark.parametrize(
-    "params, expected",
+    "method, params, expected",
     [
         (
+            # Known notification type.
+            PROGRESS,
             ProgressParams(
                 token="id1",
                 value=WorkDoneProgressBegin(
-                    kind='begin',
                     title="Begin progress",
                     percentage=0,
                 ),
             ),
             {
                 "jsonrpc": "2.0",
-                "method": "test/notification",
+                "method": "$/progress",
                 "params": {
                     "token": "id1",
                     "value": {
@@ -158,9 +196,49 @@ def test_deserialize_notification_message_bad_params_should_raise_error(protocol
                 },
             },
         ),
+        (
+            # Custom notification type.
+            EXAMPLE_NOTIFICATION,
+            ExampleParams(
+                field_a="field one",
+                field_b=ExampleParams.InnerType(
+                    inner_field="field two"
+                ),
+            ),
+            {
+                "jsonrpc": "2.0",
+                "method": EXAMPLE_NOTIFICATION,
+                "params": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two",
+                    },
+                },
+            },
+        ),
+        (
+            # Custom notification with dict params.
+            EXAMPLE_NOTIFICATION,
+            {
+                "fieldA": "field one",
+                "fieldB": {
+                    "innerField": "field two"
+                }
+            },
+            {
+                "jsonrpc": "2.0",
+                "method": EXAMPLE_NOTIFICATION,
+                "params": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two",
+                    },
+                },
+            },
+        )
     ],
 )
-def test_serialize_notification_message(params, expected):
+def test_serialize_notification_message(method, params, expected):
     """
     Ensure that we can serialize notification messages, retaining all
     expected fields.
@@ -172,7 +250,7 @@ def test_serialize_notification_message(params, expected):
     protocol._send_only_body = True
     protocol.connection_made(buffer)
 
-    protocol.notify("test/notification", params=params)
+    protocol.notify(method, params=params)
     actual = json.loads(buffer.getvalue())
 
     assert actual == expected
@@ -193,6 +271,30 @@ def test_deserialize_response_message(protocol):
     assert result.jsonrpc == "2.0"
     assert result.id == "id"
     assert result.result == 1
+
+
+def test_deserialize_response_message_unknown_type(protocol):
+    params = """
+    {
+        "jsonrpc": "2.0",
+        "id": "id",
+        "result": {
+            "field_a": "test_a",
+            "field_b": {
+                "inner_field": "test_inner"
+            }
+        }
+    }
+    """
+    protocol._result_types["id"] = JsonRPCResponseMessage
+    result = json.loads(params, object_hook=protocol._deserialize_message)
+
+    assert isinstance(result, JsonRPCResponseMessage)
+    assert result.jsonrpc == "2.0"
+    assert result.id == "id"
+
+    assert result.result.field_a == "test_a"
+    assert result.result.field_b.inner_field == "test_inner"
 
 
 def test_deserialize_request_message_with_registered_type(protocol):
@@ -277,6 +379,42 @@ def test_deserialize_request_message_without_registered_type(protocol):
                 ],
             },
         ),
+        (   # Unknown type with object params.
+            JsonRPCResponseMessage,
+            ExampleParams(
+                field_a="field one",
+                field_b=ExampleParams.InnerType(inner_field="field two")
+            ),
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two"
+                    }
+                },
+            }
+        ),
+        (   # Unknown type with dict params.
+            JsonRPCResponseMessage,
+            {
+                "fieldA": "field one",
+                "fieldB": {
+                    "innerField": "field two"
+                }
+            },
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "result": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two"
+                    }
+                },
+            }
+        )
     ],
 )
 def test_serialize_response_message(msg_type, result, expected):
@@ -294,6 +432,83 @@ def test_serialize_response_message(msg_type, result, expected):
     protocol._result_types["1"] = msg_type
 
     protocol._send_response("1", result=result)
+    actual = json.loads(buffer.getvalue())
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "method, params, expected",
+    [
+        (
+            TEXT_DOCUMENT_COMPLETION,
+            CompletionParams(
+                text_document=TextDocumentIdentifier(uri="file:///file.txt"),
+                position=Position(line=1, character=0)
+            ),
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": TEXT_DOCUMENT_COMPLETION,
+                "params": {
+                    "textDocument": { "uri": "file:///file.txt" },
+                    "position": { "line": 1, "character": 0 }
+                },
+            },
+        ),
+        (   # Unknown type with object params.
+            EXAMPLE_REQUEST,
+            ExampleParams(
+                field_a="field one",
+                field_b=ExampleParams.InnerType(inner_field="field two")
+            ),
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": EXAMPLE_REQUEST,
+                "params": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two"
+                    }
+                },
+            }
+        ),
+        (   # Unknown type with dict params.
+            EXAMPLE_REQUEST,
+            {
+                "fieldA": "field one",
+                "fieldB": {
+                    "innerField": "field two"
+                }
+            },
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": EXAMPLE_REQUEST,
+                "params": {
+                    "fieldA": "field one",
+                    "fieldB": {
+                        "innerField": "field two"
+                    }
+                },
+            }
+        )
+    ],
+)
+def test_serialize_request_message(method, params, expected):
+    """
+    Ensure that we can serialize request messages, retaining all expected
+    fields.
+    """
+
+    buffer = io.StringIO()
+
+    protocol = JsonRPCProtocol(None)
+    protocol._send_only_body = True
+    protocol.connection_made(buffer)
+
+    protocol.send_request(method, params, callback=None, msg_id="1")
     actual = json.loads(buffer.getvalue())
 
     assert actual == expected
