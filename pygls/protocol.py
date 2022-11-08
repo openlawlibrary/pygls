@@ -69,7 +69,6 @@ from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
-converter = converters.get_converter()
 
 
 def call_user_feature(base_func, method_name):
@@ -94,7 +93,41 @@ def call_user_feature(base_func, method_name):
     return decorator
 
 
-def dict_to_object(d: Any):
+@attrs.define
+class JsonRPCNotification:
+    """A class that represents a generic json rpc notification message.
+    Used as a fallback for unknown types.
+    """
+
+    method: str
+    jsonrpc: str
+    params: Any
+
+
+@attrs.define
+class JsonRPCRequestMessage:
+    """A class that represents a generic json rpc request message.
+    Used as a fallback for unknown types.
+    """
+
+    id: Union[int, str]
+    method: str
+    jsonrpc: str
+    params: Any
+
+
+@attrs.define
+class JsonRPCResponseMessage:
+    """A class that represents a generic json rpc response message.
+    Used as a fallback for unknown types.
+    """
+
+    id: Union[int, str]
+    jsonrpc: str
+    result: Any
+
+
+def _dict_to_object(d: Any):
     """Create nested objects (namedtuple) from dict."""
 
     if d is None:
@@ -110,51 +143,37 @@ def dict_to_object(d: Any):
     )
 
 
-@attrs.define
-class JsonRPCNotification:
-    """A class that represents a generic json rpc notification message.
-    Used as a fallback for unknown types.
-    """
+def _params_field_structure_hook(obj, cls):
+    if 'params' in obj:
+        obj['params'] = _dict_to_object(obj['params'])
 
-    method: str
-    jsonrpc: str
-    params: Any = attrs.field(converter=dict_to_object)
+    return cls(**obj)
 
 
-@attrs.define
-class JsonRPCRequestMessage:
-    """A class that represents a generic json rpc request message.
-    Used as a fallback for unknown types.
-    """
+def _result_field_structure_hook(obj, cls):
+    if 'result' in obj:
+        obj['result'] = _dict_to_object(obj['result'])
 
-    id: Union[int, str]
-    method: str
-    jsonrpc: str
-    params: Any = attrs.field(converter=dict_to_object)
+    return cls(**obj)
 
 
-@attrs.define
-class JsonRPCResponseMessage:
-    """A class that represents a generic json rpc response message.
-    Used as a fallback for unknown types.
-    """
+def default_converter():
+    """Default converter factory function."""
 
-    id: Union[int, str]
-    jsonrpc: str
-    result: Any = attrs.field(converter=dict_to_object)
+    converter = converters.get_converter()
+    converter.register_structure_hook(
+        JsonRPCRequestMessage, _params_field_structure_hook
+    )
 
+    converter.register_structure_hook(
+        JsonRPCResponseMessage, _result_field_structure_hook
+    )
 
-def default_serializer(o):
-    """JSON serializer for complex objects that do not extend pydantic BaseModel class."""
+    converter.register_structure_hook(
+        JsonRPCNotification, _params_field_structure_hook
+    )
 
-    if hasattr(o, '__attrs_attrs__'):
-        return converter.unstructure(o)
-
-    if isinstance(o, enum.Enum):
-        return o.value
-
-    return o.__dict__
-
+    return converter
 
 class JsonRPCProtocol(asyncio.Protocol):
     """Json RPC protocol implementation using on top of `asyncio.Protocol`.
@@ -190,6 +209,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         self._message_buf = []
 
         self._send_only_body = False
+        self._converter = default_converter()
 
     def __call__(self):
         return self
@@ -351,6 +371,17 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.debug('Received result for message "%s": %s', msg_id, result)
             future.set_result(result)
 
+    def _serialize_message(self, data):
+        """Function used to serialize data sent to the client."""
+
+        if hasattr(data, '__attrs_attrs__'):
+            return self._converter.unstructure(data)
+
+        if isinstance(data, enum.Enum):
+            return data.value
+
+        return data.__dict__
+
     def _deserialize_message(self, data):
         """Function used to deserialize data recevied from the client."""
 
@@ -360,22 +391,22 @@ class JsonRPCProtocol(asyncio.Protocol):
         try:
             if 'id' in data:
                 if 'error' in data:
-                    return converter.structure(data, ResponseErrorMessage)
+                    return self._converter.structure(data, ResponseErrorMessage)
                 elif 'method' in data:
                     request_type = (
                         self.get_message_type(data['method']) or JsonRPCRequestMessage
                     )
-                    return converter.structure(data, request_type)
+                    return self._converter.structure(data, request_type)
                 else:
                     response_type = (
                         self._result_types.pop(data['id']) or JsonRPCResponseMessage
                     )
-                    return converter.structure(data, response_type)
+                    return self._converter.structure(data, response_type)
 
             else:
                 method = data.get('method', '')
                 notification_type = self.get_message_type(method) or JsonRPCNotification
-                return converter.structure(data, notification_type)
+                return self._converter.structure(data, notification_type)
 
         except ClassValidationError as exc:
             logger.error("Unable to deserialize message\n%s", traceback.format_exc())
@@ -384,8 +415,6 @@ class JsonRPCProtocol(asyncio.Protocol):
         except Exception as exc:
             logger.error("Unable to deserialize message\n%s", traceback.format_exc())
             raise JsonRpcInternalError() from exc
-
-        return data
 
     def _procedure_handler(self, message):
         """Delegates message to handlers depending on message type."""
@@ -417,8 +446,13 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Sends data to the client."""
         if not data:
             return
+
+        if self.transport is None:
+            logger.error("Unable to send data, no available transport!")
+            return
+
         try:
-            body = json.dumps(data, default=default_serializer)
+            body = json.dumps(data, default=self._serialize_message)
             logger.info('Sending data: %s', body)
 
             body = body.encode(self.CHARSET)
@@ -522,10 +556,10 @@ class JsonRPCProtocol(asyncio.Protocol):
             params=params,
             jsonrpc=JsonRPCProtocol.VERSION
         )
-
+        # breakpoint()
         self._send_data(notification)
 
-    def send_request(self, method, params=None, callback=None):
+    def send_request(self, method, params=None, callback=None, msg_id=None):
         """Sends a JSON RPC request to the client.
 
         Args:
@@ -536,7 +570,9 @@ class JsonRPCProtocol(asyncio.Protocol):
             Future that will be resolved once a response has been received
         """
 
-        msg_id = str(uuid.uuid4())
+        if msg_id is None:
+            msg_id = str(uuid.uuid4())
+
         request_type = self.get_message_type(method) or JsonRPCRequestMessage
         logger.debug('Sending request with id "%s": %s %s', msg_id, method, params)
 
@@ -662,7 +698,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     @lsp_method(EXIT)
     def lsp_exit(self, *args) -> None:
         """Stops the server process."""
-        self.transport.close()
+        if self.transport is not None:
+            self.transport.close()
+
         sys.exit(0 if self._shutdown else 1)
 
     @lsp_method(INITIALIZE)
@@ -686,7 +724,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         ).build()
         logger.debug(
             'Server capabilities: %s',
-            json.dumps(self.server_capabilities, default=default_serializer)
+            json.dumps(self.server_capabilities, default=self._serialize_message)
         )
 
         root_path = params.root_path
@@ -791,7 +829,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             return
 
         params = LogTraceParams(message=message)
-        if verbose and self.trace == TraceValues.VERBOSE:
+        if verbose and self.trace == TraceValues.Verbose:
             params.verbose = verbose
 
         self.notify(LOG_TRACE, params)
