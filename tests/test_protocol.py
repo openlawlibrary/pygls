@@ -42,6 +42,7 @@ from lsprotocol.types import (
     WorkDoneProgressBegin,
 )
 from pygls.protocol import (
+    default_converter,
     JsonRPCProtocol,
     JsonRPCRequestMessage,
     JsonRPCResponseMessage,
@@ -98,7 +99,7 @@ class ExampleProtocol(JsonRPCProtocol):
 
 @pytest.fixture()
 def protocol():
-    return ExampleProtocol(None)
+    return ExampleProtocol(None, default_converter())
 
 
 def test_deserialize_notification_message_valid_params(protocol):
@@ -168,6 +169,41 @@ def test_deserialize_notification_message_bad_params_should_raise_error(protocol
 
     with pytest.raises(JsonRpcInvalidParams):
         json.loads(params, object_hook=protocol._deserialize_message)
+
+
+def test_deserialize_response_message_custom_converter():
+    params = """
+    {
+        "jsonrpc": "2.0",
+        "id": "id",
+        "result": "1"
+    }
+    """
+    # Just for fun, let's create a converter that reverses all the keys in a dict.
+    #
+    @attrs.define
+    class egasseM:
+        cprnosj: str
+        di: str
+        tluser: str
+
+    def structure_hook(obj, cls):
+        params = {k[::-1]: v for k, v in obj.items()}
+        return cls(**params)
+
+    def custom_converter():
+        converter = default_converter()
+        converter.register_structure_hook(egasseM, structure_hook)
+        return converter
+
+    protocol = JsonRPCProtocol(None, custom_converter())
+    protocol._result_types["id"] = egasseM
+    result = json.loads(params, object_hook=protocol._deserialize_message)
+
+    assert isinstance(result, egasseM)
+    assert result.cprnosj == "2.0"
+    assert result.di == "id"
+    assert result.tluser == "1"
 
 
 @pytest.mark.parametrize(
@@ -246,7 +282,7 @@ def test_serialize_notification_message(method, params, expected):
 
     buffer = io.StringIO()
 
-    protocol = JsonRPCProtocol(None)
+    protocol = JsonRPCProtocol(None, default_converter())
     protocol._send_only_body = True
     protocol.connection_made(buffer)
 
@@ -425,7 +461,7 @@ def test_serialize_response_message(msg_type, result, expected):
 
     buffer = io.StringIO()
 
-    protocol = JsonRPCProtocol(None)
+    protocol = JsonRPCProtocol(None, default_converter())
     protocol._send_only_body = True
     protocol.connection_made(buffer)
 
@@ -504,7 +540,7 @@ def test_serialize_request_message(method, params, expected):
 
     buffer = io.StringIO()
 
-    protocol = JsonRPCProtocol(None)
+    protocol = JsonRPCProtocol(None, default_converter())
     protocol._send_only_body = True
     protocol.connection_made(buffer)
 

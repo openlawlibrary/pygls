@@ -34,7 +34,7 @@ from lsprotocol.types import (
     WorkspaceApplyEditResponse, WorkspaceEdit
 )
 from pygls.progress import Progress
-from pygls.protocol import LanguageServerProtocol
+from pygls.protocol import LanguageServerProtocol, default_converter
 from pygls.workspace import Workspace
 
 if not IS_PYODIDE:
@@ -148,6 +148,8 @@ class Server:
         protocol_cls(Protocol): Protocol implementation that must be derived
                                 from `asyncio.Protocol`
 
+        converter_factory: Factory function to use when constructing a cattrs converter.
+
         loop(AbstractEventLoop): asyncio event loop
 
         max_workers(int, optional): Number of workers for `ThreadPool` and
@@ -169,7 +171,7 @@ class Server:
                                                     - lazy instantiated
     """
 
-    def __init__(self, protocol_cls, loop=None, max_workers=2,
+    def __init__(self, protocol_cls, converter_factory, loop=None, max_workers=2,
                  sync_kind=TextDocumentSyncKind.Incremental):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError('Protocol class should be subclass of asyncio.Protocol')
@@ -194,7 +196,7 @@ class Server:
         except NotImplementedError:
             pass
 
-        self.lsp = protocol_cls(self)
+        self.lsp = protocol_cls(self, converter_factory())
 
     def shutdown(self):
         """Shutdown server."""
@@ -337,13 +339,22 @@ class LanguageServer(Server):
     exception.
     """
 
-    def __init__(self, name: str = None, version: str = None, loop=None,
-                 protocol_cls=LanguageServerProtocol, max_workers: int = 2):
+    def __init__(
+        self,
+        name: str = None,
+        version: str = None,
+        loop=None,
+        protocol_cls=LanguageServerProtocol,
+        converter_factory=default_converter,
+        max_workers: int = 2
+    ):
+
         if not issubclass(protocol_cls, LanguageServerProtocol):
             raise TypeError('Protocol class should be subclass of LanguageServerProtocol')
+
         self.name = name
         self.version = version
-        super().__init__(protocol_cls, loop, max_workers)
+        super().__init__(protocol_cls, converter_factory, loop, max_workers)
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> WorkspaceApplyEditResponse:
         """Sends apply edit request to the client."""
