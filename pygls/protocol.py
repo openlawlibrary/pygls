@@ -175,6 +175,7 @@ def default_converter():
 
     return converter
 
+
 class JsonRPCProtocol(asyncio.Protocol):
     """Json RPC protocol implementation using on top of `asyncio.Protocol`.
 
@@ -196,8 +197,10 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     VERSION = '2.0'
 
-    def __init__(self, server):
+    def __init__(self, server, converter):
         self._server = server
+        self._converter = converter
+
         self._shutdown = False
 
         # Book keeping for in-flight requests
@@ -209,7 +212,6 @@ class JsonRPCProtocol(asyncio.Protocol):
         self._message_buf = []
 
         self._send_only_body = False
-        self._converter = default_converter()
 
     def __call__(self):
         return self
@@ -556,7 +558,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             params=params,
             jsonrpc=JsonRPCProtocol.VERSION
         )
-        # breakpoint()
+
         self._send_data(notification)
 
     def send_request(self, method, params=None, callback=None, msg_id=None):
@@ -652,8 +654,8 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         workspace(Workspace): In memory workspace
     """
 
-    def __init__(self, server):
-        super().__init__(server)
+    def __init__(self, server, converter):
+        super().__init__(server, converter)
 
         self.workspace = None
         self.trace = None
