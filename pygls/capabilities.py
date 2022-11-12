@@ -322,54 +322,23 @@ class ServerCapabilitiesBuilder:
     def _with_workspace_capabilities(self):
         # File operations
         file_operations = FileOperationOptions()
+        operations = [
+            (WORKSPACE_WILL_CREATE_FILES, "will_create"),
+            (WORKSPACE_DID_CREATE_FILES, "did_create"),
+            (WORKSPACE_WILL_DELETE_FILES, "will_delete"),
+            (WORKSPACE_DID_DELETE_FILES, "did_delete"),
+            (WORKSPACE_WILL_RENAME_FILES, "will_rename"),
+            (WORKSPACE_DID_RENAME_FILES, "did_rename"),
+        ]
 
-        will_create = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.willCreate')
-            if WORKSPACE_WILL_CREATE_FILES in self.features
-            else None
-        )
-        if will_create is not None:
-            file_operations.will_create = will_create
+        for method_name, capability_name in operations:
+            client_supports_method = get_capability(
+                self.client_capabilities, f'workspace.file_operations.{capability_name}'
+            )
 
-        did_create = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.didCreate')
-            if WORKSPACE_DID_CREATE_FILES in self.features
-            else None
-        )
-        if did_create is not None:
-            file_operations.did_create = did_create
-
-        will_rename = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.willRename')
-            if WORKSPACE_WILL_RENAME_FILES in self.features
-            else None
-        )
-        if will_rename is not None:
-            file_operations.will_rename = will_rename
-
-        did_rename = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.didRename')
-            if WORKSPACE_DID_RENAME_FILES in self.features
-            else None
-        )
-        if did_rename is not None:
-            file_operations.did_rename = did_rename
-
-        will_delete = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.willDelete')
-            if WORKSPACE_WILL_DELETE_FILES in self.features
-            else None
-        )
-        if will_delete is not None:
-            file_operations.will_delete = will_delete
-
-        did_delete = (
-            get_capability(self.client_capabilities, 'workspace.fileOperations.didDelete')
-            if WORKSPACE_DID_DELETE_FILES in self.features
-            else None
-        )
-        if did_delete is not None:
-            file_operations.did_delete = did_delete
+            if client_supports_method:
+                value = self._provider_options(method_name, None)
+                setattr(file_operations, capability_name, value)
 
         self.server_cap.workspace = ServerCapabilitiesWorkspaceType(
             workspace_folders=WorkspaceFoldersServerCapabilities(
