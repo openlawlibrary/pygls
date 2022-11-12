@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "rootDir": "src",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "lib": [
+      "ES2022",
+      "dom",
+      "webworker"
+    ],
+  },
+  "include": [
+    "./src/**/*.ts"
+  ]
+}
