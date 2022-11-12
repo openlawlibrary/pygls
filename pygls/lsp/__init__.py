@@ -22,6 +22,13 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+    WORKSPACE_DID_CREATE_FILES,
+    WORKSPACE_DID_DELETE_FILES,
+    WORKSPACE_DID_RENAME_FILES,
+    WORKSPACE_WILL_CREATE_FILES,
+    WORKSPACE_WILL_DELETE_FILES,
+    WORKSPACE_WILL_RENAME_FILES,
+    FileOperationRegistrationOptions,
     SemanticTokensLegend,
     SemanticTokensRegistrationOptions,
     ShowDocumentResult
@@ -37,6 +44,12 @@ METHOD_TO_OPTIONS = {
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
+    WORKSPACE_DID_CREATE_FILES: FileOperationRegistrationOptions,
+    WORKSPACE_DID_DELETE_FILES: FileOperationRegistrationOptions,
+    WORKSPACE_DID_RENAME_FILES: FileOperationRegistrationOptions,
+    WORKSPACE_WILL_CREATE_FILES: FileOperationRegistrationOptions,
+    WORKSPACE_WILL_DELETE_FILES: FileOperationRegistrationOptions,
+    WORKSPACE_WILL_RENAME_FILES: FileOperationRegistrationOptions,
 }
 
 
