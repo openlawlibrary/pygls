@@ -3,12 +3,7 @@ from pygls.server import LanguageServer
 from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
 from lsprotocol.types import (CompletionItem, CompletionParams, CompletionList, CompletionOptions)
 
-# The following imports are required for the glue code in 'server.ts'
-import json
-from pygls.protocol import deserialize_message
-
 server = LanguageServer("foutain-language-server", "v0.1")
-server.start_pyodide()
 
 CHARACTER = re.compile(r"^[A-Z][A-Z ]+$", re.MULTILINE)
 

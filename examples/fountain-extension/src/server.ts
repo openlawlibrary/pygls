@@ -1,4 +1,4 @@
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js")
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js")
 
 /* @ts-ignore */
 import * as languageServer from "./server.py";
@@ -19,17 +19,19 @@ async function initPyodide() {
 
     /* @ts-ignore */
     let pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/"
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.21.3/full/"
     })
 
     console.log("Installing dependencies.")
     await pyodide.loadPackage(["micropip"])
     await pyodide.runPythonAsync(`
+        import json
         import sys
         import micropip
+
         await micropip.install('pygls')
 
-        # Uncomment to use a local build of pygls
+        # Uncomment to use a local build of pygls -- see README for details.
         # await micropip.install('https://xxx.loca.lt/out/pygls-<version>-py3-none-any.whl')
     `)
 
@@ -37,7 +39,11 @@ async function initPyodide() {
 
     // Patch stdout to redirect the output.
     pyodide.globals.get('sys').stdout.write = patchedStdout
-    await pyodide.runPythonAsync(languageServer)
+    await pyodide.runPythonAsync(`
+${languageServer}
+
+server.start_pyodide()
+`)
 
     return pyodide
 }
@@ -55,7 +61,7 @@ onmessage = async (event) => {
     await pyodide.runPythonAsync(`
         from js import client_message
 
-        message = json.loads(client_message, object_hook=deserialize_message)
+        message = json.loads(client_message, object_hook=server.lsp._deserialize_message)
         server.lsp._procedure_handler(message)
     `)
 }
