@@ -1,4 +1,4 @@
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js")
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js")
 
 // Used to redirect pyodide's stdout to the webpage.
 function patchedStdout(...args) {
@@ -8,7 +8,7 @@ function patchedStdout(...args) {
 async function runTests(whl) {
     console.log("Loading pyodide")
     let pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.20.0/full/"
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.21.3/full/"
     })
 
     console.log("Installing dependencies")
