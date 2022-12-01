@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+## [0.13.1] - 1/12/2022
+### Changed
+Docs now state that the v1 alpha branch is the recommended way to start new projects
+### Fixed
+Support `CodeActionKind.SourceFixAll`
+
 ## [0.13.0] - 2/11/2022
 ### Added
 - Add `name` and `version` arguments to the constructor of `LanguageServer` ([#274])
