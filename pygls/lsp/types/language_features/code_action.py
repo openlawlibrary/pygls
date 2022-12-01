@@ -44,6 +44,7 @@ class CodeActionKind(str, enum.Enum):
     RefactorRewrite = 'refactor.rewrite'
     Source = 'source'
     SourceOrganizeImports = 'source.organizeImports'
+    SourceFixAll = 'source.fixAll'
 
 
 class CodeActionLiteralSupportActionKindClientCapabilities(Model):
