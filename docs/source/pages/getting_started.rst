@@ -17,6 +17,12 @@ servers that are based on it.
 Installation
 ------------
 
+.. note::
+   *December 2022*
+   We will soon release a major version bump with breaking changes.
+   We recommend starting new projects with the v1 alpha release at:
+   https://github.com/openlawlibrary/pygls/pull/273
+
 To get the latest release from *PyPI*, simply run:
 
 .. code:: console

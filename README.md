@@ -1,3 +1,6 @@
+> **Note**
+> We will soon release a major version bump with breaking changes. We recommend starting new projects with the v1 alpha release at https://github.com/openlawlibrary/pygls/pull/273
+
 # _pygls_
 
 [![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![Build Status](https://dev.azure.com/openlawlibrary/pygls/_apis/build/status/openlawlibrary.pygls?branchName=master)](https://dev.azure.com/openlawlibrary/pygls/_build/latest?definitionId=2&branchName=master) ![!pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
