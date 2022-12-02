@@ -22,8 +22,10 @@ Release notes are kept in CHANGELOG.md
 # Python's `setuptools` automatically derives the version from the latest Git tag.
 # NB. If the latest commit doesn't have a tag, then `setuptools` will add `dev-[hash]` to the version.
 git tag v"$(python -c 'from pygls import __version__; print(__version__)')"
+git push --tags # not required for releasing, just needed because normal `git push` won't send the tags
 
 # Build the project into the Source and Wheel formats (they go into `./dist`)
+rm -rf dist pygls.egg-info
 python -m build
 
 # Upload to Pypi

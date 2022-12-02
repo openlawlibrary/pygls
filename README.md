@@ -1,6 +1,3 @@
-> **Note**
-> We will soon release a major version bump with breaking changes. We recommend starting new projects with the v1 alpha release at https://github.com/openlawlibrary/pygls/pull/273
-
 # _pygls_
 
 [![PyPI Version](https://img.shields.io/pypi/v/pygls.svg)](https://pypi.org/project/pygls/) [![Build Status](https://dev.azure.com/openlawlibrary/pygls/_apis/build/status/openlawlibrary.pygls?branchName=master)](https://dev.azure.com/openlawlibrary/pygls/_build/latest?definitionId=2&branchName=master) ![!pyversions](https://img.shields.io/pypi/pyversions/pygls.svg) ![license](https://img.shields.io/pypi/l/pygls.svg) [![Documentation Status](https://img.shields.io/badge/docs-latest-green.svg)](https://pygls.readthedocs.io/en/latest/)
@@ -8,17 +5,17 @@
 _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing language servers using Python (e.g. Python, XML, etc.). It allows you to write your own [language server](https://langserver.org/) in just a few lines of code.
 
 ## Quick Intro
-
-> **_IMPORTANT NOTE:_**
->
-> In order to support type-checking, we added `pydantic` library which requires passing keyword arguments when creating [LSP models](https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py).
-
 Here's how to create a server and register a code completion feature:
 
 ```python
-from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
-from pygls.lsp import CompletionItem, CompletionList, CompletionOptions, CompletionParams
+from lsprotocol.types import (
+    TEXT_DOCUMENT_COMPLETION,
+    CompletionItem,
+    CompletionList,
+    CompletionOptions,
+    CompletionParams
+)
 
 server = LanguageServer('example-server', 'v0.1')
 

@@ -3,13 +3,15 @@
 Tutorial
 ========
 
-In order to help you with *pygls*, we have created a simple
-`json-extension`_ example.
+In order to help you with using *pygls* in VSCode, we have created a simple `json-extension`_ example.
+
+.. note::
+   You do not need this extension when using *pygls* with other text editors.
 
 Prerequisites
 -------------
 
-In order to setup and run the example extension, you need following software
+In order to setup and run the example VSCode extension, you need following software
 installed:
 
 * `Visual Studio Code <https://code.visualstudio.com/>`_ editor

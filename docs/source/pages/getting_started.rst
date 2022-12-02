@@ -17,12 +17,6 @@ servers that are based on it.
 Installation
 ------------
 
-.. note::
-   *December 2022*
-   We will soon release a major version bump with breaking changes.
-   We recommend starting new projects with the v1 alpha release at:
-   https://github.com/openlawlibrary/pygls/pull/273
-
 To get the latest release from *PyPI*, simply run:
 
 .. code:: console
@@ -64,7 +58,7 @@ Register Features and Commands
 
 .. code:: python
 
-    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
+    @server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
     def completions(params: CompletionParams):
         """Returns completion items."""
         return CompletionList(
@@ -84,9 +78,7 @@ Register Features and Commands
    def cmd_return_hello_world(ls, *args):
        return 'Hello World!'
 
-Features that are currently supported by the LSP specification can be
-found in `pygls.lsp.methods`_ module, while corresponding request/response
-classes can be found in `pygls.lsp.types`_ module.
+See the `lsprotocol`_ module for the complete and canonical list of avaiable features.
 
 Advanced usage
 --------------
@@ -102,5 +94,4 @@ haven't worked with language servers before.
 
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
-.. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
-.. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types
+.. _lsprotocol: https://github.com/microsoft/lsprotocol/blob/main/lsprotocol/types.py
