@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+## [1.0.0] - 2/12/2022
+### Changed
+BREAKING CHANGE: Replaced `pydantic` with [`lsprotocol`](https://github.com/microsoft/lsprotocol)
+
 ## [0.13.1] - 1/12/2022
 ### Changed
 Docs now state that the v1 alpha branch is the recommended way to start new projects
