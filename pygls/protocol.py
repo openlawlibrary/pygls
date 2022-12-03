@@ -663,16 +663,10 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         from pygls.progress import Progress
         self.progress = Progress(self)
 
-        if server.name is None or server.version is None:
-            self.server_info = None
-            logger.warning("Name or version is not set. "
-                           "This will be mandatory: "
-                           "https://github.com/openlawlibrary/pygls/pull/276")
-        else:
-            self.server_info = InitializeResultServerInfoType(
-                name=server.name,
-                version=server.version,
-            )
+        self.server_info = InitializeResultServerInfoType(
+            name=server.name,
+            version=server.version,
+        )
 
         self._register_builtin_features()
 

@@ -341,8 +341,8 @@ class LanguageServer(Server):
 
     def __init__(
         self,
-        name: str = None,
-        version: str = None,
+        name: str,
+        version: str,
         loop=None,
         protocol_cls=LanguageServerProtocol,
         converter_factory=default_converter,
