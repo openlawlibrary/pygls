@@ -94,7 +94,7 @@ async def test_ws_server():
     """Smoke test to ensure we can send/receive messages over websockets"""
 
     loop = asyncio.new_event_loop()
-    server = LanguageServer(loop=loop)
+    server = LanguageServer('pygls-test', 'v1', loop=loop)
 
     # Run the server over Websockets in a separate thread
     server_thread = Thread(

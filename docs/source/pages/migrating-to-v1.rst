@@ -180,13 +180,25 @@ You can then override the default converter used by ``pygls`` when constructing 
 .. code-block:: python
 
    server = LanguageServer(
-       name="my-language-server", version="1.0", converter_factory=custom_converter
+       name="my-language-server", version="v1.0", converter_factory=custom_converter
    )
 
 See the `hooks.py`_ module in ``lsprotocol`` for some example structure hooks
 
 Miscellaneous
 -------------
+
+Mandatory ``name`` and ``version``
+""""""""""""""""""""""""""""""""""
+
+It is now necessary to provide a name and version when constructing an instance of the ``LanguageServer`` class
+
+.. code-block:: python
+
+   from pygls.server import LanguageServer
+
+   server = LanguageServer(name="my-language-server", version="v1.0")
+
 
 ``ClientCapabilities.get_capability`` is now ``get_capability``
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
