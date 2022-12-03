@@ -9,9 +9,10 @@ This guide outlines how to adapt an existing server to the breaking changes intr
 Known Migrations
 ----------------
 You may find insight and inspiration from these projects that have already successfully migrated to v1:
-- `jedi-language-server`_
-- `vscode-ruff`_
-- `esbonio`_
+
+* `jedi-language-server`_
+* `vscode-ruff`_
+* `esbonio`_
 
 Updating Imports
 ----------------
@@ -233,6 +234,6 @@ It is now necessary to provide a name and version when constructing an instance 
 .. _lsprotocol: https://github.com/microsoft/lsprotocol
 .. _pydantic: https://pydantic-docs.helpmanual.io/
 .. _structure hooks: https://cattrs.readthedocs.io/en/stable/structuring.html#registering-custom-structuring-hooks
-.. _jedi-language-serer: https://github.com/pappasam/jedi-language-server/pull/230
+.. _jedi-language-server: https://github.com/pappasam/jedi-language-server/pull/230
 .. _vscode-ruff: https://github.com/charliermarsh/vscode-ruff/pull/37
 .. _esbonio: https://github.com/swyddfa/esbonio/pull/484
