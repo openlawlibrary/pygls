@@ -85,3 +85,13 @@ def test_win_from_fs_path(path, uri):
 )
 def test_win_to_fs_path(uri, path):
     assert uris.to_fs_path(uri) == path
+
+
+@pytest.mark.parametrize(
+    "path,uri",
+    [
+        ("untitled:module1", "untitled:module1"),
+    ],
+)
+def test_unknown_schemes_remain_unchanged(path, uri):
+    assert uris.from_fs_path(path) == uri
