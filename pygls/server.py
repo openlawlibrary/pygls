@@ -21,7 +21,7 @@ import re
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Event
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from typing import Any, Callable, List, Optional, TextIO, TypeVar, Union
 
 from pygls import IS_WIN, IS_PYODIDE
 from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
@@ -218,7 +218,7 @@ class Server:
         logger.info('Closing the event loop.')
         self.loop.close()
 
-    def start_io(self, stdin=None, stdout=None):
+    def start_io(self, stdin: Optional[TextIO] = None, stdout: Optional[TextIO] = None):
         """Starts IO server."""
         logger.info('Starting IO server')
 
@@ -251,7 +251,7 @@ class Server:
         self.lsp.connection_made(transport)
         self.lsp._send_only_body = True  # Don't send headers within the payload
 
-    def start_tcp(self, host, port):
+    def start_tcp(self, host: str, port: int) -> None:
         """Starts TCP server."""
         logger.info('Starting TCP server on %s:%s', host, port)
 
@@ -266,10 +266,10 @@ class Server:
         finally:
             self.shutdown()
 
-    def start_ws(self, host, port):
+    def start_ws(self, host: str, port: int) -> None:
         """Starts WebSocket server."""
         try:
-            import websockets
+            from websockets.server import serve
         except ImportError:
             logger.error('Run `pip install pygls[ws]` to install `websockets`.')
             sys.exit(1)
@@ -287,7 +287,7 @@ class Server:
                     json.loads(message, object_hook=self.lsp._deserialize_message)
                 )
 
-        start_server = websockets.serve(connection_made, host, port, loop=self.loop)
+        start_server = serve(connection_made, host, port, loop=self.loop)
         self._server = start_server.ws_server
         self.loop.run_until_complete(start_server)
 
@@ -356,7 +356,9 @@ class LanguageServer(Server):
         self.version = version
         super().__init__(protocol_cls, converter_factory, loop, max_workers)
 
-    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> WorkspaceApplyEditResponse:
+    def apply_edit(
+        self, edit: WorkspaceEdit, label: Optional[str] = None
+    ) -> WorkspaceApplyEditResponse:
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 

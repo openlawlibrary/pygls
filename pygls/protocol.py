@@ -27,7 +27,7 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import lru_cache, partial
 from itertools import zip_longest
-from typing import Any, Callable, List, Optional, Type, Union
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union
 
 import attrs
 from cattrs.errors import ClassValidationError
@@ -69,6 +69,8 @@ from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
+
+F = TypeVar("F", bound=Callable)
 
 
 def call_user_feature(base_func, method_name):
@@ -619,9 +621,9 @@ class JsonRPCProtocol(asyncio.Protocol):
         return self.fm.thread()
 
 
-def lsp_method(method_name: str):
-    def decorator(f):
-        f.method_name = method_name
+def lsp_method(method_name: str) -> Callable[[F], F]:
+    def decorator(f: F) -> F:
+        f.method_name = method_name  # type: ignore[attr-defined]
         return f
     return decorator
 
@@ -686,7 +688,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def get_result_type(self, method: str) -> Optional[Type]:
         return METHOD_TO_TYPES.get(method, (None, None))[1]
 
-    def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> WorkspaceApplyEditResponse:
+    def apply_edit(
+        self, edit: WorkspaceEdit, label: Optional[str] = None
+    ) -> WorkspaceApplyEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(WORKSPACE_APPLY_EDIT,
                                  ApplyWorkspaceEditParams(edit=edit, label=label))
