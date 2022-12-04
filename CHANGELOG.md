@@ -23,13 +23,15 @@ Support `CodeActionKind.SourceFixAll`
 ## [0.13.0] - 2/11/2022
 ### Added
 - Add `name` and `version` arguments to the constructor of `LanguageServer` ([#274])
-[#274]: https://github.com/openlawlibrary/pygls/issues/274
 ### Changed
 - Default behaviour change: uncaught errors are now sent as `showMessage` errors to client.
   Overrideable in `LanguageServer.report_server_error()`: https://github.com/openlawlibrary/pygls/pull/282
 ### Fixed
 - `_data_recevied()` JSONRPC message parsing errors now caught
 - Fix "Task attached to a different loop" error in `Server.start_ws` ([#268])
+
+[#274]: https://github.com/openlawlibrary/pygls/issues/274
+[#268]: https://github.com/openlawlibrary/pygls/issues/268
 
 ## [0.12.4] - 24/10/2022
 ### Fixed
@@ -41,7 +43,8 @@ Support `CodeActionKind.SourceFixAll`
 
 ## [0.12.2] - 26/09/2022
 ### Fixed
-- Relaxed the Python version upper bound to `<4`
+- Relaxed the Python version upper bound to `<4` ([#266])
+
 [#266]: https://github.com/openlawlibrary/pygls/pulls/266
 
 ## [0.12.1] - 01/08/2022
@@ -69,12 +72,12 @@ Support `CodeActionKind.SourceFixAll`
 
 ### Changed
 
-- Update json-example to include an example semantic tokens method ([204])
+- Update json-example to include an example semantic tokens method ([#204])
 
 ### Fixed
 
 - Fix example extension client not detecting debug mode appropriately ([#193])
-- Fix how the `semantic_tokens_provider` field of `ServerCapabilities` is computed ([213])
+- Fix how the `semantic_tokens_provider` field of `ServerCapabilities` is computed ([#213])
 
 [#193]: https://github.com/openlawlibrary/pygls/issues/193
 [#204]: https://github.com/openlawlibrary/pygls/issues/204
@@ -358,7 +361,14 @@ Support `CodeActionKind.SourceFixAll`
 [keepachangelog]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/spec/v2.0.0.html
 
-[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v0.12...HEAD
+[Unreleased]: https://github.com/openlawlibrary/pygls/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/openlawlibrary/pygls/compare/v0.13.1...v1.0.0
+[0.13.1]: https://github.com/openlawlibrary/pygls/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/openlawlibrary/pygls/compare/v0.12.3...v0.13.0
+[0.12.4]: https://github.com/openlawlibrary/pygls/compare/v0.12.3...v0.12.4
+[0.12.3]: https://github.com/openlawlibrary/pygls/compare/v0.12.2...v0.12.3
+[0.12.2]: https://github.com/openlawlibrary/pygls/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/openlawlibrary/pygls/compare/v0.12...v0.12.1
 [0.12]: https://github.com/openlawlibrary/pygls/compare/v0.11.3...v0.12
 [0.11.3]: https://github.com/openlawlibrary/pygls/compare/v0.11.2...v0.11.3
 [0.11.2]: https://github.com/openlawlibrary/pygls/compare/v0.11.1...v0.11.2
