@@ -19,7 +19,7 @@ from lsprotocol.types import (
 
 server = LanguageServer('example-server', 'v0.1')
 
-@server.feature(COMPLETION, CompletionOptions(trigger_characters=[',']))
+@server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
 def completions(params: CompletionParams):
     """Returns completion items."""
     return CompletionList(
