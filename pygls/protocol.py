@@ -835,10 +835,71 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         self.notify(LOG_TRACE, params)
 
-    def publish_diagnostics(self, doc_uri: str, diagnostics: List[Diagnostic]) -> None:
-        """Sends diagnostic notification to the client."""
-        self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-                    PublishDiagnosticsParams(uri=doc_uri, diagnostics=diagnostics))
+    def _publish_diagnostics_deprecator(
+        self,
+        params_or_uri: Union[str, PublishDiagnosticsParams],
+        diagnostics: Optional[List[Diagnostic]],
+        version: Optional[int],
+        **kwargs
+    ) -> PublishDiagnosticsParams:
+        if isinstance(params_or_uri, str):
+            message = "DEPRECATION: "
+            "`publish_diagnostics("
+            "self, doc_uri: str, diagnostics: List[Diagnostic], version: Optional[int] = None)`"
+            "will be replaced with `publish_diagnostics(self, params: PublishDiagnosticsParams)`"
+            logging.warning(message)
+
+            params = self._construct_publish_diagnostic_type(
+                params_or_uri,
+                diagnostics,
+                version,
+                **kwargs
+            )
+        else:
+            params = params_or_uri
+        return params
+
+    def _construct_publish_diagnostic_type(
+        self,
+        uri: str,
+        diagnostics: Optional[List[Diagnostic]],
+        version: Optional[int],
+        **kwargs
+    ) -> PublishDiagnosticsParams:
+        if diagnostics is None:
+            diagnostics = []
+
+        args = {
+            **{
+                "uri": uri,
+                "diagnostics": diagnostics,
+                "version": version
+            },
+            **kwargs
+        }
+
+        params = PublishDiagnosticsParams(**args)  # type:ignore
+        return params
+
+    def publish_diagnostics(
+        self,
+        params_or_uri: Union[str, PublishDiagnosticsParams],
+        diagnostics: Optional[List[Diagnostic]] = None,
+        version: Optional[int] = None,
+        **kwargs
+    ):
+        """
+        Sends diagnostic notification to the client.
+        Deprecation:
+          `uri`, `diagnostics` and `version` fields will be deprecated
+        """
+        params = self._publish_diagnostics_deprecator(
+            params_or_uri,
+            diagnostics,
+            version,
+            **kwargs
+        )
+        self.notify(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS, params)
 
     def register_capability(self, params: RegistrationParams,
                             callback: Optional[Callable[[], None]] = None) -> Future:
