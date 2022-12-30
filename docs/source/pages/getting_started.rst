@@ -63,7 +63,7 @@ Register Features and Commands
         """Returns completion items."""
         return CompletionList(
             is_incomplete=False,
-            item=[
+            items=[
                 CompletionItem(label='Item1'),
                 CompletionItem(label='Item2'),
                 CompletionItem(label='Item3'),
