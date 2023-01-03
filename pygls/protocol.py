@@ -55,7 +55,7 @@ from lsprotocol.types import (
 )
 from lsprotocol.types import (
     ApplyWorkspaceEditParams,
-    ConfigurationParams, Diagnostic,
+    Diagnostic,
     DidChangeTextDocumentParams, DidChangeWorkspaceFoldersParams,
     DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     ExecuteCommandParams, InitializeParams, InitializeResult,
@@ -63,7 +63,8 @@ from lsprotocol.types import (
     RegistrationParams, ResponseErrorMessage, SetTraceParams,
     ShowDocumentParams, ShowMessageParams,
     TraceValues, UnregistrationParams, WorkspaceApplyEditResponse,
-    WorkspaceEdit, InitializeResultServerInfoType
+    WorkspaceEdit, InitializeResultServerInfoType,
+    WorkspaceConfigurationParams
 )
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
@@ -799,12 +800,12 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         cmd_handler = self.fm.commands[params.command]
         self._execute_request(msg_id, cmd_handler, params.arguments)
 
-    def get_configuration(self, params: ConfigurationParams,
+    def get_configuration(self, params: WorkspaceConfigurationParams,
                           callback: Optional[ConfigCallbackType] = None) -> Future:
         """Sends configuration request to the client.
 
         Args:
-            params(ConfigurationParams): ConfigurationParams from lsp specs
+            params(WorkspaceConfigurationParams): WorkspaceConfigurationParams from lsp specs
             callback(callable): Callabe which will be called after
                                 response from the client is received
         Returns:
@@ -813,11 +814,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(WORKSPACE_CONFIGURATION, params, callback)
 
-    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
+    def get_configuration_async(self, params: WorkspaceConfigurationParams) -> asyncio.Future:
         """Calls `get_configuration` method but designed to use with coroutines
 
         Args:
-            params(ConfigurationParams): ConfigurationParams from lsp specs
+            params(WorkspaceConfigurationParams): WorkspaceConfigurationParams from lsp specs
         Returns:
             asyncio.Future that can be awaited
         """
