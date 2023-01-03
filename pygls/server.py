@@ -28,10 +28,11 @@ from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
 from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
 from lsprotocol.types import (
     ClientCapabilities,
-    ConfigurationParams, Diagnostic, MessageType, RegistrationParams,
+    Diagnostic, MessageType, RegistrationParams,
     ServerCapabilities, ShowDocumentParams,
     TextDocumentSyncKind, UnregistrationParams,
-    WorkspaceApplyEditResponse, WorkspaceEdit
+    WorkspaceApplyEditResponse, WorkspaceEdit,
+    WorkspaceConfigurationParams
 )
 from pygls.progress import Progress
 from pygls.protocol import LanguageServerProtocol, default_converter
@@ -389,12 +390,12 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, options)
 
-    def get_configuration(self, params: ConfigurationParams,
+    def get_configuration(self, params: WorkspaceConfigurationParams,
                           callback: Optional[ConfigCallbackType] = None) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
-    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
+    def get_configuration_async(self, params: WorkspaceConfigurationParams) -> asyncio.Future:
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
