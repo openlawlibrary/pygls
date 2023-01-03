@@ -26,16 +26,17 @@ from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DID_CHANGE
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
                                TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL)
 from lsprotocol.types import (CompletionItem, CompletionList, CompletionOptions,
-                             CompletionParams, ConfigurationItem,
-                             ConfigurationParams, Diagnostic,
-                             DidChangeTextDocumentParams,
-                             DidCloseTextDocumentParams,
-                             DidOpenTextDocumentParams, MessageType, Position,
-                             Range, Registration, RegistrationParams,
-                             SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
-                             Unregistration, UnregistrationParams,
-                             WorkDoneProgressBegin, WorkDoneProgressEnd,
-                             WorkDoneProgressReport)
+                              CompletionParams, ConfigurationItem,
+                              Diagnostic,
+                              DidChangeTextDocumentParams,
+                              DidCloseTextDocumentParams,
+                              DidOpenTextDocumentParams, MessageType, Position,
+                              Range, Registration, RegistrationParams,
+                              SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
+                              Unregistration, UnregistrationParams,
+                              WorkDoneProgressBegin, WorkDoneProgressEnd,
+                              WorkDoneProgressReport,
+                              WorkspaceConfigurationParams)
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -235,7 +236,7 @@ async def show_configuration_async(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
         config = await ls.get_configuration_async(
-            ConfigurationParams(items=[
+            WorkspaceConfigurationParams(items=[
                 ConfigurationItem(
                     scope_uri='',
                     section=JsonLanguageServer.CONFIGURATION_SECTION)
@@ -261,11 +262,16 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
         except Exception as e:
             ls.show_message_log(f'Error ocurred: {e}')
 
-    ls.get_configuration(ConfigurationParams(items=[
-        ConfigurationItem(
-            scope_uri='',
-            section=JsonLanguageServer.CONFIGURATION_SECTION)
-    ]), _config_callback)
+    ls.get_configuration(
+        WorkspaceConfigurationParams(
+            items=[
+                ConfigurationItem(
+                    scope_uri='',
+                    section=JsonLanguageServer.CONFIGURATION_SECTION)
+            ]
+        ),
+        _config_callback
+    )
 
 
 @json_server.thread()
@@ -273,7 +279,7 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
 def show_configuration_thread(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
-        config = ls.get_configuration(ConfigurationParams(items=[
+        config = ls.get_configuration(WorkspaceConfigurationParams(items=[
             ConfigurationItem(
                 scope_uri='',
                 section=JsonLanguageServer.CONFIGURATION_SECTION)
