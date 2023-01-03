@@ -324,7 +324,7 @@ The code snippet below shows how to send configuration to the client:
 .. code:: python
 
     def get_configuration(self,
-                          params: ConfigurationParams,
+                          params: WorkspaceConfigurationParams,
                           callback: Optional[Callable[[List[Any]], None]] = None
                           ) -> asyncio.Future:
         # Omitted
@@ -338,7 +338,7 @@ client, depending on way how the function is registered (described
 .. code:: python
 
     # await keyword tells event loop to switch to another task until notification is received
-    config = await ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]))
+    config = await ls.get_configuration(WorkspaceConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]))
 
 -  *synchronous* functions
 
@@ -348,14 +348,14 @@ client, depending on way how the function is registered (described
     def callback(config):
         # Omitted
 
-    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]), callback)
+    config = ls.get_configuration(WorkspaceConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')]), callback)
 
 -  *threaded* functions
 
 .. code:: python
 
     # .result() will block the thread
-    config = ls.get_configuration(ConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')])).result()
+    config = ls.get_configuration(WorkspaceConfigurationParams(items=[ConfigurationItem(scope_uri='doc_uri_here', section='section')])).result()
 
 Show Message
 ^^^^^^^^^^^^
