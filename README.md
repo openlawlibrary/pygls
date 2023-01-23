@@ -58,4 +58,10 @@ Your contributions to _pygls_ are welcome! Please review the _[Contributing](htt
 
 ## Donation
 
-[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library).
+[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with [sponsorship](https://github.com/sponsors/openlawlibrary).
+
+## Supporters
+
+We would like to give special thanks to the following supporters:
+* [mpourmpoulis](https://github.com/mpourmpoulis)
+
