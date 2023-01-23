@@ -44,9 +44,9 @@ Show completion list on the client:
 
 The full documentation and a tutorial is available at <https://pygls.readthedocs.io/en/latest/>.
 
-## Let Us Know How You Are Using _pygls_
+## Projects based on _pygls_
 
-Submit a Pull Request (PR) with your information against the [implementations](https://github.com/openlawlibrary/pygls/blob/master/Implementations.md) document.
+We keep a table of all known _pygls_ [implementations](https://github.com/openlawlibrary/pygls/blob/master/Implementations.md). Please submit a Pull Request with your own or any that you find are missing.
 
 ## License
 
@@ -58,4 +58,4 @@ Your contributions to _pygls_ are welcome! Please review the _[Contributing](htt
 
 ## Donation
 
-[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization.Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library).
+[Open Law Library](http://www.openlawlib.org/) is a 501(c)(3) tax exempt organization. Help us maintain our open source projects and open the law to all with a [donation](https://donorbox.org/open-law-library).
