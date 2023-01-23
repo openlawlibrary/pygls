@@ -581,12 +581,10 @@ class JsonRPCProtocol(asyncio.Protocol):
         request_type = self.get_message_type(method) or JsonRPCRequestMessage
         logger.debug('Sending request with id "%s": %s %s', msg_id, method, params)
 
-        request = request_type(
-            id=msg_id,
-            method=method,
-            params=params,
-            jsonrpc=JsonRPCProtocol.VERSION,
-        )
+        kwargs = {"method": method, "params": params, "jsonrpc": JsonRPCProtocol.VERSION}
+        if hasattr(request_type, "id"):
+            kwargs["id"] = msg_id
+        request = request_type(**kwargs)
 
         future = Future()
         # If callback function is given, call it when result is received

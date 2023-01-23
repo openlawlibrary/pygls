@@ -28,10 +28,12 @@ from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
 from lsprotocol.types import (
     PROGRESS,
     TEXT_DOCUMENT_COMPLETION,
+    TEXT_DOCUMENT_DID_OPEN,
     ClientCapabilities,
     CompletionItem,
     CompletionItemKind,
     CompletionParams,
+    DidOpenTextDocumentParams,
     InitializeParams,
     InitializeResult,
     ProgressParams,
@@ -39,6 +41,7 @@ from lsprotocol.types import (
     ShutdownResponse,
     TextDocumentCompletionResponse,
     TextDocumentIdentifier,
+    TextDocumentItem,
     WorkDoneProgressBegin,
 )
 from pygls.protocol import (
@@ -489,6 +492,30 @@ def test_serialize_response_message(msg_type, result, expected):
                 "params": {
                     "textDocument": { "uri": "file:///file.txt" },
                     "position": { "line": 1, "character": 0 }
+                },
+            },
+        ),
+        (
+            TEXT_DOCUMENT_DID_OPEN,
+            DidOpenTextDocumentParams(
+                text_document=TextDocumentItem(
+                    uri="file:///file.txt",
+                    language_id="txt",
+                    version=0,
+                    text="just some text",
+                )
+            ),
+            {
+                "jsonrpc": "2.0",
+                "id": "1",
+                "method": TEXT_DOCUMENT_DID_OPEN,
+                "params": {
+                    "textDocument": {
+                        "uri": "file:///file.txt",
+                        "languageId": "txt",
+                        "version": 0,
+                        "text": "just some text",
+                    },
                 },
             },
         ),

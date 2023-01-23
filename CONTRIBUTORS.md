@@ -5,6 +5,7 @@
 - [Brett Cannon](https://github.com/brettcannon/)
 - [Daniel Elero](https://github.com/danixeee)
 - [Daniel Miller](https://github.com/millerdev)
+- [Dan Čermák](https://github.com/dcermak)
 - [DeathAxe](https://github.com/deathaxe)
 - [Denis Loginov](https://github.com/dinvlad)
 - [Dillan Mills](https://github.com/DillanCMills)
