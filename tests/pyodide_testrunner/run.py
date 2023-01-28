@@ -17,7 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 # Path to the root of the repo.
-REPO = pathlib.Path(__file__).parent.parent
+REPO = pathlib.Path(__file__).parent.parent.parent
 BROWSERS = {
     "chrome": (webdriver.Chrome, webdriver.ChromeOptions),
     "firefox": (webdriver.Firefox, webdriver.FirefoxOptions),
@@ -56,7 +56,7 @@ def build_wheel() -> str:
         # Build the wheel
         subprocess.run([sys.executable, "-m", "build", "--wheel"], cwd=dest)
         whl = list((dest / "dist").glob("*.whl"))[0]
-        shutil.copy(whl, REPO / "pyodide_testrunner")
+        shutil.copy(whl, REPO / "tests/pyodide_testrunner")
 
         return whl.name
 
@@ -78,7 +78,9 @@ def main():
 
     q = Queue()
     server_process = Process(
-        target=spawn_http_server, args=(q, REPO / "pyodide_testrunner"), daemon=True
+        target=spawn_http_server,
+        args=(q, REPO / "tests/pyodide_testrunner"),
+        daemon=True,
     )
     server_process.start()
     port = q.get()
@@ -86,23 +88,23 @@ def main():
     print("Running tests...")
     try:
 
-        driver_cls, options_cls = BROWSERS[os.environ.get('BROWSER', 'chrome')]
+        driver_cls, options_cls = BROWSERS[os.environ.get("BROWSER", "chrome")]
 
         options = options_cls()
-        options.headless = 'CI' in os.environ
+        options.headless = "CI" in os.environ
 
         driver = driver_cls(options=options)
-        driver.get(f'http://localhost:{port}?whl={whl}')
+        driver.get(f"http://localhost:{port}?whl={whl}")
 
         wait = WebDriverWait(driver, 120)
         try:
-            button = wait.until(EC.element_to_be_clickable((By.ID, 'exit-code')))
+            button = wait.until(EC.element_to_be_clickable((By.ID, "exit-code")))
             exit_code = int(button.text)
         except WebDriverException as e:
-            print(f'Error while running test: {e!r}')
+            print(f"Error while running test: {e!r}")
             exit_code = 1
 
-        console = driver.find_element(By.ID, 'console')
+        console = driver.find_element(By.ID, "console")
         print(console.text)
     finally:
         if hasattr(server_process, "kill"):
@@ -113,5 +115,5 @@ def main():
     return exit_code
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

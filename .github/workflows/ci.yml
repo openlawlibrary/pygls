@@ -58,10 +58,10 @@ jobs:
           sudo apt install chromium-browser chromium-chromedriver
 
           python -m pip install --upgrade pip
-          python -m pip install -r pyodide_testrunner/requirements.txt
+          python -m pip install -r tests/pyodide_testrunner/requirements.txt
 
       - name: Run Testsuite
-        run: python pyodide_testrunner/run.py
+        run: python tests/pyodide_testrunner/run.py
 
   build:
     runs-on: ubuntu-latest
