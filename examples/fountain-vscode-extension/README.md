@@ -68,6 +68,7 @@ Hit `F1` to open the command palette and choose the `Developer: Install Web Exte
    **Tip:** If you'd like some more visibility into the workings of the extension you can open the developer tools with `F12` to see the console messages.
 
    ![demo.png](./demo.png)
+
 ## Using the development version of `pygls`
 
 If you need to test local changes to the `pygls` library you can change the `initPyodide` code to install a local build of `pygls` instead of the one available on PyPi

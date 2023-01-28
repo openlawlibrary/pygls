@@ -11,7 +11,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: examples/json-extension
+        working-directory: examples/json-vscode-extension
 
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('examples/json-extension/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('examples/json-vscode-extension/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -73,5 +73,5 @@ jobs:
           name: json-extension-vsix
           # The path must be rooted from the directory GitHub Actions starts
           # from, not the working-directory.
-          path: examples/json-extension/*.vsix
+          path: examples/json-vscode-extension/*.vsix
           if-no-files-found: error
