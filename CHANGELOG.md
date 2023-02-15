@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning][semver].
  - Fix `AttributeErrors` in `get_configuration_async`, `get_configuration_callback`, `get_configuration_threaded` commands in json extension. ([#307])
  - Fix type annotations for `get_configuration_async` and `get_configuration` methods on `LanguageServer` and `LanguageServerProtocol` objects ([#307])
  - Provide `version` param for publishing diagnostics ([#303]) 
-
+ - Relaxed the Python version upper bound to `<4` ([#318])
+ 
 [#230]: https://github.com/openlawlibrary/pygls/issues/230
 [#303]: https://github.com/openlawlibrary/pygls/issues/303
 [#307]: https://github.com/openlawlibrary/pygls/issues/307
+[#318]: https://github.com/openlawlibrary/pygls/issues/318
 
 ## [1.0.0] - 2/12/2022
 ### Changed
