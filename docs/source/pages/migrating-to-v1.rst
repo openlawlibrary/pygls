@@ -13,6 +13,7 @@ You may find insight and inspiration from these projects that have already succe
 * `jedi-language-server`_
 * `vscode-ruff`_
 * `esbonio`_
+* `yara-language-server`_
 
 Updating Imports
 ----------------
@@ -235,5 +236,6 @@ It is now necessary to provide a name and version when constructing an instance 
 .. _pydantic: https://pydantic-docs.helpmanual.io/
 .. _structure hooks: https://cattrs.readthedocs.io/en/stable/structuring.html#registering-custom-structuring-hooks
 .. _jedi-language-server: https://github.com/pappasam/jedi-language-server/pull/230
+.. _yara-language-server: https://github.com/avast/yls/pull/34
 .. _vscode-ruff: https://github.com/charliermarsh/vscode-ruff/pull/37
 .. _esbonio: https://github.com/swyddfa/esbonio/pull/484
