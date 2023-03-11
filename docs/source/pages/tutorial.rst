@@ -194,7 +194,7 @@ Modify the Example
 We encourage you to continue to :ref:`advanced section <advanced-usage>` and
 modify this example.
 
-.. _json-extension: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension
-.. _README: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension/README.md
-.. _server.py: https://github.com/openlawlibrary/pygls/blob/master/examples/json-extension/server/server.py
+.. _json-extension: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension
+.. _README: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension/README.md
+.. _server.py: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension/server/server.py
 .. _cooperative multitasking: https://en.wikipedia.org/wiki/Cooperative_multitasking
