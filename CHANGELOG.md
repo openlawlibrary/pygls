@@ -10,15 +10,20 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+- Data files are no longer placed inside the wrong `site-packages` folder when installing `pygls` ([#232])
+
+[#232]: https://github.com/openlawlibrary/pygls/issues/232
+
+
 ## [1.0.1] - February 16th, 2023
 ### Fixed
 
  - Fix progress example in json extension. ([#230])
  - Fix `AttributeErrors` in `get_configuration_async`, `get_configuration_callback`, `get_configuration_threaded` commands in json extension. ([#307])
  - Fix type annotations for `get_configuration_async` and `get_configuration` methods on `LanguageServer` and `LanguageServerProtocol` objects ([#307])
- - Provide `version` param for publishing diagnostics ([#303]) 
+ - Provide `version` param for publishing diagnostics ([#303])
  - Relaxed the Python version upper bound to `<4` ([#318])
- 
+
 [#230]: https://github.com/openlawlibrary/pygls/issues/230
 [#303]: https://github.com/openlawlibrary/pygls/issues/303
 [#307]: https://github.com/openlawlibrary/pygls/issues/307
