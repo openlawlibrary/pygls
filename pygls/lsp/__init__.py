@@ -122,7 +122,7 @@ def get_method_return_type(method_name, lsp_methods_map=METHOD_TO_TYPES):
 
 def is_instance(o, t):
     try:
-        check_type('', o, t)
+        check_type(o, t)
         return True
     except TypeError:
         return False

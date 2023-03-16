@@ -24,6 +24,8 @@ from pygls.exceptions import (
 )
 from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
 from lsprotocol import types
+from typeguard import TypeCheckError
+from typeguard._utils import qualified_name
 
 
 def test_has_ls_param_or_annotation():
@@ -92,10 +94,10 @@ def test_register_feature_with_wrong_options(feature_manager):
         pass
 
     with pytest.raises(
-        TypeError,
+        TypeCheckError,
         match=(
-            f'Options of method "{types.TEXT_DOCUMENT_COMPLETION}" should be instance of type '
-            "<class 'lsprotocol.types.CompletionOptions'>"
+            f'{qualified_name(Options)} is not an instance of '
+            "lsprotocol.types.CompletionOptions"
         ),  # noqa
     ):
 
