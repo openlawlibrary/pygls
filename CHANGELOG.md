@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning][semver].
 ## [Unreleased]
 ### Added
 ### Changed
+- Update typeguard to 3.x ([#327])
+
 ### Fixed
 
 - Data files are no longer placed inside the wrong `site-packages` folder when installing `pygls` ([#232])

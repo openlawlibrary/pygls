@@ -9,6 +9,7 @@
 - [Denis Loginov](https://github.com/dinvlad)
 - [Dillan Mills](https://github.com/DillanCMills)
 - [Felicián Németh](https://github.com/nemethf)
+- [Felix Yan](https://github.com/felixonmars)
 - [Jérome Perrin](https://github.com/perrinjerome)
 - [Karthik Nadig](https://github.com/karthiknadig)
 - [Laurence Warne](https://github.com/LaurenceWarne)
