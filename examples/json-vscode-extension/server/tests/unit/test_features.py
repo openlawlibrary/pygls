@@ -21,7 +21,7 @@ import threading
 import time
 
 import pytest
-from mock import Mock
+from unittest.mock import Mock
 from lsprotocol.types import (DidCloseTextDocumentParams,
                               DidOpenTextDocumentParams, TextDocumentIdentifier,
                               WorkspaceConfigurationResponse,

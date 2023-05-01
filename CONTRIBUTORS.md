@@ -10,6 +10,7 @@
 - [Dillan Mills](https://github.com/DillanCMills)
 - [Felicián Németh](https://github.com/nemethf)
 - [Felix Yan](https://github.com/felixonmars)
+- [Jelle van der Waa](https://github.com/jelly)
 - [Jérome Perrin](https://github.com/perrinjerome)
 - [Karthik Nadig](https://github.com/karthiknadig)
 - [Laurence Warne](https://github.com/LaurenceWarne)
