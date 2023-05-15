@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning][semver].
 ## [Unreleased]
 ### Added
 ### Changed
+### Fixed
+
+## [1.0.2] - May 15th, 2023
+### Changed
 - Update typeguard to 3.x ([#327])
 
 ### Fixed
-
 - Data files are no longer placed inside the wrong `site-packages` folder when installing `pygls` ([#232])
-
 [#232]: https://github.com/openlawlibrary/pygls/issues/232
 
 
