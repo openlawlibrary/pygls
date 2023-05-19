@@ -10,9 +10,17 @@ and this project adheres to [Semantic Versioning][semver].
 ### Changed
 ### Fixed
 
+- `pygls` no longer overrides the event loop for the current thread when given an explicit loop to use. ([#334])
+
+[#334]: https://github.com/openlawlibrary/pygls/issues/334
+
+
 ## [1.0.2] - May 15th, 2023
 ### Changed
 - Update typeguard to 3.x ([#327])
+
+[#327]: https://github.com/openlawlibrary/pygls/issues/327
+
 
 ### Fixed
 - Data files are no longer placed inside the wrong `site-packages` folder when installing `pygls` ([#232])

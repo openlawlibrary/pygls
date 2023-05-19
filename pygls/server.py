@@ -23,7 +23,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Event
 from typing import Any, Callable, List, Optional, TextIO, TypeVar, Union
 
-from pygls import IS_WIN, IS_PYODIDE
+from pygls import IS_PYODIDE
 from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
 from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
 from lsprotocol.types import (
@@ -184,19 +184,14 @@ class Server:
         self._thread_pool_executor = None
         self.sync_kind = sync_kind
 
-        if IS_WIN:
-            asyncio.set_event_loop(asyncio.ProactorEventLoop())
-        elif not IS_PYODIDE:
-            asyncio.set_event_loop(asyncio.SelectorEventLoop())
+        if loop is None:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self._owns_loop = True
+        else:
+            self._owns_loop = False
 
-        self.loop = loop or asyncio.new_event_loop()
-
-        try:
-            if not IS_PYODIDE:
-                asyncio.get_child_watcher().attach_loop(self.loop)
-        except NotImplementedError:
-            pass
-
+        self.loop = loop
         self.lsp = protocol_cls(self, converter_factory())
 
     def shutdown(self):
@@ -216,8 +211,9 @@ class Server:
             self._server.close()
             self.loop.run_until_complete(self._server.wait_closed())
 
-        logger.info('Closing the event loop.')
-        self.loop.close()
+        if self._owns_loop and not self.loop.is_closed:
+            logger.info('Closing the event loop.')
+            self.loop.close()
 
     def start_io(self, stdin: Optional[TextIO] = None, stdout: Optional[TextIO] = None):
         """Starts IO server."""
