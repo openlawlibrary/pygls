@@ -105,8 +105,9 @@ What is a feature in *pygls*? In terms of language servers and the
 `Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__,
 a feature is one of the predefined methods from
 LSP `specification <https://microsoft.github.io/language-server-protocol/specification>`__,
-such as: *code completion*, *formatting*, *code lens*, etc. Features
-that are available can be found in `pygls.lsp.methods`_ module.
+such as: *code completion*, *formatting*, *code lens*, etc. See the `lsprotocol
+<https://github.com/microsoft/lsprotocol/blob/main/packages/python/lsprotocol/types.py>`_ module
+for the complete and canonical list of available features.
 
 *Built-In* Features
 ~~~~~~~~~~~~~~~~~~~

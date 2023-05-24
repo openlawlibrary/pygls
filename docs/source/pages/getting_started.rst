@@ -78,7 +78,7 @@ Register Features and Commands
    def cmd_return_hello_world(ls, *args):
        return 'Hello World!'
 
-See the `lsprotocol`_ module for the complete and canonical list of avaiable features.
+See the `lsprotocol`_ module for the complete and canonical list of available features.
 
 Advanced usage
 --------------
@@ -94,4 +94,4 @@ haven't worked with language servers before.
 
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
-.. _lsprotocol: https://github.com/microsoft/lsprotocol/blob/main/lsprotocol/types.py
+.. _lsprotocol: https://github.com/microsoft/lsprotocol/blob/main/packages/python/lsprotocol/types.py
