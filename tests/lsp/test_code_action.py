@@ -16,6 +16,7 @@
 ############################################################################
 import sys
 
+import pytest
 import pytest_asyncio
 from lsprotocol.types import (
     ClientCapabilities,
@@ -29,6 +30,7 @@ from lsprotocol.types import (
 )
 
 import pygls.uris as uri
+from pygls import IS_PYODIDE
 from pygls.lsp.client import LanguageClient
 
 
@@ -49,6 +51,7 @@ async def client(server_dir):
     await client.stop()
 
 
+@pytest.mark.skipif(IS_PYODIDE, reason="subprocesses are not available in pyodide.")
 async def test_code_actions(client: LanguageClient, workspace_dir):
     """Ensure that the example code action server is working as expected."""
 
