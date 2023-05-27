@@ -83,7 +83,12 @@ def event_loop():
     policy = asyncio.get_event_loop_policy()
     loop = policy.new_event_loop()
     yield loop
-    loop.close()
+
+    try:
+        # Not implemented on pyodide
+        loop.close()
+    except NotImplementedError:
+        pass
 
 
 @pytest.fixture
