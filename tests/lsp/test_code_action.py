@@ -14,118 +14,81 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import List, Optional, Union
+import sys
 
-from lsprotocol.types import TEXT_DOCUMENT_CODE_ACTION
+import pytest_asyncio
 from lsprotocol.types import (
-    CodeAction,
+    ClientCapabilities,
     CodeActionContext,
     CodeActionKind,
-    CodeActionOptions,
     CodeActionParams,
-    Command,
-    Diagnostic,
+    InitializeParams,
     Position,
     Range,
     TextDocumentIdentifier,
 )
 
-from ..conftest import ClientServer
+import pygls.uris as uri
+from pygls.lsp.client import LanguageClient
 
 
-class ConfiguredLS(ClientServer):
-    def __init__(self):
-        super().__init__()
+@pytest_asyncio.fixture(scope="module")
+async def client(server_dir):
+    """Setup and teardown the client."""
 
-        @self.server.feature(
-            TEXT_DOCUMENT_CODE_ACTION,
-            CodeActionOptions(code_action_kinds=[CodeActionKind.Refactor])
+    server_py = server_dir / "code_actions.py"
+
+    client = LanguageClient("pygls-test-client", "0.1")
+    await client.start_io(sys.executable, str(server_py))
+
+    yield client
+
+    await client.shutdown_async(None)
+    client.exit(None)
+
+    await client.stop()
+
+
+async def test_code_actions(client: LanguageClient, workspace_dir):
+    """Ensure that the example code action server is working as expected."""
+
+    response = await client.initialize_async(
+        InitializeParams(
+            capabilities=ClientCapabilities(),
+            root_uri=uri.from_fs_path(str(workspace_dir)),
         )
-        def f(
-            params: CodeActionParams
-        ) -> Optional[List[Union[Command, CodeAction]]]:
-            if params.text_document.uri == "file://return.list":
-                return [
-                    CodeAction(title="action1"),
-                    CodeAction(title="action2", kind=CodeActionKind.Refactor),
-                    Command(
-                        title="cmd1", command="cmd1",
-                        arguments=[1, "two"]
-                    ),
-                ]
-            else:
-                return None
+    )
+    assert response is not None
 
+    code_action_options = response.capabilities.code_action_provider
+    assert code_action_options.code_action_kinds == [CodeActionKind.QuickFix]
 
-@ConfiguredLS.decorate()
-def test_capabilities(client_server):
-    _, server = client_server
-    capabilities = server.server_capabilities
+    test_uri = uri.from_fs_path(str(workspace_dir / "sums.txt"))
+    assert test_uri is not None
 
-    assert capabilities.code_action_provider
-    assert capabilities.code_action_provider.code_action_kinds == [
-        CodeActionKind.Refactor
-    ]
-
-
-@ConfiguredLS.decorate()
-def test_code_action_return_list(client_server):
-    client, _ = client_server
-    response = client.lsp.send_request(
-        TEXT_DOCUMENT_CODE_ACTION,
+    response = await client.text_document_code_action_async(
         CodeActionParams(
-            text_document=TextDocumentIdentifier(uri="file://return.list"),
+            text_document=TextDocumentIdentifier(uri=test_uri),
             range=Range(
                 start=Position(line=0, character=0),
-                end=Position(line=1, character=1),
+                end=Position(line=1, character=0),
             ),
-            context=CodeActionContext(
-                diagnostics=[
-                    Diagnostic(
-                        range=Range(
-                            start=Position(line=0, character=0),
-                            end=Position(line=1, character=1),
-                        ),
-                        message="diagnostic",
-                    )
-                ],
-                only=[CodeActionKind.Refactor],
-            ),
-        ),
-    ).result()
+            context=CodeActionContext(diagnostics=[]),
+        )
+    )
 
-    assert response[0].title == "action1"
-    assert response[1].title == "action2"
-    assert response[1].kind == CodeActionKind.Refactor.value
-    assert response[2].title == "cmd1"
-    assert response[2].command == "cmd1"
-    assert response[2].arguments == [1, "two"]
+    assert len(response) == 1
+    code_action = response[0]
 
+    assert code_action.title == "Evaluate '1 + 1 ='"
+    assert code_action.kind == CodeActionKind.QuickFix
 
-@ConfiguredLS.decorate()
-def test_code_action_return_none(client_server):
-    client, _ = client_server
-    response = client.lsp.send_request(
-        TEXT_DOCUMENT_CODE_ACTION,
-        CodeActionParams(
-            text_document=TextDocumentIdentifier(uri="file://return.none"),
-            range=Range(
-                start=Position(line=0, character=0),
-                end=Position(line=1, character=1),
-            ),
-            context=CodeActionContext(
-                diagnostics=[
-                    Diagnostic(
-                        range=Range(
-                            start=Position(line=0, character=0),
-                            end=Position(line=1, character=1),
-                        ),
-                        message="diagnostic",
-                    )
-                ],
-                only=[CodeActionKind.Refactor],
-            ),
-        ),
-    ).result()
+    fix = code_action.edit.changes[test_uri][0]
+    expected_range = Range(
+        start=Position(line=0, character=0),
+        end=Position(line=0, character=7),
+    )
 
-    assert response is None
+    assert fix.range == expected_range
+    assert fix.new_text == "1 + 1 = 2!"
+

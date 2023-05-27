@@ -16,7 +16,11 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import asyncio
+import pathlib
+
 import pytest
+
 from pygls import uris, IS_PYODIDE
 from pygls.feature_manager import FeatureManager
 from pygls.workspace import Document, Workspace
@@ -41,7 +45,7 @@ if IS_PYODIDE:
     ClientServer = PyodideClientServer
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 def client_server(request):
     if hasattr(request, 'param'):
         ConfiguredClientServer = request.param
@@ -56,6 +60,30 @@ def client_server(request):
     yield client, server
 
     client_server.stop()
+
+
+@pytest.fixture(scope="session")
+def server_dir():
+    """Returns the directory where all the example language servers live"""
+    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
+    return path.resolve()
+
+
+@pytest.fixture(scope="session")
+def workspace_dir():
+    """Returns the directory containing the example workspace."""
+    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "workspace"
+    return path.resolve()
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Redefine `pytest-asyncio's default event_loop fixture to match the scope
+    of our client fixture."""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture
