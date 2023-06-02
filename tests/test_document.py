@@ -220,10 +220,11 @@ def test_range_from_utf16():
     range = Range(
         start=Position(line=0, character=3), end=Position(line=0, character=5)
     )
-    range_from_utf16(['x="😋"'], range)
-    assert range == Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=5)
+    actual = range_from_utf16(['x="😋😋"'], range)
+    expected = Range(
+        start=Position(line=0, character=3), end=Position(line=0, character=4)
     )
+    assert actual == expected
 
 
 def test_range_to_utf16():
@@ -239,23 +240,40 @@ def test_range_to_utf16():
     range = Range(
         start=Position(line=0, character=3), end=Position(line=0, character=4)
     )
-    range_to_utf16(['x="😋"'], range)
-    assert range == Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=4)
+    actual = range_to_utf16(['x="😋😋"'], range)
+    expected = Range(
+        start=Position(line=0, character=3), end=Position(line=0, character=5)
     )
+    assert actual == expected
 
 
 def test_offset_at_position(doc):
     assert doc.offset_at_position(Position(line=0, character=8)) == 8
-    assert doc.offset_at_position(Position(line=1, character=5)) == 14
+    assert doc.offset_at_position(Position(line=1, character=5)) == 12
     assert doc.offset_at_position(Position(line=2, character=0)) == 13
     assert doc.offset_at_position(Position(line=2, character=4)) == 17
     assert doc.offset_at_position(Position(line=3, character=6)) == 27
-    assert doc.offset_at_position(Position(line=3, character=7)) == 27
+    assert doc.offset_at_position(Position(line=3, character=7)) == 28
     assert doc.offset_at_position(Position(line=3, character=8)) == 28
-    assert doc.offset_at_position(Position(line=4, character=0)) == 39
-    assert doc.offset_at_position(Position(line=5, character=0)) == 39
+    assert doc.offset_at_position(Position(line=4, character=0)) == 40
+    assert doc.offset_at_position(Position(line=5, character=0)) == 40
 
+def test_utf16_to_utf32_position_cast(doc):
+    lines = ['', '😋😋', '']
+    assert position_from_utf16(lines, Position(line=0, character=0)) == Position(line=0, character=0)
+    assert position_from_utf16(lines, Position(line=0, character=1)) == Position(line=0, character=0)
+    assert position_from_utf16(lines, Position(line=1, character=0)) == Position(line=1, character=0)
+    assert position_from_utf16(lines, Position(line=1, character=2)) == Position(line=1, character=1)
+    assert position_from_utf16(lines, Position(line=1, character=3)) == Position(line=1, character=2)
+    assert position_from_utf16(lines, Position(line=1, character=4)) == Position(line=1, character=2)
+    assert position_from_utf16(lines, Position(line=1, character=100)) == Position(line=1, character=2)
+    assert position_from_utf16(lines, Position(line=3, character=0)) == Position(line=2, character=0)
+    assert position_from_utf16(lines, Position(line=4, character=10)) == Position(line=2, character=0)
+
+def test_position_for_line_endings(doc):
+    lines = ['x\r\n', 'y\n']
+    assert position_from_utf16(lines, Position(line=0, character=10)) == Position(line=0, character=1)
+    assert position_from_utf16(lines, Position(line=1, character=10)) == Position(line=1, character=1)
 
 def test_word_at_position(doc):
     """
