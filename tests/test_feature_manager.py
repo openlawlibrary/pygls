@@ -15,15 +15,21 @@
 # limitations under the License.                                           #
 ############################################################################
 import asyncio
+from typing import Any
 
 import pytest
+from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (
     CommandAlreadyRegisteredError,
     FeatureAlreadyRegisteredError,
     ValidationError,
 )
-from pygls.feature_manager import has_ls_param_or_annotation, wrap_with_server
-from lsprotocol import types
+from pygls.feature_manager import (
+    FeatureManager,
+    has_ls_param_or_annotation,
+    wrap_with_server,
+)
+from lsprotocol import types as lsp
 from typeguard import TypeCheckError
 from typeguard._utils import qualified_name
 
@@ -73,20 +79,20 @@ def test_register_commands(feature_manager):
 
 
 def test_register_feature_with_valid_options(feature_manager):
-    options = types.CompletionOptions(trigger_characters=["!"])
+    options = lsp.CompletionOptions(trigger_characters=["!"])
 
-    @feature_manager.feature(types.TEXT_DOCUMENT_COMPLETION, options)
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_COMPLETION, options)
     def completions():
         pass
 
     reg_features = feature_manager.features.keys()
     reg_feature_options = feature_manager.feature_options.keys()
 
-    assert types.TEXT_DOCUMENT_COMPLETION in reg_features
-    assert types.TEXT_DOCUMENT_COMPLETION in reg_feature_options
+    assert lsp.TEXT_DOCUMENT_COMPLETION in reg_features
+    assert lsp.TEXT_DOCUMENT_COMPLETION in reg_feature_options
 
-    assert feature_manager.features[types.TEXT_DOCUMENT_COMPLETION] is completions
-    assert feature_manager.feature_options[types.TEXT_DOCUMENT_COMPLETION] is options
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_COMPLETION] is completions
+    assert feature_manager.feature_options[lsp.TEXT_DOCUMENT_COMPLETION] is options
 
 
 def test_register_feature_with_wrong_options(feature_manager):
@@ -101,27 +107,27 @@ def test_register_feature_with_wrong_options(feature_manager):
         ),  # noqa
     ):
 
-        @feature_manager.feature(types.TEXT_DOCUMENT_COMPLETION, Options())
+        @feature_manager.feature(lsp.TEXT_DOCUMENT_COMPLETION, Options())
         def completions():
             pass
 
 
 def test_register_features(feature_manager):
-    @feature_manager.feature(types.TEXT_DOCUMENT_COMPLETION)
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_COMPLETION)
     def completions():
         pass
 
-    @feature_manager.feature(types.TEXT_DOCUMENT_CODE_LENS)
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_CODE_LENS)
     def code_lens():
         pass
 
     reg_features = feature_manager.features.keys()
 
-    assert types.TEXT_DOCUMENT_COMPLETION in reg_features
-    assert types.TEXT_DOCUMENT_CODE_LENS in reg_features
+    assert lsp.TEXT_DOCUMENT_COMPLETION in reg_features
+    assert lsp.TEXT_DOCUMENT_CODE_LENS in reg_features
 
-    assert feature_manager.features[types.TEXT_DOCUMENT_COMPLETION] is completions
-    assert feature_manager.features[types.TEXT_DOCUMENT_CODE_LENS] is code_lens
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_COMPLETION] is completions
+    assert feature_manager.features[lsp.TEXT_DOCUMENT_CODE_LENS] is code_lens
 
 
 def test_register_same_command_twice_error(feature_manager):
@@ -141,11 +147,11 @@ def test_register_same_feature_twice_error(feature_manager):
 
     with pytest.raises(FeatureAlreadyRegisteredError):
 
-        @feature_manager.feature(types.TEXT_DOCUMENT_CODE_ACTION)
+        @feature_manager.feature(lsp.TEXT_DOCUMENT_CODE_ACTION)
         def code_action1():  # pylint: disable=unused-variable
             pass
 
-        @feature_manager.feature(types.TEXT_DOCUMENT_CODE_ACTION)
+        @feature_manager.feature(lsp.TEXT_DOCUMENT_CODE_ACTION)
         def code_action2():  # pylint: disable=unused-variable
             pass
 
@@ -183,3 +189,429 @@ def test_wrap_with_server_thread():
 
     wrapped = wrap_with_server(f, Server())
     assert wrapped.execute_in_thread is True
+
+
+
+def server_capabilities(**kwargs):
+    """Helper to reduce the amount of boilerplate required to specify the expected
+    server capabilities by filling in some fields - unless they are explicitly
+    overriden."""
+
+    if "text_document_sync" not in kwargs:
+        kwargs["text_document_sync"] = lsp.TextDocumentSyncOptions(
+            open_close=False, save=False,
+        )
+
+    if "execute_command_provider" not in kwargs:
+        kwargs["execute_command_provider" ] = lsp.ExecuteCommandOptions(commands=[])
+
+    if "workspace" not in kwargs:
+        kwargs["workspace"] = lsp.ServerCapabilitiesWorkspaceType(
+            workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                supported=True, change_notifications=True
+            ),
+            file_operations=lsp.FileOperationOptions()
+        )
+
+    return lsp.ServerCapabilities(**kwargs)
+
+
+@pytest.mark.parametrize(
+    "method, options, capabilities, expected",
+    [
+        (
+            lsp.TEXT_DOCUMENT_DID_SAVE,
+            lsp.SaveOptions(include_text=True),
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=False,
+                    save=lsp.SaveOptions(include_text=True)
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_DID_SAVE,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=False, save=True
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_WILL_SAVE,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=False, save=False
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_WILL_SAVE,
+            None,
+            lsp.ClientCapabilities(
+                text_document=lsp.TextDocumentClientCapabilities(
+                    synchronization=lsp.TextDocumentSyncClientCapabilities(
+                        will_save=True
+                    )
+                )
+            ),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=False, save=False, will_save=True
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
+            None,
+            lsp.ClientCapabilities(
+                text_document=lsp.TextDocumentClientCapabilities(
+                    synchronization=lsp.TextDocumentSyncClientCapabilities(
+                        will_save_wait_until=True
+                    )
+                )
+            ),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=False, save=False, will_save_wait_until=True
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_DID_OPEN,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=True, save=False
+                )
+            )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_DID_CLOSE,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                text_document_sync=lsp.TextDocumentSyncOptions(
+                    open_close=True, save=False
+                )
+            ),
+        ),
+        (
+            lsp.WORKSPACE_WILL_CREATE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_WILL_CREATE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        will_create=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        will_create=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        ),
+        (
+            lsp.WORKSPACE_DID_CREATE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_DID_CREATE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        did_create=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        did_create=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        ),
+        (
+            lsp.WORKSPACE_WILL_DELETE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_WILL_DELETE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        will_delete=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        will_delete=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        ),
+        (
+            lsp.WORKSPACE_DID_DELETE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_DID_DELETE_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        did_delete=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        did_delete=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        ),
+        (
+            lsp.WORKSPACE_WILL_RENAME_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_WILL_RENAME_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        will_rename=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        will_rename=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        ),
+        (
+            lsp.WORKSPACE_DID_RENAME_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities()
+        ),
+        (
+            lsp.WORKSPACE_DID_RENAME_FILES,
+            lsp.FileOperationRegistrationOptions(
+                filters=[
+                    lsp.FileOperationFilter(
+                        pattern=lsp.FileOperationPattern(glob="**/*.py")
+                    )
+                ]
+            ),
+            lsp.ClientCapabilities(
+                workspace=lsp.WorkspaceClientCapabilities(
+                    file_operations=lsp.FileOperationClientCapabilities(
+                        did_rename=True
+                    )
+                )
+            ),
+            server_capabilities(
+                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                    workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
+                        supported=True, change_notifications=True
+                    ),
+                    file_operations=lsp.FileOperationOptions(
+                        did_rename=lsp.FileOperationRegistrationOptions(
+                            filters=[
+                                lsp.FileOperationFilter(
+                                    pattern=lsp.FileOperationPattern(glob="**/*.py")
+                                )
+                            ]
+                        )
+                    ),
+                )
+            )
+        )
+    ]
+)
+def test_register_feature(
+    feature_manager: FeatureManager,
+    method: str,
+    options: Any,
+    capabilities: lsp.ClientCapabilities,
+    expected: lsp.ServerCapabilities,
+):
+    """Ensure that we can register features while specifying their associated
+    options and that `pygls` is able to correctly build the corresponding server
+    capabilities.
+
+    Parameters
+    ----------
+    feature_manager
+       The feature manager to use
+
+    method
+       The method to register the feature handler for.
+
+    options
+       The method options to use
+
+    capabilities
+       The client capabilities to use when building the server's capabilities.
+
+    expected
+       The expected server capabilties we are expecting to see.
+    """
+    @feature_manager.feature(method, options)
+    def _():
+        pass
+
+    actual = ServerCapabilitiesBuilder(
+        capabilities,
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+    ).build()
+
+    assert expected == actual

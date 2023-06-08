@@ -41,7 +41,7 @@ from lsprotocol.types import (
 from lsprotocol.types import (
     ClientCapabilities, CodeLensOptions, CompletionOptions,
     DocumentLinkOptions, ExecuteCommandOptions, ImplementationOptions,
-    SaveOptions, SemanticTokensOptions, SemanticTokensRegistrationOptions,
+    SemanticTokensOptions, SemanticTokensRegistrationOptions,
     SemanticTokensOptionsFullType1, ServerCapabilities,
     ServerCapabilitiesWorkspaceType, SignatureHelpOptions,
     TextDocumentSyncOptions, TypeDefinitionOptions,
@@ -110,11 +110,7 @@ class ServerCapabilitiesBuilder:
             and TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
         )
         if TEXT_DOCUMENT_DID_SAVE in self.features:
-            if TEXT_DOCUMENT_DID_SAVE in self.feature_options:
-                include_text = self.feature_options[TEXT_DOCUMENT_DID_SAVE].include_text
-                save = SaveOptions(include_text=include_text)
-            else:
-                save = True
+            save = self.feature_options.get(TEXT_DOCUMENT_DID_SAVE, True)
         else:
             save = False
 
