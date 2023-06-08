@@ -19,6 +19,7 @@ from typing import Any, Callable, List, Optional, Union
 from lsprotocol.types import (
     ALL_TYPES_MAP,
     METHOD_TO_TYPES,
+    TEXT_DOCUMENT_DID_SAVE,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
@@ -29,6 +30,7 @@ from lsprotocol.types import (
     WORKSPACE_WILL_DELETE_FILES,
     WORKSPACE_WILL_RENAME_FILES,
     FileOperationRegistrationOptions,
+    SaveOptions,
     SemanticTokensLegend,
     SemanticTokensRegistrationOptions,
     ShowDocumentResult
@@ -41,6 +43,7 @@ ConfigCallbackType = Callable[[List[Any]], None]
 ShowDocumentCallbackType = Callable[[ShowDocumentResult], None]
 
 METHOD_TO_OPTIONS = {
+    TEXT_DOCUMENT_DID_SAVE: SaveOptions,
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],
     TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE: Union[SemanticTokensLegend, SemanticTokensRegistrationOptions],

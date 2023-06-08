@@ -16,9 +16,11 @@ and this project adheres to [Semantic Versioning][semver].
 ### Fixed
 
 - `pygls` no longer overrides the event loop for the current thread when given an explicit loop to use. ([#334])
+- Fixed `MethodTypeNotRegisteredError` when registering a `TEXT_DOCUMENT_DID_SAVE` feature with options. ([#338])
 
 [#328]: https://github.com/openlawlibrary/pygls/issues/328
 [#334]: https://github.com/openlawlibrary/pygls/issues/334
+[#338]: https://github.com/openlawlibrary/pygls/discussions/338
 [#253]: https://github.com/openlawlibrary/pygls/pull/253
 
 
