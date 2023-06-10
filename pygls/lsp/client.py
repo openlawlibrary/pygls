@@ -1,5 +1,5 @@
 # GENERATED FROM scripts/gen-client.py -- DO NOT EDIT
-# Last Modified: 2023-03-17 22:26:58.144053
+# Last Modified: 2023-06-09 20:42:24.861547
 # flake8: noqa
 from concurrent.futures import Future
 from lsprotocol.types import CallHierarchyIncomingCall
@@ -136,6 +136,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("callHierarchy/incomingCalls", params, callback)
 
     async def call_hierarchy_incoming_calls_async(
@@ -148,6 +151,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("callHierarchy/incomingCalls", params)
 
     def call_hierarchy_outgoing_calls(
@@ -161,6 +167,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("callHierarchy/outgoingCalls", params, callback)
 
     async def call_hierarchy_outgoing_calls_async(
@@ -173,6 +182,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("callHierarchy/outgoingCalls", params)
 
     def code_action_resolve(
@@ -187,6 +199,9 @@ class LanguageClient(Client):
 
         {@link CodeAction} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("codeAction/resolve", params, callback)
 
     async def code_action_resolve_async(
@@ -200,6 +215,9 @@ class LanguageClient(Client):
 
         {@link CodeAction} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("codeAction/resolve", params)
 
     def code_lens_resolve(
@@ -211,6 +229,9 @@ class LanguageClient(Client):
 
         A request to resolve a command for a given code lens.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("codeLens/resolve", params, callback)
 
     async def code_lens_resolve_async(
@@ -221,6 +242,9 @@ class LanguageClient(Client):
 
         A request to resolve a command for a given code lens.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("codeLens/resolve", params)
 
     def completion_item_resolve(
@@ -234,6 +258,9 @@ class LanguageClient(Client):
         item.The request's parameter is of type {@link CompletionItem} the response
         is of type {@link CompletionItem} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("completionItem/resolve", params, callback)
 
     async def completion_item_resolve_async(
@@ -246,6 +273,9 @@ class LanguageClient(Client):
         item.The request's parameter is of type {@link CompletionItem} the response
         is of type {@link CompletionItem} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("completionItem/resolve", params)
 
     def document_link_resolve(
@@ -260,6 +290,9 @@ class LanguageClient(Client):
         The request's parameter is of type {@link DocumentLink} the response
         is of type {@link DocumentLink} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("documentLink/resolve", params, callback)
 
     async def document_link_resolve_async(
@@ -273,6 +306,9 @@ class LanguageClient(Client):
         The request's parameter is of type {@link DocumentLink} the response
         is of type {@link DocumentLink} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("documentLink/resolve", params)
 
     def initialize(
@@ -289,6 +325,9 @@ class LanguageClient(Client):
         if of type {@link InitializeResult} of a Thenable that resolves to
         such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("initialize", params, callback)
 
     async def initialize_async(
@@ -304,6 +343,9 @@ class LanguageClient(Client):
         if of type {@link InitializeResult} of a Thenable that resolves to
         such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("initialize", params)
 
     def inlay_hint_resolve(
@@ -320,6 +362,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("inlayHint/resolve", params, callback)
 
     async def inlay_hint_resolve_async(
@@ -335,6 +380,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("inlayHint/resolve", params)
 
     def shutdown(
@@ -350,6 +398,9 @@ class LanguageClient(Client):
         only notification that is sent after a shutdown request is the exit
         event.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("shutdown", params, callback)
 
     async def shutdown_async(
@@ -364,6 +415,9 @@ class LanguageClient(Client):
         only notification that is sent after a shutdown request is the exit
         event.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("shutdown", params)
 
     def text_document_code_action(
@@ -375,6 +429,9 @@ class LanguageClient(Client):
 
         A request to provide commands for the given text document and range.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/codeAction", params, callback)
 
     async def text_document_code_action_async(
@@ -385,6 +442,9 @@ class LanguageClient(Client):
 
         A request to provide commands for the given text document and range.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/codeAction", params)
 
     def text_document_code_lens(
@@ -396,6 +456,9 @@ class LanguageClient(Client):
 
         A request to provide code lens for the given text document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/codeLens", params, callback)
 
     async def text_document_code_lens_async(
@@ -406,6 +469,9 @@ class LanguageClient(Client):
 
         A request to provide code lens for the given text document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/codeLens", params)
 
     def text_document_color_presentation(
@@ -421,6 +487,9 @@ class LanguageClient(Client):
         the response is of type {@link ColorInformation ColorInformation[]}
         or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/colorPresentation", params, callback)
 
     async def text_document_color_presentation_async(
@@ -435,6 +504,9 @@ class LanguageClient(Client):
         the response is of type {@link ColorInformation ColorInformation[]}
         or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/colorPresentation", params)
 
     def text_document_completion(
@@ -457,6 +529,9 @@ class LanguageClient(Client):
         `filterText`, `insertText`, and `textEdit`, must not be changed
         during resolve.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/completion", params, callback)
 
     async def text_document_completion_async(
@@ -478,6 +553,9 @@ class LanguageClient(Client):
         `filterText`, `insertText`, and `textEdit`, must not be changed
         during resolve.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/completion", params)
 
     def text_document_declaration(
@@ -495,6 +573,9 @@ class LanguageClient(Client):
         Declaration} or a typed array of {@link DeclarationLink} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/declaration", params, callback)
 
     async def text_document_declaration_async(
@@ -511,6 +592,9 @@ class LanguageClient(Client):
         Declaration} or a typed array of {@link DeclarationLink} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/declaration", params)
 
     def text_document_definition(
@@ -528,6 +612,9 @@ class LanguageClient(Client):
         Definition} or a typed array of {@link DefinitionLink} or a Thenable
         that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/definition", params, callback)
 
     async def text_document_definition_async(
@@ -544,6 +631,9 @@ class LanguageClient(Client):
         Definition} or a typed array of {@link DefinitionLink} or a Thenable
         that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/definition", params)
 
     def text_document_diagnostic(
@@ -557,6 +647,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/diagnostic", params, callback)
 
     async def text_document_diagnostic_async(
@@ -569,6 +662,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/diagnostic", params)
 
     def text_document_document_color(
@@ -584,6 +680,9 @@ class LanguageClient(Client):
         response is of type {@link ColorInformation ColorInformation[]} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/documentColor", params, callback)
 
     async def text_document_document_color_async(
@@ -598,6 +697,9 @@ class LanguageClient(Client):
         response is of type {@link ColorInformation ColorInformation[]} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/documentColor", params)
 
     def text_document_document_highlight(
@@ -615,6 +717,9 @@ class LanguageClient(Client):
         [DocumentHighlight[]] (#DocumentHighlight) or a Thenable that
         resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/documentHighlight", params, callback)
 
     async def text_document_document_highlight_async(
@@ -631,6 +736,9 @@ class LanguageClient(Client):
         [DocumentHighlight[]] (#DocumentHighlight) or a Thenable that
         resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/documentHighlight", params)
 
     def text_document_document_link(
@@ -642,6 +750,9 @@ class LanguageClient(Client):
 
         A request to provide document links.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/documentLink", params, callback)
 
     async def text_document_document_link_async(
@@ -652,6 +763,9 @@ class LanguageClient(Client):
 
         A request to provide document links.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/documentLink", params)
 
     def text_document_document_symbol(
@@ -667,6 +781,9 @@ class LanguageClient(Client):
         the response is of type {@link SymbolInformation
         SymbolInformation[]} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/documentSymbol", params, callback)
 
     async def text_document_document_symbol_async(
@@ -681,6 +798,9 @@ class LanguageClient(Client):
         the response is of type {@link SymbolInformation
         SymbolInformation[]} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/documentSymbol", params)
 
     def text_document_folding_range(
@@ -696,6 +816,9 @@ class LanguageClient(Client):
         response is of type {@link FoldingRangeList} or a Thenable that
         resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/foldingRange", params, callback)
 
     async def text_document_folding_range_async(
@@ -710,6 +833,9 @@ class LanguageClient(Client):
         response is of type {@link FoldingRangeList} or a Thenable that
         resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/foldingRange", params)
 
     def text_document_formatting(
@@ -721,6 +847,9 @@ class LanguageClient(Client):
 
         A request to to format a whole document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/formatting", params, callback)
 
     async def text_document_formatting_async(
@@ -731,6 +860,9 @@ class LanguageClient(Client):
 
         A request to to format a whole document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/formatting", params)
 
     def text_document_hover(
@@ -746,6 +878,9 @@ class LanguageClient(Client):
         response is of type {@link Hover} or a Thenable that resolves to
         such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/hover", params, callback)
 
     async def text_document_hover_async(
@@ -760,6 +895,9 @@ class LanguageClient(Client):
         response is of type {@link Hover} or a Thenable that resolves to
         such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/hover", params)
 
     def text_document_implementation(
@@ -776,6 +914,9 @@ class LanguageClient(Client):
         (#TextDocumentPositionParams) the response is of type {@link
         Definition} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/implementation", params, callback)
 
     async def text_document_implementation_async(
@@ -791,6 +932,9 @@ class LanguageClient(Client):
         (#TextDocumentPositionParams) the response is of type {@link
         Definition} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/implementation", params)
 
     def text_document_inlay_hint(
@@ -807,6 +951,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/inlayHint", params, callback)
 
     async def text_document_inlay_hint_async(
@@ -822,6 +969,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/inlayHint", params)
 
     def text_document_inline_value(
@@ -838,6 +988,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/inlineValue", params, callback)
 
     async def text_document_inline_value_async(
@@ -853,6 +1006,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/inlineValue", params)
 
     def text_document_linked_editing_range(
@@ -866,6 +1022,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/linkedEditingRange", params, callback)
 
     async def text_document_linked_editing_range_async(
@@ -878,6 +1037,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/linkedEditingRange", params)
 
     def text_document_moniker(
@@ -893,6 +1055,9 @@ class LanguageClient(Client):
         The request parameter is of type {@link TextDocumentPositionParams}.
         The response is of type {@link Moniker Moniker[]} or `null`.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/moniker", params, callback)
 
     async def text_document_moniker_async(
@@ -907,6 +1072,9 @@ class LanguageClient(Client):
         The request parameter is of type {@link TextDocumentPositionParams}.
         The response is of type {@link Moniker Moniker[]} or `null`.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/moniker", params)
 
     def text_document_on_type_formatting(
@@ -918,6 +1086,9 @@ class LanguageClient(Client):
 
         A request to format a document on type.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/onTypeFormatting", params, callback)
 
     async def text_document_on_type_formatting_async(
@@ -928,6 +1099,9 @@ class LanguageClient(Client):
 
         A request to format a document on type.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/onTypeFormatting", params)
 
     def text_document_prepare_call_hierarchy(
@@ -943,6 +1117,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/prepareCallHierarchy", params, callback)
 
     async def text_document_prepare_call_hierarchy_async(
@@ -957,6 +1134,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/prepareCallHierarchy", params)
 
     def text_document_prepare_rename(
@@ -970,6 +1150,9 @@ class LanguageClient(Client):
 
         @since 3.16 - support for default behavior
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/prepareRename", params, callback)
 
     async def text_document_prepare_rename_async(
@@ -982,6 +1165,9 @@ class LanguageClient(Client):
 
         @since 3.16 - support for default behavior
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/prepareRename", params)
 
     def text_document_prepare_type_hierarchy(
@@ -997,6 +1183,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/prepareTypeHierarchy", params, callback)
 
     async def text_document_prepare_type_hierarchy_async(
@@ -1011,6 +1200,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/prepareTypeHierarchy", params)
 
     def text_document_range_formatting(
@@ -1022,6 +1214,9 @@ class LanguageClient(Client):
 
         A request to to format a range in a document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/rangeFormatting", params, callback)
 
     async def text_document_range_formatting_async(
@@ -1032,6 +1227,9 @@ class LanguageClient(Client):
 
         A request to to format a range in a document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/rangeFormatting", params)
 
     def text_document_references(
@@ -1047,6 +1245,9 @@ class LanguageClient(Client):
 
         {@link Location Location[]} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/references", params, callback)
 
     async def text_document_references_async(
@@ -1061,6 +1262,9 @@ class LanguageClient(Client):
 
         {@link Location Location[]} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/references", params)
 
     def text_document_rename(
@@ -1072,6 +1276,9 @@ class LanguageClient(Client):
 
         A request to rename a symbol.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/rename", params, callback)
 
     async def text_document_rename_async(
@@ -1082,6 +1289,9 @@ class LanguageClient(Client):
 
         A request to rename a symbol.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/rename", params)
 
     def text_document_selection_range(
@@ -1097,6 +1307,9 @@ class LanguageClient(Client):
         response is of type {@link SelectionRange SelectionRange[]} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/selectionRange", params, callback)
 
     async def text_document_selection_range_async(
@@ -1111,6 +1324,9 @@ class LanguageClient(Client):
         response is of type {@link SelectionRange SelectionRange[]} or a
         Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/selectionRange", params)
 
     def text_document_semantic_tokens_full(
@@ -1122,6 +1338,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/semanticTokens/full", params, callback)
 
     async def text_document_semantic_tokens_full_async(
@@ -1132,6 +1351,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/semanticTokens/full", params)
 
     def text_document_semantic_tokens_full_delta(
@@ -1143,6 +1365,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/semanticTokens/full/delta", params, callback)
 
     async def text_document_semantic_tokens_full_delta_async(
@@ -1153,6 +1378,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/semanticTokens/full/delta", params)
 
     def text_document_semantic_tokens_range(
@@ -1164,6 +1392,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/semanticTokens/range", params, callback)
 
     async def text_document_semantic_tokens_range_async(
@@ -1174,6 +1405,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/semanticTokens/range", params)
 
     def text_document_signature_help(
@@ -1185,6 +1419,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/signatureHelp", params, callback)
 
     async def text_document_signature_help_async(
@@ -1195,6 +1432,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/signatureHelp", params)
 
     def text_document_type_definition(
@@ -1211,6 +1451,9 @@ class LanguageClient(Client):
         (#TextDocumentPositionParams) the response is of type {@link
         Definition} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/typeDefinition", params, callback)
 
     async def text_document_type_definition_async(
@@ -1226,6 +1469,9 @@ class LanguageClient(Client):
         (#TextDocumentPositionParams) the response is of type {@link
         Definition} or a Thenable that resolves to such.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/typeDefinition", params)
 
     def text_document_will_save_wait_until(
@@ -1244,6 +1490,9 @@ class LanguageClient(Client):
         server constantly fails on this request. This is done to keep the
         save fast and reliable.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("textDocument/willSaveWaitUntil", params, callback)
 
     async def text_document_will_save_wait_until_async(
@@ -1261,6 +1510,9 @@ class LanguageClient(Client):
         server constantly fails on this request. This is done to keep the
         save fast and reliable.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("textDocument/willSaveWaitUntil", params)
 
     def type_hierarchy_subtypes(
@@ -1274,6 +1526,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("typeHierarchy/subtypes", params, callback)
 
     async def type_hierarchy_subtypes_async(
@@ -1286,6 +1541,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("typeHierarchy/subtypes", params)
 
     def type_hierarchy_supertypes(
@@ -1299,6 +1557,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("typeHierarchy/supertypes", params, callback)
 
     async def type_hierarchy_supertypes_async(
@@ -1311,6 +1572,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("typeHierarchy/supertypes", params)
 
     def workspace_diagnostic(
@@ -1324,6 +1588,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/diagnostic", params, callback)
 
     async def workspace_diagnostic_async(
@@ -1336,6 +1603,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/diagnostic", params)
 
     def workspace_execute_command(
@@ -1350,6 +1620,9 @@ class LanguageClient(Client):
         The request might return a workspace edit which the client will
         apply to the workspace.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/executeCommand", params, callback)
 
     async def workspace_execute_command_async(
@@ -1363,6 +1636,9 @@ class LanguageClient(Client):
         The request might return a workspace edit which the client will
         apply to the workspace.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/executeCommand", params)
 
     def workspace_symbol(
@@ -1380,6 +1656,9 @@ class LanguageClient(Client):
          need to advertise support for WorkspaceSymbols via the client capability
          `workspace.symbol.resolveSupport`.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/symbol", params, callback)
 
     async def workspace_symbol_async(
@@ -1396,6 +1675,9 @@ class LanguageClient(Client):
          need to advertise support for WorkspaceSymbols via the client capability
          `workspace.symbol.resolveSupport`.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/symbol", params)
 
     def workspace_symbol_resolve(
@@ -1409,6 +1691,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspaceSymbol/resolve", params, callback)
 
     async def workspace_symbol_resolve_async(
@@ -1421,6 +1706,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspaceSymbol/resolve", params)
 
     def workspace_will_create_files(
@@ -1436,6 +1724,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/willCreateFiles", params, callback)
 
     async def workspace_will_create_files_async(
@@ -1450,6 +1741,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/willCreateFiles", params)
 
     def workspace_will_delete_files(
@@ -1464,6 +1758,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/willDeleteFiles", params, callback)
 
     async def workspace_will_delete_files_async(
@@ -1477,6 +1774,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/willDeleteFiles", params)
 
     def workspace_will_rename_files(
@@ -1492,6 +1792,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return self.protocol.send_request("workspace/willRenameFiles", params, callback)
 
     async def workspace_will_rename_files_async(
@@ -1506,6 +1809,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         return await self.protocol.send_request_async("workspace/willRenameFiles", params)
 
     def cancel_request(self, params: CancelParams) -> None:
@@ -1513,6 +1819,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("$/cancelRequest", params)
 
     def exit(self, params: None) -> None:
@@ -1521,6 +1830,9 @@ class LanguageClient(Client):
         The exit event is sent from the client to the server to ask the server
         to exit its process.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("exit", params)
 
     def initialized(self, params: InitializedParams) -> None:
@@ -1530,6 +1842,9 @@ class LanguageClient(Client):
         the client is fully initialized and the server is allowed to send requests
         from the server to the client.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("initialized", params)
 
     def notebook_document_did_change(self, params: DidChangeNotebookDocumentParams) -> None:
@@ -1537,6 +1852,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("notebookDocument/didChange", params)
 
     def notebook_document_did_close(self, params: DidCloseNotebookDocumentParams) -> None:
@@ -1546,6 +1864,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("notebookDocument/didClose", params)
 
     def notebook_document_did_open(self, params: DidOpenNotebookDocumentParams) -> None:
@@ -1555,6 +1876,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("notebookDocument/didOpen", params)
 
     def notebook_document_did_save(self, params: DidSaveNotebookDocumentParams) -> None:
@@ -1564,6 +1888,9 @@ class LanguageClient(Client):
 
         @since 3.17.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("notebookDocument/didSave", params)
 
     def progress(self, params: ProgressParams) -> None:
@@ -1571,6 +1898,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("$/progress", params)
 
     def set_trace(self, params: SetTraceParams) -> None:
@@ -1578,6 +1908,9 @@ class LanguageClient(Client):
 
 
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("$/setTrace", params)
 
     def text_document_did_change(self, params: DidChangeTextDocumentParams) -> None:
@@ -1586,6 +1919,9 @@ class LanguageClient(Client):
         The document change notification is sent from the client to the server
         to signal changes to a text document.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("textDocument/didChange", params)
 
     def text_document_did_close(self, params: DidCloseTextDocumentParams) -> None:
@@ -1601,6 +1937,9 @@ class LanguageClient(Client):
         doesn't mean that the document was open in an editor before. A close
         notification requires a previous open notification to be sent.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("textDocument/didClose", params)
 
     def text_document_did_open(self, params: DidOpenTextDocumentParams) -> None:
@@ -1617,6 +1956,9 @@ class LanguageClient(Client):
         close notification send before. This means open and close
         notification must be balanced and the max open count is one.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("textDocument/didOpen", params)
 
     def text_document_did_save(self, params: DidSaveTextDocumentParams) -> None:
@@ -1625,6 +1967,9 @@ class LanguageClient(Client):
         The document save notification is sent from the client to the server
         when the document got saved in the client.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("textDocument/didSave", params)
 
     def text_document_will_save(self, params: WillSaveTextDocumentParams) -> None:
@@ -1633,6 +1978,9 @@ class LanguageClient(Client):
         A document will save notification is sent from the client to the server
         before the document is actually saved.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("textDocument/willSave", params)
 
     def window_work_done_progress_cancel(self, params: WorkDoneProgressCancelParams) -> None:
@@ -1641,6 +1989,9 @@ class LanguageClient(Client):
         The `window/workDoneProgress/cancel` notification is sent from  the
         client to the server to cancel a progress initiated on the server side.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("window/workDoneProgress/cancel", params)
 
     def workspace_did_change_configuration(self, params: DidChangeConfigurationParams) -> None:
@@ -1652,6 +2003,9 @@ class LanguageClient(Client):
         The notification contains the changed configuration as defined by
         the language client.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didChangeConfiguration", params)
 
     def workspace_did_change_watched_files(self, params: DidChangeWatchedFilesParams) -> None:
@@ -1660,6 +2014,9 @@ class LanguageClient(Client):
         The watched files notification is sent from the client to the server
         when the client detects changes to file watched by the language client.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didChangeWatchedFiles", params)
 
     def workspace_did_change_workspace_folders(self, params: DidChangeWorkspaceFoldersParams) -> None:
@@ -1668,6 +2025,9 @@ class LanguageClient(Client):
         The `workspace/didChangeWorkspaceFolders` notification is sent from the
         client to the server when the workspace folder configuration changes.
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didChangeWorkspaceFolders", params)
 
     def workspace_did_create_files(self, params: CreateFilesParams) -> None:
@@ -1678,6 +2038,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didCreateFiles", params)
 
     def workspace_did_delete_files(self, params: DeleteFilesParams) -> None:
@@ -1689,6 +2052,9 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didDeleteFiles", params)
 
     def workspace_did_rename_files(self, params: RenameFilesParams) -> None:
@@ -1699,4 +2065,7 @@ class LanguageClient(Client):
 
         @since 3.16.0
         """
+        if self.stopped:
+            raise RuntimeError("Client has been stopped.")
+
         self.protocol.notify("workspace/didRenameFiles", params)
