@@ -18,13 +18,16 @@ import asyncio
 import logging
 import re
 from threading import Event
+from typing import Any
 from typing import Callable
 from typing import List
 from typing import Optional
 from typing import Type
+from typing import Union
 
 from cattrs import Converter
 
+from pygls.exceptions import PyglsError, JsonRpcException
 from pygls.protocol import JsonRPCProtocol, default_converter
 
 
@@ -78,12 +81,28 @@ class Client:
         protocol_cls: Type[JsonRPCProtocol] = JsonRPCProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
     ):
-
         self.protocol = protocol_cls(self, converter_factory())
 
         self._server: Optional[asyncio.subprocess.Process] = None
         self._stop_event = Event()
         self._async_tasks: List[asyncio.Task] = []
+
+    @property
+    def stopped(self) -> bool:
+        """Return ``True`` if the client has been stopped."""
+        return self._stop_event.is_set()
+
+    def feature(
+        self, feature_name: str, options: Optional[Any] = None,
+    ):
+        """Decorator used to register LSP features.
+
+        Example:
+            @ls.feature('window/logMessage')
+            def completions(ls, params: LogMessageParams):
+                logger.info("%s", params.message)
+        """
+        return self.protocol.fm.feature(feature_name, options)
 
     async def start_io(self, cmd: str, *args, **kwargs):
         """Start the given server and communicate with it over stdio."""
@@ -99,14 +118,36 @@ class Client:
 
         self.protocol.connection_made(server.stdin)  # type: ignore
         connection = asyncio.create_task(
-            aio_readline(
-                self._stop_event,
-                server.stdout,
-                self.protocol.data_received
-            )
+            aio_readline(self._stop_event, server.stdout, self.protocol.data_received)
         )
+        notify_exit = asyncio.create_task(self._server_exit())
+
         self._server = server
-        self._async_tasks.append(connection)
+        self._async_tasks.extend([connection, notify_exit])
+
+    async def _server_exit(self):
+        await self._server.wait()
+        await self.server_exit(self._server)
+        self._stop_event.set()
+
+    async def server_exit(self, server: asyncio.subprocess.Process):
+        """Called when the server process exits."""
+
+    def _report_server_error(
+        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+    ):
+        # Prevent recursive error reporting
+        try:
+            self.report_server_error(error, source)
+        except Exception:
+            logger.warning("Failed to report error to client")
+
+    def report_server_error(
+        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+    ):
+        """Called when the server does something unexpected e.g. respond with malformed
+        JSON."""
+
 
     async def stop(self):
         self._stop_event.set()
