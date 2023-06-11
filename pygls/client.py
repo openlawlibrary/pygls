@@ -60,7 +60,7 @@ async def aio_readline(stop_event, reader, message_handler):
         if content_length and not header.strip():
 
             # Read body
-            body = await reader.read(content_length)
+            body = await reader.readexactly(content_length)
             if not body:
                 break
             message.append(body)
@@ -107,6 +107,9 @@ class Client:
     async def start_io(self, cmd: str, *args, **kwargs):
         """Start the given server and communicate with it over stdio."""
 
+        logger.debug(
+            "Starting server process: %s", ' '.join([cmd, *args])
+        )
         server = await asyncio.create_subprocess_exec(
             cmd,
             *args,
@@ -126,9 +129,15 @@ class Client:
         self._async_tasks.extend([connection, notify_exit])
 
     async def _server_exit(self):
-        await self._server.wait()
-        await self.server_exit(self._server)
-        self._stop_event.set()
+        if self._server is not None:
+            await self._server.wait()
+            logger.debug(
+                "Server process %s exited with return code: %s",
+                self._server.pid,
+                self._server.returncode,
+            )
+            await self.server_exit(self._server)
+            self._stop_event.set()
 
     async def server_exit(self, server: asyncio.subprocess.Process):
         """Called when the server process exits."""
@@ -136,11 +145,10 @@ class Client:
     def _report_server_error(
         self, error: Exception, source: Union[PyglsError, JsonRpcException]
     ):
-        # Prevent recursive error reporting
         try:
             self.report_server_error(error, source)
         except Exception:
-            logger.warning("Failed to report error to client")
+            logger.error("Unable to report error", exc_info=True)
 
     def report_server_error(
         self, error: Exception, source: Union[PyglsError, JsonRpcException]
@@ -148,9 +156,12 @@ class Client:
         """Called when the server does something unexpected e.g. respond with malformed
         JSON."""
 
-
     async def stop(self):
         self._stop_event.set()
+
+        if self._server is not None and self._server.returncode is None:
+            logger.debug("Terminating server process: %s", self._server.pid)
+            self._server.terminate()
 
         if len(self._async_tasks) > 0:
             await asyncio.gather(*self._async_tasks)
