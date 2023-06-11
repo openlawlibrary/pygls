@@ -605,18 +605,21 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         return future
 
-    def send_request_async(self, method, params=None):
+    def send_request_async(self, method, params=None, msg_id=None):
         """Calls `send_request` and wraps `concurrent.futures.Future` with
         `asyncio.Future` so it can be used with `await` keyword.
 
         Args:
             method(str): The method name of the message to send
             params(any): The payload of the message
+            msg_id(str|int): Optional, message id
 
         Returns:
             `asyncio.Future` that can be awaited
         """
-        return asyncio.wrap_future(self.send_request(method, params))
+        return asyncio.wrap_future(
+            self.send_request(method, params=params, msg_id=msg_id)
+        )
 
     def thread(self):
         """Decorator that mark function to execute it in a thread."""
