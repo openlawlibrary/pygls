@@ -63,21 +63,21 @@ def client_server(request):
     client_server.stop()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def server_dir():
     """Returns the directory where all the example language servers live"""
     path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
     return path.resolve()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def workspace_dir():
     """Returns the directory containing the example workspace."""
     path = pathlib.Path(__file__) / ".." / ".." / "examples" / "workspace"
     return path.resolve()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def event_loop():
     """Redefine `pytest-asyncio's default event_loop fixture to match the scope
     of our client fixture."""
