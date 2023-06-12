@@ -15,7 +15,10 @@ def handler(data):
         ),
     )
     content = str(payload).replace("'", '"')
-    print(f'Content-Length: {len(content)}\r\n\r\n{content}', flush=True)
+    message = f'Content-Length: {len(content)}\r\n\r\n{content}'.encode('utf8')
+
+    sys.stdout.buffer.write(message)
+    sys.stdout.flush()
 
 
 async def main():
