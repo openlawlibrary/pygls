@@ -34,7 +34,7 @@ from pygls import IS_PYODIDE
 from pygls.lsp.client import LanguageClient
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture()
 async def client(server_dir):
     """Setup and teardown the client."""
 
