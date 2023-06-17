@@ -18,13 +18,13 @@ from functools import reduce
 from typing import Any
 
 from lsprotocol.types import (
-    TEXT_DOCUMENT_CODE_ACTION, TEXT_DOCUMENT_CODE_LENS,
+    INLAY_HINT_RESOLVE, TEXT_DOCUMENT_CODE_ACTION, TEXT_DOCUMENT_CODE_LENS,
     TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DECLARATION,
     TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DOCUMENT_COLOR,
     TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT, TEXT_DOCUMENT_DOCUMENT_LINK,
     TEXT_DOCUMENT_DOCUMENT_SYMBOL, TEXT_DOCUMENT_FOLDING_RANGE,
     TEXT_DOCUMENT_FORMATTING, TEXT_DOCUMENT_HOVER,
-    TEXT_DOCUMENT_IMPLEMENTATION, TEXT_DOCUMENT_ON_TYPE_FORMATTING,
+    TEXT_DOCUMENT_IMPLEMENTATION, TEXT_DOCUMENT_INLAY_HINT, TEXT_DOCUMENT_ON_TYPE_FORMATTING,
     TEXT_DOCUMENT_RANGE_FORMATTING, TEXT_DOCUMENT_REFERENCES,
     TEXT_DOCUMENT_RENAME, TEXT_DOCUMENT_SELECTION_RANGE,
     TEXT_DOCUMENT_SIGNATURE_HELP, TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
@@ -36,7 +36,7 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_TYPE_DEFINITION, WORKSPACE_DID_CREATE_FILES,
     WORKSPACE_DID_DELETE_FILES, WORKSPACE_DID_RENAME_FILES,
     WORKSPACE_SYMBOL, WORKSPACE_WILL_CREATE_FILES,
-    WORKSPACE_WILL_DELETE_FILES, WORKSPACE_WILL_RENAME_FILES
+    WORKSPACE_WILL_DELETE_FILES, WORKSPACE_WILL_RENAME_FILES, InlayHintOptions
 )
 from lsprotocol.types import (
     ClientCapabilities, CodeLensOptions, CompletionOptions,
@@ -162,6 +162,13 @@ class ServerCapabilitiesBuilder:
         )
         if value is not None:
             self.server_cap.type_definition_provider = value
+        return self
+
+    def _with_inlay_hints(self):
+        value = self._provider_options(TEXT_DOCUMENT_INLAY_HINT, default=InlayHintOptions())
+        if value is not None:
+            value.resolve_provider = INLAY_HINT_RESOLVE in self.features
+            self.server_cap.inlay_hint_provider = value
         return self
 
     def _with_implementation(self):
@@ -358,6 +365,7 @@ class ServerCapabilitiesBuilder:
             ._with_declaration()
             ._with_definition()
             ._with_type_definition()
+            ._with_inlay_hints()
             ._with_implementation()
             ._with_references()
             ._with_document_highlight()

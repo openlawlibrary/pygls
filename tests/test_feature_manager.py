@@ -303,6 +303,14 @@ def server_capabilities(**kwargs):
             ),
         ),
         (
+            lsp.TEXT_DOCUMENT_INLAY_HINT,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                inlay_hint_provider=lsp.InlayHintOptions(resolve_provider=False),
+            )
+        ),
+        (
             lsp.WORKSPACE_WILL_CREATE_FILES,
             lsp.FileOperationRegistrationOptions(
                 filters=[
@@ -608,6 +616,33 @@ def test_register_feature(
 
     actual = ServerCapabilitiesBuilder(
         capabilities,
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+    ).build()
+
+    assert expected == actual
+
+
+def test_register_inlay_hint_resolve(
+    feature_manager: FeatureManager,
+):
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_INLAY_HINT)
+    def _():
+        pass
+
+    @feature_manager.feature(lsp.INLAY_HINT_RESOLVE)
+    def _():
+        pass
+
+    expected = server_capabilities(
+        inlay_hint_provider=lsp.InlayHintOptions(resolve_provider=True),
+    )
+
+    actual = ServerCapabilitiesBuilder(
+        lsp.ClientCapabilities(),
         feature_manager.features.keys(),
         feature_manager.feature_options,
         [],
