@@ -1,5 +1,4 @@
 # GENERATED FROM scripts/gen-client.py -- DO NOT EDIT
-# Last Modified: 2023-06-09 20:42:24.861547
 # flake8: noqa
 from concurrent.futures import Future
 from lsprotocol.types import CallHierarchyIncomingCall
@@ -194,10 +193,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``codeAction/resolve`` request.
 
-        Request to resolve additional information for a given code action.The
-        request's parameter is of type {@link CodeAction} the response is of type.
-
-        {@link CodeAction} or a Thenable that resolves to such.
+        Request to resolve additional information for a given code action.The request's
+        parameter is of type {@link CodeAction} the response is of type {@link CodeAction}
+        or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -210,10 +208,9 @@ class LanguageClient(Client):
     ) -> CodeAction:
         """Make a ``codeAction/resolve`` request.
 
-        Request to resolve additional information for a given code action.The
-        request's parameter is of type {@link CodeAction} the response is of type.
-
-        {@link CodeAction} or a Thenable that resolves to such.
+        Request to resolve additional information for a given code action.The request's
+        parameter is of type {@link CodeAction} the response is of type {@link CodeAction}
+        or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -254,9 +251,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``completionItem/resolve`` request.
 
-        Request to resolve additional information for a given completion
-        item.The request's parameter is of type {@link CompletionItem} the response
-        is of type {@link CompletionItem} or a Thenable that resolves to such.
+        Request to resolve additional information for a given completion item.The
+        request's parameter is of type {@link CompletionItem} the response is of type {@link
+        CompletionItem} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -269,9 +266,9 @@ class LanguageClient(Client):
     ) -> CompletionItem:
         """Make a ``completionItem/resolve`` request.
 
-        Request to resolve additional information for a given completion
-        item.The request's parameter is of type {@link CompletionItem} the response
-        is of type {@link CompletionItem} or a Thenable that resolves to such.
+        Request to resolve additional information for a given completion item.The
+        request's parameter is of type {@link CompletionItem} the response is of type {@link
+        CompletionItem} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -287,8 +284,8 @@ class LanguageClient(Client):
 
         Request to resolve additional information for a given document link.
 
-        The request's parameter is of type {@link DocumentLink} the response
-        is of type {@link DocumentLink} or a Thenable that resolves to such.
+        The request's parameter is of type {@link DocumentLink} the response is of type
+        {@link DocumentLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -303,8 +300,8 @@ class LanguageClient(Client):
 
         Request to resolve additional information for a given document link.
 
-        The request's parameter is of type {@link DocumentLink} the response
-        is of type {@link DocumentLink} or a Thenable that resolves to such.
+        The request's parameter is of type {@link DocumentLink} the response is of type
+        {@link DocumentLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -320,10 +317,9 @@ class LanguageClient(Client):
 
         The initialize request is sent from the client to the server.
 
-        It is sent once as the request after starting up the server. The
-        requests parameter is of type {@link InitializeParams} the response
-        if of type {@link InitializeResult} of a Thenable that resolves to
-        such.
+        It is sent once as the request after starting up the server. The requests parameter
+        is of type {@link InitializeParams} the response if of type {@link InitializeResult}
+        of a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -338,10 +334,9 @@ class LanguageClient(Client):
 
         The initialize request is sent from the client to the server.
 
-        It is sent once as the request after starting up the server. The
-        requests parameter is of type {@link InitializeParams} the response
-        if of type {@link InitializeResult} of a Thenable that resolves to
-        such.
+        It is sent once as the request after starting up the server. The requests parameter
+        is of type {@link InitializeParams} the response if of type {@link InitializeResult}
+        of a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -355,10 +350,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``inlayHint/resolve`` request.
 
-        A request to resolve additional properties for an inlay hint. The
-        request's parameter is of type {@link InlayHint}, the response is of type.
-
-        {@link InlayHint} or a Thenable that resolves to such.
+        A request to resolve additional properties for an inlay hint. The request's
+        parameter is of type {@link InlayHint}, the response is of type {@link InlayHint} or
+        a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -373,10 +367,9 @@ class LanguageClient(Client):
     ) -> InlayHint:
         """Make a ``inlayHint/resolve`` request.
 
-        A request to resolve additional properties for an inlay hint. The
-        request's parameter is of type {@link InlayHint}, the response is of type.
-
-        {@link InlayHint} or a Thenable that resolves to such.
+        A request to resolve additional properties for an inlay hint. The request's
+        parameter is of type {@link InlayHint}, the response is of type {@link InlayHint} or
+        a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -394,9 +387,8 @@ class LanguageClient(Client):
 
         A shutdown request is sent from the client to the server.
 
-        It is sent once when the client decides to shutdown the server. The
-        only notification that is sent after a shutdown request is the exit
-        event.
+        It is sent once when the client decides to shutdown the server. The only
+        notification that is sent after a shutdown request is the exit event.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -411,9 +403,8 @@ class LanguageClient(Client):
 
         A shutdown request is sent from the client to the server.
 
-        It is sent once when the client decides to shutdown the server. The
-        only notification that is sent after a shutdown request is the exit
-        event.
+        It is sent once when the client decides to shutdown the server. The only
+        notification that is sent after a shutdown request is the exit event.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -483,9 +474,9 @@ class LanguageClient(Client):
 
         A request to list all presentation for a color.
 
-        The request's parameter is of type {@link ColorPresentationParams}
-        the response is of type {@link ColorInformation ColorInformation[]}
-        or a Thenable that resolves to such.
+        The request's parameter is of type {@link ColorPresentationParams} the response is
+        of type {@link ColorInformation ColorInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -500,9 +491,9 @@ class LanguageClient(Client):
 
         A request to list all presentation for a color.
 
-        The request's parameter is of type {@link ColorPresentationParams}
-        the response is of type {@link ColorInformation ColorInformation[]}
-        or a Thenable that resolves to such.
+        The request's parameter is of type {@link ColorPresentationParams} the response is
+        of type {@link ColorInformation ColorInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -516,18 +507,16 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/completion`` request.
 
-        Request to request completion at a given text document position. The
-        request's parameter is of type {@link TextDocumentPosition} the response is
-        of type {@link CompletionItem CompletionItem[]} or {@link CompletionList}
-        or a Thenable that resolves to such.
+        Request to request completion at a given text document position. The request's
+        parameter is of type {@link TextDocumentPosition} the response is of type {@link
+        CompletionItem CompletionItem[]} or {@link CompletionList} or a Thenable that
+        resolves to such.
 
-        The request can delay the computation of the {@link
-        CompletionItem.detail `detail`} and {@link
-        CompletionItem.documentation `documentation`} properties to the
-        `completionItem/resolve` request. However, properties that are
-        needed for the initial sorting and filtering, like `sortText`,
-        `filterText`, `insertText`, and `textEdit`, must not be changed
-        during resolve.
+        The request can delay the computation of the {@link CompletionItem.detail `detail`}
+        and {@link CompletionItem.documentation `documentation`} properties to the
+        `completionItem/resolve` request. However, properties that are needed for the
+        initial sorting and filtering, like `sortText`, `filterText`, `insertText`, and
+        `textEdit`, must not be changed during resolve.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -540,18 +529,16 @@ class LanguageClient(Client):
     ) -> Union[List[CompletionItem], CompletionList, None]:
         """Make a ``textDocument/completion`` request.
 
-        Request to request completion at a given text document position. The
-        request's parameter is of type {@link TextDocumentPosition} the response is
-        of type {@link CompletionItem CompletionItem[]} or {@link CompletionList}
-        or a Thenable that resolves to such.
+        Request to request completion at a given text document position. The request's
+        parameter is of type {@link TextDocumentPosition} the response is of type {@link
+        CompletionItem CompletionItem[]} or {@link CompletionList} or a Thenable that
+        resolves to such.
 
-        The request can delay the computation of the {@link
-        CompletionItem.detail `detail`} and {@link
-        CompletionItem.documentation `documentation`} properties to the
-        `completionItem/resolve` request. However, properties that are
-        needed for the initial sorting and filtering, like `sortText`,
-        `filterText`, `insertText`, and `textEdit`, must not be changed
-        during resolve.
+        The request can delay the computation of the {@link CompletionItem.detail `detail`}
+        and {@link CompletionItem.documentation `documentation`} properties to the
+        `completionItem/resolve` request. However, properties that are needed for the
+        initial sorting and filtering, like `sortText`, `filterText`, `insertText`, and
+        `textEdit`, must not be changed during resolve.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -565,13 +552,12 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/declaration`` request.
 
-        A request to resolve the type definition locations of a symbol at a
-        given text document position.
+        A request to resolve the type definition locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Declaration} or a typed array of {@link DeclarationLink} or a
-        Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Declaration} or a typed
+        array of {@link DeclarationLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -584,13 +570,12 @@ class LanguageClient(Client):
     ) -> Union[Location, List[Location], List[LocationLink], None]:
         """Make a ``textDocument/declaration`` request.
 
-        A request to resolve the type definition locations of a symbol at a
-        given text document position.
+        A request to resolve the type definition locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Declaration} or a typed array of {@link DeclarationLink} or a
-        Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Declaration} or a typed
+        array of {@link DeclarationLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -604,13 +589,12 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/definition`` request.
 
-        A request to resolve the definition location of a symbol at a given text
-        document position.
+        A request to resolve the definition location of a symbol at a given text document
+        position.
 
-        The request's parameter is of type [TextDocumentPosition]
-        (#TextDocumentPosition) the response is of either type {@link
-        Definition} or a typed array of {@link DefinitionLink} or a Thenable
-        that resolves to such.
+        The request's parameter is of type [TextDocumentPosition] (#TextDocumentPosition)
+        the response is of either type {@link Definition} or a typed array of {@link
+        DefinitionLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -623,13 +607,12 @@ class LanguageClient(Client):
     ) -> Union[Location, List[Location], List[LocationLink], None]:
         """Make a ``textDocument/definition`` request.
 
-        A request to resolve the definition location of a symbol at a given text
-        document position.
+        A request to resolve the definition location of a symbol at a given text document
+        position.
 
-        The request's parameter is of type [TextDocumentPosition]
-        (#TextDocumentPosition) the response is of either type {@link
-        Definition} or a typed array of {@link DefinitionLink} or a Thenable
-        that resolves to such.
+        The request's parameter is of type [TextDocumentPosition] (#TextDocumentPosition)
+        the response is of either type {@link Definition} or a typed array of {@link
+        DefinitionLink} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -676,9 +659,9 @@ class LanguageClient(Client):
 
         A request to list all color symbols found in a given text document.
 
-        The request's parameter is of type {@link DocumentColorParams} the
-        response is of type {@link ColorInformation ColorInformation[]} or a
-        Thenable that resolves to such.
+        The request's parameter is of type {@link DocumentColorParams} the response is of
+        type {@link ColorInformation ColorInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -693,9 +676,9 @@ class LanguageClient(Client):
 
         A request to list all color symbols found in a given text document.
 
-        The request's parameter is of type {@link DocumentColorParams} the
-        response is of type {@link ColorInformation ColorInformation[]} or a
-        Thenable that resolves to such.
+        The request's parameter is of type {@link DocumentColorParams} the response is of
+        type {@link ColorInformation ColorInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -712,10 +695,9 @@ class LanguageClient(Client):
         Request to resolve a {@link DocumentHighlight} for a given text document
         position.
 
-        The request's parameter is of type [TextDocumentPosition]
-        (#TextDocumentPosition) the request response is of type
-        [DocumentHighlight[]] (#DocumentHighlight) or a Thenable that
-        resolves to such.
+        The request's parameter is of type [TextDocumentPosition] (#TextDocumentPosition)
+        the request response is of type [DocumentHighlight[]] (#DocumentHighlight) or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -731,10 +713,9 @@ class LanguageClient(Client):
         Request to resolve a {@link DocumentHighlight} for a given text document
         position.
 
-        The request's parameter is of type [TextDocumentPosition]
-        (#TextDocumentPosition) the request response is of type
-        [DocumentHighlight[]] (#DocumentHighlight) or a Thenable that
-        resolves to such.
+        The request's parameter is of type [TextDocumentPosition] (#TextDocumentPosition)
+        the request response is of type [DocumentHighlight[]] (#DocumentHighlight) or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -777,9 +758,9 @@ class LanguageClient(Client):
 
         A request to list all symbols found in a given text document.
 
-        The request's parameter is of type {@link TextDocumentIdentifier}
-        the response is of type {@link SymbolInformation
-        SymbolInformation[]} or a Thenable that resolves to such.
+        The request's parameter is of type {@link TextDocumentIdentifier} the response is of
+        type {@link SymbolInformation SymbolInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -794,9 +775,9 @@ class LanguageClient(Client):
 
         A request to list all symbols found in a given text document.
 
-        The request's parameter is of type {@link TextDocumentIdentifier}
-        the response is of type {@link SymbolInformation
-        SymbolInformation[]} or a Thenable that resolves to such.
+        The request's parameter is of type {@link TextDocumentIdentifier} the response is of
+        type {@link SymbolInformation SymbolInformation[]} or a Thenable that resolves to
+        such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -812,9 +793,8 @@ class LanguageClient(Client):
 
         A request to provide folding ranges in a document.
 
-        The request's parameter is of type {@link FoldingRangeParams}, the
-        response is of type {@link FoldingRangeList} or a Thenable that
-        resolves to such.
+        The request's parameter is of type {@link FoldingRangeParams}, the response is of
+        type {@link FoldingRangeList} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -829,9 +809,8 @@ class LanguageClient(Client):
 
         A request to provide folding ranges in a document.
 
-        The request's parameter is of type {@link FoldingRangeParams}, the
-        response is of type {@link FoldingRangeList} or a Thenable that
-        resolves to such.
+        The request's parameter is of type {@link FoldingRangeParams}, the response is of
+        type {@link FoldingRangeList} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -845,7 +824,7 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/formatting`` request.
 
-        A request to to format a whole document.
+        A request to format a whole document.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -858,7 +837,7 @@ class LanguageClient(Client):
     ) -> Optional[List[TextEdit]]:
         """Make a ``textDocument/formatting`` request.
 
-        A request to to format a whole document.
+        A request to format a whole document.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -874,9 +853,8 @@ class LanguageClient(Client):
 
         Request to request hover information at a given text document position.
 
-        The request's parameter is of type {@link TextDocumentPosition} the
-        response is of type {@link Hover} or a Thenable that resolves to
-        such.
+        The request's parameter is of type {@link TextDocumentPosition} the response is of
+        type {@link Hover} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -891,9 +869,8 @@ class LanguageClient(Client):
 
         Request to request hover information at a given text document position.
 
-        The request's parameter is of type {@link TextDocumentPosition} the
-        response is of type {@link Hover} or a Thenable that resolves to
-        such.
+        The request's parameter is of type {@link TextDocumentPosition} the response is of
+        type {@link Hover} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -907,12 +884,12 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/implementation`` request.
 
-        A request to resolve the implementation locations of a symbol at a given
-        text document position.
+        A request to resolve the implementation locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Definition} or a Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Definition} or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -925,12 +902,12 @@ class LanguageClient(Client):
     ) -> Union[Location, List[Location], List[LocationLink], None]:
         """Make a ``textDocument/implementation`` request.
 
-        A request to resolve the implementation locations of a symbol at a given
-        text document position.
+        A request to resolve the implementation locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Definition} or a Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Definition} or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -944,10 +921,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/inlayHint`` request.
 
-        A request to provide inlay hints in a document. The request's parameter
-        is of type {@link InlayHintsParams}, the response is of type.
-
-        {@link InlayHint InlayHint[]} or a Thenable that resolves to such.
+        A request to provide inlay hints in a document. The request's parameter is of
+        type {@link InlayHintsParams}, the response is of type {@link InlayHint InlayHint[]}
+        or a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -962,10 +938,9 @@ class LanguageClient(Client):
     ) -> Optional[List[InlayHint]]:
         """Make a ``textDocument/inlayHint`` request.
 
-        A request to provide inlay hints in a document. The request's parameter
-        is of type {@link InlayHintsParams}, the response is of type.
-
-        {@link InlayHint InlayHint[]} or a Thenable that resolves to such.
+        A request to provide inlay hints in a document. The request's parameter is of
+        type {@link InlayHintsParams}, the response is of type {@link InlayHint InlayHint[]}
+        or a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -981,10 +956,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/inlineValue`` request.
 
-        A request to provide inline values in a document. The request's
-        parameter is of type {@link InlineValueParams}, the response is of type.
-
-        {@link InlineValue InlineValue[]} or a Thenable that resolves to such.
+        A request to provide inline values in a document. The request's parameter is of
+        type {@link InlineValueParams}, the response is of type {@link InlineValue
+        InlineValue[]} or a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -999,10 +973,9 @@ class LanguageClient(Client):
     ) -> Optional[List[Union[InlineValueText, InlineValueVariableLookup, InlineValueEvaluatableExpression]]]:
         """Make a ``textDocument/inlineValue`` request.
 
-        A request to provide inline values in a document. The request's
-        parameter is of type {@link InlineValueParams}, the response is of type.
-
-        {@link InlineValue InlineValue[]} or a Thenable that resolves to such.
+        A request to provide inline values in a document. The request's parameter is of
+        type {@link InlineValueParams}, the response is of type {@link InlineValue
+        InlineValue[]} or a Thenable that resolves to such.
 
         @since 3.17.0
         """
@@ -1049,11 +1022,10 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/moniker`` request.
 
-        A request to get the moniker of a symbol at a given text document
-        position.
+        A request to get the moniker of a symbol at a given text document position.
 
-        The request parameter is of type {@link TextDocumentPositionParams}.
-        The response is of type {@link Moniker Moniker[]} or `null`.
+        The request parameter is of type {@link TextDocumentPositionParams}. The response is
+        of type {@link Moniker Moniker[]} or `null`.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1066,11 +1038,10 @@ class LanguageClient(Client):
     ) -> Optional[List[Moniker]]:
         """Make a ``textDocument/moniker`` request.
 
-        A request to get the moniker of a symbol at a given text document
-        position.
+        A request to get the moniker of a symbol at a given text document position.
 
-        The request parameter is of type {@link TextDocumentPositionParams}.
-        The response is of type {@link Moniker Moniker[]} or `null`.
+        The request parameter is of type {@link TextDocumentPositionParams}. The response is
+        of type {@link Moniker Moniker[]} or `null`.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1111,9 +1082,8 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/prepareCallHierarchy`` request.
 
-        A request to result a `CallHierarchyItem` in a document at a given
-        position. Can be used as an input to an incoming or outgoing call
-        hierarchy.
+        A request to result a `CallHierarchyItem` in a document at a given position. Can
+        be used as an input to an incoming or outgoing call hierarchy.
 
         @since 3.16.0
         """
@@ -1128,9 +1098,8 @@ class LanguageClient(Client):
     ) -> Optional[List[CallHierarchyItem]]:
         """Make a ``textDocument/prepareCallHierarchy`` request.
 
-        A request to result a `CallHierarchyItem` in a document at a given
-        position. Can be used as an input to an incoming or outgoing call
-        hierarchy.
+        A request to result a `CallHierarchyItem` in a document at a given position. Can
+        be used as an input to an incoming or outgoing call hierarchy.
 
         @since 3.16.0
         """
@@ -1177,9 +1146,8 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/prepareTypeHierarchy`` request.
 
-        A request to result a `TypeHierarchyItem` in a document at a given
-        position. Can be used as an input to a subtypes or supertypes type
-        hierarchy.
+        A request to result a `TypeHierarchyItem` in a document at a given position. Can
+        be used as an input to a subtypes or supertypes type hierarchy.
 
         @since 3.17.0
         """
@@ -1194,9 +1162,8 @@ class LanguageClient(Client):
     ) -> Optional[List[TypeHierarchyItem]]:
         """Make a ``textDocument/prepareTypeHierarchy`` request.
 
-        A request to result a `TypeHierarchyItem` in a document at a given
-        position. Can be used as an input to a subtypes or supertypes type
-        hierarchy.
+        A request to result a `TypeHierarchyItem` in a document at a given position. Can
+        be used as an input to a subtypes or supertypes type hierarchy.
 
         @since 3.17.0
         """
@@ -1212,7 +1179,7 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/rangeFormatting`` request.
 
-        A request to to format a range in a document.
+        A request to format a range in a document.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1225,7 +1192,7 @@ class LanguageClient(Client):
     ) -> Optional[List[TextEdit]]:
         """Make a ``textDocument/rangeFormatting`` request.
 
-        A request to to format a range in a document.
+        A request to format a range in a document.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1239,10 +1206,10 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/references`` request.
 
-        A request to resolve project-wide references for the symbol denoted by
-        the given text document position. The request's parameter is of type {@link
-        ReferenceParams} the response is of type.
+        A request to resolve project-wide references for the symbol denoted by the given
+        text document position.
 
+        The request's parameter is of type {@link ReferenceParams} the response is of type
         {@link Location Location[]} or a Thenable that resolves to such.
         """
         if self.stopped:
@@ -1256,10 +1223,10 @@ class LanguageClient(Client):
     ) -> Optional[List[Location]]:
         """Make a ``textDocument/references`` request.
 
-        A request to resolve project-wide references for the symbol denoted by
-        the given text document position. The request's parameter is of type {@link
-        ReferenceParams} the response is of type.
+        A request to resolve project-wide references for the symbol denoted by the given
+        text document position.
 
+        The request's parameter is of type {@link ReferenceParams} the response is of type
         {@link Location Location[]} or a Thenable that resolves to such.
         """
         if self.stopped:
@@ -1303,9 +1270,8 @@ class LanguageClient(Client):
 
         A request to provide selection ranges in a document.
 
-        The request's parameter is of type {@link SelectionRangeParams}, the
-        response is of type {@link SelectionRange SelectionRange[]} or a
-        Thenable that resolves to such.
+        The request's parameter is of type {@link SelectionRangeParams}, the response is of
+        type {@link SelectionRange SelectionRange[]} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1320,9 +1286,8 @@ class LanguageClient(Client):
 
         A request to provide selection ranges in a document.
 
-        The request's parameter is of type {@link SelectionRangeParams}, the
-        response is of type {@link SelectionRange SelectionRange[]} or a
-        Thenable that resolves to such.
+        The request's parameter is of type {@link SelectionRangeParams}, the response is of
+        type {@link SelectionRange SelectionRange[]} or a Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1444,12 +1409,12 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/typeDefinition`` request.
 
-        A request to resolve the type definition locations of a symbol at a
-        given text document position.
+        A request to resolve the type definition locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Definition} or a Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Definition} or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1462,12 +1427,12 @@ class LanguageClient(Client):
     ) -> Union[Location, List[Location], List[LocationLink], None]:
         """Make a ``textDocument/typeDefinition`` request.
 
-        A request to resolve the type definition locations of a symbol at a
-        given text document position.
+        A request to resolve the type definition locations of a symbol at a given text
+        document position.
 
         The request's parameter is of type [TextDocumentPositionParams]
-        (#TextDocumentPositionParams) the response is of type {@link
-        Definition} or a Thenable that resolves to such.
+        (#TextDocumentPositionParams) the response is of type {@link Definition} or a
+        Thenable that resolves to such.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1481,14 +1446,13 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``textDocument/willSaveWaitUntil`` request.
 
-        A document will save request is sent from the client to the server
-        before the document is actually saved.
+        A document will save request is sent from the client to the server before the
+        document is actually saved.
 
-        The request can return an array of TextEdits which will be applied
-        to the text document before it is saved. Please note that clients
-        might drop results if computing the text edits took too long or if a
-        server constantly fails on this request. This is done to keep the
-        save fast and reliable.
+        The request can return an array of TextEdits which will be applied to the text
+        document before it is saved. Please note that clients might drop results if
+        computing the text edits took too long or if a server constantly fails on this
+        request. This is done to keep the save fast and reliable.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1501,14 +1465,13 @@ class LanguageClient(Client):
     ) -> Optional[List[TextEdit]]:
         """Make a ``textDocument/willSaveWaitUntil`` request.
 
-        A document will save request is sent from the client to the server
-        before the document is actually saved.
+        A document will save request is sent from the client to the server before the
+        document is actually saved.
 
-        The request can return an array of TextEdits which will be applied
-        to the text document before it is saved. Please note that clients
-        might drop results if computing the text edits took too long or if a
-        server constantly fails on this request. This is done to keep the
-        save fast and reliable.
+        The request can return an array of TextEdits which will be applied to the text
+        document before it is saved. Please note that clients might drop results if
+        computing the text edits took too long or if a server constantly fails on this
+        request. This is done to keep the save fast and reliable.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1617,8 +1580,8 @@ class LanguageClient(Client):
 
         A request send from the client to the server to execute a command.
 
-        The request might return a workspace edit which the client will
-        apply to the workspace.
+        The request might return a workspace edit which the client will apply to the
+        workspace.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1633,8 +1596,8 @@ class LanguageClient(Client):
 
         A request send from the client to the server to execute a command.
 
-        The request might return a workspace edit which the client will
-        apply to the workspace.
+        The request might return a workspace edit which the client will apply to the
+        workspace.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1648,9 +1611,9 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``workspace/symbol`` request.
 
-        A request to list project-wide symbols matching the query string given
-        by the {@link WorkspaceSymbolParams}. The response is of type {@link
-        SymbolInformation SymbolInformation[]} or a Thenable that resolves to such.
+        A request to list project-wide symbols matching the query string given by the
+        {@link WorkspaceSymbolParams}. The response is of type {@link SymbolInformation
+        SymbolInformation[]} or a Thenable that resolves to such.
 
         @since 3.17.0 - support for WorkspaceSymbol in the returned data. Clients
          need to advertise support for WorkspaceSymbols via the client capability
@@ -1667,9 +1630,9 @@ class LanguageClient(Client):
     ) -> Union[List[SymbolInformation], List[WorkspaceSymbol], None]:
         """Make a ``workspace/symbol`` request.
 
-        A request to list project-wide symbols matching the query string given
-        by the {@link WorkspaceSymbolParams}. The response is of type {@link
-        SymbolInformation SymbolInformation[]} or a Thenable that resolves to such.
+        A request to list project-wide symbols matching the query string given by the
+        {@link WorkspaceSymbolParams}. The response is of type {@link SymbolInformation
+        SymbolInformation[]} or a Thenable that resolves to such.
 
         @since 3.17.0 - support for WorkspaceSymbol in the returned data. Clients
          need to advertise support for WorkspaceSymbols via the client capability
@@ -1718,9 +1681,12 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``workspace/willCreateFiles`` request.
 
-        The will create files request is sent from the client to the server
-        before files are actually created as long as the creation is triggered from
-        within the client.
+        The will create files request is sent from the client to the server before files
+        are actually created as long as the creation is triggered from within the client.
+
+        The request can return a `WorkspaceEdit` which will be applied to workspace before the
+        files are created. Hence the `WorkspaceEdit` can not manipulate the content of the file
+        to be created.
 
         @since 3.16.0
         """
@@ -1735,9 +1701,12 @@ class LanguageClient(Client):
     ) -> Optional[WorkspaceEdit]:
         """Make a ``workspace/willCreateFiles`` request.
 
-        The will create files request is sent from the client to the server
-        before files are actually created as long as the creation is triggered from
-        within the client.
+        The will create files request is sent from the client to the server before files
+        are actually created as long as the creation is triggered from within the client.
+
+        The request can return a `WorkspaceEdit` which will be applied to workspace before the
+        files are created. Hence the `WorkspaceEdit` can not manipulate the content of the file
+        to be created.
 
         @since 3.16.0
         """
@@ -1753,8 +1722,8 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``workspace/willDeleteFiles`` request.
 
-        The did delete files notification is sent from the client to the server
-        when files were deleted from within the client.
+        The did delete files notification is sent from the client to the server when
+        files were deleted from within the client.
 
         @since 3.16.0
         """
@@ -1769,8 +1738,8 @@ class LanguageClient(Client):
     ) -> Optional[WorkspaceEdit]:
         """Make a ``workspace/willDeleteFiles`` request.
 
-        The did delete files notification is sent from the client to the server
-        when files were deleted from within the client.
+        The did delete files notification is sent from the client to the server when
+        files were deleted from within the client.
 
         @since 3.16.0
         """
@@ -1786,9 +1755,8 @@ class LanguageClient(Client):
     ) -> Future:
         """Make a ``workspace/willRenameFiles`` request.
 
-        The will rename files request is sent from the client to the server
-        before files are actually renamed as long as the rename is triggered from
-        within the client.
+        The will rename files request is sent from the client to the server before files
+        are actually renamed as long as the rename is triggered from within the client.
 
         @since 3.16.0
         """
@@ -1803,9 +1771,8 @@ class LanguageClient(Client):
     ) -> Optional[WorkspaceEdit]:
         """Make a ``workspace/willRenameFiles`` request.
 
-        The will rename files request is sent from the client to the server
-        before files are actually renamed as long as the rename is triggered from
-        within the client.
+        The will rename files request is sent from the client to the server before files
+        are actually renamed as long as the rename is triggered from within the client.
 
         @since 3.16.0
         """
@@ -1827,8 +1794,8 @@ class LanguageClient(Client):
     def exit(self, params: None) -> None:
         """Send a ``exit`` notification.
 
-        The exit event is sent from the client to the server to ask the server
-        to exit its process.
+        The exit event is sent from the client to the server to ask the server to exit
+        its process.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1838,9 +1805,9 @@ class LanguageClient(Client):
     def initialized(self, params: InitializedParams) -> None:
         """Send a ``initialized`` notification.
 
-        The initialized notification is sent from the client to the server after
-        the client is fully initialized and the server is allowed to send requests
-        from the server to the client.
+        The initialized notification is sent from the client to the server after the
+        client is fully initialized and the server is allowed to send requests from the
+        server to the client.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1916,8 +1883,8 @@ class LanguageClient(Client):
     def text_document_did_change(self, params: DidChangeTextDocumentParams) -> None:
         """Send a ``textDocument/didChange`` notification.
 
-        The document change notification is sent from the client to the server
-        to signal changes to a text document.
+        The document change notification is sent from the client to the server to signal
+        changes to a text document.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1927,15 +1894,14 @@ class LanguageClient(Client):
     def text_document_did_close(self, params: DidCloseTextDocumentParams) -> None:
         """Send a ``textDocument/didClose`` notification.
 
-        The document close notification is sent from the client to the server
-        when the document got closed in the client.
+        The document close notification is sent from the client to the server when the
+        document got closed in the client.
 
-        The document's truth now exists where the document's uri points to
-        (e.g. if the document's uri is a file uri the truth now exists on
-        disk). As with the open notification the close notification is about
-        managing the document's content. Receiving a close notification
-        doesn't mean that the document was open in an editor before. A close
-        notification requires a previous open notification to be sent.
+        The document's truth now exists where the document's uri points to (e.g. if the
+        document's uri is a file uri the truth now exists on disk). As with the open
+        notification the close notification is about managing the document's content.
+        Receiving a close notification doesn't mean that the document was open in an editor
+        before. A close notification requires a previous open notification to be sent.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1945,16 +1911,15 @@ class LanguageClient(Client):
     def text_document_did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Send a ``textDocument/didOpen`` notification.
 
-        The document open notification is sent from the client to the server to
-        signal newly opened text documents.
+        The document open notification is sent from the client to the server to signal
+        newly opened text documents.
 
-        The document's truth is now managed by the client and the server
-        must not try to read the document's truth using the document's uri.
-        Open in this sense means it is managed by the client. It doesn't
-        necessarily mean that its content is presented in an editor. An open
-        notification must not be sent more than once without a corresponding
-        close notification send before. This means open and close
-        notification must be balanced and the max open count is one.
+        The document's truth is now managed by the client and the server must not try to
+        read the document's truth using the document's uri. Open in this sense means it is
+        managed by the client. It doesn't necessarily mean that its content is presented in
+        an editor. An open notification must not be sent more than once without a
+        corresponding close notification send before. This means open and close notification
+        must be balanced and the max open count is one.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1964,8 +1929,8 @@ class LanguageClient(Client):
     def text_document_did_save(self, params: DidSaveTextDocumentParams) -> None:
         """Send a ``textDocument/didSave`` notification.
 
-        The document save notification is sent from the client to the server
-        when the document got saved in the client.
+        The document save notification is sent from the client to the server when the
+        document got saved in the client.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1975,8 +1940,8 @@ class LanguageClient(Client):
     def text_document_will_save(self, params: WillSaveTextDocumentParams) -> None:
         """Send a ``textDocument/willSave`` notification.
 
-        A document will save notification is sent from the client to the server
-        before the document is actually saved.
+        A document will save notification is sent from the client to the server before
+        the document is actually saved.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1986,8 +1951,8 @@ class LanguageClient(Client):
     def window_work_done_progress_cancel(self, params: WorkDoneProgressCancelParams) -> None:
         """Send a ``window/workDoneProgress/cancel`` notification.
 
-        The `window/workDoneProgress/cancel` notification is sent from  the
-        client to the server to cancel a progress initiated on the server side.
+        The `window/workDoneProgress/cancel` notification is sent from  the client to the
+        server to cancel a progress initiated on the server side.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -1997,11 +1962,11 @@ class LanguageClient(Client):
     def workspace_did_change_configuration(self, params: DidChangeConfigurationParams) -> None:
         """Send a ``workspace/didChangeConfiguration`` notification.
 
-        The configuration change notification is sent from the client to the
-        server when the client's configuration has changed.
+        The configuration change notification is sent from the client to the server when
+        the client's configuration has changed.
 
-        The notification contains the changed configuration as defined by
-        the language client.
+        The notification contains the changed configuration as defined by the language
+        client.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -2011,8 +1976,8 @@ class LanguageClient(Client):
     def workspace_did_change_watched_files(self, params: DidChangeWatchedFilesParams) -> None:
         """Send a ``workspace/didChangeWatchedFiles`` notification.
 
-        The watched files notification is sent from the client to the server
-        when the client detects changes to file watched by the language client.
+        The watched files notification is sent from the client to the server when the
+        client detects changes to file watched by the language client.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -2022,8 +1987,8 @@ class LanguageClient(Client):
     def workspace_did_change_workspace_folders(self, params: DidChangeWorkspaceFoldersParams) -> None:
         """Send a ``workspace/didChangeWorkspaceFolders`` notification.
 
-        The `workspace/didChangeWorkspaceFolders` notification is sent from the
-        client to the server when the workspace folder configuration changes.
+        The `workspace/didChangeWorkspaceFolders` notification is sent from the client to
+        the server when the workspace folder configuration changes.
         """
         if self.stopped:
             raise RuntimeError("Client has been stopped.")
@@ -2033,8 +1998,8 @@ class LanguageClient(Client):
     def workspace_did_create_files(self, params: CreateFilesParams) -> None:
         """Send a ``workspace/didCreateFiles`` notification.
 
-        The did create files notification is sent from the client to the server
-        when files were created from within the client.
+        The did create files notification is sent from the client to the server when
+        files were created from within the client.
 
         @since 3.16.0
         """
@@ -2046,9 +2011,8 @@ class LanguageClient(Client):
     def workspace_did_delete_files(self, params: DeleteFilesParams) -> None:
         """Send a ``workspace/didDeleteFiles`` notification.
 
-        The will delete files request is sent from the client to the server
-        before files are actually deleted as long as the deletion is triggered from
-        within the client.
+        The will delete files request is sent from the client to the server before files
+        are actually deleted as long as the deletion is triggered from within the client.
 
         @since 3.16.0
         """
@@ -2060,8 +2024,8 @@ class LanguageClient(Client):
     def workspace_did_rename_files(self, params: RenameFilesParams) -> None:
         """Send a ``workspace/didRenameFiles`` notification.
 
-        The did rename files notification is sent from the client to the server
-        when files were renamed from within the client.
+        The did rename files notification is sent from the client to the server when
+        files were renamed from within the client.
 
         @since 3.16.0
         """
