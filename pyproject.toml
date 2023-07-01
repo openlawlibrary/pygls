@@ -1,8 +1,62 @@
-[build-system]
-requires = ["setuptools>=44", "wheel", "setuptools_scm>=3.4.3", "toml"]
-build-backend = "setuptools.build_meta"
+[tool.poetry]
+name = "pygls"
+version = "1.0.2"
+description = "A pythonic generic language server (pronounced like 'pie glass')"
+authors = ["Open Law Library <info@openlawlib.org>"]
+maintainers = [
+    "Tom BH <tom@tombh.co.uk>",
+    "Alex Carney <alcarneyme@gmail.com>",
+]
+repository = "https://github.com/openlawlibrary/pygls"
+documentation = "https://pygls.readthedocs.io/en/latest"
+license = "Apache 2.0"
+readme = "README.md"
 
-[tool.setuptools_scm]
+[tool.poetry.dependencies]
+python = ">=3.7.16,<4"
+lsprotocol = "2023.0.0a2"
+typeguard = "^3.0.0"
+websockets = {version = "^11.0.3", optional = true}
+
+[tool.poetry.extras]
+ws = ["websockets"]
+
+[tool.poetry.group.dev.dependencies]
+# Replaces (amongst many other things) flake8 and bandit
+ruff = "^0.0.275"
+# TODO `poethepoet==0.20` needs python 3.8
+poethepoet = "^0.19.0"
+mypy = "^1.4.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "7.1.2"
+pytest-asyncio = "^0.21.0"
+
+[tool.poetry.group.docs.dependencies]
+# TODO `sphinx==7` needs python 3.8
+sphinx = "^5"
+# TODO `sphinx-rtd-theme==1.3.0` will support `sphinx==7`
+sphinx-rtd-theme = "^1.2.2"
+
+[tool.poetry.group.pyodide.dependencies]
+selenium = "^4.10.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.poe.tasks]
+test = "pytest"
+test-pyodide = "python tests/pyodide_testrunner/run.py"
+ruff = "ruff check ."
+mypy = "mypy -p pygls"
+# check_generated_client = "python scripts/check_client_is_uptodate.py"
+check_generated_client = "true"
+lint = ["ruff", "mypy", "check_generated_client"]
+generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
+
+[tool.ruff]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

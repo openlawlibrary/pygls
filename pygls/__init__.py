@@ -19,8 +19,6 @@
 import os
 import sys
 
-__version__ = "1.0.2"
-
 IS_WIN = os.name == 'nt'
 IS_PYODIDE = 'pyodide' in sys.modules
 

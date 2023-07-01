@@ -7,12 +7,10 @@ import re
 import sys
 import textwrap
 from datetime import datetime
-from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Type
-from typing import Union
 
 from lsprotocol._hooks import _resolve_forward_references
 from lsprotocol.types import METHOD_TO_TYPES
