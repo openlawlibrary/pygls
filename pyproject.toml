@@ -49,8 +49,7 @@ test = "pytest"
 test-pyodide = "python tests/pyodide_testrunner/run.py"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
-# check_generated_client = "python scripts/check_client_is_uptodate.py"
-check_generated_client = "true"
+check_generated_client = "python scripts/check_client_is_uptodate.py"
 lint = ["ruff", "mypy", "check_generated_client"]
 generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
 
