@@ -11,7 +11,6 @@ All notable changes to this project will be documented in this file.
 
 #### Changed
 #### Fixed
->>>>>>> 0f2ef84 (ci: autogenerate changelog with `git-cliff`)
 
 - `pygls` no longer overrides the event loop for the current thread when given an explicit loop to use. ([#334])
 - Fixed `MethodTypeNotRegisteredError` when registering a `TEXT_DOCUMENT_DID_SAVE` feature with options. ([#338])

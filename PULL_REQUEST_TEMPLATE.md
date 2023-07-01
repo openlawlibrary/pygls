@@ -10,7 +10,5 @@ _Please replace this description with a concise description of this Pull Request
 - [ ] Tests have been included and/or updated, as appropriate
 - [ ] Docstrings have been included and/or updated, as appropriate
 - [ ] Standalone docs have been updated accordingly
-- [ ] [CONTRIBUTORS.md][contributors] was updated, as appropriate
 
 [commit messages]: https://chris.beams.io/posts/git-commit/
-[contributors]: https://github.com/openlawlibrary/pygls/blob/master/CONTRIBUTORS.md
