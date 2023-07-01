@@ -1,0 +1,44 @@
+name: Release Pygls to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  relase:
+    name: "🚀 Release 🚢"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Use Python "3.10"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+      - name: Generate the latest changelog
+        uses: orhun/git-cliff-action@v2
+        id: git-cliff
+        with:
+          args: --verbose --latest
+      - name: Update the changelog
+        run: |
+          cat "${{ steps.git-cliff.outputs.contents }} | "sed -i "3r /dev/stdin" CHANGELOG.md
+          git config --global user.name 'Github Action'
+          git config --global user.email 'github.action@users.noreply.github.com'
+          git commit -am "chore: update changelog"
+          git push
+      - name: Update CONTRIBUTORS.md
+        run: |
+          poetry run poe generate_contributors_md
+          if [[ $(git diff --stat CONTRIBUTORS.md) != '' ]]; then
+            git commit -am "chore: update CONTRIBUTORS.md"
+            git push
+          fi
+      - name: Release
+        run: |
+          poetry build
+          poetry publish --username "__token__" --password ${{ secrets.PYPI_API_TOKEN }}
