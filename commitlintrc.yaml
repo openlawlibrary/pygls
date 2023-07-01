@@ -1,0 +1,28 @@
+---
+# The rules below have been manually copied from @commitlint/config-conventional
+# and match the v1.0.0 specification:
+# https://www.conventionalcommits.org/en/v1.0.0/#specification
+#
+# You can remove them and uncomment the config below when the following issue is
+# fixed: https://github.com/conventional-changelog/commitlint/issues/613
+#
+# extends:
+#   - '@commitlint/config-conventional'
+rules:
+  body-leading-blank: [1, always]
+  body-max-line-length: [2, always, 100]
+  footer-leading-blank: [1, always]
+  footer-max-line-length: [2, always, 100]
+  header-max-length: [2, always, 100]
+  subject-case:
+    - 2
+    - never
+    - [sentence-case, start-case, pascal-case, upper-case]
+  subject-empty: [2, never]
+  subject-full-stop: [2, never, "."]
+  type-case: [2, always, lower-case]
+  type-empty: [2, never]
+  type-enum:
+    - 2
+    - always
+    - [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test]
