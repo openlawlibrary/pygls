@@ -45,16 +45,17 @@ def build_wheel() -> str:
         for src, target in directories:
             shutil.copytree(REPO / src, dest / target)
 
-        # Note that we don't copy `pyproject.toml` which declares that pygls should be
-        # built with `setuptools_scm` as this will fail due to the tmpdir not containing
-        # a proper git repo.
-        files = ["setup.py", "setup.cfg", "README.md", "ThirdPartyNotices.txt"]
+        files = ["pyproject.toml", "README.md", "ThirdPartyNotices.txt"]
 
         for src in files:
             shutil.copy(REPO / src, dest)
 
         # Build the wheel
-        subprocess.run([sys.executable, "-m", "build", "--wheel"], cwd=dest)
+        subprocess.run([
+            "poetry",
+            "build",
+            "--format=wheel"
+        ], cwd=dest)
         whl = list((dest / "dist").glob("*.whl"))[0]
         shutil.copy(whl, REPO / "tests/pyodide_testrunner")
 

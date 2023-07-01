@@ -20,7 +20,6 @@ import pytest
 import pytest_asyncio
 from lsprotocol.types import (
     ClientCapabilities,
-    InlayHint,
     InlayHintParams,
     InitializeParams,
     Position,

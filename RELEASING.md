@@ -8,27 +8,9 @@ Release notes are kept in CHANGELOG.md
 
 ## Steps to release
 
-  * Install:
-      * Python's [build module](https://pypa-build.readthedocs.io/en/latest/) with Pip or your
-        OS's package manager
-      * [Twine](https://twine.readthedocs.io/en/stable/) for interacting with pypi.org 
-  * It's probably best to make a dedicated release branch, but not essential
-  * Update CHANGELOG.md
-  * Change version in pygls/__init__.py
-  * Commit
-
+Update version in `pyproject.toml`
 
 ```sh
-# Python's `setuptools` automatically derives the version from the latest Git tag.
-# NB. If the latest commit doesn't have a tag, then `setuptools` will add `dev-[hash]` to the version.
-git tag v"$(python -c 'from pygls import __version__; print(__version__)')"
-git push --tags # not required for releasing, just needed because normal `git push` won't send the tags
-
-# Build the project into the Source and Wheel formats (they go into `./dist`)
-rm -rf dist pygls.egg-info
-python -m build
-
-# Upload to Pypi
-# You'll also need, or have access to, the Pygls Pypi org or account. Likely from @dgreisen
-twine upload dist/*
+poetry build
+poetry publish --username "$PYPI_USERNAME" --password "$PYPI_PASSWORD"
 ```

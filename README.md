@@ -52,6 +52,13 @@ There are also other Language Servers with "general" in their descriptons, or at
   * https://github.com/mattn/efm-langserver
   * https://github.com/jose-elias-alvarez/null-ls.nvim (Neovim only)
 
+## Tests
+
+* `poetry install --all-extras`
+* `poetry run test`
+* `poetry run test-pyodide`
+
+
 ## Contributing
 
 Your contributions to _pygls_ are most welcome ❤️ Please review the [Contributing](https://github.com/openlawlibrary/pygls/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/openlawlibrary/pygls/blob/master/CODE_OF_CONDUCT.md) documents for how to get started.

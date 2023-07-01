@@ -139,7 +139,7 @@ def test_show_configuration_callback():
     )
 
     server.show_message.assert_called_with(
-        f'jsonServer.exampleConfiguration value: some_value'
+        'jsonServer.exampleConfiguration value: some_value'
     )
 
 
@@ -170,7 +170,7 @@ async def test_show_configuration_async():
     )
 
     server.show_message.assert_called_with(
-        f'jsonServer.exampleConfiguration value: some_value'
+        'jsonServer.exampleConfiguration value: some_value'
     )
 
 
@@ -201,5 +201,5 @@ def test_show_configuration_thread():
     thread.join()
 
     server.show_message.assert_called_with(
-        f'jsonServer.exampleConfiguration value: some_value'
+        'jsonServer.exampleConfiguration value: some_value'
     )
