@@ -45,17 +45,33 @@ def build_wheel() -> str:
         for src, target in directories:
             shutil.copytree(REPO / src, dest / target)
 
-        files = ["pyproject.toml", "README.md", "ThirdPartyNotices.txt"]
+        files = [
+            "pyproject.toml",
+            "poetry.lock",
+            "README.md",
+            "ThirdPartyNotices.txt"
+        ]
 
         for src in files:
             shutil.copy(REPO / src, dest)
 
-        # Build the wheel
+        # Convert the lock file to requirements.txt.
+        # Ensures reproducible behavour for testing.
         subprocess.run([
             "poetry",
-            "build",
-            "--format=wheel"
+            "export",
+            "-f", "requirements.txt",
+            "--output", "requirements.txt"
         ], cwd=dest)
+        subprocess.run([
+            "poetry",
+            "run",
+            "pip",
+            "install",
+            "-r", "requirements.txt"
+        ], cwd=dest)
+        # Build the wheel
+        subprocess.run(["poetry", "build", "--format", "wheel"], cwd=dest)
         whl = list((dest / "dist").glob("*.whl"))[0]
         shutil.copy(whl, REPO / "tests/pyodide_testrunner")
 
