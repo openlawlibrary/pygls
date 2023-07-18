@@ -378,6 +378,12 @@ class LanguageServer(Server):
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 
+    def apply_edit_async(
+        self, edit: WorkspaceEdit, label: Optional[str] = None
+    ) -> WorkspaceApplyEditResponse:
+        """Sends apply edit request to the client. Should be called with `await`"""
+        return self.lsp.apply_edit_async(edit, label)
+
     def command(self, command_name: str) -> Callable[[F], F]:
         """Decorator used to register custom commands.
 

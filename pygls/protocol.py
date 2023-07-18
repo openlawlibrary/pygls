@@ -742,6 +742,14 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             WORKSPACE_APPLY_EDIT, ApplyWorkspaceEditParams(edit=edit, label=label)
         )
 
+    def apply_edit_async(
+        self, edit: WorkspaceEdit, label: Optional[str] = None
+    ) -> WorkspaceApplyEditResponse:
+        """Sends apply edit request to the client. Should be called with `await`"""
+        return self.send_request_async(
+            WORKSPACE_APPLY_EDIT, ApplyWorkspaceEditParams(edit=edit, label=label)
+        )
+
     @lsp_method(EXIT)
     def lsp_exit(self, *args) -> None:
         """Stops the server process."""
