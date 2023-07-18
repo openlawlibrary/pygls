@@ -488,7 +488,8 @@ Workspace methods that can be used for user defined features are:
 
     def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
         # Omitted
-
+    def apply_edit_async(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
+        # Omitted
 
 .. _pygls.lsp.methods: https://github.com/openlawlibrary/pygls/blob/master/pygls/lsp/methods.py
 .. _pygls.lsp.types: https://github.com/openlawlibrary/pygls/tree/master/pygls/lsp/types
