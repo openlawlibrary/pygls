@@ -19,7 +19,7 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, get_type_hints
 
 from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
                              ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
@@ -49,7 +49,7 @@ def has_ls_param_or_annotation(f, annotation):
     try:
         sig = inspect.signature(f)
         first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
-        return first_p.name == PARAM_LS or first_p.annotation is annotation
+        return first_p.name == PARAM_LS or get_type_hints(f)[first_p.name] == annotation
     except Exception:
         return False
 
