@@ -33,19 +33,23 @@ from lsprotocol import types as lsp
 from typeguard import TypeCheckError
 from typeguard._utils import qualified_name
 
+class Temp:
+    pass
+
 
 def test_has_ls_param_or_annotation():
-    class Temp:
-        pass
-
     def f1(ls, a, b, c):
         pass
 
     def f2(temp: Temp, a, b, c):
         pass
 
+    def f3(temp: "Temp", a, b, c):
+        pass
+
     assert has_ls_param_or_annotation(f1, None)
     assert has_ls_param_or_annotation(f2, Temp)
+    assert has_ls_param_or_annotation(f3, Temp)
 
 
 def test_register_command_validation_error(feature_manager):
