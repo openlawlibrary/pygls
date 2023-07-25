@@ -21,3 +21,4 @@
 - [Tomoya Tanjo](https://github.com/tom-tan)
 - [bollwyvl](https://github.com/bollwyvl)
 - [yorodm](https://github.com/yorodm)
+- [Zanie Blue](https://github.com/zanieb)
