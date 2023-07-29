@@ -28,11 +28,16 @@ from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
 from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
 from lsprotocol.types import (
     ClientCapabilities,
-    Diagnostic, MessageType, RegistrationParams,
-    ServerCapabilities, ShowDocumentParams,
-    TextDocumentSyncKind, UnregistrationParams,
-    WorkspaceApplyEditResponse, WorkspaceEdit,
-    WorkspaceConfigurationParams
+    Diagnostic,
+    MessageType,
+    RegistrationParams,
+    ServerCapabilities,
+    ShowDocumentParams,
+    TextDocumentSyncKind,
+    UnregistrationParams,
+    WorkspaceApplyEditResponse,
+    WorkspaceEdit,
+    WorkspaceConfigurationParams,
 )
 from pygls.progress import Progress
 from pygls.protocol import LanguageServerProtocol, default_converter
@@ -44,13 +49,13 @@ if not IS_PYODIDE:
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar('F', bound=Callable)
+F = TypeVar("F", bound=Callable)
 
 
 async def aio_readline(loop, executor, stop_event, rfile, proxy):
     """Reads data from stdin in separate thread (asynchronously)."""
 
-    CONTENT_LENGTH_PATTERN = re.compile(rb'^Content-Length: (\d+)\r\n$')
+    CONTENT_LENGTH_PATTERN = re.compile(rb"^Content-Length: (\d+)\r\n$")
 
     # Initialize message buffer
     message = []
@@ -68,11 +73,10 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
             match = CONTENT_LENGTH_PATTERN.fullmatch(header)
             if match:
                 content_length = int(match.group(1))
-                logger.debug('Content length: %s', content_length)
+                logger.debug("Content length: %s", content_length)
 
         # Check if all headers have been read (as indicated by an empty line \r\n)
         if content_length and not header.strip():
-
             # Read body
             body = await loop.run_in_executor(executor, rfile.read, content_length)
             if not body:
@@ -80,7 +84,7 @@ async def aio_readline(loop, executor, stop_event, rfile, proxy):
             message.append(body)
 
             # Pass message to language server protocol
-            proxy(b''.join(message))
+            proxy(b"".join(message))
 
             # Reset the buffer
             message = []
@@ -172,10 +176,16 @@ class Server:
                                                     - lazy instantiated
     """
 
-    def __init__(self, protocol_cls, converter_factory, loop=None, max_workers=2,
-                 sync_kind=TextDocumentSyncKind.Incremental):
+    def __init__(
+        self,
+        protocol_cls,
+        converter_factory,
+        loop=None,
+        max_workers=2,
+        sync_kind=TextDocumentSyncKind.Incremental,
+    ):
         if not issubclass(protocol_cls, asyncio.Protocol):
-            raise TypeError('Protocol class should be subclass of asyncio.Protocol')
+            raise TypeError("Protocol class should be subclass of asyncio.Protocol")
 
         self._max_workers = max_workers
         self._server = None
@@ -196,7 +206,7 @@ class Server:
 
     def shutdown(self):
         """Shutdown server."""
-        logger.info('Shutting down the server')
+        logger.info("Shutting down the server")
 
         self._stop_event.set()
 
@@ -212,35 +222,38 @@ class Server:
             self.loop.run_until_complete(self._server.wait_closed())
 
         if self._owns_loop and not self.loop.is_closed:
-            logger.info('Closing the event loop.')
+            logger.info("Closing the event loop.")
             self.loop.close()
 
     def start_io(self, stdin: Optional[TextIO] = None, stdout: Optional[TextIO] = None):
         """Starts IO server."""
-        logger.info('Starting IO server')
+        logger.info("Starting IO server")
 
         self._stop_event = Event()
-        transport = StdOutTransportAdapter(stdin or sys.stdin.buffer,
-                                           stdout or sys.stdout.buffer)
+        transport = StdOutTransportAdapter(
+            stdin or sys.stdin.buffer, stdout or sys.stdout.buffer
+        )
         self.lsp.connection_made(transport)
 
         try:
             self.loop.run_until_complete(
-                aio_readline(self.loop,
-                             self.thread_pool_executor,
-                             self._stop_event,
-                             stdin or sys.stdin.buffer,
-                             self.lsp.data_received))
+                aio_readline(
+                    self.loop,
+                    self.thread_pool_executor,
+                    self._stop_event,
+                    stdin or sys.stdin.buffer,
+                    self.lsp.data_received,
+                )
+            )
         except BrokenPipeError:
-            logger.error('Connection to the client is lost! Shutting down the server.')
+            logger.error("Connection to the client is lost! Shutting down the server.")
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
             self.shutdown()
 
     def start_pyodide(self):
-
-        logger.info('Starting Pyodide server')
+        logger.info("Starting Pyodide server")
 
         # Note: We don't actually start anything running as the main event
         # loop will be handled by the web platform.
@@ -250,7 +263,7 @@ class Server:
 
     def start_tcp(self, host: str, port: int) -> None:
         """Starts TCP server."""
-        logger.info('Starting TCP server on %s:%s', host, port)
+        logger.info("Starting TCP server on %s:%s", host, port)
 
         self._stop_event = Event()
         self._server = self.loop.run_until_complete(
@@ -268,10 +281,10 @@ class Server:
         try:
             from websockets.server import serve
         except ImportError:
-            logger.error('Run `pip install pygls[ws]` to install `websockets`.')
+            logger.error("Run `pip install pygls[ws]` to install `websockets`.")
             sys.exit(1)
 
-        logger.info('Starting WebSocket server on {}:{}'.format(host, port))
+        logger.info("Starting WebSocket server on {}:{}".format(host, port))
 
         self._stop_event = Event()
         self.lsp._send_only_body = True  # Don't send headers within the payload
@@ -310,8 +323,9 @@ class Server:
         def thread_pool_executor(self) -> ThreadPoolExecutor:
             """Returns thread pool instance (lazy initialization)."""
             if not self._thread_pool_executor:
-                self._thread_pool_executor = \
-                    ThreadPoolExecutor(max_workers=self._max_workers)
+                self._thread_pool_executor = ThreadPoolExecutor(
+                    max_workers=self._max_workers
+                )
 
             return self._thread_pool_executor
 
@@ -329,9 +343,12 @@ class LanguageServer(Server):
         max_workers(int, optional): Number of workers for `ThreadPool` and
                                     `ThreadPoolExecutor`
     """
+
     lsp: LanguageServerProtocol
 
-    default_error_message = "Unexpected error in LSP server, see server's logs for details"
+    default_error_message = (
+        "Unexpected error in LSP server, see server's logs for details"
+    )
     """
     The default error message sent to the user's editor when this server encounters an uncaught
     exception.
@@ -344,11 +361,12 @@ class LanguageServer(Server):
         loop=None,
         protocol_cls=LanguageServerProtocol,
         converter_factory=default_converter,
-        max_workers: int = 2
+        max_workers: int = 2,
     ):
-
         if not issubclass(protocol_cls, LanguageServerProtocol):
-            raise TypeError('Protocol class should be subclass of LanguageServerProtocol')
+            raise TypeError(
+                "Protocol class should be subclass of LanguageServerProtocol"
+            )
 
         self.name = name
         self.version = version
@@ -376,7 +394,9 @@ class LanguageServer(Server):
         return self.lsp.client_capabilities
 
     def feature(
-        self, feature_name: str, options: Optional[Any] = None,
+        self,
+        feature_name: str,
+        options: Optional[Any] = None,
     ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
@@ -387,12 +407,17 @@ class LanguageServer(Server):
         """
         return self.lsp.fm.feature(feature_name, options)
 
-    def get_configuration(self, params: WorkspaceConfigurationParams,
-                          callback: Optional[ConfigCallbackType] = None) -> Future:
+    def get_configuration(
+        self,
+        params: WorkspaceConfigurationParams,
+        callback: Optional[ConfigCallbackType] = None,
+    ) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
-    def get_configuration_async(self, params: WorkspaceConfigurationParams) -> asyncio.Future:
+    def get_configuration_async(
+        self, params: WorkspaceConfigurationParams
+    ) -> asyncio.Future:
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
@@ -416,15 +441,13 @@ class LanguageServer(Server):
         Sends diagnostic notification to the client.
         """
         params = self.lsp._construct_publish_diagnostic_type(
-            uri,
-            diagnostics,
-            version,
-            **kwargs
+            uri, diagnostics, version, **kwargs
         )
         self.lsp.publish_diagnostics(params, **kwargs)
 
-    def register_capability(self, params: RegistrationParams,
-                            callback: Optional[Callable[[], None]] = None) -> Future:
+    def register_capability(
+        self, params: RegistrationParams, callback: Optional[Callable[[], None]] = None
+    ) -> Future:
         """Register a new capability on the client."""
         return self.lsp.register_capability(params, callback)
 
@@ -432,7 +455,9 @@ class LanguageServer(Server):
         """Register a new capability on the client. Should be called with `await`"""
         return self.lsp.register_capability_async(params)
 
-    def semantic_tokens_refresh(self, callback: Optional[Callable[[], None]] = None) -> Future:
+    def semantic_tokens_refresh(
+        self, callback: Optional[Callable[[], None]] = None
+    ) -> Future:
         """Request a refresh of all semantic tokens."""
         return self.lsp.semantic_tokens_refresh(callback)
 
@@ -449,8 +474,11 @@ class LanguageServer(Server):
         """Return server capabilities."""
         return self.lsp.server_capabilities
 
-    def show_document(self, params: ShowDocumentParams,
-                      callback: Optional[ShowDocumentCallbackType] = None) -> Future:
+    def show_document(
+        self,
+        params: ShowDocumentParams,
+        callback: Optional[ShowDocumentCallbackType] = None,
+    ) -> Future:
         """Display a particular document in the user interface."""
         return self.lsp.show_document(params, callback)
 
@@ -466,14 +494,18 @@ class LanguageServer(Server):
         """Sends message to the client's output channel."""
         self.lsp.show_message_log(message, msg_type)
 
-    def _report_server_error(self, error: Exception, source: Union[PyglsError, JsonRpcException]):
+    def _report_server_error(
+        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+    ):
         # Prevent recursive error reporting
         try:
             self.report_server_error(error, source)
         except Exception:
             logger.warning("Failed to report error to client")
 
-    def report_server_error(self, error: Exception, source: Union[PyglsError, JsonRpcException]):
+    def report_server_error(
+        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+    ):
         """
         Sends error to the client for displaying.
 
@@ -501,12 +533,17 @@ class LanguageServer(Server):
         """Decorator that mark function to execute it in a thread."""
         return self.lsp.thread()
 
-    def unregister_capability(self, params: UnregistrationParams,
-                              callback: Optional[Callable[[], None]] = None) -> Future:
+    def unregister_capability(
+        self,
+        params: UnregistrationParams,
+        callback: Optional[Callable[[], None]] = None,
+    ) -> Future:
         """Unregister a new capability on the client."""
         return self.lsp.unregister_capability(params, callback)
 
-    def unregister_capability_async(self, params: UnregistrationParams) -> asyncio.Future:
+    def unregister_capability_async(
+        self, params: UnregistrationParams
+    ) -> asyncio.Future:
         """Unregister a new capability on the client. Should be called with `await`"""
         return self.lsp.unregister_capability_async(params)
 

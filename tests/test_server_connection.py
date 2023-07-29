@@ -18,11 +18,11 @@ except ImportError:
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 async def test_tcp_connection_lost():
     loop = asyncio.new_event_loop()
 
-    server = LanguageServer('pygls-test', 'v1', loop=loop)
+    server = LanguageServer("pygls-test", "v1", loop=loop)
 
     server.lsp.connection_made = Mock()
     server.lsp.connection_lost = Mock()
@@ -57,21 +57,17 @@ async def test_tcp_connection_lost():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 async def test_io_connection_lost():
     # Client to Server pipe.
     csr, csw = os.pipe()
     # Server to client pipe.
     scr, scw = os.pipe()
 
-    server = LanguageServer('pygls-test', 'v1', loop=asyncio.new_event_loop())
+    server = LanguageServer("pygls-test", "v1", loop=asyncio.new_event_loop())
     server.lsp.connection_made = Mock()
     server_thread = Thread(
-        target=server.start_io,
-        args=(
-            os.fdopen(csr, "rb"),
-            os.fdopen(scw, "wb")
-        )
+        target=server.start_io, args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb"))
     )
     server_thread.daemon = True
     server_thread.start()
@@ -94,7 +90,7 @@ async def test_ws_server():
     """Smoke test to ensure we can send/receive messages over websockets"""
 
     loop = asyncio.new_event_loop()
-    server = LanguageServer('pygls-test', 'v1', loop=loop)
+    server = LanguageServer("pygls-test", "v1", loop=loop)
 
     # Run the server over Websockets in a separate thread
     server_thread = Thread(
@@ -114,7 +110,6 @@ async def test_ws_server():
     port = server._server.sockets[0].getsockname()[1]
     # Simulate client's connection
     async with websockets.connect(f"ws://127.0.0.1:{port}") as connection:
-
         # Send an 'initialize' request
         msg = dict(
             jsonrpc="2.0", id=1, method="initialize", params=dict(capabilities=dict())

@@ -33,6 +33,7 @@ from lsprotocol import types as lsp
 from typeguard import TypeCheckError
 from typeguard._utils import qualified_name
 
+
 class Temp:
     pass
 
@@ -53,7 +54,6 @@ def test_has_ls_param_or_annotation():
 
 
 def test_register_command_validation_error(feature_manager):
-
     with pytest.raises(ValidationError):
 
         @feature_manager.command(" \n\t")
@@ -106,7 +106,7 @@ def test_register_feature_with_wrong_options(feature_manager):
     with pytest.raises(
         TypeCheckError,
         match=(
-            f'{qualified_name(Options)} is not an instance of '
+            f"{qualified_name(Options)} is not an instance of "
             "lsprotocol.types.CompletionOptions"
         ),  # noqa
     ):
@@ -135,7 +135,6 @@ def test_register_features(feature_manager):
 
 
 def test_register_same_command_twice_error(feature_manager):
-
     with pytest.raises(CommandAlreadyRegisteredError):
 
         @feature_manager.command("cmd1")
@@ -148,7 +147,6 @@ def test_register_same_command_twice_error(feature_manager):
 
 
 def test_register_same_feature_twice_error(feature_manager):
-
     with pytest.raises(FeatureAlreadyRegisteredError):
 
         @feature_manager.feature(lsp.TEXT_DOCUMENT_CODE_ACTION)
@@ -195,7 +193,6 @@ def test_wrap_with_server_thread():
     assert wrapped.execute_in_thread is True
 
 
-
 def server_capabilities(**kwargs):
     """Helper to reduce the amount of boilerplate required to specify the expected
     server capabilities by filling in some fields - unless they are explicitly
@@ -203,18 +200,19 @@ def server_capabilities(**kwargs):
 
     if "text_document_sync" not in kwargs:
         kwargs["text_document_sync"] = lsp.TextDocumentSyncOptions(
-            open_close=False, save=False,
+            open_close=False,
+            save=False,
         )
 
     if "execute_command_provider" not in kwargs:
-        kwargs["execute_command_provider" ] = lsp.ExecuteCommandOptions(commands=[])
+        kwargs["execute_command_provider"] = lsp.ExecuteCommandOptions(commands=[])
 
     if "workspace" not in kwargs:
         kwargs["workspace"] = lsp.ServerCapabilitiesWorkspaceType(
             workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                 supported=True, change_notifications=True
             ),
-            file_operations=lsp.FileOperationOptions()
+            file_operations=lsp.FileOperationOptions(),
         )
 
     return lsp.ServerCapabilities(**kwargs)
@@ -229,10 +227,9 @@ def server_capabilities(**kwargs):
             lsp.ClientCapabilities(),
             server_capabilities(
                 text_document_sync=lsp.TextDocumentSyncOptions(
-                    open_close=False,
-                    save=lsp.SaveOptions(include_text=True)
+                    open_close=False, save=lsp.SaveOptions(include_text=True)
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_DID_SAVE,
@@ -242,7 +239,7 @@ def server_capabilities(**kwargs):
                 text_document_sync=lsp.TextDocumentSyncOptions(
                     open_close=False, save=True
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_WILL_SAVE,
@@ -252,7 +249,7 @@ def server_capabilities(**kwargs):
                 text_document_sync=lsp.TextDocumentSyncOptions(
                     open_close=False, save=False
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_WILL_SAVE,
@@ -268,7 +265,7 @@ def server_capabilities(**kwargs):
                 text_document_sync=lsp.TextDocumentSyncOptions(
                     open_close=False, save=False, will_save=True
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
@@ -284,7 +281,7 @@ def server_capabilities(**kwargs):
                 text_document_sync=lsp.TextDocumentSyncOptions(
                     open_close=False, save=False, will_save_wait_until=True
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_DID_OPEN,
@@ -294,7 +291,7 @@ def server_capabilities(**kwargs):
                 text_document_sync=lsp.TextDocumentSyncOptions(
                     open_close=True, save=False
                 )
-            )
+            ),
         ),
         (
             lsp.TEXT_DOCUMENT_DID_CLOSE,
@@ -312,7 +309,7 @@ def server_capabilities(**kwargs):
             lsp.ClientCapabilities(),
             server_capabilities(
                 inlay_hint_provider=lsp.InlayHintOptions(resolve_provider=False),
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_WILL_CREATE_FILES,
@@ -324,7 +321,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_WILL_CREATE_FILES,
@@ -357,7 +354,7 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_DID_CREATE_FILES,
@@ -369,7 +366,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_DID_CREATE_FILES,
@@ -382,9 +379,7 @@ def server_capabilities(**kwargs):
             ),
             lsp.ClientCapabilities(
                 workspace=lsp.WorkspaceClientCapabilities(
-                    file_operations=lsp.FileOperationClientCapabilities(
-                        did_create=True
-                    )
+                    file_operations=lsp.FileOperationClientCapabilities(did_create=True)
                 )
             ),
             server_capabilities(
@@ -402,7 +397,7 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_WILL_DELETE_FILES,
@@ -414,7 +409,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_WILL_DELETE_FILES,
@@ -447,7 +442,7 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_DID_DELETE_FILES,
@@ -459,7 +454,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_DID_DELETE_FILES,
@@ -472,9 +467,7 @@ def server_capabilities(**kwargs):
             ),
             lsp.ClientCapabilities(
                 workspace=lsp.WorkspaceClientCapabilities(
-                    file_operations=lsp.FileOperationClientCapabilities(
-                        did_delete=True
-                    )
+                    file_operations=lsp.FileOperationClientCapabilities(did_delete=True)
                 )
             ),
             server_capabilities(
@@ -492,7 +485,7 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_WILL_RENAME_FILES,
@@ -504,7 +497,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_WILL_RENAME_FILES,
@@ -537,7 +530,7 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
+            ),
         ),
         (
             lsp.WORKSPACE_DID_RENAME_FILES,
@@ -549,7 +542,7 @@ def server_capabilities(**kwargs):
                 ]
             ),
             lsp.ClientCapabilities(),
-            server_capabilities()
+            server_capabilities(),
         ),
         (
             lsp.WORKSPACE_DID_RENAME_FILES,
@@ -562,9 +555,7 @@ def server_capabilities(**kwargs):
             ),
             lsp.ClientCapabilities(
                 workspace=lsp.WorkspaceClientCapabilities(
-                    file_operations=lsp.FileOperationClientCapabilities(
-                        did_rename=True
-                    )
+                    file_operations=lsp.FileOperationClientCapabilities(did_rename=True)
                 )
             ),
             server_capabilities(
@@ -582,9 +573,9 @@ def server_capabilities(**kwargs):
                         )
                     ),
                 )
-            )
-        )
-    ]
+            ),
+        ),
+    ],
 )
 def test_register_feature(
     feature_manager: FeatureManager,
@@ -614,6 +605,7 @@ def test_register_feature(
     expected
        The expected server capabilties we are expecting to see.
     """
+
     @feature_manager.feature(method, options)
     def _():
         pass
@@ -632,7 +624,6 @@ def test_register_feature(
 def test_register_inlay_hint_resolve(
     feature_manager: FeatureManager,
 ):
-
     @feature_manager.feature(lsp.TEXT_DOCUMENT_INLAY_HINT)
     def _():
         pass

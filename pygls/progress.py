@@ -3,10 +3,14 @@ from concurrent.futures import Future
 from typing import Dict
 
 from lsprotocol.types import (
-    PROGRESS, WINDOW_WORK_DONE_PROGRESS_CREATE,
-    ProgressParams, ProgressToken, WorkDoneProgressBegin,
-    WorkDoneProgressEnd, WorkDoneProgressReport,
-    WorkDoneProgressCreateParams
+    PROGRESS,
+    WINDOW_WORK_DONE_PROGRESS_CREATE,
+    ProgressParams,
+    ProgressToken,
+    WorkDoneProgressBegin,
+    WorkDoneProgressEnd,
+    WorkDoneProgressReport,
+    WorkDoneProgressCreateParams,
 )
 from pygls.protocol import LanguageServerProtocol
 
@@ -34,8 +38,7 @@ class Progress:
         self.tokens[token] = Future()
 
     def create(self, token: ProgressToken, callback=None) -> Future:
-        """Create a server initiated work done progress.
-        """
+        """Create a server initiated work done progress."""
         self._check_token_registered(token)
 
         def on_created(*args, **kwargs):
@@ -50,8 +53,7 @@ class Progress:
         )
 
     async def create_async(self, token: ProgressToken) -> asyncio.Future:
-        """Create a server initiated work done progress.
-        """
+        """Create a server initiated work done progress."""
         self._check_token_registered(token)
 
         result = await self._lsp.send_request_async(
@@ -62,25 +64,16 @@ class Progress:
         return result
 
     def begin(self, token: ProgressToken, value: WorkDoneProgressBegin) -> None:
-        """Notify beginning of work.
-        """
+        """Notify beginning of work."""
         # Register cancellation future for the case of client initiated progress
         self.tokens.setdefault(token, Future())
 
-        return self._lsp.notify(
-            PROGRESS,
-            ProgressParams(
-                token=token,
-                value=value
-            )
-        )
+        return self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))
 
     def report(self, token: ProgressToken, value: WorkDoneProgressReport) -> None:
-        """Notify progress of work.
-        """
+        """Notify progress of work."""
         self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))
 
     def end(self, token: ProgressToken, value: WorkDoneProgressEnd) -> None:
-        """Notify end of work.
-        """
+        """Notify end of work."""
         self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))

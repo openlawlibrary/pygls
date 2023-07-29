@@ -91,7 +91,7 @@ def test_bf_text_document_did_open(client_server):
     assert document.language_id == "python"
 
 
-@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 def test_command_async(client_server):
     client, server = client_server
 
@@ -103,7 +103,7 @@ def test_command_async(client_server):
     assert thread_id == server.thread_id
 
 
-@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 def test_command_sync(client_server):
     client, server = client_server
 
@@ -115,7 +115,7 @@ def test_command_sync(client_server):
     assert thread_id == server.thread_id
 
 
-@pytest.mark.skipif(IS_PYODIDE, reason='threads are not available in pyodide.')
+@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 def test_command_thread(client_server):
     client, server = client_server
 
@@ -131,7 +131,7 @@ def test_allow_custom_protocol_derived_from_lsp():
     class CustomProtocol(LanguageServerProtocol):
         pass
 
-    server = LanguageServer('pygls-test', 'v1', protocol_cls=CustomProtocol)
+    server = LanguageServer("pygls-test", "v1", protocol_cls=CustomProtocol)
 
     assert isinstance(server.lsp, CustomProtocol)
 
@@ -141,4 +141,4 @@ def test_forbid_custom_protocol_not_derived_from_lsp():
         pass
 
     with pytest.raises(TypeError):
-        LanguageServer('pygls-test', 'v1', protocol_cls=CustomProtocol)
+        LanguageServer("pygls-test", "v1", protocol_cls=CustomProtocol)

@@ -19,7 +19,7 @@
 import os
 import sys
 
-IS_WIN = os.name == 'nt'
-IS_PYODIDE = 'pyodide' in sys.modules
+IS_WIN = os.name == "nt"
+IS_PYODIDE = "pyodide" in sys.modules
 
-pygls = 'pygls'
+pygls = "pygls"

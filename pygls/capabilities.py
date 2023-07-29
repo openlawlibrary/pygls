@@ -18,34 +18,65 @@ from functools import reduce
 from typing import Any
 
 from lsprotocol.types import (
-    INLAY_HINT_RESOLVE, TEXT_DOCUMENT_CODE_ACTION, TEXT_DOCUMENT_CODE_LENS,
-    TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DECLARATION,
-    TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DOCUMENT_COLOR,
-    TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT, TEXT_DOCUMENT_DOCUMENT_LINK,
-    TEXT_DOCUMENT_DOCUMENT_SYMBOL, TEXT_DOCUMENT_FOLDING_RANGE,
-    TEXT_DOCUMENT_FORMATTING, TEXT_DOCUMENT_HOVER,
-    TEXT_DOCUMENT_IMPLEMENTATION, TEXT_DOCUMENT_INLAY_HINT, TEXT_DOCUMENT_ON_TYPE_FORMATTING,
-    TEXT_DOCUMENT_RANGE_FORMATTING, TEXT_DOCUMENT_REFERENCES,
-    TEXT_DOCUMENT_RENAME, TEXT_DOCUMENT_SELECTION_RANGE,
-    TEXT_DOCUMENT_SIGNATURE_HELP, TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
-    TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
-    TEXT_DOCUMENT_DID_SAVE, TEXT_DOCUMENT_LINKED_EDITING_RANGE,
-    TEXT_DOCUMENT_MONIKER, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA, TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
-    TEXT_DOCUMENT_WILL_SAVE, TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
-    TEXT_DOCUMENT_TYPE_DEFINITION, WORKSPACE_DID_CREATE_FILES,
-    WORKSPACE_DID_DELETE_FILES, WORKSPACE_DID_RENAME_FILES,
-    WORKSPACE_SYMBOL, WORKSPACE_WILL_CREATE_FILES,
-    WORKSPACE_WILL_DELETE_FILES, WORKSPACE_WILL_RENAME_FILES, InlayHintOptions
+    INLAY_HINT_RESOLVE,
+    TEXT_DOCUMENT_CODE_ACTION,
+    TEXT_DOCUMENT_CODE_LENS,
+    TEXT_DOCUMENT_COMPLETION,
+    TEXT_DOCUMENT_DECLARATION,
+    TEXT_DOCUMENT_DEFINITION,
+    TEXT_DOCUMENT_DOCUMENT_COLOR,
+    TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT,
+    TEXT_DOCUMENT_DOCUMENT_LINK,
+    TEXT_DOCUMENT_DOCUMENT_SYMBOL,
+    TEXT_DOCUMENT_FOLDING_RANGE,
+    TEXT_DOCUMENT_FORMATTING,
+    TEXT_DOCUMENT_HOVER,
+    TEXT_DOCUMENT_IMPLEMENTATION,
+    TEXT_DOCUMENT_INLAY_HINT,
+    TEXT_DOCUMENT_ON_TYPE_FORMATTING,
+    TEXT_DOCUMENT_RANGE_FORMATTING,
+    TEXT_DOCUMENT_REFERENCES,
+    TEXT_DOCUMENT_RENAME,
+    TEXT_DOCUMENT_SELECTION_RANGE,
+    TEXT_DOCUMENT_SIGNATURE_HELP,
+    TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
+    TEXT_DOCUMENT_DID_CLOSE,
+    TEXT_DOCUMENT_DID_OPEN,
+    TEXT_DOCUMENT_DID_SAVE,
+    TEXT_DOCUMENT_LINKED_EDITING_RANGE,
+    TEXT_DOCUMENT_MONIKER,
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
+    TEXT_DOCUMENT_WILL_SAVE,
+    TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
+    TEXT_DOCUMENT_TYPE_DEFINITION,
+    WORKSPACE_DID_CREATE_FILES,
+    WORKSPACE_DID_DELETE_FILES,
+    WORKSPACE_DID_RENAME_FILES,
+    WORKSPACE_SYMBOL,
+    WORKSPACE_WILL_CREATE_FILES,
+    WORKSPACE_WILL_DELETE_FILES,
+    WORKSPACE_WILL_RENAME_FILES,
+    InlayHintOptions,
 )
 from lsprotocol.types import (
-    ClientCapabilities, CodeLensOptions, CompletionOptions,
-    DocumentLinkOptions, ExecuteCommandOptions, ImplementationOptions,
-    SemanticTokensOptions, SemanticTokensRegistrationOptions,
-    SemanticTokensOptionsFullType1, ServerCapabilities,
-    ServerCapabilitiesWorkspaceType, SignatureHelpOptions,
-    TextDocumentSyncOptions, TypeDefinitionOptions,
-    FileOperationOptions, WorkspaceFoldersServerCapabilities
+    ClientCapabilities,
+    CodeLensOptions,
+    CompletionOptions,
+    DocumentLinkOptions,
+    ExecuteCommandOptions,
+    ImplementationOptions,
+    SemanticTokensOptions,
+    SemanticTokensRegistrationOptions,
+    SemanticTokensOptionsFullType1,
+    ServerCapabilities,
+    ServerCapabilitiesWorkspaceType,
+    SignatureHelpOptions,
+    TextDocumentSyncOptions,
+    TypeDefinitionOptions,
+    FileOperationOptions,
+    WorkspaceFoldersServerCapabilities,
 )
 
 
@@ -69,13 +100,9 @@ class ServerCapabilitiesBuilder:
     """Create `ServerCapabilities` instance depending on builtin and user registered
     features.
     """
+
     def __init__(
-        self,
-        client_capabilities,
-        features,
-        feature_options,
-        commands,
-        sync_kind
+        self, client_capabilities, features, feature_options, commands, sync_kind
     ):
         self.client_capabilities = client_capabilities
         self.features = features
@@ -97,15 +124,14 @@ class ServerCapabilitiesBuilder:
         )
         will_save = (
             get_capability(
-                self.client_capabilities,
-                'text_document.synchronization.will_save'
+                self.client_capabilities, "text_document.synchronization.will_save"
             )
             and TEXT_DOCUMENT_WILL_SAVE in self.features
         )
         will_save_wait_until = (
             get_capability(
                 self.client_capabilities,
-                'text_document.synchronization.will_save_wait_until'
+                "text_document.synchronization.will_save_wait_until",
             )
             and TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL in self.features
         )
@@ -125,7 +151,9 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_completion(self):
-        value = self._provider_options(TEXT_DOCUMENT_COMPLETION, default=CompletionOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_COMPLETION, default=CompletionOptions()
+        )
         if value is not None:
             self.server_cap.completion_provider = value
         return self
@@ -165,7 +193,9 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_inlay_hints(self):
-        value = self._provider_options(TEXT_DOCUMENT_INLAY_HINT, default=InlayHintOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_INLAY_HINT, default=InlayHintOptions()
+        )
         if value is not None:
             value.resolve_provider = INLAY_HINT_RESOLVE in self.features
             self.server_cap.inlay_hint_provider = value
@@ -204,13 +234,17 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_code_lens(self):
-        value = self._provider_options(TEXT_DOCUMENT_CODE_LENS, default=CodeLensOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_CODE_LENS, default=CodeLensOptions()
+        )
         if value is not None:
             self.server_cap.code_lens_provider = value
         return self
 
     def _with_document_link(self):
-        value = self._provider_options(TEXT_DOCUMENT_DOCUMENT_LINK, default=DocumentLinkOptions())
+        value = self._provider_options(
+            TEXT_DOCUMENT_DOCUMENT_LINK, default=DocumentLinkOptions()
+        )
         if value is not None:
             self.server_cap.document_link_provider = value
         return self
@@ -252,8 +286,9 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_execute_command(self):
-        self.server_cap.execute_command_provider = \
-            ExecuteCommandOptions(commands=self.commands)
+        self.server_cap.execute_command_provider = ExecuteCommandOptions(
+            commands=self.commands
+        )
         return self
 
     def _with_selection_range(self):
@@ -269,11 +304,10 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_semantic_tokens(self):
-
         providers = [
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA,
-            TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
         ]
 
         for provider in providers:
@@ -296,7 +330,7 @@ class ServerCapabilitiesBuilder:
         options = SemanticTokensOptions(
             legend=value,
             full=full_support or None,
-            range=TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE in self.features or None
+            range=TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE in self.features or None,
         )
 
         if options.full or options.range:
@@ -336,7 +370,7 @@ class ServerCapabilitiesBuilder:
 
         for method_name, capability_name in operations:
             client_supports_method = get_capability(
-                self.client_capabilities, f'workspace.file_operations.{capability_name}'
+                self.client_capabilities, f"workspace.file_operations.{capability_name}"
             )
 
             if client_supports_method:
@@ -357,8 +391,7 @@ class ServerCapabilitiesBuilder:
 
     def build(self):
         return (
-            self
-            ._with_text_doc_sync()
+            self._with_text_doc_sync()
             ._with_completion()
             ._with_hover()
             ._with_signature_help()

@@ -46,7 +46,7 @@ from pygls.protocol import (
     JsonRPCProtocol,
     JsonRPCRequestMessage,
     JsonRPCResponseMessage,
-    JsonRPCNotification
+    JsonRPCNotification,
 )
 
 EXAMPLE_NOTIFICATION = "example/notification"
@@ -57,7 +57,7 @@ EXAMPLE_REQUEST = "example/request"
 class IntResult:
     id: str
     result: int
-    jsonrpc: str = attrs.field(default='2.0')
+    jsonrpc: str = attrs.field(default="2.0")
 
 
 @attrs.define
@@ -72,7 +72,7 @@ class ExampleParams:
 
 @attrs.define
 class ExampleNotification:
-    jsonrpc: str = attrs.field(default='2.0')
+    jsonrpc: str = attrs.field(default="2.0")
     method: str = EXAMPLE_NOTIFICATION
     params: ExampleParams = attrs.field(default=None)
 
@@ -80,7 +80,7 @@ class ExampleNotification:
 @attrs.define
 class ExampleRequest:
     id: str
-    jsonrpc: str = attrs.field(default='2.0')
+    jsonrpc: str = attrs.field(default="2.0")
     method: str = EXAMPLE_REQUEST
     params: ExampleParams = attrs.field(default=None)
 
@@ -92,7 +92,6 @@ EXAMPLE_LSP_METHODS_MAP = {
 
 
 class ExampleProtocol(JsonRPCProtocol):
-
     def get_message_type(self, method: str):
         return EXAMPLE_LSP_METHODS_MAP.get(method, (None,))[0]
 
@@ -118,7 +117,9 @@ def test_deserialize_notification_message_valid_params(protocol):
 
     result = json.loads(params, object_hook=protocol._deserialize_message)
 
-    assert isinstance(result, ExampleNotification), f"Expected FeatureRequest instance, got {result}"
+    assert isinstance(
+        result, ExampleNotification
+    ), f"Expected FeatureRequest instance, got {result}"
     assert result.jsonrpc == "2.0"
     assert result.method == EXAMPLE_NOTIFICATION
 
@@ -179,6 +180,7 @@ def test_deserialize_response_message_custom_converter():
         "result": "1"
     }
     """
+
     # Just for fun, let's create a converter that reverses all the keys in a dict.
     #
     @attrs.define
@@ -237,9 +239,7 @@ def test_deserialize_response_message_custom_converter():
             EXAMPLE_NOTIFICATION,
             ExampleParams(
                 field_a="field one",
-                field_b=ExampleParams.InnerType(
-                    inner_field="field two"
-                ),
+                field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
             {
                 "jsonrpc": "2.0",
@@ -255,12 +255,7 @@ def test_deserialize_response_message_custom_converter():
         (
             # Custom notification with dict params.
             EXAMPLE_NOTIFICATION,
-            {
-                "fieldA": "field one",
-                "fieldB": {
-                    "innerField": "field two"
-                }
-            },
+            {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
             {
                 "jsonrpc": "2.0",
                 "method": EXAMPLE_NOTIFICATION,
@@ -271,7 +266,7 @@ def test_deserialize_response_message_custom_converter():
                     },
                 },
             },
-        )
+        ),
     ],
 )
 def test_serialize_notification_message(method, params, expected):
@@ -415,42 +410,33 @@ def test_deserialize_request_message_without_registered_type(protocol):
                 ],
             },
         ),
-        (   # Unknown type with object params.
+        (  # Unknown type with object params.
             JsonRPCResponseMessage,
             ExampleParams(
                 field_a="field one",
-                field_b=ExampleParams.InnerType(inner_field="field two")
+                field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
             {
                 "jsonrpc": "2.0",
                 "id": "1",
                 "result": {
                     "fieldA": "field one",
-                    "fieldB": {
-                        "innerField": "field two"
-                    }
+                    "fieldB": {"innerField": "field two"},
                 },
-            }
-        ),
-        (   # Unknown type with dict params.
-            JsonRPCResponseMessage,
-            {
-                "fieldA": "field one",
-                "fieldB": {
-                    "innerField": "field two"
-                }
             },
+        ),
+        (  # Unknown type with dict params.
+            JsonRPCResponseMessage,
+            {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
             {
                 "jsonrpc": "2.0",
                 "id": "1",
                 "result": {
                     "fieldA": "field one",
-                    "fieldB": {
-                        "innerField": "field two"
-                    }
+                    "fieldB": {"innerField": "field two"},
                 },
-            }
-        )
+            },
+        ),
     ],
 )
 def test_serialize_response_message(msg_type, result, expected):
@@ -480,23 +466,23 @@ def test_serialize_response_message(msg_type, result, expected):
             TEXT_DOCUMENT_COMPLETION,
             CompletionParams(
                 text_document=TextDocumentIdentifier(uri="file:///file.txt"),
-                position=Position(line=1, character=0)
+                position=Position(line=1, character=0),
             ),
             {
                 "jsonrpc": "2.0",
                 "id": "1",
                 "method": TEXT_DOCUMENT_COMPLETION,
                 "params": {
-                    "textDocument": { "uri": "file:///file.txt" },
-                    "position": { "line": 1, "character": 0 }
+                    "textDocument": {"uri": "file:///file.txt"},
+                    "position": {"line": 1, "character": 0},
                 },
             },
         ),
-        (   # Unknown type with object params.
+        (  # Unknown type with object params.
             EXAMPLE_REQUEST,
             ExampleParams(
                 field_a="field one",
-                field_b=ExampleParams.InnerType(inner_field="field two")
+                field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
             {
                 "jsonrpc": "2.0",
@@ -504,32 +490,23 @@ def test_serialize_response_message(msg_type, result, expected):
                 "method": EXAMPLE_REQUEST,
                 "params": {
                     "fieldA": "field one",
-                    "fieldB": {
-                        "innerField": "field two"
-                    }
+                    "fieldB": {"innerField": "field two"},
                 },
-            }
-        ),
-        (   # Unknown type with dict params.
-            EXAMPLE_REQUEST,
-            {
-                "fieldA": "field one",
-                "fieldB": {
-                    "innerField": "field two"
-                }
             },
+        ),
+        (  # Unknown type with dict params.
+            EXAMPLE_REQUEST,
+            {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
             {
                 "jsonrpc": "2.0",
                 "id": "1",
                 "method": EXAMPLE_REQUEST,
                 "params": {
                     "fieldA": "field one",
-                    "fieldB": {
-                        "innerField": "field two"
-                    }
+                    "fieldB": {"innerField": "field two"},
                 },
-            }
-        )
+            },
+        ),
     ],
 )
 def test_serialize_request_message(method, params, expected):

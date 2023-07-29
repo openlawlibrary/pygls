@@ -67,8 +67,7 @@ class ConfiguredLS(ClientServer):
                 ),
                 "file://return.markup_content": Hover(
                     range=range,
-                    contents=MarkupContent(
-                        kind=MarkupKind.Markdown, value="value"),
+                    contents=MarkupContent(kind=MarkupKind.Markdown, value="value"),
                 ),
             }.get(params.text_document.uri, None)
 
@@ -87,8 +86,7 @@ def test_hover_return_marked_string(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_HOVER,
         HoverParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.marked_string"),
+            text_document=TextDocumentIdentifier(uri="file://return.marked_string"),
             position=Position(line=0, character=0),
         ),
     ).result()
@@ -135,9 +133,7 @@ def test_hover_return_markup_content(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_HOVER,
         HoverParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.markup_content"
-            ),
+            text_document=TextDocumentIdentifier(uri="file://return.markup_content"),
             position=Position(line=0, character=0),
         ),
     ).result()

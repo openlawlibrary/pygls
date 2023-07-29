@@ -24,9 +24,11 @@ ws = ["websockets"]
 [tool.poetry.group.dev.dependencies]
 # Replaces (amongst many other things) flake8 and bandit
 ruff = "^0.0.275"
-# TODO `poethepoet==0.20` needs python 3.8
+# TODO `poethepoet>=0.20` needs python 3.8
 poethepoet = "^0.19.0"
 mypy = "^1.4.1"
+# TODO `black>=23` needs python 3.8
+black = "22.8"
 
 [tool.poetry.group.test.dependencies]
 pytest = "7.1.2"
@@ -55,13 +57,21 @@ lint = [
     "ruff",
     "mypy",
     "check_generated_client",
-    "check_commit_style"
+    "check_commit_style",
+    "black_check"
 ]
 generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
+black_check = "black --check ."
 
 [tool.ruff]
+# Sometimes Black can't reduce line length without breaking more imortant rules.
+# So allow Ruff to be more lenient.
 line-length = 120
+
+[tool.black]
+line-length = 88
+extend-exclude = "pygls/lsp/client.py"
 
 [build-system]
 requires = ["poetry-core"]

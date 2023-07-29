@@ -35,9 +35,7 @@ server = LanguageServer("code-action-server", "v0.1")
 
 @server.feature(
     TEXT_DOCUMENT_CODE_ACTION,
-    CodeActionOptions(
-        code_action_kinds=[CodeActionKind.QuickFix]
-    )
+    CodeActionOptions(code_action_kinds=[CodeActionKind.QuickFix]),
 )
 def code_actions(params: CodeActionParams):
     items = []
@@ -47,31 +45,25 @@ def code_actions(params: CodeActionParams):
     start_line = params.range.start.line
     end_line = params.range.end.line
 
-    lines = document.lines[start_line:end_line+1]
+    lines = document.lines[start_line : end_line + 1]
     for idx, line in enumerate(lines):
-
         match = ADDITION.match(line)
         if match is not None:
-
             range_ = Range(
                 start=Position(line=start_line + idx, character=0),
-                end=Position(line=start_line + idx, character=len(line)-1)
+                end=Position(line=start_line + idx, character=len(line) - 1),
             )
 
             left = int(match.group(1))
             right = int(match.group(2))
             answer = left + right
 
-            text_edit = TextEdit(
-                range=range_, new_text=f"{line.strip()} {answer}!"
-            )
+            text_edit = TextEdit(range=range_, new_text=f"{line.strip()} {answer}!")
 
             action = CodeAction(
                 title=f"Evaluate '{match.group(0)}'",
                 kind=CodeActionKind.QuickFix,
-                edit=WorkspaceEdit(
-                    changes={document_uri: [text_edit]}
-                )
+                edit=WorkspaceEdit(changes={document_uri: [text_edit]}),
             )
             items.append(action)
 

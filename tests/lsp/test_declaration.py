@@ -84,9 +84,7 @@ def test_declaration_return_location(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.location"
-            ),
+            text_document=TextDocumentIdentifier(uri="file://return.location"),
             position=Position(line=0, character=0),
         ),
     ).result()
@@ -105,8 +103,7 @@ def test_declaration_return_location_list(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_DECLARATION,
         DeclarationParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.location_list"),
+            text_document=TextDocumentIdentifier(uri="file://return.location_list"),
             position=Position(line=0, character=0),
         ),
     ).result()

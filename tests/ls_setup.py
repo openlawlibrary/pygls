@@ -36,8 +36,8 @@ from ._init_server_stall_fix_hack import retry_stalled_init_fix_hack
 
 CALL_TIMEOUT = 3
 
-def setup_ls_features(server):
 
+def setup_ls_features(server):
     # Commands
     @server.command(CMD_ASYNC)
     async def cmd_test3(ls, *args):  # pylint: disable=unused-variable
@@ -64,9 +64,7 @@ class PyodideTestTransportAdapter:
 
     def write(self, data):
         object_hook = self.dest.lsp._deserialize_message
-        self.dest.lsp._procedure_handler(
-            json.loads(data, object_hook=object_hook)
-        )
+        self.dest.lsp._procedure_handler(json.loads(data, object_hook=object_hook))
 
 
 class PyodideClientServer:
@@ -74,9 +72,8 @@ class PyodideClientServer:
     environment."""
 
     def __init__(self, LS=LanguageServer):
-
-        self.server = LS('pygls-server', 'v1')
-        self.client = LS('pygls-client', 'v1')
+        self.server = LS("pygls-server", "v1")
+        self.client = LS("pygls-client", "v1")
 
         self.server.lsp.connection_made(PyodideTestTransportAdapter(self.client))
         self.server.lsp._send_only_body = True
@@ -92,20 +89,14 @@ class PyodideClientServer:
 
     @classmethod
     def decorate(cls):
-        return pytest.mark.parametrize(
-            'client_server',
-            [cls],
-            indirect=True
-        )
+        return pytest.mark.parametrize("client_server", [cls], indirect=True)
 
     def initialize(self):
         response = self.client.lsp.send_request(
             INITIALIZE,
             InitializeParams(
-                process_id=12345,
-                root_uri="file://",
-                capabilities=ClientCapabilities()
-            )
+                process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
+            ),
         ).result(timeout=CALL_TIMEOUT)
 
         assert response.capabilities is not None
@@ -123,18 +114,18 @@ class NativeClientServer:
         scr, scw = os.pipe()
 
         # Setup Server
-        self.server = LS('server', 'v1')
+        self.server = LS("server", "v1")
         self.server_thread = threading.Thread(
-            name='Server Thread',
+            name="Server Thread",
             target=self.server.start_io,
             args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb")),
         )
         self.server_thread.daemon = True
 
         # Setup client
-        self.client = LS('client', 'v1', asyncio.new_event_loop())
+        self.client = LS("client", "v1", asyncio.new_event_loop())
         self.client_thread = threading.Thread(
-            name='Client Thread',
+            name="Client Thread",
             target=self.client.start_io,
             args=(os.fdopen(scr, "rb"), os.fdopen(csw, "wb")),
         )
@@ -142,11 +133,7 @@ class NativeClientServer:
 
     @classmethod
     def decorate(cls):
-        return pytest.mark.parametrize(
-            'client_server',
-            [cls],
-            indirect=True
-        )
+        return pytest.mark.parametrize("client_server", [cls], indirect=True)
 
     def start(self):
         self.server_thread.start()
@@ -155,9 +142,7 @@ class NativeClientServer:
         self.initialize()
 
     def stop(self):
-        shutdown_response = self.client.lsp.send_request(
-            SHUTDOWN
-        ).result()
+        shutdown_response = self.client.lsp.send_request(SHUTDOWN).result()
         assert shutdown_response is None
         self.client.lsp.notify(EXIT)
         self.server_thread.join()
@@ -170,14 +155,11 @@ class NativeClientServer:
 
     @retry_stalled_init_fix_hack()
     def initialize(self):
-
-        timeout = None if 'DISABLE_TIMEOUT' in os.environ else 1
+        timeout = None if "DISABLE_TIMEOUT" in os.environ else 1
         response = self.client.lsp.send_request(
             INITIALIZE,
             InitializeParams(
-                process_id=12345,
-                root_uri="file://",
-                capabilities=ClientCapabilities()
+                process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
             ),
         ).result(timeout=timeout)
         assert response.capabilities is not None

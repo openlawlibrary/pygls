@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from pygls.server import aio_readline
 
+
 def handler(data):
     payload = dict(
         jsonrpc="2.0",
@@ -15,7 +16,7 @@ def handler(data):
         ),
     )
     content = str(payload).replace("'", '"')
-    message = f'Content-Length: {len(content)}\r\n\r\n{content}'.encode('utf8')
+    message = f"Content-Length: {len(content)}\r\n\r\n{content}".encode("utf8")
 
     sys.stdout.buffer.write(message)
     sys.stdout.flush()
@@ -27,7 +28,7 @@ async def main():
         ThreadPoolExecutor(),
         threading.Event(),
         sys.stdin.buffer,
-        handler
+        handler,
     )
 
 

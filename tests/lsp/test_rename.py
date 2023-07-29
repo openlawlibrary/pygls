@@ -99,7 +99,8 @@ workspace_edit = {
                 ignore_if_not_exists=True,
             ),
         ),
-    ], }
+    ],
+}
 
 
 class ConfiguredLS(ClientServer):
@@ -132,9 +133,7 @@ def test_rename_return_workspace_edit(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_RENAME,
         RenameParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.workspace_edit"
-            ),
+            text_document=TextDocumentIdentifier(uri="file://return.workspace_edit"),
             position=Position(line=0, character=0),
             new_name="new name",
         ),
@@ -160,14 +159,9 @@ def test_rename_return_workspace_edit(client_server):
     assert changes[0].text_document.version == 3
     assert changes[0].edits[0].new_text == "text3"
     assert changes[0].edits[0].range.start.line == 2
-    assert (
-        changes[0].edits[0].range.start.character
-        == 2
-    )
+    assert changes[0].edits[0].range.start.character == 2
     assert changes[0].edits[0].range.end.line == 3
-    assert (
-        changes[0].edits[0].range.end.character == 3
-    )
+    assert changes[0].edits[0].range.end.character == 3
 
     assert changes[1].kind == ResourceOperationKind.Create.value
     assert changes[1].uri == "create file"

@@ -23,16 +23,20 @@ import re
 from typing import List, Optional, Pattern
 
 from lsprotocol.types import (
-    Position, Range, TextDocumentContentChangeEvent,
+    Position,
+    Range,
+    TextDocumentContentChangeEvent,
     TextDocumentContentChangeEvent_Type1,
-    TextDocumentItem, TextDocumentSyncKind,
-    VersionedTextDocumentIdentifier, WorkspaceFolder
+    TextDocumentItem,
+    TextDocumentSyncKind,
+    VersionedTextDocumentIdentifier,
+    WorkspaceFolder,
 )
 from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
-RE_END_WORD = re.compile('^[A-Za-z_0-9]*')
-RE_START_WORD = re.compile('[A-Za-z_0-9]*$')
+RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
+RE_START_WORD = re.compile("[A-Za-z_0-9]*$")
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +94,7 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
         return Position(len(lines) - 1, utf16_num_units(lines[-1]))
 
     _line = lines[position.line]
-    _line = _line.replace('\r\n', '\n')  # TODO: it's a bit of a hack
+    _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
     _utf16_len = utf16_num_units(_line)
     _utf32_len = len(_line)
 
@@ -153,7 +157,7 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
         return Position(
             line=position.line,
             character=position.character
-            + utf16_unit_offset(lines[position.line][:position.character])
+            + utf16_unit_offset(lines[position.line][: position.character]),
         )
     except IndexError:
         return Position(line=len(lines), character=0)
@@ -173,7 +177,7 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
     """
     range_new = Range(
         start=position_from_utf16(lines, range.start),
-        end=position_from_utf16(lines, range.end)
+        end=position_from_utf16(lines, range.end),
     )
     return range_new
 
@@ -192,12 +196,11 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
     """
     return Range(
         start=position_to_utf16(lines, range.start),
-        end=position_to_utf16(lines, range.end)
+        end=position_to_utf16(lines, range.end),
     )
 
 
 class Document(object):
-
     def __init__(
         self,
         uri: str,
@@ -205,7 +208,7 @@ class Document(object):
         version: Optional[int] = None,
         language_id: Optional[str] = None,
         local: bool = True,
-        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental
+        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
     ):
         self.uri = uri
         self.version = version
@@ -223,7 +226,9 @@ class Document(object):
     def __str__(self):
         return str(self.uri)
 
-    def _apply_incremental_change(self, change: TextDocumentContentChangeEvent_Type1) -> None:
+    def _apply_incremental_change(
+        self, change: TextDocumentContentChangeEvent_Type1
+    ) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
@@ -320,38 +325,38 @@ class Document(object):
     @property
     def source(self) -> str:
         if self._source is None:
-            with io.open(self.path, 'r', encoding='utf-8') as f:
+            with io.open(self.path, "r", encoding="utf-8") as f:
                 return f.read()
         return self._source
 
     def word_at_position(
-            self,
-            position: Position,
-            re_start_word: Pattern = RE_START_WORD,
-            re_end_word: Pattern = RE_END_WORD
+        self,
+        position: Position,
+        re_start_word: Pattern = RE_START_WORD,
+        re_end_word: Pattern = RE_END_WORD,
     ) -> str:
         """Return the word at position.
 
-    Arguments:
-        position (Position):
-            The line and character offset.
-        re_start_word (Pattern):
-            The regular expression for extracting the word backward from
-            position.  Specifically, the first match from a re.findall
-            call on the line up to the character value of position.  The
-            default pattern is '[A-Za-z_0-9]*$'.
-        re_end_word (Pattern):
-            The regular expression for extracting the word forward from
-            position.  Specifically, the last match from a re.findall
-            call on the line from the character value of position.  The
-            default pattern is '^[A-Za-z_0-9]*'.
+        Arguments:
+            position (Position):
+                The line and character offset.
+            re_start_word (Pattern):
+                The regular expression for extracting the word backward from
+                position.  Specifically, the first match from a re.findall
+                call on the line up to the character value of position.  The
+                default pattern is '[A-Za-z_0-9]*$'.
+            re_end_word (Pattern):
+                The regular expression for extracting the word forward from
+                position.  Specifically, the last match from a re.findall
+                call on the line from the character value of position.  The
+                default pattern is '^[A-Za-z_0-9]*'.
 
-    Returns:
-        The word (obtained by concatenating the two matches) at position.
+        Returns:
+            The word (obtained by concatenating the two matches) at position.
         """
         lines = self.lines
         if position.line >= len(lines):
-            return ''
+            return ""
 
         pos = position_from_utf16(lines, position)
         row, col = pos.line, pos.character
@@ -369,7 +374,6 @@ class Document(object):
 
 
 class Workspace(object):
-
     def __init__(self, root_uri, sync_kind=None, workspace_folders=None):
         self._root_uri = root_uri
         self._root_uri_scheme = uri_scheme(self._root_uri)
@@ -394,7 +398,7 @@ class Workspace(object):
             source=source,
             version=version,
             language_id=language_id,
-            sync_kind=self._sync_kind
+            sync_kind=self._sync_kind,
         )
 
     def add_folder(self, folder: WorkspaceFolder):
@@ -419,8 +423,7 @@ class Workspace(object):
 
     def is_local(self):
         return (
-            self._root_uri_scheme == ''
-            or self._root_uri_scheme == 'file'
+            self._root_uri_scheme == "" or self._root_uri_scheme == "file"
         ) and os.path.exists(self._root_path)
 
     def put_document(self, text_document: TextDocumentItem):
@@ -451,9 +454,11 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    def update_document(self,
-                        text_doc: VersionedTextDocumentIdentifier,
-                        change: TextDocumentContentChangeEvent):
+    def update_document(
+        self,
+        text_doc: VersionedTextDocumentIdentifier,
+        change: TextDocumentContentChangeEvent,
+    ):
         doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
         self._docs[doc_uri].version = text_doc.version

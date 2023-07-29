@@ -39,9 +39,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT,
             DocumentHighlightOptions(),
         )
-        def f(
-            params: DocumentHighlightParams
-        ) -> Optional[List[DocumentHighlight]]:
+        def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
             if params.text_document.uri == "file://return.list":
                 return [
                     DocumentHighlight(

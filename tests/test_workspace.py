@@ -24,12 +24,7 @@ from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)
 DOC_TEXT = """test"""
-DOC = TextDocumentItem(
-    uri=DOC_URI,
-    language_id="plaintext",
-    version=0,
-    text=DOC_TEXT
-)
+DOC = TextDocumentItem(uri=DOC_URI, language_id="plaintext", version=0, text=DOC_TEXT)
 
 
 def test_add_folder(workspace):

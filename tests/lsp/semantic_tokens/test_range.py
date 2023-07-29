@@ -32,10 +32,7 @@ from lsprotocol.types import (
 from ...conftest import ClientServer
 
 SemanticTokenReturnType = Optional[
-    Union[
-        SemanticTokensPartialResult,
-        Optional[SemanticTokens]
-    ]
+    Union[SemanticTokensPartialResult, Optional[SemanticTokens]]
 ]
 
 
@@ -46,8 +43,7 @@ class ConfiguredLS(ClientServer):
         @self.server.feature(
             TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
             SemanticTokensLegend(
-                token_types=["keyword", "operator"],
-                token_modifiers=["readonly"]
+                token_types=["keyword", "operator"], token_modifiers=["readonly"]
             ),
         )
         def f(
@@ -68,9 +64,7 @@ def test_capabilities(client_server):
         "keyword",
         "operator",
     ]
-    assert provider.legend.token_modifiers == [
-        "readonly"
-    ]
+    assert provider.legend.token_modifiers == ["readonly"]
 
 
 @ConfiguredLS.decorate()
@@ -79,8 +73,7 @@ def test_semantic_tokens_range_return_tokens(client_server):
     response = client.lsp.send_request(
         TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
         SemanticTokensRangeParams(
-            text_document=TextDocumentIdentifier(
-                uri="file://return.tokens"),
+            text_document=TextDocumentIdentifier(uri="file://return.tokens"),
             range=Range(
                 start=Position(line=0, character=0),
                 end=Position(line=10, character=80),
