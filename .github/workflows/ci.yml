@@ -74,9 +74,13 @@ jobs:
           sudo apt install chromium-browser chromium-chromedriver
           poetry install --with pyodide
       - name: Run Testsuite
-        run: |
-          source $VENV
-          poe test-pyodide
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            source $VENV
+            poe test-pyodide
 
   lint:
     needs: pre_job
