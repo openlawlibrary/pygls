@@ -61,7 +61,7 @@ def write_notification(
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
             "    if self.stopped:",
-            '        raise RuntimeError(\"Client has been stopped.\")',
+            '        raise RuntimeError("Client has been stopped.")',
             "",
             f'    self.protocol.notify("{method}", params)',
             "",
@@ -70,7 +70,6 @@ def write_notification(
 
 
 def get_response_type(response: Type, imports: Set[Tuple[str, str]]) -> str:
-
     # Find the response type.
     result_field = [f for f in response.__attrs_attrs__ if f.name == "result"][0]
     result = re.sub(r"<class '([\w.]+)'>", r"\1", str(result_field.type))
@@ -120,7 +119,7 @@ def write_method(
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
             "    if self.stopped:",
-            '        raise RuntimeError(\"Client has been stopped.\")',
+            '        raise RuntimeError("Client has been stopped.")',
             "",
             f'    return self.protocol.send_request("{method}", params, callback)',
             "",
@@ -133,7 +132,7 @@ def write_method(
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
             "    if self.stopped:",
-            '        raise RuntimeError(\"Client has been stopped.\")',
+            '        raise RuntimeError("Client has been stopped.")',
             "",
             f'    return await self.protocol.send_request_async("{method}", params)',
             "",
@@ -153,7 +152,6 @@ def generate_client() -> str:
     }
 
     for method_name, types in METHOD_TO_TYPES.items():
-
         # Skip any requests that come from the server.
         if message_direction(method_name) == "serverToClient":
             continue

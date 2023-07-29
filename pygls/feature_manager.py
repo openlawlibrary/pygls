@@ -21,10 +21,20 @@ import itertools
 import logging
 from typing import Any, Callable, Dict, Optional, get_type_hints
 
-from pygls.constants import (ATTR_COMMAND_TYPE, ATTR_EXECUTE_IN_THREAD, ATTR_FEATURE_TYPE,
-                             ATTR_REGISTERED_NAME, ATTR_REGISTERED_TYPE, PARAM_LS)
-from pygls.exceptions import (CommandAlreadyRegisteredError, FeatureAlreadyRegisteredError,
-                              ThreadDecoratorError, ValidationError)
+from pygls.constants import (
+    ATTR_COMMAND_TYPE,
+    ATTR_EXECUTE_IN_THREAD,
+    ATTR_FEATURE_TYPE,
+    ATTR_REGISTERED_NAME,
+    ATTR_REGISTERED_TYPE,
+    PARAM_LS,
+)
+from pygls.exceptions import (
+    CommandAlreadyRegisteredError,
+    FeatureAlreadyRegisteredError,
+    ThreadDecoratorError,
+    ValidationError,
+)
 from pygls.lsp import get_method_options_type, is_instance
 
 logger = logging.getLogger(__name__)
@@ -40,7 +50,9 @@ def assign_thread_attr(f):
 
 
 def get_help_attrs(f):
-    return getattr(f, ATTR_REGISTERED_NAME, None), getattr(f, ATTR_REGISTERED_TYPE, None)
+    return getattr(f, ATTR_REGISTERED_NAME, None), getattr(
+        f, ATTR_REGISTERED_TYPE, None
+    )
 
 
 def has_ls_param_or_annotation(f, annotation):
@@ -64,8 +76,10 @@ def wrap_with_server(f, server):
         return f
 
     if asyncio.iscoroutinefunction(f):
+
         async def wrapped(*args, **kwargs):
             return await f(server, *args, **kwargs)
+
     else:
         wrapped = functools.partial(f, server)
         if is_thread_function(f):
@@ -99,7 +113,7 @@ class FeatureManager:
     def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
         """Registers builtin (predefined) feature."""
         self._builtin_features[feature_name] = func
-        logger.info('Registered builtin feature %s', feature_name)
+        logger.info("Registered builtin feature %s", feature_name)
 
     @property
     def builtin_features(self) -> Dict:
@@ -112,11 +126,12 @@ class FeatureManager:
         Example:
             @ls.command('myCustomCommand')
         """
+
         def decorator(f):
             # Validate
-            if command_name is None or command_name.strip() == '':
-                logger.error('Missing command name.')
-                raise ValidationError('Command name is required.')
+            if command_name is None or command_name.strip() == "":
+                logger.error("Missing command name.")
+                raise ValidationError("Command name is required.")
 
             # Check if not already registered
             if command_name in self._commands:
@@ -134,6 +149,7 @@ class FeatureManager:
             logger.info('Command "%s" is successfully registered.', command_name)
 
             return f
+
         return decorator
 
     @property
@@ -142,18 +158,21 @@ class FeatureManager:
         return self._commands
 
     def feature(
-        self, feature_name: str, options: Optional[Any] = None,
+        self,
+        feature_name: str,
+        options: Optional[Any] = None,
     ) -> Callable:
         """Decorator used to register LSP features.
 
         Example:
             @ls.feature('textDocument/completion', CompletionItems(trigger_characters=['.']))
         """
+
         def decorator(f):
             # Validate
-            if feature_name is None or feature_name.strip() == '':
-                logger.error('Missing feature name.')
-                raise ValidationError('Feature name is required.')
+            if feature_name is None or feature_name.strip() == "":
+                logger.error("Missing feature name.")
+                raise ValidationError("Feature name is required.")
 
             # Add feature if not exists
             if feature_name in self._features:
@@ -172,14 +191,17 @@ class FeatureManager:
                 options_type = get_method_options_type(feature_name)
                 if options_type and not is_instance(options, options_type):
                     raise TypeError(
-                        (f'Options of method "{feature_name}"'
-                         f' should be instance of type {options_type}')
+                        (
+                            f'Options of method "{feature_name}"'
+                            f" should be instance of type {options_type}"
+                        )
                     )
                 self._feature_options[feature_name] = options
 
             logger.info('Registered "%s" with options "%s"', feature_name, options)
 
             return f
+
         return decorator
 
     @property
@@ -194,10 +216,12 @@ class FeatureManager:
 
     def thread(self) -> Callable:
         """Decorator that mark function to execute it in a thread."""
+
         def decorator(f):
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
-                    f"Thread decorator cannot be used with async functions \"{f.__name__}\"")
+                    f'Thread decorator cannot be used with async functions "{f.__name__}"'
+                )
 
             # Allow any decorator order
             try:
@@ -213,4 +237,5 @@ class FeatureManager:
                 assign_thread_attr(f)
 
             return f
+
         return decorator

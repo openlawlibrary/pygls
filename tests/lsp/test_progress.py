@@ -49,8 +49,7 @@ class ConfiguredLS(ClientServer):
 
         @self.server.feature(
             TEXT_DOCUMENT_CODE_LENS,
-            CodeLensOptions(resolve_provider=False,
-                            work_done_progress=True),
+            CodeLensOptions(resolve_provider=False, work_done_progress=True),
         )
         async def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
             if "client_initiated_token" in params.text_document.uri:
@@ -68,19 +67,23 @@ class ConfiguredLS(ClientServer):
             assert token
             self.server.lsp.progress.begin(
                 token,
-                WorkDoneProgressBegin(kind='begin', title="starting", percentage=0),
+                WorkDoneProgressBegin(kind="begin", title="starting", percentage=0),
             )
             await asyncio.sleep(0.1)
             if self.server.lsp.progress.tokens[token].cancelled():
                 self.server.lsp.progress.end(
-                    token, WorkDoneProgressEnd(kind='end', message="cancelled")
+                    token, WorkDoneProgressEnd(kind="end", message="cancelled")
                 )
             else:
                 self.server.lsp.progress.report(
                     token,
-                    WorkDoneProgressReport(kind='report', message="doing", percentage=50),
+                    WorkDoneProgressReport(
+                        kind="report", message="doing", percentage=50
+                    ),
                 )
-                self.server.lsp.progress.end(token, WorkDoneProgressEnd(kind='end', message="done"))
+                self.server.lsp.progress.end(
+                    token, WorkDoneProgressEnd(kind="end", message="done")
+                )
             return None
 
         @self.client.feature(PROGRESS)

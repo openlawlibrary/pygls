@@ -22,7 +22,7 @@ from lsprotocol.types import (
 from lsprotocol.types import (
     SemanticTokens,
     SemanticTokensPartialResult,
-    SemanticTokensParams
+    SemanticTokensParams,
 )
 
 from ...conftest import ClientServer

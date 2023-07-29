@@ -35,8 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 async def aio_readline(stop_event, reader, message_handler):
-
-    CONTENT_LENGTH_PATTERN = re.compile(rb'^Content-Length: (\d+)\r\n$')
+    CONTENT_LENGTH_PATTERN = re.compile(rb"^Content-Length: (\d+)\r\n$")
 
     # Initialize message buffer
     message = []
@@ -54,11 +53,10 @@ async def aio_readline(stop_event, reader, message_handler):
             match = CONTENT_LENGTH_PATTERN.fullmatch(header)
             if match:
                 content_length = int(match.group(1))
-                logger.debug('Content length: %s', content_length)
+                logger.debug("Content length: %s", content_length)
 
         # Check if all headers have been read (as indicated by an empty line \r\n)
         if content_length and not header.strip():
-
             # Read body
             body = await reader.readexactly(content_length)
             if not body:
@@ -66,7 +64,7 @@ async def aio_readline(stop_event, reader, message_handler):
             message.append(body)
 
             # Pass message to protocol
-            message_handler(b''.join(message))
+            message_handler(b"".join(message))
 
             # Reset the buffer
             message = []
@@ -93,7 +91,9 @@ class Client:
         return self._stop_event.is_set()
 
     def feature(
-        self, feature_name: str, options: Optional[Any] = None,
+        self,
+        feature_name: str,
+        options: Optional[Any] = None,
     ):
         """Decorator used to register LSP features.
 
@@ -107,9 +107,7 @@ class Client:
     async def start_io(self, cmd: str, *args, **kwargs):
         """Start the given server and communicate with it over stdio."""
 
-        logger.debug(
-            "Starting server process: %s", ' '.join([cmd, *args])
-        )
+        logger.debug("Starting server process: %s", " ".join([cmd, *args]))
         server = await asyncio.create_subprocess_exec(
             cmd,
             *args,

@@ -94,4 +94,3 @@ async def test_code_actions(client: LanguageClient, workspace_dir):
 
     assert fix.range == expected_range
     assert fix.new_text == "1 + 1 = 2!"
-

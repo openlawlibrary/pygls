@@ -34,7 +34,6 @@ def build_wheel() -> str:
     """
 
     with tempfile.TemporaryDirectory() as tmpdir:
-
         # Copy all required files.
         dest = pathlib.Path(tmpdir)
 
@@ -45,31 +44,27 @@ def build_wheel() -> str:
         for src, target in directories:
             shutil.copytree(REPO / src, dest / target)
 
-        files = [
-            "pyproject.toml",
-            "poetry.lock",
-            "README.md",
-            "ThirdPartyNotices.txt"
-        ]
+        files = ["pyproject.toml", "poetry.lock", "README.md", "ThirdPartyNotices.txt"]
 
         for src in files:
             shutil.copy(REPO / src, dest)
 
         # Convert the lock file to requirements.txt.
         # Ensures reproducible behavour for testing.
-        subprocess.run([
-            "poetry",
-            "export",
-            "-f", "requirements.txt",
-            "--output", "requirements.txt"
-        ], cwd=dest)
-        subprocess.run([
-            "poetry",
-            "run",
-            "pip",
-            "install",
-            "-r", "requirements.txt"
-        ], cwd=dest)
+        subprocess.run(
+            [
+                "poetry",
+                "export",
+                "-f",
+                "requirements.txt",
+                "--output",
+                "requirements.txt",
+            ],
+            cwd=dest,
+        )
+        subprocess.run(
+            ["poetry", "run", "pip", "install", "-r", "requirements.txt"], cwd=dest
+        )
         # Build the wheel
         subprocess.run(["poetry", "build", "--format", "wheel"], cwd=dest)
         whl = list((dest / "dist").glob("*.whl"))[0]
@@ -89,7 +84,6 @@ def spawn_http_server(q: Queue, directory: str):
 
 
 def main():
-
     exit_code = 1
     whl = build_wheel()
 
@@ -104,7 +98,6 @@ def main():
 
     print("Running tests...")
     try:
-
         driver_cls, options_cls = BROWSERS[os.environ.get("BROWSER", "chrome")]
 
         options = options_cls()

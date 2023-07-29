@@ -11,8 +11,7 @@ RETRIES = 3
 
 
 def retry_stalled_init_fix_hack():
-
-    if 'DISABLE_TIMEOUT' in os.environ:
+    if "DISABLE_TIMEOUT" in os.environ:
         return lambda f: f
 
     def decorator(func):
@@ -23,10 +22,12 @@ def retry_stalled_init_fix_hack():
                     return func(*args, **kwargs)
                 except concurrent.futures._base.TimeoutError:
                     print(
-                        '\n\nRetrying timeouted test server init '
-                        '%d of %d\n' % (attempt, RETRIES)
+                        "\n\nRetrying timeouted test server init "
+                        "%d of %d\n" % (attempt, RETRIES)
                     )
                     attempt += 1
             return func(*args, **kwargs)
+
         return newfn
+
     return decorator

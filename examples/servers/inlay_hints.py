@@ -57,7 +57,7 @@ def inlay_hints(params: InlayHintParams):
             if number is None:
                 continue
 
-            binary_num = bin(number).split('b')[1]
+            binary_num = bin(number).split("b")[1]
             items.append(
                 InlayHint(
                     label=f":{binary_num}",

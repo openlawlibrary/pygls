@@ -23,10 +23,10 @@ class JsonRpcException(Exception):
     """A class used as a base class for json rpc exceptions."""
 
     def __init__(self, message=None, code=None, data=None):
-        message = message or getattr(self.__class__, 'MESSAGE')
+        message = message or getattr(self.__class__, "MESSAGE")
         super().__init__(message)
         self.message = message
-        self.code = code or getattr(self.__class__, 'CODE')
+        self.code = code or getattr(self.__class__, "CODE")
         self.data = data
 
     def __eq__(self, other):
@@ -43,108 +43,110 @@ class JsonRpcException(Exception):
     def from_error(error):
         for exc_class in _EXCEPTIONS:
             if exc_class.supports_code(error.code):
-                return exc_class(code=error.code, message=error.message, data=error.data)
+                return exc_class(
+                    code=error.code, message=error.message, data=error.data
+                )
 
         return JsonRpcException(code=error.code, message=error.message, data=error.data)
 
     @classmethod
     def supports_code(cls, code):
         # Defaults to UnknownErrorCode
-        return getattr(cls, 'CODE', -32001) == code
+        return getattr(cls, "CODE", -32001) == code
 
     def to_dict(self):
         exception_dict = {
-            'code': self.code,
-            'message': self.message,
+            "code": self.code,
+            "message": self.message,
         }
         if self.data is not None:
-            exception_dict['data'] = str(self.data)
+            exception_dict["data"] = str(self.data)
         return exception_dict
 
 
 class JsonRpcInternalError(JsonRpcException):
     CODE = -32602
-    MESSAGE = 'Internal Error'
+    MESSAGE = "Internal Error"
 
     @classmethod
     def of(cls, exc_info):
         exc_type, exc_value, exc_tb = exc_info
         return cls(
-            message=''.join(traceback.format_exception_only(
-                exc_type, exc_value)).strip(),
-            data={'traceback': traceback.format_tb(exc_tb)}
+            message="".join(
+                traceback.format_exception_only(exc_type, exc_value)
+            ).strip(),
+            data={"traceback": traceback.format_tb(exc_tb)},
         )
 
 
 class JsonRpcInvalidParams(JsonRpcException):
     CODE = -32602
-    MESSAGE = 'Invalid Params'
+    MESSAGE = "Invalid Params"
 
 
 class JsonRpcInvalidRequest(JsonRpcException):
     CODE = -32600
-    MESSAGE = 'Invalid Request'
+    MESSAGE = "Invalid Request"
 
 
 class JsonRpcMethodNotFound(JsonRpcException):
     CODE = -32601
-    MESSAGE = 'Method Not Found'
+    MESSAGE = "Method Not Found"
 
     @classmethod
     def of(cls, method):
-        return cls(message=cls.MESSAGE + ': ' + method)
+        return cls(message=cls.MESSAGE + ": " + method)
 
 
 class JsonRpcParseError(JsonRpcException):
     CODE = -32700
-    MESSAGE = 'Parse Error'
+    MESSAGE = "Parse Error"
 
 
 class JsonRpcRequestCancelled(JsonRpcException):
     CODE = -32800
-    MESSAGE = 'Request Cancelled'
+    MESSAGE = "Request Cancelled"
 
 
 class JsonRpcContentModified(JsonRpcException):
     CODE = -32801
-    MESSAGE = 'Content Modified'
+    MESSAGE = "Content Modified"
 
 
 class JsonRpcServerNotInitialized(JsonRpcException):
     CODE = -32002
-    MESSAGE = 'ServerNotInitialized'
+    MESSAGE = "ServerNotInitialized"
 
 
 class JsonRpcUnknownErrorCode(JsonRpcException):
     CODE = -32001
-    MESSAGE = 'UnknownErrorCode'
+    MESSAGE = "UnknownErrorCode"
 
 
 class JsonRpcReservedErrorRangeStart(JsonRpcException):
     CODE = -32099
-    MESSAGE = 'jsonrpcReservedErrorRangeStart'
+    MESSAGE = "jsonrpcReservedErrorRangeStart"
 
 
 class JsonRpcReservedErrorRangeEnd(JsonRpcException):
     CODE = -32000
-    MESSAGE = 'jsonrpcReservedErrorRangeEnd'
+    MESSAGE = "jsonrpcReservedErrorRangeEnd"
 
 
 class LspReservedErrorRangeStart(JsonRpcException):
     CODE = -32899
-    MESSAGE = 'lspReservedErrorRangeStart'
+    MESSAGE = "lspReservedErrorRangeStart"
 
 
 class LspReservedErrorRangeEnd(JsonRpcException):
     CODE = -32800
-    MESSAGE = 'lspReservedErrorRangeEnd'
+    MESSAGE = "lspReservedErrorRangeEnd"
 
 
 class JsonRpcServerError(JsonRpcException):
-
     def __init__(self, message, code, data=None):
         if not _is_server_error_code(code):
-            raise ValueError('Error code should be in range -32099 - -32000')
+            raise ValueError("Error code should be in range -32099 - -32000")
         super().__init__(message=message, code=code, data=data)
 
     @classmethod
@@ -172,7 +174,6 @@ class PyglsError(Exception):
 
 
 class CommandAlreadyRegisteredError(PyglsError):
-
     def __init__(self, command_name):
         self.command_name = command_name
 
@@ -181,7 +182,6 @@ class CommandAlreadyRegisteredError(PyglsError):
 
 
 class FeatureAlreadyRegisteredError(PyglsError):
-
     def __init__(self, feature_name):
         self.feature_name = feature_name
 
@@ -198,7 +198,6 @@ class FeatureNotificationError(PyglsError):
 
 
 class MethodTypeNotRegisteredError(PyglsError):
-
     def __init__(self, name):
         self.name = name
 
@@ -211,10 +210,9 @@ class ThreadDecoratorError(PyglsError):
 
 
 class ValidationError(PyglsError):
-
     def __init__(self, errors=None):
         self.errors = errors or []
 
     def __repr__(self):
-        opt_errs = '\n-'.join([e for e in self.errors])
-        return f'Missing options: {opt_errs}'
+        opt_errs = "\n-".join([e for e in self.errors])
+        return f"Missing options: {opt_errs}"

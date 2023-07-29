@@ -25,7 +25,9 @@ Example JSON object:
 
 import requests
 
-PYGLS_CONTRIBUTORS_JSON_URL = "https://api.github.com/repos/openlawlibrary/pygls/contributors"
+PYGLS_CONTRIBUTORS_JSON_URL = (
+    "https://api.github.com/repos/openlawlibrary/pygls/contributors"
+)
 CONTRIBUTORS_FILE = "CONTRIBUTORS.md"
 
 response = requests.get(PYGLS_CONTRIBUTORS_JSON_URL)
@@ -37,7 +39,7 @@ for contributor in contributors:
     name = contributor["login"]
     contributions = contributor["contributions"]
     url = contributor["html_url"]
-    contents += f'* [{name}]({url}) ({contributions})\n'
+    contents += f"* [{name}]({url}) ({contributions})\n"
 
 file = open(CONTRIBUTORS_FILE, "w")
 n = file.write(contents)
