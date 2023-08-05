@@ -20,6 +20,7 @@ import io
 import logging
 import os
 import re
+import warnings
 from typing import List, Optional, Pattern
 
 from lsprotocol.types import (
@@ -38,7 +39,7 @@ from pygls.uris import to_fs_path, uri_scheme
 RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
 RE_START_WORD = re.compile("[A-Za-z_0-9]*$")
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def is_char_beyond_multilingual_plane(char: str) -> bool:
@@ -301,7 +302,7 @@ class Document(object):
             # assumptions in test_document/test_document_full_edit. Test breaks
             # otherwise, and fixing the tests would require a broader fix to
             # protocol.py.
-            log.error(
+            logger.error(
                 "Unsupported client-provided TextDocumentContentChangeEvent. "
                 "Please update / submit a Pull Request to your LSP client."
             )
@@ -386,7 +387,7 @@ class Workspace(object):
             for folder in workspace_folders:
                 self.add_folder(folder)
 
-    def _create_document(
+    def _create_text_document(
         self,
         doc_uri: str,
         source: Optional[str] = None,
@@ -412,31 +413,31 @@ class Workspace(object):
     def folders(self):
         return self._folders
 
-    def get_document(self, doc_uri: str) -> Document:
+    def get_text_document(self, doc_uri: str) -> Document:
         """
         Return a managed document if-present,
         else create one pointing at disk.
 
         See https://github.com/Microsoft/language-server-protocol/issues/177
         """
-        return self._docs.get(doc_uri) or self._create_document(doc_uri)
+        return self._docs.get(doc_uri) or self._create_text_document(doc_uri)
 
     def is_local(self):
         return (
             self._root_uri_scheme == "" or self._root_uri_scheme == "file"
         ) and os.path.exists(self._root_path)
 
-    def put_document(self, text_document: TextDocumentItem):
+    def put_text_document(self, text_document: TextDocumentItem):
         doc_uri = text_document.uri
 
-        self._docs[doc_uri] = self._create_document(
+        self._docs[doc_uri] = self._create_text_document(
             doc_uri,
             source=text_document.text,
             version=text_document.version,
             language_id=text_document.language_id,
         )
 
-    def remove_document(self, doc_uri: str):
+    def remove_text_document(self, doc_uri: str):
         self._docs.pop(doc_uri)
 
     def remove_folder(self, folder_uri: str):
@@ -454,7 +455,7 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
-    def update_document(
+    def update_text_document(
         self,
         text_doc: VersionedTextDocumentIdentifier,
         change: TextDocumentContentChangeEvent,
@@ -462,3 +463,39 @@ class Workspace(object):
         doc_uri = text_doc.uri
         self._docs[doc_uri].apply_change(change)
         self._docs[doc_uri].version = text_doc.version
+
+    def get_document(self, *args, **kwargs):
+        warnings.warn(
+            "'workspace.get_document' has been deprecated, use "
+            "'workspace.get_text_document' instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.get_text_document(*args, **kwargs)
+
+    def remove_document(self, *args, **kwargs):
+        warnings.warn(
+            "'workspace.remove_document' has been deprecated, use "
+            "'workspace.remove_text_document' instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.remove_text_document(*args, **kwargs)
+
+    def put_document(self, *args, **kwargs):
+        warnings.warn(
+            "'workspace.put_document' has been deprecated, use "
+            "'workspace.put_text_document' instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.put_text_document(*args, **kwargs)
+
+    def update_document(self, *args, **kwargs):
+        warnings.warn(
+            "'workspace.update_document' has been deprecated, use "
+            "'workspace.update_text_document' instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.update_text_document(*args, **kwargs)
