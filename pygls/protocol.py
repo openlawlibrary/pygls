@@ -768,14 +768,18 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         self._server.process_id = params.process_id
 
+        text_document_sync_kind = self._server._text_document_sync_kind
+        notebook_document_sync = self._server._notebook_document_sync
+
         # Initialize server capabilities
         self.client_capabilities = params.capabilities
         self.server_capabilities = ServerCapabilitiesBuilder(
             self.client_capabilities,
-            {**self.fm.features, **self.fm.builtin_features}.keys(),
+            set({**self.fm.features, **self.fm.builtin_features}.keys()),
             self.fm.feature_options,
             list(self.fm.commands.keys()),
-            self._server.sync_kind,
+            text_document_sync_kind,
+            notebook_document_sync,
         ).build()
         logger.debug(
             "Server capabilities: %s",

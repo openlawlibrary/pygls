@@ -616,6 +616,7 @@ def test_register_feature(
         feature_manager.feature_options,
         [],
         None,
+        None,
     ).build()
 
     assert expected == actual
@@ -641,6 +642,7 @@ def test_register_inlay_hint_resolve(
         feature_manager.features.keys(),
         feature_manager.feature_options,
         [],
+        None,
         None,
     ).build()
 
