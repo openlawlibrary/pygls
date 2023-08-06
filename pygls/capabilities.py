@@ -15,7 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 from functools import reduce
-from typing import Any
+from typing import Any, Dict, List, Set
 
 from lsprotocol.types import (
     INLAY_HINT_RESOLVE,
@@ -72,12 +72,14 @@ from lsprotocol.types import (
     DocumentLinkOptions,
     ExecuteCommandOptions,
     ImplementationOptions,
+    NotebookDocumentSyncOptions,
     SemanticTokensOptions,
     SemanticTokensRegistrationOptions,
     SemanticTokensOptionsFullType1,
     ServerCapabilities,
     ServerCapabilitiesWorkspaceType,
     SignatureHelpOptions,
+    TextDocumentSyncKind,
     TextDocumentSyncOptions,
     TypeDefinitionOptions,
     FileOperationOptions,
@@ -107,13 +109,20 @@ class ServerCapabilitiesBuilder:
     """
 
     def __init__(
-        self, client_capabilities, features, feature_options, commands, sync_kind
+        self,
+        client_capabilities: ClientCapabilities,
+        features: Set[str],
+        feature_options: Dict[str, Any],
+        commands: List[str],
+        text_document_sync_kind: TextDocumentSyncKind,
+        notebook_document_sync: NotebookDocumentSyncOptions,
     ):
         self.client_capabilities = client_capabilities
         self.features = features
         self.feature_options = feature_options
         self.commands = commands
-        self.sync_kind = sync_kind
+        self.text_document_sync_kind = text_document_sync_kind
+        self.notebook_document_sync = notebook_document_sync
 
         self.server_cap = ServerCapabilities()
 
@@ -122,7 +131,7 @@ class ServerCapabilitiesBuilder:
             return self.feature_options.get(feature, default)
         return None
 
-    def _with_text_doc_sync(self):
+    def _with_text_document_sync(self):
         open_close = (
             TEXT_DOCUMENT_DID_OPEN in self.features
             or TEXT_DOCUMENT_DID_CLOSE in self.features
@@ -147,12 +156,19 @@ class ServerCapabilitiesBuilder:
 
         self.server_cap.text_document_sync = TextDocumentSyncOptions(
             open_close=open_close,
-            change=self.sync_kind,
+            change=self.text_document_sync_kind,
             will_save=will_save,
             will_save_wait_until=will_save_wait_until,
             save=save,
         )
 
+        return self
+
+    def _with_notebook_document_sync(self):
+        if self.client_capabilities.notebook_document is None:
+            return self
+
+        self.server_cap.notebook_document_sync = self.notebook_document_sync
         return self
 
     def _with_completion(self):
@@ -416,7 +432,8 @@ class ServerCapabilitiesBuilder:
 
     def build(self):
         return (
-            self._with_text_doc_sync()
+            self._with_text_document_sync()
+            ._with_notebook_document_sync()
             ._with_completion()
             ._with_hover()
             ._with_signature_help()

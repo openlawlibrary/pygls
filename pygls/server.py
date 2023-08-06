@@ -30,6 +30,7 @@ from lsprotocol.types import (
     ClientCapabilities,
     Diagnostic,
     MessageType,
+    NotebookDocumentSyncOptions,
     RegistrationParams,
     ServerCapabilities,
     ShowDocumentParams,
@@ -178,11 +179,11 @@ class Server:
 
     def __init__(
         self,
-        protocol_cls,
-        converter_factory,
-        loop=None,
-        max_workers=2,
-        sync_kind=TextDocumentSyncKind.Incremental,
+        protocol_cls: Type[JsonRPCProtocol],
+        converter_factory: Callable[[], cattrs.Converter],
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        max_workers: int = 2,
+        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
     ):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError("Protocol class should be subclass of asyncio.Protocol")
@@ -192,7 +193,9 @@ class Server:
         self._stop_event = None
         self._thread_pool = None
         self._thread_pool_executor = None
-        self.sync_kind = sync_kind
+
+        if sync_kind is not None:
+            self.text_document_sync_kind = sync_kind
 
         if loop is None:
             loop = asyncio.new_event_loop()
@@ -361,6 +364,8 @@ class LanguageServer(Server):
         loop=None,
         protocol_cls=LanguageServerProtocol,
         converter_factory=default_converter,
+        text_document_sync_kind: TextDocumentSyncKind=TextDocumentSyncKind.Incremental,
+        notebook_document_sync: Optional[NotebookDocumentSyncOptions] = None,
         max_workers: int = 2,
     ):
         if not issubclass(protocol_cls, LanguageServerProtocol):
@@ -370,6 +375,8 @@ class LanguageServer(Server):
 
         self.name = name
         self.version = version
+        self._text_document_sync_kind = text_document_sync_kind
+        self._notebook_document_sync = notebook_document_sync
         super().__init__(protocol_cls, converter_factory, loop, max_workers)
 
     def apply_edit(
