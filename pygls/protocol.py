@@ -704,7 +704,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def __init__(self, server, converter):
         super().__init__(server, converter)
 
-        self.workspace = None
+        self._workspace: Optional[Workspace] = None
         self.trace = None
 
         from pygls.progress import Progress
@@ -721,9 +721,22 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def _register_builtin_features(self):
         """Registers generic LSP features from this class."""
         for name in dir(self):
+
+            if name in {'workspace'}:
+                continue
+
             attr = getattr(self, name)
             if callable(attr) and hasattr(attr, "method_name"):
                 self.fm.add_builtin_feature(attr.method_name, attr)
+
+    @property
+    def workspace(self) -> Workspace:
+        if self._workspace is None:
+            raise RuntimeError(
+                "The workspace is not available - has the server been initialized?"
+            )
+
+        return self._workspace
 
     @lru_cache()
     def get_message_type(self, method: str) -> Optional[Type]:
@@ -791,7 +804,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize the workspace
         workspace_folders = params.workspace_folders or []
-        self.workspace = Workspace(root_uri, self._server.sync_kind, workspace_folders)
+        self._workspace = Workspace(root_uri, text_document_sync_kind, workspace_folders)
 
         self.trace = TraceValues.Off
 
