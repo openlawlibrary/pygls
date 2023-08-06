@@ -17,18 +17,29 @@
 import re
 from typing import Optional
 
+from lsprotocol import types
+
 from pygls.server import LanguageServer
-from lsprotocol.types import (
-    INLAY_HINT_RESOLVE,
-    TEXT_DOCUMENT_INLAY_HINT,
-    InlayHint,
-    InlayHintKind,
-    InlayHintParams,
-    Position,
-)
 
 NUMBER = re.compile(r"\d+")
-server = LanguageServer("inlay-hint-server", "v0.1")
+COMMENT = re.compile(r"^#$")
+
+
+server = LanguageServer(
+    name="inlay-hint-server",
+    version="v0.1",
+    notebook_document_sync=types.NotebookDocumentSyncOptions(
+        notebook_selector=[
+            types.NotebookDocumentSyncOptionsNotebookSelectorType2(
+                cells=[
+                    types.NotebookDocumentSyncOptionsNotebookSelectorType2CellsType(
+                        language="python"
+                    )
+                ]
+            )
+        ]
+    ),
+)
 
 
 def parse_int(chars: str) -> Optional[int]:
@@ -38,17 +49,36 @@ def parse_int(chars: str) -> Optional[int]:
         return None
 
 
-@server.feature(TEXT_DOCUMENT_INLAY_HINT)
-def inlay_hints(params: InlayHintParams):
+@server.feature(types.TEXT_DOCUMENT_INLAY_HINT)
+def inlay_hints(params: types.InlayHintParams):
     items = []
     document_uri = params.text_document.uri
-    document = server.workspace.get_document(document_uri)
+    document = server.workspace.get_text_document(document_uri)
 
     start_line = params.range.start.line
     end_line = params.range.end.line
 
     lines = document.lines[start_line : end_line + 1]
     for lineno, line in enumerate(lines):
+        match = COMMENT.match(line)
+        if match is not None:
+            nb = server.workspace.get_notebook_document(cell_uri=document_uri)
+            if nb is not None:
+                idx = 0
+                for idx, cell in enumerate(nb.cells):
+                    if cell.document == document_uri:
+                        break
+
+                items.append(
+                    types.InlayHint(
+                        label=f"notebook: {nb.uri}, cell {idx+1}",
+                        kind=types.InlayHintKind.Type,
+                        padding_left=False,
+                        padding_right=True,
+                        position=types.Position(line=lineno, character=match.end()),
+                    )
+                )
+
         for match in NUMBER.finditer(line):
             if not match:
                 continue
@@ -59,22 +89,26 @@ def inlay_hints(params: InlayHintParams):
 
             binary_num = bin(number).split("b")[1]
             items.append(
-                InlayHint(
+                types.InlayHint(
                     label=f":{binary_num}",
-                    kind=InlayHintKind.Type,
+                    kind=types.InlayHintKind.Type,
                     padding_left=False,
                     padding_right=True,
-                    position=Position(line=lineno, character=match.end()),
+                    position=types.Position(line=lineno, character=match.end()),
                 )
             )
 
     return items
 
 
-@server.feature(INLAY_HINT_RESOLVE)
-def inlay_hint_resolve(hint: InlayHint):
-    n = int(hint.label[1:], 2)
-    hint.tooltip = f"Binary representation of the number: {n}"
+@server.feature(types.INLAY_HINT_RESOLVE)
+def inlay_hint_resolve(hint: types.InlayHint):
+    try:
+        n = int(hint.label[1:], 2)
+        hint.tooltip = f"Binary representation of the number: {n}"
+    except Exception:
+        pass
+
     return hint
 
 
