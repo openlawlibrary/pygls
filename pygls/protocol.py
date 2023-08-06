@@ -54,6 +54,9 @@ from lsprotocol.types import (
     INITIALIZE,
     INITIALIZED,
     METHOD_TO_TYPES,
+    NOTEBOOK_DOCUMENT_DID_CHANGE,
+    NOTEBOOK_DOCUMENT_DID_CLOSE,
+    NOTEBOOK_DOCUMENT_DID_OPEN,
     LOG_TRACE,
     SET_TRACE,
     SHUTDOWN,
@@ -74,9 +77,12 @@ from lsprotocol.types import (
 from lsprotocol.types import (
     ApplyWorkspaceEditParams,
     Diagnostic,
+    DidChangeNotebookDocumentParams,
     DidChangeTextDocumentParams,
     DidChangeWorkspaceFoldersParams,
+    DidCloseNotebookDocumentParams,
     DidCloseTextDocumentParams,
+    DidOpenNotebookDocumentParams,
     DidOpenTextDocumentParams,
     ExecuteCommandParams,
     InitializeParams,
@@ -835,17 +841,38 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         (Incremental(from server capabilities); not configurable for now)
         """
         for change in params.content_changes:
-            self.workspace.update_document(params.text_document, change)
+            self.workspace.update_text_document(params.text_document, change)
 
     @lsp_method(TEXT_DOCUMENT_DID_CLOSE)
     def lsp_text_document__did_close(self, params: DidCloseTextDocumentParams) -> None:
         """Removes document from workspace."""
-        self.workspace.remove_document(params.text_document.uri)
+        self.workspace.remove_text_document(params.text_document.uri)
 
     @lsp_method(TEXT_DOCUMENT_DID_OPEN)
     def lsp_text_document__did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Puts document to the workspace."""
-        self.workspace.put_document(params.text_document)
+        self.workspace.put_text_document(params.text_document)
+
+    @lsp_method(NOTEBOOK_DOCUMENT_DID_OPEN)
+    def lsp_notebook_document__did_open(
+        self, params: DidOpenNotebookDocumentParams
+    ) -> None:
+        """Put a notebook document into the workspace"""
+        self.workspace.put_notebook_document(params)
+
+    @lsp_method(NOTEBOOK_DOCUMENT_DID_CHANGE)
+    def lsp_notebook_document__did_change(
+        self, params: DidChangeNotebookDocumentParams
+    ) -> None:
+        """Update a notebook's contents"""
+        self.workspace.update_notebook_document(params)
+
+    @lsp_method(NOTEBOOK_DOCUMENT_DID_CLOSE)
+    def lsp_notebook_document__did_close(
+        self, params: DidCloseNotebookDocumentParams
+    ) -> None:
+        """Remove a notebook document from the workspace."""
+        self.workspace.remove_notebook_document(params)
 
     @lsp_method(SET_TRACE)
     def lsp_set_trace(self, params: SetTraceParams) -> None:

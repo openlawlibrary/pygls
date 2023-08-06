@@ -16,23 +16,16 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import copy
 import io
 import logging
 import os
 import re
 import warnings
-from typing import List, Optional, Pattern
+from typing import Dict, List, Optional, Pattern
 
-from lsprotocol.types import (
-    Position,
-    Range,
-    TextDocumentContentChangeEvent,
-    TextDocumentContentChangeEvent_Type1,
-    TextDocumentItem,
-    TextDocumentSyncKind,
-    VersionedTextDocumentIdentifier,
-    WorkspaceFolder,
-)
+from lsprotocol import types
+
 from pygls.uris import to_fs_path, uri_scheme
 
 # TODO: this is not the best e.g. we capture numbers
@@ -64,7 +57,7 @@ def utf16_num_units(chars: str):
     return len(chars) + utf16_unit_offset(chars)
 
 
-def position_from_utf16(lines: List[str], position: Position) -> Position:
+def position_from_utf16(lines: List[str], position: types.Position) -> types.Position:
     """Convert the position.character from utf-16 code units to utf-32.
 
     A python application can't use the character member of `Position`
@@ -90,9 +83,9 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
         The position with `character` being converted to utf-32 code units.
     """
     if len(lines) == 0:
-        return Position(0, 0)
+        return types.Position(0, 0)
     if position.line >= len(lines):
-        return Position(len(lines) - 1, utf16_num_units(lines[-1]))
+        return types.Position(len(lines) - 1, utf16_num_units(lines[-1]))
 
     _line = lines[position.line]
     _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
@@ -100,7 +93,7 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
     _utf32_len = len(_line)
 
     if _utf16_len == 0:
-        return Position(position.line, 0)
+        return types.Position(position.line, 0)
 
     _utf16_end_of_line = utf16_num_units(_line)
     if position.character > _utf16_end_of_line:
@@ -125,11 +118,11 @@ def position_from_utf16(lines: List[str], position: Position) -> Position:
             _utf16_index += 1
         utf32_index += 1
 
-    position = Position(line=position.line, character=utf32_index)
+    position = types.Position(line=position.line, character=utf32_index)
     return position
 
 
-def position_to_utf16(lines: List[str], position: Position) -> Position:
+def position_to_utf16(lines: List[str], position: types.Position) -> types.Position:
     """Convert the position.character from utf-32 to utf-16 code units.
 
     A python application can't use the character member of `Position`
@@ -155,16 +148,16 @@ def position_to_utf16(lines: List[str], position: Position) -> Position:
         The position with `character` being converted to utf-16 code units.
     """
     try:
-        return Position(
+        return types.Position(
             line=position.line,
             character=position.character
             + utf16_unit_offset(lines[position.line][: position.character]),
         )
     except IndexError:
-        return Position(line=len(lines), character=0)
+        return types.Position(line=len(lines), character=0)
 
 
-def range_from_utf16(lines: List[str], range: Range) -> Range:
+def range_from_utf16(lines: List[str], range: types.Range) -> types.Range:
     """Convert range.[start|end].character from utf-16 code units to utf-32.
 
     Arguments:
@@ -176,14 +169,14 @@ def range_from_utf16(lines: List[str], range: Range) -> Range:
     Returns:
         The range with `character` offsets being converted to utf-16 code units.
     """
-    range_new = Range(
+    range_new = types.Range(
         start=position_from_utf16(lines, range.start),
         end=position_from_utf16(lines, range.end),
     )
     return range_new
 
 
-def range_to_utf16(lines: List[str], range: Range) -> Range:
+def range_to_utf16(lines: List[str], range: types.Range) -> types.Range:
     """Convert range.[start|end].character from utf-32 to utf-16 code units.
 
     Arguments:
@@ -195,13 +188,13 @@ def range_to_utf16(lines: List[str], range: Range) -> Range:
     Returns:
         The range with `character` offsets being converted to utf-32 code units.
     """
-    return Range(
+    return types.Range(
         start=position_to_utf16(lines, range.start),
         end=position_to_utf16(lines, range.end),
     )
 
 
-class Document(object):
+class TextDocument(object):
     def __init__(
         self,
         uri: str,
@@ -209,7 +202,7 @@ class Document(object):
         version: Optional[int] = None,
         language_id: Optional[str] = None,
         local: bool = True,
-        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
+        sync_kind: types.TextDocumentSyncKind = types.TextDocumentSyncKind.Incremental,
     ):
         self.uri = uri
         self.version = version
@@ -220,15 +213,17 @@ class Document(object):
         self._local = local
         self._source = source
 
-        self._is_sync_kind_full = sync_kind == TextDocumentSyncKind.Full
-        self._is_sync_kind_incremental = sync_kind == TextDocumentSyncKind.Incremental
-        self._is_sync_kind_none = sync_kind == TextDocumentSyncKind.None_
+        self._is_sync_kind_full = sync_kind == types.TextDocumentSyncKind.Full
+        self._is_sync_kind_incremental = (
+            sync_kind == types.TextDocumentSyncKind.Incremental
+        )
+        self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
 
     def __str__(self):
         return str(self.uri)
 
     def _apply_incremental_change(
-        self, change: TextDocumentContentChangeEvent_Type1
+        self, change: types.TextDocumentContentChangeEvent_Type1
     ) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
@@ -269,18 +264,18 @@ class Document(object):
 
         self._source = new.getvalue()
 
-    def _apply_full_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def _apply_full_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a ``Full`` text change to the document."""
         self._source = change.text
 
-    def _apply_none_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def _apply_none_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a ``None`` text change to the document
 
         Currently does nothing, provided for consistency.
         """
         pass
 
-    def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def apply_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind
 
         Performs either ``Incremental``, ``Full``, or ``None`` synchronization based on
@@ -294,7 +289,7 @@ class Document(object):
             content update client requests in the pygls Python library.
 
         """
-        if isinstance(change, TextDocumentContentChangeEvent_Type1):
+        if isinstance(change, types.TextDocumentContentChangeEvent_Type1):
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return
@@ -316,7 +311,7 @@ class Document(object):
     def lines(self) -> List[str]:
         return self.source.splitlines(True)
 
-    def offset_at_position(self, position: Position) -> int:
+    def offset_at_position(self, position: types.Position) -> int:
         """Return the character offset pointed at by the given position."""
         lines = self.lines
         pos = position_from_utf16(lines, position)
@@ -332,7 +327,7 @@ class Document(object):
 
     def word_at_position(
         self,
-        position: Position,
+        position: types.Position,
         re_start_word: Pattern = RE_START_WORD,
         re_end_word: Pattern = RE_END_WORD,
     ) -> str:
@@ -374,6 +369,10 @@ class Document(object):
         return m_start[0] + m_end[-1]
 
 
+# For backwards compatibility
+Document = TextDocument
+
+
 class Workspace(object):
     def __init__(self, root_uri, sync_kind=None, workspace_folders=None):
         self._root_uri = root_uri
@@ -381,7 +380,11 @@ class Workspace(object):
         self._root_path = to_fs_path(self._root_uri)
         self._sync_kind = sync_kind
         self._folders = {}
-        self._docs = {}
+        self._text_documents: Dict[str, TextDocument] = {}
+        self._notebook_documents: Dict[str, types.NotebookDocument] = {}
+
+        # Used to lookup notebooks which contain a given cell.
+        self._cell_in_notebook: Dict[str, str] = {}
 
         if workspace_folders is not None:
             for folder in workspace_folders:
@@ -393,8 +396,8 @@ class Workspace(object):
         source: Optional[str] = None,
         version: Optional[int] = None,
         language_id: Optional[str] = None,
-    ) -> Document:
-        return Document(
+    ) -> TextDocument:
+        return TextDocument(
             doc_uri,
             source=source,
             version=version,
@@ -402,43 +405,120 @@ class Workspace(object):
             sync_kind=self._sync_kind,
         )
 
-    def add_folder(self, folder: WorkspaceFolder):
+    def add_folder(self, folder: types.WorkspaceFolder):
         self._folders[folder.uri] = folder
 
     @property
     def documents(self):
-        return self._docs
+        warnings.warn(
+            "'workspace.documents' has been deprecated, use "
+            "'workspace.text_documents' instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.text_documents
+
+    @property
+    def notebook_documents(self):
+        return self._notebook_documents
+
+    @property
+    def text_documents(self):
+        return self._text_documents
 
     @property
     def folders(self):
         return self._folders
 
-    def get_text_document(self, doc_uri: str) -> Document:
+    def get_notebook_document(
+        self, *, notebook_uri: Optional[str] = None, cell_uri: Optional[str] = None
+    ) -> Optional[types.NotebookDocument]:
+        """Return the notebook corresponding with the given uri.
+
+        If both ``notebook_uri`` and ``cell_uri`` are given, ``notebook_uri`` takes
+        precedence.
+
+        Parameters
+        ----------
+        notebook_uri
+           If given, return the notebook document with the given uri.
+
+        cell_uri
+           If given, return the notebook document which contains a cell with the
+           given uri
+
+        Returns
+        -------
+        Optional[NotebookDocument]
+           The requested notebook document if found, ``None`` otherwise.
+        """
+        if notebook_uri is not None:
+            return self._notebook_documents.get(notebook_uri)
+
+        notebook_uri = self._cell_in_notebook.get(cell_uri)
+        return self._notebook_documents.get(notebook_uri)
+
+    def get_text_document(self, doc_uri: str) -> TextDocument:
         """
         Return a managed document if-present,
         else create one pointing at disk.
 
         See https://github.com/Microsoft/language-server-protocol/issues/177
         """
-        return self._docs.get(doc_uri) or self._create_text_document(doc_uri)
+        return self._text_documents.get(doc_uri) or self._create_text_document(doc_uri)
 
     def is_local(self):
         return (
             self._root_uri_scheme == "" or self._root_uri_scheme == "file"
         ) and os.path.exists(self._root_path)
 
-    def put_text_document(self, text_document: TextDocumentItem):
+    def put_notebook_document(self, params: types.DidOpenNotebookDocumentParams):
+        notebook = params.notebook_document
+
+        # Create a fresh instance to ensure our copy cannot be accidentally modified.
+        self._notebook_documents[notebook.uri] = copy.deepcopy(notebook)
+
+        for cell_document in params.cell_text_documents:
+            self.put_text_document(cell_document, notebook_uri=notebook.uri)
+
+    def put_text_document(
+        self,
+        text_document: types.TextDocumentItem,
+        notebook_uri: Optional[str] = None,
+    ):
+        """Add a text document to the workspace.
+
+        Parameters
+        ----------
+        text_document
+           The text document to add
+
+        notebook_uri
+           If set, indicates that this text document represents a cell in a notebook
+           document
+        """
         doc_uri = text_document.uri
 
-        self._docs[doc_uri] = self._create_text_document(
+        self._text_documents[doc_uri] = self._create_text_document(
             doc_uri,
             source=text_document.text,
             version=text_document.version,
             language_id=text_document.language_id,
         )
 
+        if notebook_uri:
+            self._cell_in_notebook[doc_uri] = notebook_uri
+
+    def remove_notebook_document(self, params: types.DidChangeNotebookDocumentParams):
+        notebook_uri = params.notebook_document.uri
+        self._notebook_documents.pop(notebook_uri, None)
+
+        for cell_document in params.cell_text_documents:
+            self.remove_text_document(cell_document.uri)
+
     def remove_text_document(self, doc_uri: str):
-        self._docs.pop(doc_uri)
+        self._text_documents.pop(doc_uri, None)
+        self._cell_in_notebook.pop(doc_uri, None)
 
     def remove_folder(self, folder_uri: str):
         self._folders.pop(folder_uri, None)
@@ -455,14 +535,62 @@ class Workspace(object):
     def root_uri(self):
         return self._root_uri
 
+    def update_notebook_document(self, params: types.DidChangeNotebookDocumentParams):
+        uri = params.notebook_document.uri
+        notebook = self._notebook_documents[uri]
+        notebook.version = params.notebook_document.version
+
+        if params.change.metadata:
+            notebook.metadata = params.change.metadata
+
+        cell_changes = params.change.cells
+        if cell_changes is None:
+            return
+
+        # Process changes to any cell metadata.
+        nb_cells = {cell.document: cell for cell in notebook.cells}
+        for new_data in cell_changes.data or []:
+            nb_cell = nb_cells.get(new_data.document)
+            if nb_cell is None:
+                logger.warning(
+                    "Ignoring metadata for '%s': not in notebook.", new_data.document
+                )
+                continue
+
+            nb_cell.kind = new_data.kind
+            nb_cell.metadata = new_data.metadata
+            nb_cell.execution_summary = new_data.execution_summary
+
+        # Process changes to the notebook's structure
+        structure = cell_changes.structure
+        if structure:
+            cells = notebook.cells
+            new_cells = structure.array.cells or []
+
+            # Re-order the cells
+            before = cells[: structure.array.start]
+            after = cells[(structure.array.start + structure.array.delete_count) :]
+            notebook.cells = [*before, *new_cells, *after]
+
+            for new_cell in structure.did_open or []:
+                self.put_text_document(new_cell, notebook_uri=uri)
+
+            for removed_cell in structure.did_close or []:
+                self.remove_text_document(removed_cell.uri)
+
+        # Process changes to the text content of existing cells.
+        for text in cell_changes.text_content or []:
+            for change in text.changes:
+                self.update_text_document(text.document, change)
+
     def update_text_document(
         self,
-        text_doc: VersionedTextDocumentIdentifier,
-        change: TextDocumentContentChangeEvent,
+        text_doc: types.VersionedTextDocumentIdentifier,
+        change: types.TextDocumentContentChangeEvent,
     ):
         doc_uri = text_doc.uri
-        self._docs[doc_uri].apply_change(change)
-        self._docs[doc_uri].version = text_doc.version
+        self._text_documents[doc_uri].apply_change(change)
+        self._text_documents[doc_uri].version = text_doc.version
 
     def get_document(self, *args, **kwargs):
         warnings.warn(
