@@ -21,6 +21,7 @@ import pathlib
 import sys
 
 import pytest
+from lsprotocol import types
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
@@ -123,4 +124,7 @@ def feature_manager():
 @pytest.fixture
 def workspace(tmpdir):
     """Return a workspace."""
-    return Workspace(uris.from_fs_path(str(tmpdir)))
+    return Workspace(
+        uris.from_fs_path(str(tmpdir)),
+        sync_kind=types.TextDocumentSyncKind.Incremental,
+    )
