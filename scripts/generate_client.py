@@ -49,13 +49,14 @@ def write_notification(
 
     if params is None:
         param_name = "None"
+        param_mod = ""
     else:
         param_mod, param_name = params.__module__, params.__name__
-        imports.add((param_mod, param_name))
+        param_mod = param_mod.replace("lsprotocol.types", "types") + "."
 
     return "\n".join(
         [
-            f"def {python_name}(self, params: {param_name}) -> None:",
+            f"def {python_name}(self, params: {param_mod}{param_name}) -> None:",
             f'    """Send a ``{method}`` notification.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
@@ -76,15 +77,11 @@ def get_response_type(response: Type, imports: Set[Tuple[str, str]]) -> str:
     result = re.sub(r"ForwardRef\('([\w.]+)'\)", r"lsprotocol.types.\1", result)
     result = result.replace("NoneType", "None")
 
-    # Replace any lsprotocol types with their short name.
-    for match in re.finditer(r"lsprotocol.types.([\w]+)", result):
-        imports.add(("lsprotocol.types", match.group(1)))
-
     # Replace any typing imports with their short name.
     for match in re.finditer(r"typing.([\w]+)", result):
         imports.add(("typing", match.group(1)))
 
-    result = result.replace("lsprotocol.types.", "")
+    result = result.replace("lsprotocol.types.", "types.")
     result = result.replace("typing.", "")
 
     return result
@@ -101,9 +98,10 @@ def write_method(
 
     if params is None:
         param_name = "None"
+        param_mod = ""
     else:
         param_mod, param_name = params.__module__, params.__name__
-        imports.add((param_mod, param_name))
+        param_mod = param_mod.replace("lsprotocol.types", "types") + "."
 
     result_type = get_response_type(response, imports)
 
@@ -111,7 +109,7 @@ def write_method(
         [
             f"def {python_name}(",
             "    self,",
-            f"    params: {param_name},",
+            f"    params: {param_mod}{param_name},",
             f"    callback: Optional[Callable[[{result_type}], None]] = None,",
             ") -> Future:",
             f'    """Make a ``{method}`` request.',
@@ -125,7 +123,7 @@ def write_method(
             "",
             f"async def {python_name}_async(",
             "    self,",
-            f"    params: {param_name},",
+            f"    params: {param_mod}{param_name},",
             f") -> {result_type}:",
             f'    """Make a ``{method}`` request.',
             "",
@@ -144,9 +142,10 @@ def generate_client() -> str:
     methods = []
     imports = {
         ("concurrent.futures", "Future"),
+        ("lsprotocol", "types"),
         ("pygls.protocol", "LanguageServerProtocol"),
         ("pygls.protocol", "default_converter"),
-        ("pygls.client", "Client"),
+        ("pygls.client", "JsonRPCClient"),
         ("typing", "Callable"),
         ("typing", "Optional"),
     }
@@ -171,7 +170,7 @@ def generate_client() -> str:
         write_imports(imports),
         "",
         "",
-        "class LanguageClient(Client):",
+        "class BaseLanguageClient(JsonRPCClient):",
         "",
         "    def __init__(",
         "        self,",
