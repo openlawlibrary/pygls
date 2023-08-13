@@ -71,7 +71,7 @@ async def aio_readline(stop_event, reader, message_handler):
             content_length = 0
 
 
-class Client:
+class JsonRPCClient:
     """Base JSON-RPC client."""
 
     def __init__(

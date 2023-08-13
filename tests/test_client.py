@@ -22,7 +22,7 @@ from typing import Union
 import pytest
 from pygls import IS_PYODIDE
 
-from pygls.client import Client
+from pygls.client import JsonRPCClient
 from pygls.exceptions import JsonRpcException, PyglsError
 
 
@@ -34,7 +34,7 @@ SERVERS = pathlib.Path(__file__).parent / "servers"
 async def test_client_detect_server_exit():
     """Ensure that the client detects when the server process exits."""
 
-    class TestClient(Client):
+    class TestClient(JsonRPCClient):
         server_exit_called = False
 
         async def server_exit(self, server: asyncio.subprocess.Process):
@@ -56,7 +56,7 @@ async def test_client_detect_invalid_json():
     """Ensure that the client can detect the case where the server returns invalid
     json."""
 
-    class TestClient(Client):
+    class TestClient(JsonRPCClient):
         report_error_called = False
         future = None
 
@@ -93,7 +93,7 @@ async def test_client_detect_invalid_json():
 async def test_client_large_responses():
     """Ensure that the client can correctly handle large responses from a server."""
 
-    client = Client()
+    client = JsonRPCClient()
     await client.start_io(sys.executable, str(SERVERS / "large_response.py"))
 
     result = await client.protocol.send_request_async("get/numbers", {}, msg_id=1)
