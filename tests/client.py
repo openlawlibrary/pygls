@@ -32,7 +32,7 @@ from lsprotocol import types
 from pygls import IS_PYODIDE
 from pygls import uris
 from pygls.exceptions import JsonRpcMethodNotFound
-from pygls.lsp.client import LanguageClient as BaseLanguageClient
+from pygls.lsp.client import BaseLanguageClient
 from pygls.protocol import LanguageServerProtocol
 from pygls.protocol import default_converter
 
