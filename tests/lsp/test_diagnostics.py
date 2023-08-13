@@ -14,82 +14,41 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import json
+from typing import Tuple
 
-from typing import List
-
-import time
-from lsprotocol.types import (
-    TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS,
-    PublishDiagnosticsParams,
-    Diagnostic,
-    Range,
-    Position,
-)
-from ..conftest import ClientServer
+from lsprotocol import types
 
 
-class ConfiguredLS(ClientServer):
-    def __init__(self):
-        super().__init__()
-        self.client.notifications: List[PublishDiagnosticsParams] = []
-
-        @self.client.feature(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
-        def f1(params: PublishDiagnosticsParams):
-            self.client.notifications.append(params)
+from ..client import LanguageClient
 
 
-@ConfiguredLS.decorate()
-def test_diagnostics_notifications(client_server):
-    client, server = client_server
-    diagnostic = Diagnostic(
-        range=Range(
-            start=Position(line=0, character=0),
-            end=Position(line=1, character=1),
-        ),
-        message="test diagnostic",
-    )
-    server.lsp.publish_diagnostics(
-        PublishDiagnosticsParams(uri="", diagnostics=[diagnostic], version=1),
-    )
-    server.lsp.publish_diagnostics(
-        "",
-        diagnostics=[diagnostic],
-        version=1,
+async def test_diagnostics(
+    json_server_client: Tuple[LanguageClient, types.InitializeResult],
+    uri_for,
+):
+    """Ensure that diagnostics are working as expected."""
+    client, _ = json_server_client
+
+    test_uri = uri_for("example.json")
+    assert test_uri is not None
+
+    # Get the expected error message
+    document_content = "text"
+    try:
+        json.loads(document_content)
+    except json.JSONDecodeError as err:
+        expected_message = err.msg
+
+    client.text_document_did_open(
+        types.DidOpenTextDocumentParams(
+            text_document=types.TextDocumentItem(
+                uri=test_uri, language_id="json", version=1, text=document_content
+            )
+        )
     )
 
-    time.sleep(0.1)
+    await client.wait_for_notification(types.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
 
-    assert len(client.notifications) == 2
-    expected = PublishDiagnosticsParams(
-        uri="",
-        diagnostics=[diagnostic],
-        version=1,
-    )
-    assert client.notifications[0] == expected
-
-
-@ConfiguredLS.decorate()
-def test_diagnostics_notifications_deprecated(client_server):
-    client, server = client_server
-    diagnostic = Diagnostic(
-        range=Range(
-            start=Position(line=0, character=0),
-            end=Position(line=1, character=1),
-        ),
-        message="test diagnostic",
-    )
-    server.publish_diagnostics(
-        "",
-        diagnostics=[diagnostic],
-        version=1,
-    )
-
-    time.sleep(0.1)
-
-    assert len(client.notifications) == 1
-    expected = PublishDiagnosticsParams(
-        uri="",
-        diagnostics=[diagnostic],
-        version=1,
-    )
-    assert client.notifications[0] == expected
+    diagnostics = client.diagnostics[test_uri]
+    assert diagnostics[0].message == expected_message

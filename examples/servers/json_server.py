@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import argparse
 import asyncio
 import json
 import re
@@ -22,38 +23,35 @@ import uuid
 from json import JSONDecodeError
 from typing import Optional
 
-from lsprotocol.types import (
-    TEXT_DOCUMENT_COMPLETION,
-    TEXT_DOCUMENT_DID_CHANGE,
-    TEXT_DOCUMENT_DID_CLOSE,
-    TEXT_DOCUMENT_DID_OPEN,
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-)
-from lsprotocol.types import (
-    CompletionItem,
-    CompletionList,
-    CompletionOptions,
-    CompletionParams,
-    ConfigurationItem,
-    Diagnostic,
-    DidChangeTextDocumentParams,
-    DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams,
-    MessageType,
-    Position,
-    Range,
-    Registration,
-    RegistrationParams,
-    SemanticTokens,
-    SemanticTokensLegend,
-    SemanticTokensParams,
-    Unregistration,
-    UnregistrationParams,
-    WorkDoneProgressBegin,
-    WorkDoneProgressEnd,
-    WorkDoneProgressReport,
-    WorkspaceConfigurationParams,
-)
+from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
+from lsprotocol.types import TEXT_DOCUMENT_DID_CHANGE
+from lsprotocol.types import TEXT_DOCUMENT_DID_CLOSE
+from lsprotocol.types import TEXT_DOCUMENT_DID_OPEN
+from lsprotocol.types import TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL
+from lsprotocol.types import CompletionItem
+from lsprotocol.types import CompletionList
+from lsprotocol.types import CompletionOptions
+from lsprotocol.types import CompletionParams
+from lsprotocol.types import ConfigurationItem
+from lsprotocol.types import Diagnostic
+from lsprotocol.types import DidChangeTextDocumentParams
+from lsprotocol.types import DidCloseTextDocumentParams
+from lsprotocol.types import DidOpenTextDocumentParams
+from lsprotocol.types import MessageType
+from lsprotocol.types import Position
+from lsprotocol.types import Range
+from lsprotocol.types import Registration
+from lsprotocol.types import RegistrationParams
+from lsprotocol.types import SemanticTokens
+from lsprotocol.types import SemanticTokensLegend
+from lsprotocol.types import SemanticTokensParams
+from lsprotocol.types import Unregistration
+from lsprotocol.types import UnregistrationParams
+from lsprotocol.types import WorkDoneProgressBegin
+from lsprotocol.types import WorkDoneProgressEnd
+from lsprotocol.types import WorkDoneProgressReport
+from lsprotocol.types import WorkspaceConfigurationParams
+
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -116,7 +114,8 @@ def _validate_json(source):
 
 
 @json_server.feature(
-    TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[","])
+    TEXT_DOCUMENT_COMPLETION,
+    CompletionOptions(trigger_characters=[","], all_commit_characters=[":"]),
 )
 def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Returns completion items."""
@@ -335,3 +334,30 @@ async def unregister_completions(ls: JsonLanguageServer, *args):
         ls.show_message(
             "Error happened during completions unregistration.", MessageType.Error
         )
+
+
+def add_arguments(parser):
+    parser.description = "simple json server example"
+
+    parser.add_argument("--tcp", action="store_true", help="Use TCP server")
+    parser.add_argument("--ws", action="store_true", help="Use WebSocket server")
+    parser.add_argument("--host", default="127.0.0.1", help="Bind to this address")
+    parser.add_argument("--port", type=int, default=2087, help="Bind to this port")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    add_arguments(parser)
+    args = parser.parse_args()
+
+    if args.tcp:
+        json_server.start_tcp(args.host, args.port)
+    elif args.ws:
+        json_server.start_ws(args.host, args.port)
+    else:
+        json_server.start_io()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
+    main()

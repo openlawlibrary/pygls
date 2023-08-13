@@ -14,82 +14,35 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
-from lsprotocol.types import (
-    CompletionItem,
-    CompletionItemKind,
-    CompletionList,
-    CompletionOptions,
-    CompletionParams,
-    Position,
-    TextDocumentIdentifier,
-)
+from typing import Tuple
 
-from ..conftest import ClientServer
+from lsprotocol import types
 
 
-class ConfiguredLS(ClientServer):
-    def __init__(self):
-        super().__init__()
+from ..client import LanguageClient
 
-        @self.server.feature(
-            TEXT_DOCUMENT_COMPLETION,
-            CompletionOptions(
-                trigger_characters=[","],
-                all_commit_characters=[":"],
-                resolve_provider=True,
-            ),
+
+async def test_completion(
+    json_server_client: Tuple[LanguageClient, types.InitializeResult],
+    uri_for,
+):
+    """Ensure that the completion methods are working as expected."""
+    client, initialize_result = json_server_client
+
+    completion_provider = initialize_result.capabilities.completion_provider
+    assert completion_provider
+    assert completion_provider.trigger_characters == [","]
+    assert completion_provider.all_commit_characters == [":"]
+
+    test_uri = uri_for("example.json")
+    assert test_uri is not None
+
+    response = await client.text_document_completion_async(
+        types.CompletionParams(
+            text_document=types.TextDocumentIdentifier(uri=test_uri),
+            position=types.Position(line=0, character=0),
         )
-        def f(params: CompletionParams) -> CompletionList:
-            return CompletionList(
-                is_incomplete=False,
-                items=[
-                    CompletionItem(
-                        label="test1",
-                        kind=CompletionItemKind.Method,
-                        preselect=True,
-                    ),
-                ],
-            )
+    )
 
-
-@ConfiguredLS.decorate()
-def test_capabilities(client_server):
-    _, server = client_server
-    capabilities = server.server_capabilities
-
-    assert capabilities.completion_provider
-    assert capabilities.completion_provider.trigger_characters == [","]
-    assert capabilities.completion_provider.all_commit_characters == [":"]
-    assert capabilities.completion_provider.resolve_provider is True
-
-
-@ConfiguredLS.decorate()
-def test_completions(client_server):
-    client, _ = client_server
-    response = client.lsp.send_request(
-        TEXT_DOCUMENT_COMPLETION,
-        CompletionParams(
-            text_document=TextDocumentIdentifier(uri="file://test.test"),
-            position=Position(line=0, character=0),
-        ),
-    ).result()
-
-    assert not response.is_incomplete
-    assert response.items[0].label == "test1"
-    assert response.items[0].kind == CompletionItemKind.Method
-    assert response.items[0].preselect
-    assert response.items[0].deprecated is None
-    assert response.items[0].tags is None
-    assert response.items[0].detail is None
-    assert response.items[0].documentation is None
-    assert response.items[0].sort_text is None
-    assert response.items[0].filter_text is None
-    assert response.items[0].insert_text is None
-    assert response.items[0].insert_text_format is None
-    assert response.items[0].insert_text_mode is None
-    assert response.items[0].text_edit is None
-    assert response.items[0].additional_text_edits is None
-    assert response.items[0].commit_characters is None
-    assert response.items[0].command is None
-    assert response.items[0].data is None
+    labels = {i.label for i in response.items}
+    assert labels == set(['"', "[", "]", "{", "}"])
