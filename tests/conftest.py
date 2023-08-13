@@ -21,6 +21,8 @@ import pathlib
 import sys
 
 import pytest
+import pytest_asyncio
+from lsprotocol import types
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
@@ -32,6 +34,7 @@ from .ls_setup import (
     setup_ls_features,
 )
 
+from .client import make_test_lsp_client
 
 DOC = """document
 for
@@ -63,18 +66,16 @@ def client_server(request):
     client_server.stop()
 
 
-@pytest.fixture()
-def server_dir():
-    """Returns the directory where all the example language servers live"""
-    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
-    return path.resolve()
+@pytest.fixture(scope="session")
+def uri_for():
+    """Returns the uri corresponsing to a file in the example workspace."""
+    base_dir = pathlib.Path(__file__, "..", "..", "examples", "workspace").resolve()
 
+    def fn(*args):
+        fpath = pathlib.Path(base_dir, *args)
+        return uris.from_fs_path(str(fpath))
 
-@pytest.fixture()
-def workspace_dir():
-    """Returns the directory containing the example workspace."""
-    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "workspace"
-    return path.resolve()
+    return fn
 
 
 @pytest.fixture()
@@ -96,6 +97,40 @@ def event_loop():
         loop.close()
     except NotImplementedError:
         pass
+
+
+@pytest.fixture(scope="session")
+def server_dir():
+    """Returns the directory where all the example language servers live"""
+    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
+    return path.resolve()
+
+
+@pytest_asyncio.fixture()
+async def json_server_client(server_dir, uri_for):
+    """Returns a language client connected to server_dir/json_server.py."""
+
+    if IS_PYODIDE:
+        pytest.skip("subprocesses are not available in pyodide")
+
+    client = make_test_lsp_client()
+    await client.start_io(sys.executable, str(server_dir / "json_server.py"))
+
+    # Initialize the server
+    response = await client.initialize_async(
+        types.InitializeParams(
+            capabilities=types.ClientCapabilities(),
+            root_uri=uri_for("."),  # root of example workspace
+        )
+    )
+    assert response is not None
+
+    yield client, response
+
+    await client.shutdown_async(None)
+    client.exit(None)
+
+    await client.stop()
 
 
 @pytest.fixture
