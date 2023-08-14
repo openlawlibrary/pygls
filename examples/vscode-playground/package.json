@@ -1,0 +1,111 @@
+{
+  "name": "pygls-playground",
+  "description": "Extension for experimenting with pygls powered language servers",
+  "author": "Open Law Library",
+  "repository": "https://github.com/openlawlibrary/pygls",
+  "license": "Apache-2.0",
+  "version": "1.0.2",
+  "publisher": "openlawlibrary",
+  "engines": {
+    "node": ">=16.17.1",
+    "vscode": "^1.78.0"
+  },
+  "extensionDependencies": [
+    "ms-python.python"
+  ],
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "pygls.server.restart",
+        "title": "Restart Language Server",
+        "category": "pygls"
+      },
+      {
+        "command": "pygls.server.executeCommand",
+        "title": "Execute Command",
+        "category": "pygls"
+      }
+    ],
+    "configuration": [
+      {
+        "type": "object",
+        "title": "Server Configuration",
+        "properties": {
+          "pygls.server.cwd": {
+            "scope": "window",
+            "type": "string",
+            "description": "The working directory from which to launch the server.",
+            "markdownDescription": "The working directory from which to launch the server.\nIf blank, this will default to the `examples/servers` directory."
+          },
+          "pygls.server.launchScript": {
+            "scope": "window",
+            "type": "string",
+            "default": "json_server.py",
+            "description": "The python script to run when launching the server."
+          },
+          "pygls.trace.server": {
+            "scope": "window",
+            "type": "string",
+            "default": "off",
+            "enum": [
+              "off",
+              "verbose"
+            ],
+            "description": "Controls if LSP messages send to/from the server should be logged.",
+            "enumDescriptions": [
+              "do not log any lsp messages",
+              "log all lsp messages sent to/from the server"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "title": "Client Configuration",
+        "properties": {
+          "pygls.client.documentSelector": {
+            "scope": "window",
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "default": [
+              {
+                "scheme": "file",
+                "language": "json"
+              }
+            ],
+            "description": "The client uses this to decide which documents the server is able to help with.",
+            "markdownDescription": "The client uses this to decide which documents the server is able to help with.\n See [DocumentSelector](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#documentFilter) in the LSP Specification for more details."
+          }
+        }
+      }
+    ]
+  },
+  "main": "./out/extension",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p .",
+    "watch": "tsc -p . -w"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "@types/semver": "^7.5.0",
+    "@types/vscode": "^1.78.0",
+    "@typescript-eslint/eslint-plugin": "^5.3.0",
+    "@typescript-eslint/parser": "^5.3.0",
+    "eslint": "^8.2.0",
+    "typescript": "^5.1.0"
+  },
+  "dependencies": {
+    "@vscode/python-extension": "^1.0.4",
+    "semver": "^7.5.4",
+    "vscode-languageclient": "^8.1.0"
+  }
+}
