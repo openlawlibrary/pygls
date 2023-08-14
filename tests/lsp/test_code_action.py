@@ -14,69 +14,33 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import sys
+from typing import Tuple
 
-import pytest
-import pytest_asyncio
-from lsprotocol.types import (
-    ClientCapabilities,
-    CodeActionContext,
-    CodeActionKind,
-    CodeActionParams,
-    InitializeParams,
-    Position,
-    Range,
-    TextDocumentIdentifier,
-)
+from lsprotocol import types
 
-import pygls.uris as uri
-from pygls import IS_PYODIDE
-from pygls.lsp.client import LanguageClient
+from ..client import LanguageClient
 
 
-@pytest_asyncio.fixture()
-async def client(server_dir):
-    """Setup and teardown the client."""
-
-    server_py = server_dir / "code_actions.py"
-
-    client = LanguageClient("pygls-test-client", "0.1")
-    await client.start_io(sys.executable, str(server_py))
-
-    yield client
-
-    await client.shutdown_async(None)
-    client.exit(None)
-
-    await client.stop()
-
-
-@pytest.mark.skipif(IS_PYODIDE, reason="subprocesses are not available in pyodide.")
-async def test_code_actions(client: LanguageClient, workspace_dir):
+async def test_code_actions(
+    code_action_client: Tuple[LanguageClient, types.InitializeResult], uri_for
+):
     """Ensure that the example code action server is working as expected."""
+    client, initialize_result = code_action_client
 
-    response = await client.initialize_async(
-        InitializeParams(
-            capabilities=ClientCapabilities(),
-            root_uri=uri.from_fs_path(str(workspace_dir)),
-        )
-    )
-    assert response is not None
+    code_action_options = initialize_result.capabilities.code_action_provider
+    assert code_action_options.code_action_kinds == [types.CodeActionKind.QuickFix]
 
-    code_action_options = response.capabilities.code_action_provider
-    assert code_action_options.code_action_kinds == [CodeActionKind.QuickFix]
-
-    test_uri = uri.from_fs_path(str(workspace_dir / "sums.txt"))
+    test_uri = uri_for("sums.txt")
     assert test_uri is not None
 
     response = await client.text_document_code_action_async(
-        CodeActionParams(
-            text_document=TextDocumentIdentifier(uri=test_uri),
-            range=Range(
-                start=Position(line=0, character=0),
-                end=Position(line=1, character=0),
+        types.CodeActionParams(
+            text_document=types.TextDocumentIdentifier(uri=test_uri),
+            range=types.Range(
+                start=types.Position(line=0, character=0),
+                end=types.Position(line=1, character=0),
             ),
-            context=CodeActionContext(diagnostics=[]),
+            context=types.CodeActionContext(diagnostics=[]),
         )
     )
 
@@ -84,12 +48,12 @@ async def test_code_actions(client: LanguageClient, workspace_dir):
     code_action = response[0]
 
     assert code_action.title == "Evaluate '1 + 1 ='"
-    assert code_action.kind == CodeActionKind.QuickFix
+    assert code_action.kind == types.CodeActionKind.QuickFix
 
     fix = code_action.edit.changes[test_uri][0]
-    expected_range = Range(
-        start=Position(line=0, character=0),
-        end=Position(line=0, character=7),
+    expected_range = types.Range(
+        start=types.Position(line=0, character=0),
+        end=types.Position(line=0, character=7),
     )
 
     assert fix.range == expected_range

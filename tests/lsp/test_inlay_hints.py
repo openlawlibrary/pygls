@@ -14,65 +14,31 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import sys
+from typing import Tuple
 
-import pytest
-import pytest_asyncio
-from lsprotocol.types import (
-    ClientCapabilities,
-    InlayHintParams,
-    InitializeParams,
-    Position,
-    Range,
-    TextDocumentIdentifier,
-)
+from lsprotocol import types
 
-import pygls.uris as uri
-from pygls import IS_PYODIDE
-from pygls.lsp.client import LanguageClient
+from ..client import LanguageClient
 
 
-@pytest_asyncio.fixture()
-async def client(server_dir):
-    """Setup and teardown the client."""
-
-    server_py = server_dir / "inlay_hints.py"
-
-    client = LanguageClient("pygls-test-client", "0.1")
-    await client.start_io(sys.executable, str(server_py))
-
-    yield client
-
-    await client.shutdown_async(None)
-    client.exit(None)
-
-    await client.stop()
-
-
-@pytest.mark.skipif(IS_PYODIDE, reason="subprocesses are not available in pyodide.")
-async def test_code_actions(client: LanguageClient, workspace_dir):
+async def test_code_actions(
+    inlay_hints_client: Tuple[LanguageClient, types.InitializeResult], uri_for
+):
     """Ensure that the example code action server is working as expected."""
+    client, initialize_result = inlay_hints_client
 
-    response = await client.initialize_async(
-        InitializeParams(
-            capabilities=ClientCapabilities(),
-            root_uri=uri.from_fs_path(str(workspace_dir)),
-        )
-    )
-    assert response is not None
-
-    inlay_hint_provider = response.capabilities.inlay_hint_provider
+    inlay_hint_provider = initialize_result.capabilities.inlay_hint_provider
     assert inlay_hint_provider.resolve_provider is True
 
-    test_uri = uri.from_fs_path(str(workspace_dir / "sums.txt"))
+    test_uri = uri_for("sums.txt")
     assert test_uri is not None
 
     response = await client.text_document_inlay_hint_async(
-        InlayHintParams(
-            text_document=TextDocumentIdentifier(uri=test_uri),
-            range=Range(
-                start=Position(line=3, character=0),
-                end=Position(line=4, character=0),
+        types.InlayHintParams(
+            text_document=types.TextDocumentIdentifier(uri=test_uri),
+            range=types.Range(
+                start=types.Position(line=3, character=0),
+                end=types.Position(line=4, character=0),
             ),
         )
     )
