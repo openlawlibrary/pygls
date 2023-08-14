@@ -1,4 +1,4 @@
-name: JSON language server
+name: vscode-playground
 
 on:
   - push
@@ -11,7 +11,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: examples/json-vscode-extension
+        working-directory: examples/vscode-playground
 
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('examples/json-vscode-extension/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('examples/vscode-playground/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -37,7 +37,7 @@ jobs:
           npm i vsce
 
       - name: Lint
-        run: npx eslint client/src/*.ts
+        run: npx eslint src/*.ts
 
       - name: Compile
         run: npm run compile
@@ -63,15 +63,12 @@ jobs:
         run: |
           npx vsce ls | grep package.json
           npx vsce ls | grep out/extension.js
-          npx vsce ls | grep server/__init__.py
-          npx vsce ls | grep server/__main__.py
-          npx vsce ls | grep server/server.py
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v2
         with:
-          name: json-extension-vsix
+          name: vscode-playground-vsix
           # The path must be rooted from the directory GitHub Actions starts
           # from, not the working-directory.
-          path: examples/json-vscode-extension/*.vsix
+          path: examples/vscode-playground/*.vsix
           if-no-files-found: error
