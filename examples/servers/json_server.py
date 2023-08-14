@@ -359,5 +359,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
     main()
