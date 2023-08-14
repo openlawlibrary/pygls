@@ -18,13 +18,19 @@
 ############################################################################
 import asyncio
 import logging
+import pathlib
+import sys
 from concurrent.futures import Future
 from typing import Dict
 from typing import List
 from typing import Type
 
+import pytest
+import pytest_asyncio
 from lsprotocol import types
 
+from pygls import IS_PYODIDE
+from pygls import uris
 from pygls.exceptions import JsonRpcMethodNotFound
 from pygls.lsp.client import LanguageClient as BaseLanguageClient
 from pygls.protocol import LanguageServerProtocol
@@ -137,3 +143,38 @@ def make_test_lsp_client() -> LanguageClient:
         client.messages.append(params)
 
     return client
+
+
+def create_client_for_server(server_name: str):
+    """Automate the process of creating a language client connected to the given server
+    and tearing it down again.
+    """
+
+    @pytest_asyncio.fixture
+    async def fixture_func():
+        if IS_PYODIDE:
+            pytest.skip("not available in pyodide")
+
+        client = make_test_lsp_client()
+        server_dir = pathlib.Path(__file__, "..", "..", "examples", "servers").resolve()
+        root_dir = pathlib.Path(__file__, "..", "..", "examples", "workspace").resolve()
+
+        await client.start_io(sys.executable, str(server_dir / server_name))
+
+        # Initialize the server
+        response = await client.initialize_async(
+            types.InitializeParams(
+                capabilities=types.ClientCapabilities(),
+                root_uri=uris.from_fs_path(root_dir),
+            )
+        )
+        assert response is not None
+
+        yield client, response
+
+        await client.shutdown_async(None)
+        client.exit(None)
+
+        await client.stop()
+
+    return fixture_func

@@ -21,8 +21,6 @@ import pathlib
 import sys
 
 import pytest
-import pytest_asyncio
-from lsprotocol import types
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
@@ -34,7 +32,7 @@ from .ls_setup import (
     setup_ls_features,
 )
 
-from .client import make_test_lsp_client
+from .client import create_client_for_server
 
 DOC = """document
 for
@@ -106,31 +104,9 @@ def server_dir():
     return path.resolve()
 
 
-@pytest_asyncio.fixture()
-async def json_server_client(server_dir, uri_for):
-    """Returns a language client connected to server_dir/json_server.py."""
-
-    if IS_PYODIDE:
-        pytest.skip("subprocesses are not available in pyodide")
-
-    client = make_test_lsp_client()
-    await client.start_io(sys.executable, str(server_dir / "json_server.py"))
-
-    # Initialize the server
-    response = await client.initialize_async(
-        types.InitializeParams(
-            capabilities=types.ClientCapabilities(),
-            root_uri=uri_for("."),  # root of example workspace
-        )
-    )
-    assert response is not None
-
-    yield client, response
-
-    await client.shutdown_async(None)
-    client.exit(None)
-
-    await client.stop()
+code_action_client = create_client_for_server("code_actions.py")
+inlay_hints_client = create_client_for_server("inlay_hints.py")
+json_server_client = create_client_for_server("json_server.py")
 
 
 @pytest.fixture
