@@ -72,8 +72,6 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
-          sudo apt update
-          sudo apt install chromium-browser chromium-chromedriver
           poetry install --with pyodide
       - name: Run Testsuite
         uses: nick-fields/retry@v2
