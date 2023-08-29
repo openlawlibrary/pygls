@@ -101,7 +101,9 @@ def main():
         driver_cls, options_cls = BROWSERS[os.environ.get("BROWSER", "chrome")]
 
         options = options_cls()
-        options.headless = "CI" in os.environ
+        if "CI" in os.environ:
+            options.binary_location = "/usr/bin/google-chrome"
+            options.add_argument("--headless")
 
         driver = driver_cls(options=options)
         driver.get(f"http://localhost:{port}?whl={whl}")
