@@ -301,13 +301,13 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.6"
+version = "8.1.7"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
-    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
 ]
 
 [package.dependencies]
@@ -338,13 +338,13 @@ files = [
 
 [[package]]
 name = "exceptiongroup"
-version = "1.1.2"
+version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "exceptiongroup-1.1.2-py3-none-any.whl", hash = "sha256:e346e69d186172ca7cf029c8c1d16235aa0e04035e5750b4b95039e65204328f"},
-    {file = "exceptiongroup-1.1.2.tar.gz", hash = "sha256:12c3e887d6485d16943a309616de20ae5582633e0a2eda17f4e10fd61c1e8af5"},
+    {file = "exceptiongroup-1.1.3-py3-none-any.whl", hash = "sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3"},
+    {file = "exceptiongroup-1.1.3.tar.gz", hash = "sha256:097acd85d473d75af5bb98e41b61ff7fe35efe6675e4f9370ec6ec5126d160e9"},
 ]
 
 [package.extras]
@@ -436,13 +436,13 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "lsprotocol"
-version = "2023.0.0a2"
+version = "2023.0.0a3"
 description = "Python implementation of the Language Server Protocol."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "lsprotocol-2023.0.0a2-py3-none-any.whl", hash = "sha256:c4f2f77712b50d065b17f9b50d2b88c480dc2ce4bbaa56eea8269dbf54bc9701"},
-    {file = "lsprotocol-2023.0.0a2.tar.gz", hash = "sha256:80aae7e39171b49025876a524937c10be2eb986f4be700ca22ee7d186b8488aa"},
+    {file = "lsprotocol-2023.0.0a3-py3-none-any.whl", hash = "sha256:2896c5a30c34846e3d5687e35715961f49bf7b92a36e4fb2b707ff65f19087f7"},
+    {file = "lsprotocol-2023.0.0a3.tar.gz", hash = "sha256:d704e4e00419f74bece9795de4b34d02aa555fc0131fec49f59ac9eb46816e51"},
 ]
 
 [package.dependencies]
@@ -691,13 +691,13 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.15.1"
+version = "2.16.1"
 description = "Pygments is a syntax highlighting package written in Python."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "Pygments-2.15.1-py3-none-any.whl", hash = "sha256:db2db3deb4b4179f399a09054b023b6a586b76499d36965813c71aa8ed7b5fd1"},
-    {file = "Pygments-2.15.1.tar.gz", hash = "sha256:8ace4d3c1dd481894b2005f560ead0f9f19ee64fe983366be1a21e171d12775c"},
+    {file = "Pygments-2.16.1-py3-none-any.whl", hash = "sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692"},
+    {file = "Pygments-2.16.1.tar.gz", hash = "sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29"},
 ]
 
 [package.extras]
@@ -819,13 +819,13 @@ files = [
 
 [[package]]
 name = "selenium"
-version = "4.10.0"
+version = "4.11.2"
 description = ""
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "selenium-4.10.0-py3-none-any.whl", hash = "sha256:40241b9d872f58959e9b34e258488bf11844cd86142fd68182bd41db9991fc5c"},
-    {file = "selenium-4.10.0.tar.gz", hash = "sha256:871bf800c4934f745b909c8dfc7d15c65cf45bd2e943abd54451c810ada395e3"},
+    {file = "selenium-4.11.2-py3-none-any.whl", hash = "sha256:98e72117b194b3fa9c69b48998f44bf7dd4152c7bd98544911a1753b9f03cc7d"},
+    {file = "selenium-4.11.2.tar.gz", hash = "sha256:9f9a5ed586280a3594f7461eb1d9dab3eac9d91e28572f365e9b98d9d03e02b5"},
 ]
 
 [package.dependencies]
@@ -904,18 +904,18 @@ test = ["cython", "html5lib", "pytest (>=4.6)", "typed_ast"]
 
 [[package]]
 name = "sphinx-rtd-theme"
-version = "1.2.2"
+version = "1.3.0"
 description = "Read the Docs theme for Sphinx"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 files = [
-    {file = "sphinx_rtd_theme-1.2.2-py2.py3-none-any.whl", hash = "sha256:6a7e7d8af34eb8fc57d52a09c6b6b9c46ff44aea5951bc831eeb9245378f3689"},
-    {file = "sphinx_rtd_theme-1.2.2.tar.gz", hash = "sha256:01c5c5a72e2d025bd23d1f06c59a4831b06e6ce6c01fdd5ebfe9986c0a880fc7"},
+    {file = "sphinx_rtd_theme-1.3.0-py2.py3-none-any.whl", hash = "sha256:46ddef89cc2416a81ecfbeaceab1881948c014b1b6e4450b815311a89fb977b0"},
+    {file = "sphinx_rtd_theme-1.3.0.tar.gz", hash = "sha256:590b030c7abb9cf038ec053b95e5380b5c70d61591eb0b552063fbe7c41f0931"},
 ]
 
 [package.dependencies]
 docutils = "<0.19"
-sphinx = ">=1.6,<7"
+sphinx = ">=1.6,<8"
 sphinxcontrib-jquery = ">=4,<5"
 
 [package.extras]
@@ -1284,5 +1284,5 @@ ws = ["websockets"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.7.16,<4"
-content-hash = "0963df26c51f1bebf513af40b40cf9030252bb20b90aa8724beb7e128da138ed"
+python-versions = ">=3.7.9,<4"
+content-hash = "27ee5cd8b82f9c490eed22daa698893ebaed1bd98c080ad314545e168298b6e9"
