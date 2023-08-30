@@ -23,7 +23,7 @@ Features
    -  functions that will be executed in separate thread
 
 -  thread management
--  in-memory workspace with _full_ and _incremental_ document updates
+-  in-memory workspace with *full* and *incremental* document updates
 -  type-checking
 -  good test coverage
 
@@ -43,6 +43,7 @@ User Guide
    pages/advanced_usage
    pages/testing
    pages/migrating-to-v1
+   pages/reference
 
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification

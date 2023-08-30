@@ -15,6 +15,9 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import importlib.metadata
+import re
+from docutils import nodes
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +27,9 @@ copyright = "Open Law Library"
 author = "Open Law Library"
 
 # The short X.Y version
-version = ""
+version = importlib.metadata.version("pygls")
 # The full version, including alpha/beta/rc tags
-release = ""
+release = version
 
 title = "pygls Documentation"
 description = "a pythonic generic language server"
@@ -41,7 +44,19 @@ description = "a pythonic generic language server"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+]
+
+autodoc_member_order = "groupwise"
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "all"
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -164,3 +179,110 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
+
+def lsp_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    """Link to sections within the lsp specification."""
+
+    anchor = text.replace("/", "_")
+    ref = f"https://microsoft.github.io/language-server-protocol/specification.html#{anchor}"
+
+    node = nodes.reference(rawtext, text, refuri=ref, **options)
+    return [node], []
+
+
+CODE_FENCE_PATTERN = re.compile(r"```(\w+)?")
+LINK_PATTERN = re.compile(r"\{@link ([^}]+)\}")
+LITERAL_PATTERN = re.compile(r"(?<![`:])`([^`]+)`(?!_)")
+MD_LINK_PATTERN = re.compile(r"\[`?([^\]]+?)`?\]\(([^)]+)\)")
+SINCE_PATTERN = re.compile(r"@since ([\d\.]+)")
+
+
+def process_docstring(app, what, name, obj, options, lines):
+    """Fixup LSP docstrings so that they work with reStructuredText syntax
+
+    - Replaces ``@since <version>`` with ``**LSP v<version>**``
+
+    - Replaces ``{@link <item>}`` with ``:class:`~lsprotocol.types.<item>` ``
+
+    - Replaces markdown hyperlink with reStructuredText equivalent
+
+    - Replaces inline markdown code (single "`") with reStructuredText inline code
+      (double "`")
+
+    - Inserts the required newline before a bulleted list
+
+    - Replaces code fences with code blocks
+
+    - Fixes indentation
+    """
+
+    line_breaks = []
+    code_fences = []
+
+    for i, line in enumerate(lines):
+        if line.startswith("- "):
+            line_breaks.append(i)
+
+        # Does the line need dedenting?
+        if line.startswith(" " * 4) and not lines[i - 1].startswith(" "):
+            # Be sure to modify the original list *and* the line the rest of the
+            # loop will use.
+            line = lines[i][4:]
+            lines[i] = line
+
+        if (match := SINCE_PATTERN.search(line)) is not None:
+            start, end = match.span()
+            lines[i] = "".join([line[:start], f"**LSP v{match.group(1)}**", line[end:]])
+
+        if (match := LINK_PATTERN.search(line)) is not None:
+            start, end = match.span()
+            item = match.group(1)
+
+            lines[i] = "".join(
+                [line[:start], f":class:`~lsprotocol.types.{item}`", line[end:]]
+            )
+
+        if (match := MD_LINK_PATTERN.search(line)) is not None:
+            start, end = match.span()
+            text = match.group(1)
+            target = match.group(2)
+
+            line = "".join([line[:start], f"`{text} <{target}>`__", line[end:]])
+            lines[i] = line
+
+        if (match := LITERAL_PATTERN.search(line)) is not None:
+            start, end = match.span()
+            lines[i] = "".join([line[:start], f"`{match.group(0)}` ", line[end:]])
+
+        if (match := CODE_FENCE_PATTERN.match(line)) is not None:
+            open_ = len(code_fences) % 2 == 0
+            lang = match.group(1) or ""
+
+            if open_:
+                code_fences.append((i, lang))
+                line_breaks.extend([i, i + 1])
+            else:
+                code_fences.append(i)
+
+    # Rewrite fenced code blocks
+    open_ = -1
+    for fence in code_fences:
+        if isinstance(fence, tuple):
+            open_ = fence[0] + 1
+            lines[fence[0]] = f".. code-block:: {fence[1]}"
+        else:
+            # Indent content
+            for j in range(open_, fence):
+                lines[j] = f"   {lines[j]}"
+
+            lines[fence] = ""
+
+    # Insert extra line breaks
+    for offset, line in enumerate(line_breaks):
+        lines.insert(line + offset, "")
+
+
+def setup(app):
+    app.add_role("lsp", lsp_role)
+    app.connect("autodoc-process-docstring", process_docstring)
