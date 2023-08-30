@@ -52,3 +52,11 @@ async def test_diagnostics(
 
     diagnostics = client.diagnostics[test_uri]
     assert diagnostics[0].message == expected_message
+
+    result = await client.text_document_diagnostic_async(
+        types.DocumentDiagnosticParams(
+            text_document=types.TextDocumentIdentifier(test_uri)
+        )
+    )
+    diagnostics = result.items
+    assert diagnostics[0].message == expected_message

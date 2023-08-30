@@ -24,6 +24,7 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     TEXT_DOCUMENT_DECLARATION,
     TEXT_DOCUMENT_DEFINITION,
+    TEXT_DOCUMENT_DIAGNOSTIC,
     TEXT_DOCUMENT_DOCUMENT_COLOR,
     TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT,
     TEXT_DOCUMENT_DOCUMENT_LINK,
@@ -386,6 +387,12 @@ class ServerCapabilitiesBuilder:
         )
         return self
 
+    def _with_diagnostic_provider(self):
+        value = self._provider_options(TEXT_DOCUMENT_DIAGNOSTIC)
+        if value is not None:
+            self.server_cap.diagnostic_provider = value
+        return self
+
     def _build(self):
         return self.server_cap
 
@@ -420,5 +427,6 @@ class ServerCapabilitiesBuilder:
             ._with_moniker()
             ._with_workspace_symbol()
             ._with_workspace_capabilities()
+            ._with_diagnostic_provider()
             ._build()
         )
