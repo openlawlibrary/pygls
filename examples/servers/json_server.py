@@ -23,34 +23,7 @@ import uuid
 from json import JSONDecodeError
 from typing import Optional
 
-from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
-from lsprotocol.types import TEXT_DOCUMENT_DID_CHANGE
-from lsprotocol.types import TEXT_DOCUMENT_DID_CLOSE
-from lsprotocol.types import TEXT_DOCUMENT_DID_OPEN
-from lsprotocol.types import TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL
-from lsprotocol.types import CompletionItem
-from lsprotocol.types import CompletionList
-from lsprotocol.types import CompletionOptions
-from lsprotocol.types import CompletionParams
-from lsprotocol.types import ConfigurationItem
-from lsprotocol.types import Diagnostic
-from lsprotocol.types import DidChangeTextDocumentParams
-from lsprotocol.types import DidCloseTextDocumentParams
-from lsprotocol.types import DidOpenTextDocumentParams
-from lsprotocol.types import MessageType
-from lsprotocol.types import Position
-from lsprotocol.types import Range
-from lsprotocol.types import Registration
-from lsprotocol.types import RegistrationParams
-from lsprotocol.types import SemanticTokens
-from lsprotocol.types import SemanticTokensLegend
-from lsprotocol.types import SemanticTokensParams
-from lsprotocol.types import Unregistration
-from lsprotocol.types import UnregistrationParams
-from lsprotocol.types import WorkDoneProgressBegin
-from lsprotocol.types import WorkDoneProgressEnd
-from lsprotocol.types import WorkDoneProgressReport
-from lsprotocol.types import WorkspaceConfigurationParams
+from lsprotocol import types as lsp
 
 from pygls.server import LanguageServer
 
@@ -99,10 +72,10 @@ def _validate_json(source):
         col = err.colno
         line = err.lineno
 
-        d = Diagnostic(
-            range=Range(
-                start=Position(line=line - 1, character=col - 1),
-                end=Position(line=line - 1, character=col),
+        d = lsp.Diagnostic(
+            range=lsp.Range(
+                start=lsp.Position(line=line - 1, character=col - 1),
+                end=lsp.Position(line=line - 1, character=col),
             ),
             message=msg,
             source=type(json_server).__name__,
@@ -114,19 +87,38 @@ def _validate_json(source):
 
 
 @json_server.feature(
-    TEXT_DOCUMENT_COMPLETION,
-    CompletionOptions(trigger_characters=[","], all_commit_characters=[":"]),
+    lsp.TEXT_DOCUMENT_DIAGNOSTIC,
+    lsp.DiagnosticOptions(
+        identifier="jsonServer",
+        inter_file_dependencies=True,
+        workspace_diagnostics=False,
+    ),
 )
-def completions(params: Optional[CompletionParams] = None) -> CompletionList:
+def text_document_diagnostic(
+    params: lsp.DocumentDiagnosticParams,
+) -> lsp.DocumentDiagnosticReport:
+    """Returns diagnostic report."""
+    document = json_server.workspace.get_document(params.text_document.uri)
+    return lsp.RelatedFullDocumentDiagnosticReport(
+        items=_validate_json(document.source),
+        kind=lsp.DocumentDiagnosticReportKind.Full,
+    )
+
+
+@json_server.feature(
+    lsp.TEXT_DOCUMENT_COMPLETION,
+    lsp.CompletionOptions(trigger_characters=[","], all_commit_characters=[":"]),
+)
+def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.CompletionList:
     """Returns completion items."""
-    return CompletionList(
+    return lsp.CompletionList(
         is_incomplete=False,
         items=[
-            CompletionItem(label='"'),
-            CompletionItem(label="["),
-            CompletionItem(label="]"),
-            CompletionItem(label="{"),
-            CompletionItem(label="}"),
+            lsp.CompletionItem(label='"'),
+            lsp.CompletionItem(label="["),
+            lsp.CompletionItem(label="]"),
+            lsp.CompletionItem(label="{"),
+            lsp.CompletionItem(label="}"),
         ],
     )
 
@@ -153,30 +145,30 @@ async def count_down_10_seconds_non_blocking(ls, *args):
         await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
-def did_change(ls, params: DidChangeTextDocumentParams):
+@json_server.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
+def did_change(ls, params: lsp.DidChangeTextDocumentParams):
     """Text document did change notification."""
     _validate(ls, params)
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
-def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
+@json_server.feature(lsp.TEXT_DOCUMENT_DID_CLOSE)
+def did_close(server: JsonLanguageServer, params: lsp.DidCloseTextDocumentParams):
     """Text document did close notification."""
     server.show_message("Text Document Did Close")
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_OPEN)
-async def did_open(ls, params: DidOpenTextDocumentParams):
+@json_server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
+async def did_open(ls, params: lsp.DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message("Text Document Did Open")
     _validate(ls, params)
 
 
 @json_server.feature(
-    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    SemanticTokensLegend(token_types=["operator"], token_modifiers=[]),
+    lsp.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    lsp.SemanticTokensLegend(token_types=["operator"], token_modifiers=[]),
 )
-def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
+def semantic_tokens(ls: JsonLanguageServer, params: lsp.SemanticTokensParams):
     """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
     for details on how semantic tokens are encoded."""
 
@@ -200,7 +192,7 @@ def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
             last_line = lineno
             last_start = start
 
-    return SemanticTokens(data=data)
+    return lsp.SemanticTokens(data=data)
 
 
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)
@@ -211,7 +203,8 @@ async def progress(ls: JsonLanguageServer, *args):
     await ls.progress.create_async(token)
     # Begin
     ls.progress.begin(
-        token, WorkDoneProgressBegin(title="Indexing", percentage=0, cancellable=True)
+        token,
+        lsp.WorkDoneProgressBegin(title="Indexing", percentage=0, cancellable=True),
     )
     # Report
     for i in range(1, 10):
@@ -221,21 +214,21 @@ async def progress(ls: JsonLanguageServer, *args):
             return
         ls.progress.report(
             token,
-            WorkDoneProgressReport(message=f"{i * 10}%", percentage=i * 10),
+            lsp.WorkDoneProgressReport(message=f"{i * 10}%", percentage=i * 10),
         )
         await asyncio.sleep(2)
     # End
-    ls.progress.end(token, WorkDoneProgressEnd(message="Finished"))
+    ls.progress.end(token, lsp.WorkDoneProgressEnd(message="Finished"))
 
 
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
 async def register_completions(ls: JsonLanguageServer, *args):
     """Register completions method on the client."""
-    params = RegistrationParams(
+    params = lsp.RegistrationParams(
         registrations=[
-            Registration(
+            lsp.Registration(
                 id=str(uuid.uuid4()),
-                method=TEXT_DOCUMENT_COMPLETION,
+                method=lsp.TEXT_DOCUMENT_COMPLETION,
                 register_options={"triggerCharacters": "[':']"},
             )
         ]
@@ -245,7 +238,7 @@ async def register_completions(ls: JsonLanguageServer, *args):
         ls.show_message("Successfully registered completions method")
     else:
         ls.show_message(
-            "Error happened during completions registration.", MessageType.Error
+            "Error happened during completions registration.", lsp.MessageType.Error
         )
 
 
@@ -254,9 +247,9 @@ async def show_configuration_async(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
         config = await ls.get_configuration_async(
-            WorkspaceConfigurationParams(
+            lsp.WorkspaceConfigurationParams(
                 items=[
-                    ConfigurationItem(
+                    lsp.ConfigurationItem(
                         scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
                     )
                 ]
@@ -285,9 +278,9 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
             ls.show_message_log(f"Error ocurred: {e}")
 
     ls.get_configuration(
-        WorkspaceConfigurationParams(
+        lsp.WorkspaceConfigurationParams(
             items=[
-                ConfigurationItem(
+                lsp.ConfigurationItem(
                     scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
                 )
             ]
@@ -302,9 +295,9 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
         config = ls.get_configuration(
-            WorkspaceConfigurationParams(
+            lsp.WorkspaceConfigurationParams(
                 items=[
-                    ConfigurationItem(
+                    lsp.ConfigurationItem(
                         scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
                     )
                 ]
@@ -322,9 +315,11 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)
 async def unregister_completions(ls: JsonLanguageServer, *args):
     """Unregister completions method on the client."""
-    params = UnregistrationParams(
+    params = lsp.UnregistrationParams(
         unregisterations=[
-            Unregistration(id=str(uuid.uuid4()), method=TEXT_DOCUMENT_COMPLETION)
+            lsp.Unregistration(
+                id=str(uuid.uuid4()), method=lsp.TEXT_DOCUMENT_COMPLETION
+            )
         ]
     )
     response = await ls.unregister_capability_async(params)
@@ -332,7 +327,7 @@ async def unregister_completions(ls: JsonLanguageServer, *args):
         ls.show_message("Successfully unregistered completions method")
     else:
         ls.show_message(
-            "Error happened during completions unregistration.", MessageType.Error
+            "Error happened during completions unregistration.", lsp.MessageType.Error
         )
 
 
