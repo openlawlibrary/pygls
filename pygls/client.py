@@ -97,10 +97,18 @@ class JsonRPCClient:
     ):
         """Decorator used to register LSP features.
 
-        Example:
-            @ls.feature('window/logMessage')
-            def completions(ls, params: LogMessageParams):
-                logger.info("%s", params.message)
+        Example
+        -------
+        ::
+
+           import logging
+           from pygls.client import JsonRPCClient
+
+           ls = JsonRPCClient()
+
+           @ls.feature('window/logMessage')
+           def completions(ls, params):
+               logging.info("%s", params.message)
         """
         return self.protocol.fm.feature(feature_name, options)
 
