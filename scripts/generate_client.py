@@ -57,7 +57,7 @@ def write_notification(
     return "\n".join(
         [
             f"def {python_name}(self, params: {param_mod}{param_name}) -> None:",
-            f'    """Send a ``{method}`` notification.',
+            f'    """Send a :lsp:`{method}` notification.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
@@ -112,7 +112,7 @@ def write_method(
             f"    params: {param_mod}{param_name},",
             f"    callback: Optional[Callable[[{result_type}], None]] = None,",
             ") -> Future:",
-            f'    """Make a ``{method}`` request.',
+            f'    """Make a :lsp:`{method}` request.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
@@ -125,7 +125,7 @@ def write_method(
             "    self,",
             f"    params: {param_mod}{param_name},",
             f") -> {result_type}:",
-            f'    """Make a ``{method}`` request.',
+            f'    """Make a :lsp:`{method}` request.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
             '    """',
