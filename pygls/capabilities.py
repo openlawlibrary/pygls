@@ -56,6 +56,7 @@ from lsprotocol.types import (
     WORKSPACE_DID_DELETE_FILES,
     WORKSPACE_DID_RENAME_FILES,
     WORKSPACE_SYMBOL,
+    WORKSPACE_SYMBOL_RESOLVE,
     WORKSPACE_WILL_CREATE_FILES,
     WORKSPACE_WILL_DELETE_FILES,
     WORKSPACE_WILL_RENAME_FILES,
@@ -354,6 +355,7 @@ class ServerCapabilitiesBuilder:
     def _with_workspace_symbol(self):
         value = self._provider_options(WORKSPACE_SYMBOL)
         if value is not None:
+            value.resolve_provider = self._provider_options(WORKSPACE_SYMBOL_RESOLVE)
             self.server_cap.workspace_symbol_provider = value
         return self
 
