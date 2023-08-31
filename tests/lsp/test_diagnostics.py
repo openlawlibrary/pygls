@@ -60,3 +60,9 @@ async def test_diagnostics(
     )
     diagnostics = result.items
     assert diagnostics[0].message == expected_message
+
+    workspace_result = await client.workspace_diagnostic_async(
+        types.WorkspaceDiagnosticParams(previous_result_ids=[])
+    )
+    diagnostics = workspace_result.items[0].items
+    assert diagnostics[0].message == expected_message
