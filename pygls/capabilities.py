@@ -52,6 +52,7 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_WILL_SAVE,
     TEXT_DOCUMENT_WILL_SAVE_WAIT_UNTIL,
     TEXT_DOCUMENT_TYPE_DEFINITION,
+    WORKSPACE_DIAGNOSTIC,
     WORKSPACE_DID_CREATE_FILES,
     WORKSPACE_DID_DELETE_FILES,
     WORKSPACE_DID_RENAME_FILES,
@@ -392,6 +393,7 @@ class ServerCapabilitiesBuilder:
     def _with_diagnostic_provider(self):
         value = self._provider_options(TEXT_DOCUMENT_DIAGNOSTIC)
         if value is not None:
+            value.workspace_diagnostics = self._provider_options(WORKSPACE_DIAGNOSTIC)
             self.server_cap.diagnostic_provider = value
         return self
 

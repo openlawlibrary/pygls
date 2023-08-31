@@ -91,7 +91,7 @@ def _validate_json(source):
     lsp.DiagnosticOptions(
         identifier="jsonServer",
         inter_file_dependencies=True,
-        workspace_diagnostics=False,
+        workspace_diagnostics=True,
     ),
 )
 def text_document_diagnostic(
@@ -102,6 +102,24 @@ def text_document_diagnostic(
     return lsp.RelatedFullDocumentDiagnosticReport(
         items=_validate_json(document.source),
         kind=lsp.DocumentDiagnosticReportKind.Full,
+    )
+
+
+@json_server.feature(lsp.WORKSPACE_DIAGNOSTIC)
+def workspace_diagnostic(
+    params: lsp.WorkspaceDiagnosticParams,
+) -> lsp.WorkspaceDiagnosticReport:
+    """Returns diagnostic report."""
+    first = list(json_server.workspace._docs.keys())[0]
+    document = json_server.workspace.get_document(first)
+    return lsp.WorkspaceDiagnosticReport(
+        items=[
+            lsp.WorkspaceFullDocumentDiagnosticReport(
+                uri=document.uri,
+                items=_validate_json(document.source),
+                kind=lsp.DocumentDiagnosticReportKind.Full,
+            )
+        ]
     )
 
 
