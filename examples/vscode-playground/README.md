@@ -61,3 +61,20 @@ Open terminal in the same directory as this file and execute following commands:
    ![Screenshot of the VSCode workspace folder selection dialog](https://user-images.githubusercontent.com/2675694/262779751-367c568e-37d7-490a-b83e-910da1596298.png)
 
    be sure to select the one corresponding with the `pygls/examples/workspace` folder.
+
+#### Selecting the document language
+
+The default settings for the `pygls-playground` VSCode extension are configured for the `json_server.py` example. In particular the server will only be used for `.json` files.
+
+The `code_actions.py` example is intended to be used with text files (e.g. the provided `sums.txt` file). To use the server with text files change the **Pygls > Client: Document Selector** setting to the following:
+
+```
+"pygls.client.documentSelector": [
+    {
+        "scheme": "file",
+        "language": "plaintext"
+    },
+],
+```
+
+You can find the full list of known language identifiers [here](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
