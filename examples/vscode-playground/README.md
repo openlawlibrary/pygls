@@ -53,7 +53,7 @@ Open terminal in the same directory as this file and execute following commands:
 
 1. Select `Launch Client` and press `F5`, this will open a second VSCode window with the `vscode-playground` extension enabled.
 
-1. You will need to make sure that VSCode ia using a virtual environment that contains an installation of `pygls`. 
+1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`. 
    The `Python: Select Interpreter` command can be used to pick the correct one
 
    If you see a window like the following
