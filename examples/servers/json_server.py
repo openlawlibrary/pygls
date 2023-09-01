@@ -213,6 +213,12 @@ def semantic_tokens(ls: JsonLanguageServer, params: lsp.SemanticTokensParams):
     return lsp.SemanticTokens(data=data)
 
 
+@json_server.feature(lsp.TEXT_DOCUMENT_INLINE_VALUE)
+def inline_value(params: lsp.InlineValueParams):
+    """Returns inline value."""
+    return [lsp.InlineValueText(range=params.range, text="Inline value")]
+
+
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)
 async def progress(ls: JsonLanguageServer, *args):
     """Create and start the progress on the client."""
