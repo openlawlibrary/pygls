@@ -41,7 +41,7 @@ class JsonLanguageServer(LanguageServer):
     CMD_SHOW_CONFIGURATION_THREAD = "showConfigurationThread"
     CMD_UNREGISTER_COMPLETIONS = "unregisterCompletions"
 
-    CONFIGURATION_SECTION = "jsonServer"
+    CONFIGURATION_SECTION = "pygls.jsonServer"
 
     def __init__(self, *args):
         super().__init__(*args)

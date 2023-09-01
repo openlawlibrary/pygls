@@ -30,7 +30,6 @@ const MIN_PYTHON = semver.parse("3.7.9")
 
 // Some other nice to haves.
 // TODO: Check selected env satisfies pygls' requirements - if not offer to run the select env command.
-// TODO: Inspect ServerCapabilities and present a quick pick list of runnable commands.
 // TODO: Start a debug session for the currently configured server.
 // TODO: TCP Transport
 // TODO: WS Transport
@@ -59,6 +58,13 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand("pygls.server.restart", async () => {
             logger.info('restarting server...')
             await startLangServer()
+        })
+    )
+
+    // Execute command... command
+    context.subscriptions.push(
+        vscode.commands.registerCommand("pygls.server.executeCommand", async () => {
+            await executeServerCommand()
         })
     )
 
@@ -211,6 +217,35 @@ function startLangServerTCP(addr: number): LanguageClient {
         serverOptions,
         getClientOptions()
     );
+}
+
+/**
+ * Execute a command provided by the language server.
+ */
+async function executeServerCommand() {
+    if (!client || client.state !== State.Running) {
+        await vscode.window.showErrorMessage("There is no language server running.")
+        return
+    }
+
+    const knownCommands = client.initializeResult.capabilities.executeCommandProvider?.commands
+    if (!knownCommands || knownCommands.length === 0) {
+        const info = client.initializeResult.serverInfo
+        const name = info?.name || "Server"
+        const version = info?.version || ""
+
+        await vscode.window.showInformationMessage(`${name} ${version} does not implement any commands.`)
+        return
+    }
+
+    const commandName = await vscode.window.showQuickPick(knownCommands, { canPickMany: false })
+    if (!commandName) {
+        return
+    }
+    logger.info(`executing command: '${commandName}'`)
+
+    const result = await vscode.commands.executeCommand(commandName /* if your command accepts arguments you can pass them here */)
+    logger.info(`${commandName} result: ${JSON.stringify(result, undefined, 2)}`)
 }
 
 /**
