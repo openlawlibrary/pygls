@@ -34,6 +34,7 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_HOVER,
     TEXT_DOCUMENT_IMPLEMENTATION,
     TEXT_DOCUMENT_INLAY_HINT,
+    TEXT_DOCUMENT_INLINE_VALUE,
     TEXT_DOCUMENT_ON_TYPE_FORMATTING,
     TEXT_DOCUMENT_RANGE_FORMATTING,
     TEXT_DOCUMENT_REFERENCES,
@@ -397,6 +398,12 @@ class ServerCapabilitiesBuilder:
             self.server_cap.diagnostic_provider = value
         return self
 
+    def _with_inline_value_provider(self):
+        value = self._provider_options(TEXT_DOCUMENT_INLINE_VALUE)
+        if value is not None:
+            self.server_cap.inline_value_provider = value
+        return self
+
     def _build(self):
         return self.server_cap
 
@@ -432,5 +439,6 @@ class ServerCapabilitiesBuilder:
             ._with_workspace_symbol()
             ._with_workspace_capabilities()
             ._with_diagnostic_provider()
+            ._with_inline_value_provider()
             ._build()
         )
