@@ -35,6 +35,17 @@
     "configuration": [
       {
         "type": "object",
+        "title": "Json Server Configuration",
+        "properties": {
+          "pygls.jsonServer.exampleConfiguration": {
+            "scope": "resource",
+            "type": "string",
+            "default": "You can override this message"
+          }
+        }
+      },
+      {
+        "type": "object",
         "title": "Server Configuration",
         "properties": {
           "pygls.server.cwd": {
