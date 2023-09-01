@@ -42,6 +42,7 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_SELECTION_RANGE,
     TEXT_DOCUMENT_SIGNATURE_HELP,
     TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
+    TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY,
     TEXT_DOCUMENT_DID_CLOSE,
     TEXT_DOCUMENT_DID_OPEN,
     TEXT_DOCUMENT_DID_SAVE,
@@ -307,6 +308,12 @@ class ServerCapabilitiesBuilder:
             self.server_cap.call_hierarchy_provider = value
         return self
 
+    def _with_type_hierarchy(self):
+        value = self._provider_options(TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY)
+        if value is not None:
+            self.server_cap.type_hierarchy_provider = value
+        return self
+
     def _with_semantic_tokens(self):
         providers = [
             TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
@@ -433,6 +440,7 @@ class ServerCapabilitiesBuilder:
             ._with_execute_command()
             ._with_selection_range()
             ._with_call_hierarchy()
+            ._with_type_hierarchy()
             ._with_semantic_tokens()
             ._with_linked_editing_range()
             ._with_moniker()
