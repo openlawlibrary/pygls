@@ -5,3 +5,6 @@ LSP type definitions in ``pygls`` are provided by the `lsprotocol <https://githu
 
 .. automodule:: lsprotocol.types
    :members:
+   :undoc-members:
+
+
