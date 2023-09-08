@@ -3,10 +3,16 @@
 Tutorial
 ========
 
-In order to help you with using *pygls* in VSCode, we have created a simple `json-extension`_ example.
+In order to help you with using *pygls* in VSCode, we have created the `vscode-playground`_ extension.
 
 .. note::
-   You do not need this extension when using *pygls* with other text editors.
+
+   This extension is meant to provide an environment in which you can easily experiment with a *pygls* powered language server.
+   It is not necessary in order to use *pygls* with other text editors.
+
+   If you decide you want to publish your language server on the VSCode marketplace this 
+   `template extension <https://github.com/microsoft/vscode-python-tools-extension-template>`__
+   from Microsoft a useful starting point.
 
 Prerequisites
 -------------
@@ -82,18 +88,19 @@ Language server is **blocked**, because ``time.sleep`` is a
 **blocking** operation. This is why you didn't hit the breakpoint this time.
 
 .. hint::
-    To make this command **non blocking**, add ``@json_server.thread()``
-    decorator, like in code below:
 
-    .. code-block:: python
+   To make this command **non blocking**, add ``@json_server.thread()``
+   decorator, like in code below:
 
-        @json_server.thread()
-        @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
-        def count_down_10_seconds_blocking(ls, *args):
-            # Omitted
+   .. code-block:: python
 
-    *pygls* uses a **thread pool** to execute functions that are marked with
-    a ``thread`` decorator.
+      @json_server.thread()
+      @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+      def count_down_10_seconds_blocking(ls, *args):
+          # Omitted
+
+   *pygls* uses a **thread pool** to execute functions that are marked with
+   a ``thread`` decorator.
 
 
 Non-Blocking Command Test
@@ -194,7 +201,7 @@ Modify the Example
 We encourage you to continue to :ref:`advanced section <advanced-usage>` and
 modify this example.
 
-.. _json-extension: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension
-.. _README: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension/README.md
-.. _server.py: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension/server/server.py
+.. _vscode-playground: https://github.com/openlawlibrary/pygls/blob/main/examples/vscode-playground
+.. _README: https://github.com/openlawlibrary/pygls/blob/main/examples/vscode-playground/README.md
+.. _server.py: https://github.com/openlawlibrary/pygls/blob/main/examples/servers/json_server.py
 .. _cooperative multitasking: https://en.wikipedia.org/wiki/Cooperative_multitasking
