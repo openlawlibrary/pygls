@@ -67,7 +67,7 @@ class JsonRpcException(Exception):
 
 
 class JsonRpcInternalError(JsonRpcException):
-    CODE = -32602
+    CODE = -32603
     MESSAGE = "Internal Error"
 
     @classmethod
