@@ -468,8 +468,14 @@ class Workspace(object):
         if notebook_uri is not None:
             return self._notebook_documents.get(notebook_uri)
 
-        notebook_uri = self._cell_in_notebook.get(cell_uri)
-        return self._notebook_documents.get(notebook_uri)
+        if cell_uri is not None:
+            notebook_uri = self._cell_in_notebook.get(cell_uri)
+            if notebook_uri is None:
+                return None
+
+            return self._notebook_documents.get(notebook_uri)
+
+        return None
 
     def get_text_document(self, doc_uri: str) -> TextDocument:
         """
@@ -522,7 +528,7 @@ class Workspace(object):
         if notebook_uri:
             self._cell_in_notebook[doc_uri] = notebook_uri
 
-    def remove_notebook_document(self, params: types.DidChangeNotebookDocumentParams):
+    def remove_notebook_document(self, params: types.DidCloseNotebookDocumentParams):
         notebook_uri = params.notebook_document.uri
         self._notebook_documents.pop(notebook_uri, None)
 

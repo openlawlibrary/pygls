@@ -503,16 +503,16 @@ class JsonRPCProtocol(asyncio.Protocol):
             body = json.dumps(data, default=self._serialize_message)
             logger.info("Sending data: %s", body)
 
-            body = body.encode(self.CHARSET)
-            if not self._send_only_body:
-                header = (
-                    f"Content-Length: {len(body)}\r\n"
-                    f"Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n"
-                ).encode(self.CHARSET)
+            if self._send_only_body:
+                self.transport.write(body)
+                return
 
-                self.transport.write(header + body)
-            else:
-                self.transport.write(body.decode("utf-8"))
+            header = (
+                f"Content-Length: {len(body)}\r\n"
+                f"Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n"
+            ).encode(self.CHARSET)
+
+            self.transport.write(header + body.encode(self.CHARSET))
         except Exception as error:
             logger.exception("Error sending data", exc_info=True)
             self._server._report_server_error(error, JsonRpcInternalError)
@@ -631,7 +631,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             jsonrpc=JsonRPCProtocol.VERSION,
         )
 
-        future = Future()
+        future = Future()  # type: ignore[var-annotated]
         # If callback function is given, call it when result is received
         if callback:
 

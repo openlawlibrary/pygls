@@ -110,7 +110,7 @@ def workspace_diagnostic(
     params: lsp.WorkspaceDiagnosticParams,
 ) -> lsp.WorkspaceDiagnosticReport:
     """Returns diagnostic report."""
-    first = list(json_server.workspace._docs.keys())[0]
+    first = list(json_server.workspace.text_documents.keys())[0]
     document = json_server.workspace.get_document(first)
     return lsp.WorkspaceDiagnosticReport(
         items=[

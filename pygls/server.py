@@ -189,9 +189,9 @@ class Server:
 
         self._max_workers = max_workers
         self._server = None
-        self._stop_event = None
-        self._thread_pool = None
-        self._thread_pool_executor = None
+        self._stop_event: Optional[Event] = None
+        self._thread_pool: Optional[ThreadPool] = None
+        self._thread_pool_executor: Optional[ThreadPoolExecutor] = None
 
         if sync_kind is not None:
             self.text_document_sync_kind = sync_kind
@@ -210,7 +210,8 @@ class Server:
         """Shutdown server."""
         logger.info("Shutting down the server")
 
-        self._stop_event.set()
+        if self._stop_event is not None:
+            self._stop_event.set()
 
         if self._thread_pool:
             self._thread_pool.terminate()
@@ -223,7 +224,7 @@ class Server:
             self._server.close()
             self.loop.run_until_complete(self._server.wait_closed())
 
-        if self._owns_loop and not self.loop.is_closed:
+        if self._owns_loop and not self.loop.is_closed():
             logger.info("Closing the event loop.")
             self.loop.close()
 
@@ -235,7 +236,7 @@ class Server:
         transport = StdOutTransportAdapter(
             stdin or sys.stdin.buffer, stdout or sys.stdout.buffer
         )
-        self.lsp.connection_made(transport)
+        self.lsp.connection_made(transport)  # type: ignore[arg-type]
 
         try:
             self.loop.run_until_complete(
@@ -260,7 +261,7 @@ class Server:
         # Note: We don't actually start anything running as the main event
         # loop will be handled by the web platform.
         transport = PyodideTransportAdapter(sys.stdout)
-        self.lsp.connection_made(transport)
+        self.lsp.connection_made(transport)  # type: ignore[arg-type]
         self.lsp._send_only_body = True  # Don't send headers within the payload
 
     def start_tcp(self, host: str, port: int) -> None:
@@ -268,7 +269,7 @@ class Server:
         logger.info("Starting TCP server on %s:%s", host, port)
 
         self._stop_event = Event()
-        self._server = self.loop.run_until_complete(
+        self._server = self.loop.run_until_complete(  # type: ignore[assignment]
             self.loop.create_server(self.lsp, host, port)
         )
         try:
@@ -300,7 +301,7 @@ class Server:
                 )
 
         start_server = serve(connection_made, host, port, loop=self.loop)
-        self._server = start_server.ws_server
+        self._server = start_server.ws_server  # type: ignore[assignment]
         self.loop.run_until_complete(start_server)
 
         try:
@@ -388,7 +389,7 @@ class LanguageServer(Server):
         name: str,
         version: str,
         loop=None,
-        protocol_cls=Type[LanguageServerProtocol],
+        protocol_cls: Type[LanguageServerProtocol] = LanguageServerProtocol,
         converter_factory=default_converter,
         text_document_sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
         notebook_document_sync: Optional[NotebookDocumentSyncOptions] = None,
