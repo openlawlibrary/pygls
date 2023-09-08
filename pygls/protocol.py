@@ -727,8 +727,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     def _register_builtin_features(self):
         """Registers generic LSP features from this class."""
         for name in dir(self):
-
-            if name in {'workspace'}:
+            if name in {"workspace"}:
                 continue
 
             attr = getattr(self, name)
@@ -810,7 +809,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         # Initialize the workspace
         workspace_folders = params.workspace_folders or []
-        self._workspace = Workspace(root_uri, text_document_sync_kind, workspace_folders)
+        self._workspace = Workspace(
+            root_uri, text_document_sync_kind, workspace_folders
+        )
 
         self.trace = TraceValues.Off
 
@@ -1002,10 +1003,24 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         version: Optional[int] = None,
         **kwargs,
     ):
-        """
-        Sends diagnostic notification to the client.
-        Deprecation:
-          `uri`, `diagnostics` and `version` fields will be deprecated
+        """Sends diagnostic notification to the client.
+
+        .. deprecated:: 1.0.1
+
+           Passing ``(uri, diagnostics, version)`` as arguments is deprecated.
+           Pass an instance of :class:`~lsprotocol.types.PublishDiagnosticParams`
+           instead.
+
+        Parameters
+        ----------
+        params_or_uri
+           The :class:`~lsprotocol.types.PublishDiagnosticParams` to send to the client.
+
+        diagnostics
+           *Deprecated*. The diagnostics to publish
+
+        version
+           *Deprecated*: The version number
         """
         params = self._publish_diagnostics_deprecator(
             params_or_uri, diagnostics, version, **kwargs
