@@ -6,12 +6,12 @@ servers that are based on it.
 
 .. note::
 
-    Before going any further, if you are not familiar with *language servers*
-    and *Language Server Protocol*, we recommend reading following articles:
+   Before going any further, if you are not familiar with *language servers*
+   and *Language Server Protocol*, we recommend reading following articles:
 
-        - `Language Server Protocol Overview <https://microsoft.github.io/language-server-protocol/overview>`_
-        - `Language Server Protocol Specification <https://microsoft.github.io/language-server-protocol/specification>`_
-        - `Language Server Protocol SDKs <https://microsoft.github.io/language-server-protocol/implementors/sdks/>`_
+   - `Language Server Protocol Overview <https://microsoft.github.io/language-server-protocol/overview>`_
+   - `Language Server Protocol Specification <https://microsoft.github.io/language-server-protocol/specification>`_
+   - `Language Server Protocol SDKs <https://microsoft.github.io/language-server-protocol/implementors/sdks/>`_
 
 
 Installation
@@ -23,12 +23,11 @@ To get the latest release from *PyPI*, simply run:
 
    pip install pygls
 
-Alternatively, *pygls* source code can be downloaded from our `GitHub`_
-page and installed with following command:
+Alternatively, *pygls* source code can be downloaded from our `GitHub`_ page and installed with following command:
 
 .. code:: console
 
-   python setup.py install
+   pip install git+https://github.com/openlawlibrary/pygls
 
 Quick Start
 -----------
@@ -78,13 +77,7 @@ Register Features and Commands
    def cmd_return_hello_world(ls, *args):
        return 'Hello World!'
 
-See the `lsprotocol`_ module for the complete and canonical list of available features.
-
-Advanced usage
---------------
-
-To reveal the full potential of *pygls* (``thread management``, ``coroutines``,
-``multi-root workspace``, ``TCP/STDIO communication``, etc.) keep reading.
+See the :mod:`lsprotocol.types` module for the complete and canonical list of available features.
 
 Tutorial
 --------
@@ -92,6 +85,10 @@ Tutorial
 We recommend completing the :ref:`tutorial <tutorial>`, especially if you
 haven't worked with language servers before.
 
+User Guide
+----------
+
+To reveal the full potential of *pygls* (``thread management``, ``coroutines``,
+``multi-root workspace``, ``TCP/STDIO communication``, etc.) keep reading.
 
 .. _GitHub: https://github.com/openlawlibrary/pygls
-.. _lsprotocol: https://github.com/microsoft/lsprotocol/blob/main/packages/python/lsprotocol/types.py

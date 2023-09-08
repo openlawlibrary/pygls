@@ -11,8 +11,6 @@ have to mock the whole language server. If you skipped the advanced usage page,
 take a look at :ref:`passing language server instance <passing-instance>`
 section for more details.
 
-Json Extension example's `unit tests`_ might be helpful, too.
-
 Integration Tests
 -----------------
 
@@ -23,6 +21,4 @@ server, we used *pygls* to simulate the client and send desired requests to the
 server. To get a better understanding of how to set it up, take a look at our test
 `fixtures`_.
 
-
-.. _unit tests: https://github.com/openlawlibrary/pygls/blob/master/examples/json-vscode-extension/server/tests/unit
-.. _fixtures: https://github.com/openlawlibrary/pygls/blob/master/tests/conftest.py#L29
+.. _fixtures: https://github.com/openlawlibrary/pygls/blob/main/tests/conftest.py
