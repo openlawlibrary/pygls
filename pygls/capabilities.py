@@ -15,7 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 from functools import reduce
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Union
 
 from lsprotocol.types import (
     INLAY_HINT_RESOLVE,
@@ -349,10 +349,12 @@ class ServerCapabilitiesBuilder:
             self.server_cap.semantic_tokens_provider = value
             return self
 
+        full_support: Union[bool, SemanticTokensOptionsFullType1] = (
+            TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
+        )
+
         if TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA in self.features:
             full_support = SemanticTokensOptionsFullType1(delta=True)
-        else:
-            full_support = TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
 
         options = SemanticTokensOptions(
             legend=value,

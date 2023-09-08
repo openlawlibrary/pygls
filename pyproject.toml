@@ -73,6 +73,9 @@ line-length = 120
 line-length = 88
 extend-exclude = "pygls/lsp/client.py"
 
+[tool.mypy]
+check_untyped_defs = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
