@@ -40,7 +40,7 @@ User Guide
 
    pages/getting_started
    pages/tutorial
-   pages/advanced_usage
+   pages/user-guide
    pages/testing
    pages/migrating-to-v1
    pages/reference

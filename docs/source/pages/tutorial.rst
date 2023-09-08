@@ -198,7 +198,7 @@ executing the function.
 Modify the Example
 ~~~~~~~~~~~~~~~~~~
 
-We encourage you to continue to :ref:`advanced section <advanced-usage>` and
+We encourage you to continue to :ref:`user guide <user-guide>` and
 modify this example.
 
 .. _vscode-playground: https://github.com/openlawlibrary/pygls/blob/main/examples/vscode-playground
