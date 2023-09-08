@@ -21,8 +21,18 @@ import re
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Event
-from typing import Any, Callable, List, Optional, TextIO, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    List,
+    Optional,
+    TextIO,
+    Type,
+    TypeVar,
+    Union,
+)
 
+import cattrs
 from pygls import IS_PYODIDE
 from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
 from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
@@ -41,7 +51,7 @@ from lsprotocol.types import (
     WorkspaceConfigurationParams,
 )
 from pygls.progress import Progress
-from pygls.protocol import LanguageServerProtocol, default_converter
+from pygls.protocol import JsonRPCProtocol, LanguageServerProtocol, default_converter
 from pygls.workspace import Workspace
 
 if not IS_PYODIDE:
@@ -148,33 +158,22 @@ class WebSocketTransportAdapter:
 
 
 class Server:
-    """Class that represents async server. It can be started using TCP or IO.
+    """Base server class
 
-    Args:
-        protocol_cls(Protocol): Protocol implementation that must be derived
-                                from `asyncio.Protocol`
+    Parameters
+    ----------
+    protocol_cls
+       Protocol implementation that must be derive from :class:`~pygls.protocol.JsonRPCProtocol`
 
-        converter_factory: Factory function to use when constructing a cattrs converter.
+    converter_factory
+       Factory function to use when constructing a cattrs converter.
 
-        loop(AbstractEventLoop): asyncio event loop
+    loop
+       The asyncio event loop
 
-        max_workers(int, optional): Number of workers for `ThreadPool` and
-                                    `ThreadPoolExecutor`
+    max_workers
+       Maximum number of workers for `ThreadPool` and `ThreadPoolExecutor`
 
-        sync_kind(TextDocumentSyncKind): Text document synchronization option
-            - None(0): no synchronization
-            - Full(1): replace whole text
-            - Incremental(2): replace text within a given range
-
-    Attributes:
-        _max_workers(int): Number of workers for thread pool executor
-        _server(Server): Server object which can be used to stop the process
-        _stop_event(Event): Event used for stopping `aio_readline`
-        _thread_pool(ThreadPool): Thread pool for executing methods decorated
-                                  with `@ls.thread()` - lazy instantiated
-        _thread_pool_executor(ThreadPoolExecutor): Thread pool executor
-                                                   passed to `run_in_executor`
-                                                    - lazy instantiated
     """
 
     def __init__(
@@ -334,17 +333,44 @@ class Server:
 
 
 class LanguageServer(Server):
-    """A class that represents Language server using Language Server Protocol.
+    """The default LanguageServer
 
     This class can be extended and it can be passed as a first argument to
     registered commands/features.
 
-    Args:
-        name(str): Name of the server
-        version(str): Version of the server
-        protocol_cls(LanguageServerProtocol): LSP or any subclass of it
-        max_workers(int, optional): Number of workers for `ThreadPool` and
-                                    `ThreadPoolExecutor`
+    .. |ServerInfo| replace:: :class:`~lsprotocol.types.InitializeResultServerInfoType`
+
+    Parameters
+    ----------
+    name
+       Name of the server, used to populate |ServerInfo| which is sent to
+       the client during initialization
+
+    version
+       Version of the server, used to populate |ServerInfo| which is sent to
+       the client during initialization
+
+    protocol_cls
+       The :class:`~pygls.protocol.LanguageServerProtocol` class definition, or any
+       subclass of it.
+
+    max_workers
+       Maximum number of workers for ``ThreadPool`` and ``ThreadPoolExecutor``
+
+    text_document_sync_kind
+       Text document synchronization method
+
+       None
+          No synchronization
+
+       :attr:`~lsprotocol.types.TextDocumentSyncKind.Full`
+          Send entire document text with each update
+
+       :attr:`~lsprotocol.types.TextDocumentSyncKind.Incremental`
+          Send only the region of text that changed with each update
+
+    notebook_document_sync
+       Advertise :lsp:`NotebookDocument` support to the client.
     """
 
     lsp: LanguageServerProtocol
@@ -362,9 +388,9 @@ class LanguageServer(Server):
         name: str,
         version: str,
         loop=None,
-        protocol_cls=LanguageServerProtocol,
+        protocol_cls=Type[LanguageServerProtocol],
         converter_factory=default_converter,
-        text_document_sync_kind: TextDocumentSyncKind=TextDocumentSyncKind.Incremental,
+        text_document_sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
         notebook_document_sync: Optional[NotebookDocumentSyncOptions] = None,
         max_workers: int = 2,
     ):
@@ -394,16 +420,19 @@ class LanguageServer(Server):
     def command(self, command_name: str) -> Callable[[F], F]:
         """Decorator used to register custom commands.
 
-        Example:
-            @ls.command('myCustomCommand')
-            def my_cmd(ls, a, b, c):
-                pass
+        Example
+        -------
+        ::
+
+           @ls.command('myCustomCommand')
+           def my_cmd(ls, a, b, c):
+               pass
         """
         return self.lsp.fm.command(command_name)
 
     @property
     def client_capabilities(self) -> ClientCapabilities:
-        """Return client capabilities."""
+        """The client's capabilities."""
         return self.lsp.client_capabilities
 
     def feature(
@@ -413,10 +442,13 @@ class LanguageServer(Server):
     ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
-        Example:
-            @ls.feature('textDocument/completion', CompletionOptions(trigger_characters=['.']))
-            def completions(ls, params: CompletionParams):
-                return CompletionList(is_incomplete=False, items=[CompletionItem("Completion 1")])
+        Example
+        -------
+        ::
+
+           @ls.feature('textDocument/completion', CompletionOptions(trigger_characters=['.']))
+           def completions(ls, params: CompletionParams):
+               return CompletionList(is_incomplete=False, items=[CompletionItem("Completion 1")])
         """
         return self.lsp.fm.feature(feature_name, options)
 

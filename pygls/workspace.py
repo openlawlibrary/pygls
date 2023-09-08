@@ -278,15 +278,18 @@ class TextDocument(object):
     def apply_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind
 
-        Performs either ``Incremental``, ``Full``, or ``None`` synchronization based on
-        both the Client request and server capabilities.
+        Performs either
+        :attr:`~lsprotocol.types.TextDocumentSyncKind.Incremental`,
+        :attr:`~lsprotocol.types.TextDocumentSyncKind.Full`, or no synchronization
+        based on both the client request and server capabilities.
 
-        ``Incremental`` versus ``Full`` synchronization:
-            Even if a server accepts ``Incremantal`` SyncKinds, clients may request
-            a ``Full`` SyncKind. In LSP 3.x, clients make this request by omitting
-            both Range and RangeLength from their request. Consequently, the
-            attributes "range" and "rangeLength" will be missing from ``Full``
-            content update client requests in the pygls Python library.
+        .. admonition:: ``Incremental`` versus ``Full`` synchronization
+
+           Even if a server accepts ``Incremantal`` SyncKinds, clients may request
+           a ``Full`` SyncKind. In LSP 3.x, clients make this request by omitting
+           both Range and RangeLength from their request. Consequently, the
+           attributes "range" and "rangeLength" will be missing from ``Full``
+           content update client requests in the pygls Python library.
 
         """
         if isinstance(change, types.TextDocumentContentChangeEvent_Type1):
@@ -333,22 +336,32 @@ class TextDocument(object):
     ) -> str:
         """Return the word at position.
 
-        Arguments:
-            position (Position):
-                The line and character offset.
-            re_start_word (Pattern):
-                The regular expression for extracting the word backward from
-                position.  Specifically, the first match from a re.findall
-                call on the line up to the character value of position.  The
-                default pattern is '[A-Za-z_0-9]*$'.
-            re_end_word (Pattern):
-                The regular expression for extracting the word forward from
-                position.  Specifically, the last match from a re.findall
-                call on the line from the character value of position.  The
-                default pattern is '^[A-Za-z_0-9]*'.
+        The word is constructed in two halves, the first half is found by taking
+        the first match of ``re_start_word`` on the line up until
+        ``position.character``.
 
-        Returns:
-            The word (obtained by concatenating the two matches) at position.
+        The second half is found by taking ``position.character`` up until the
+        last match of ``re_end_word`` on the line.
+
+        :func:`python:re.findall` is used to find the matches.
+
+        Parameters
+        ----------
+        position
+           The line and character offset.
+
+        re_start_word
+           The regular expression for extracting the word backward from
+           position. The default pattern is ``[A-Za-z_0-9]*$``.
+
+        re_end_word
+           The regular expression for extracting the word forward from
+           position. The default pattern is ``^[A-Za-z_0-9]*``.
+
+        Returns
+        -------
+        str
+           The word (obtained by concatenating the two matches) at position.
         """
         lines = self.lines
         if position.line >= len(lines):
