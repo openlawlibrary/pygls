@@ -805,7 +805,9 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         )
 
         root_path = params.root_path
-        root_uri = params.root_uri or from_fs_path(root_path)
+        root_uri = params.root_uri
+        if root_path is not None and root_uri is None:
+            root_uri = from_fs_path(root_path)
 
         # Initialize the workspace
         workspace_folders = params.workspace_folders or []

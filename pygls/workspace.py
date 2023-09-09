@@ -206,9 +206,12 @@ class TextDocument(object):
     ):
         self.uri = uri
         self.version = version
-        self.path = to_fs_path(uri)
+        path = to_fs_path(uri)
+        if path is None:
+            raise Exception("`path` cannot be None")
+        self.path = path
         self.language_id = language_id
-        self.filename = os.path.basename(self.path)
+        self.filename: str | None = os.path.basename(self.path)
 
         self._local = local
         self._source = source
@@ -268,7 +271,7 @@ class TextDocument(object):
         """Apply a ``Full`` text change to the document."""
         self._source = change.text
 
-    def _apply_none_change(self, change: types.TextDocumentContentChangeEvent) -> None:
+    def _apply_none_change(self, _: types.TextDocumentContentChangeEvent) -> None:
         """Apply a ``None`` text change to the document
 
         Currently does nothing, provided for consistency.
@@ -331,8 +334,8 @@ class TextDocument(object):
     def word_at_position(
         self,
         position: types.Position,
-        re_start_word: Pattern = RE_START_WORD,
-        re_end_word: Pattern = RE_END_WORD,
+        re_start_word: Pattern[str] = RE_START_WORD,
+        re_end_word: Pattern[str] = RE_END_WORD,
     ) -> str:
         """Return the word at position.
 
@@ -387,17 +390,27 @@ Document = TextDocument
 
 
 class Workspace(object):
-    def __init__(self, root_uri, sync_kind=None, workspace_folders=None):
+    def __init__(
+        self,
+        root_uri: Optional[str],
+        sync_kind: types.TextDocumentSyncKind = types.TextDocumentSyncKind.Incremental,
+        workspace_folders: Optional[List[types.WorkspaceFolder]] = None,
+    ):
         self._root_uri = root_uri
-        self._root_uri_scheme = uri_scheme(self._root_uri)
-        self._root_path = to_fs_path(self._root_uri)
+        if self._root_uri is not None:
+            self._root_uri_scheme = uri_scheme(self._root_uri)
+            root_path = to_fs_path(self._root_uri)
+            if root_path is None:
+                raise Exception("Couldn't get `root_path` from `root_uri`")
+            self._root_path = root_path
         self._sync_kind = sync_kind
-        self._folders = {}
         self._text_documents: Dict[str, TextDocument] = {}
         self._notebook_documents: Dict[str, types.NotebookDocument] = {}
 
         # Used to lookup notebooks which contain a given cell.
         self._cell_in_notebook: Dict[str, str] = {}
+        self._folders: Dict[str, types.WorkspaceFolder] = {}
+        self._docs: Dict[str, Document] = {}
 
         if workspace_folders is not None:
             for folder in workspace_folders:
