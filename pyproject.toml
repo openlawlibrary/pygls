@@ -64,6 +64,9 @@ generate_client = "python scripts/generate_client.py --output pygls/lsp/client.p
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
 
+[tool.pyright]
+strict = ["pygls"]
+
 [tool.ruff]
 # Sometimes Black can't reduce line length without breaking more imortant rules.
 # So allow Ruff to be more lenient.

@@ -16,10 +16,13 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-"""A collection of URI utilities with logic built on the VSCode URI library.
+"""
+A collection of URI utilities with logic built on the VSCode URI library.
 
 https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef13bb9/lib/index.ts
 """
+from typing import Tuple
+
 import re
 from urllib import parse
 
@@ -27,8 +30,10 @@ from pygls import IS_WIN
 
 RE_DRIVE_LETTER_PATH = re.compile(r"^\/[a-zA-Z]:")
 
+URLParts = Tuple[str, str, str, str, str, str]
 
-def _normalize_win_path(path):
+
+def _normalize_win_path(path: str):
     netloc = ""
 
     # normalize to fwd-slashes on windows,
@@ -59,7 +64,7 @@ def _normalize_win_path(path):
     return path, netloc
 
 
-def from_fs_path(path):
+def from_fs_path(path: str):
     """Returns a URI for the given filesystem path."""
     try:
         scheme = "file"
@@ -70,8 +75,9 @@ def from_fs_path(path):
         return None
 
 
-def to_fs_path(uri):
-    """Returns the filesystem path of the given URI.
+def to_fs_path(uri: str):
+    """
+    Returns the filesystem path of the given URI.
 
     Will handle UNC paths and normalize windows drive letters to lower-case.
     Also uses the platform specific path separator. Will *not* validate the
@@ -80,7 +86,7 @@ def to_fs_path(uri):
     """
     try:
         # scheme://netloc/path;parameters?query#fragment
-        scheme, netloc, path, _params, _query, _fragment = urlparse(uri)
+        scheme, netloc, path, _, _, _ = urlparse(uri)
 
         if netloc and path and scheme == "file":
             # unc path: file://shares/c$/far/boo
@@ -102,25 +108,35 @@ def to_fs_path(uri):
         return None
 
 
-def uri_scheme(uri):
+def uri_scheme(uri: str):
     try:
         return urlparse(uri)[0]
     except (TypeError, IndexError):
         return None
 
 
+# TODO: Use `URLParts` type
 def uri_with(
-    uri, scheme=None, netloc=None, path=None, params=None, query=None, fragment=None
+    uri: str,
+    scheme: str | None = None,
+    netloc: str | None = None,
+    path: str | None = None,
+    params: str | None = None,
+    query: str | None = None,
+    fragment: str | None = None,
 ):
-    """Return a URI with the given part(s) replaced.
-
+    """
+    Return a URI with the given part(s) replaced.
     Parts are decoded / encoded.
     """
     old_scheme, old_netloc, old_path, old_params, old_query, old_fragment = urlparse(
         uri
     )
 
-    path, _netloc = _normalize_win_path(path)
+    if path is None:
+        raise Exception("`path` must not be None")
+
+    path, _ = _normalize_win_path(path)
     return urlunparse(
         (
             scheme or old_scheme,
@@ -133,7 +149,7 @@ def uri_with(
     )
 
 
-def urlparse(uri):
+def urlparse(uri: str):
     """Parse and decode the parts of a URI."""
     scheme, netloc, path, params, query, fragment = parse.urlparse(uri)
     return (
@@ -146,7 +162,7 @@ def urlparse(uri):
     )
 
 
-def urlunparse(parts):
+def urlunparse(parts: URLParts) -> str:
     """Unparse and encode parts of a URI."""
     scheme, netloc, path, params, query, fragment = parts
 
