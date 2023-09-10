@@ -25,7 +25,8 @@ from lsprotocol import types
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
-from pygls.workspace import Document, Workspace
+from pygls.workspace.document import TextDocument
+from pygls.workspace.workspace import Workspace
 
 from .ls_setup import (
     NativeClientServer,
@@ -112,7 +113,7 @@ json_server_client = create_client_for_server("json_server.py")
 
 @pytest.fixture
 def doc():
-    return Document(DOC_URI, DOC)
+    return TextDocument(DOC_URI, DOC)
 
 
 @pytest.fixture
