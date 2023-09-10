@@ -73,6 +73,7 @@ from lsprotocol.types import (
     WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS,
     WORKSPACE_EXECUTE_COMMAND,
     WORKSPACE_SEMANTIC_TOKENS_REFRESH,
+    PositionEncodingKind,
 )
 from lsprotocol.types import (
     ApplyWorkspaceEditParams,
@@ -213,6 +214,10 @@ def default_converter():
     )
 
     converter.register_structure_hook(JsonRPCNotification, _params_field_structure_hook)
+
+    converter.register_structure_hook(
+        Union[PositionEncodingKind, str, None], lambda obj, _: obj
+    )
 
     return converter
 

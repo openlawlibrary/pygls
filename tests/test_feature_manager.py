@@ -215,12 +215,38 @@ def server_capabilities(**kwargs):
             file_operations=lsp.FileOperationOptions(),
         )
 
+    if "position_encoding" not in kwargs:
+        kwargs["position_encoding"] = lsp.PositionEncodingKind.Utf16
+
     return lsp.ServerCapabilities(**kwargs)
 
 
 @pytest.mark.parametrize(
     "method, options, capabilities, expected",
     [
+        (
+            lsp.INITIALIZE,
+            None,
+            lsp.ClientCapabilities(
+                general=lsp.GeneralClientCapabilities(
+                    position_encodings=[lsp.PositionEncodingKind.Utf8]
+                )
+            ),
+            server_capabilities(position_encoding=lsp.PositionEncodingKind.Utf8),
+        ),
+        (
+            lsp.INITIALIZE,
+            None,
+            lsp.ClientCapabilities(
+                general=lsp.GeneralClientCapabilities(
+                    position_encodings=[
+                        lsp.PositionEncodingKind.Utf8,
+                        lsp.PositionEncodingKind.Utf32,
+                    ]
+                )
+            ),
+            server_capabilities(position_encoding=lsp.PositionEncodingKind.Utf32),
+        ),
         (
             lsp.TEXT_DOCUMENT_DID_SAVE,
             lsp.SaveOptions(include_text=True),

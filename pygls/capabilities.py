@@ -16,6 +16,7 @@
 ############################################################################
 from functools import reduce
 from typing import Any, Dict, List, Set, Union
+import logging
 
 from lsprotocol.types import (
     INLAY_HINT_RESOLVE,
@@ -64,6 +65,7 @@ from lsprotocol.types import (
     WORKSPACE_WILL_DELETE_FILES,
     WORKSPACE_WILL_RENAME_FILES,
     InlayHintOptions,
+    PositionEncodingKind,
 )
 from lsprotocol.types import (
     ClientCapabilities,
@@ -85,6 +87,8 @@ from lsprotocol.types import (
     FileOperationOptions,
     WorkspaceFoldersServerCapabilities,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_capability(
@@ -429,6 +433,32 @@ class ServerCapabilitiesBuilder:
             self.server_cap.inline_value_provider = value
         return self
 
+    def _with_position_encodings(self):
+        self.server_cap.position_encoding = PositionEncodingKind.Utf16
+
+        general = self.client_capabilities.general
+        if general is None:
+            return self
+
+        encodings = general.position_encodings
+        if encodings is None:
+            return self
+
+        if PositionEncodingKind.Utf16 in encodings:
+            return self
+
+        if PositionEncodingKind.Utf32 in encodings:
+            self.server_cap.position_encoding = PositionEncodingKind.Utf32
+            return self
+
+        if PositionEncodingKind.Utf8 in encodings:
+            self.server_cap.position_encoding = PositionEncodingKind.Utf8
+            return self
+
+        logger.warning(f"Unknown `PositionEncoding`s: {encodings}")
+
+        return self
+
     def _build(self):
         return self.server_cap
 
@@ -467,5 +497,6 @@ class ServerCapabilitiesBuilder:
             ._with_workspace_capabilities()
             ._with_diagnostic_provider()
             ._with_inline_value_provider()
+            ._with_position_encodings()
             ._build()
         )
