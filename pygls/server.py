@@ -52,7 +52,7 @@ from lsprotocol.types import (
 )
 from pygls.progress import Progress
 from pygls.protocol import JsonRPCProtocol, LanguageServerProtocol, default_converter
-from pygls.workspace import Workspace
+from pygls.workspace.workspace import Workspace
 
 if not IS_PYODIDE:
     from multiprocessing.pool import ThreadPool

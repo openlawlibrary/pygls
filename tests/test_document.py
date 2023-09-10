@@ -24,13 +24,13 @@ from lsprotocol.types import (
     TextDocumentContentChangeEvent_Type1,
     TextDocumentSyncKind,
 )
-from pygls.workspace import (
-    Document,
+from pygls.workspace.position import (
     position_from_utf16,
     position_to_utf16,
     range_from_utf16,
     range_to_utf16,
 )
+from pygls.workspace.document import Document
 from .conftest import DOC, DOC_URI
 
 
