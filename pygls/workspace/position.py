@@ -47,14 +47,21 @@ class Position:
         """
         return sum(self.is_char_beyond_multilingual_plane(ch) for ch in chars)
 
-    def utf16_num_units(self, chars: str):
+    def client_num_units(self, chars: str):
         """
         Calculate the length of `str` in utf-16 code units.
 
         Arguments:
             chars (str): The string to return the length in utf-16 code units for.
         """
-        return len(chars) + self.utf16_unit_offset(chars)
+        utf32_units = len(chars)
+        if self.encoding == types.PositionEncodingKind.Utf32:
+            return utf32_units
+
+        if self.encoding == types.PositionEncodingKind.Utf8:
+            return utf32_units + (self.utf16_unit_offset(chars) * 2)
+
+        return utf32_units + self.utf16_unit_offset(chars)
 
     def position_from_client_units(
         self, lines: List[str], position: types.Position
@@ -88,24 +95,24 @@ class Position:
         if len(lines) == 0:
             return types.Position(0, 0)
         if position.line >= len(lines):
-            return types.Position(len(lines) - 1, self.utf16_num_units(lines[-1]))
+            return types.Position(len(lines) - 1, self.client_num_units(lines[-1]))
 
         _line = lines[position.line]
         _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
-        _utf16_len = self.utf16_num_units(_line)
+        _client_len = self.client_num_units(_line)
         _utf32_len = len(_line)
 
-        if _utf16_len == 0:
+        if _client_len == 0:
             return types.Position(position.line, 0)
 
-        _utf16_end_of_line = self.utf16_num_units(_line)
-        if position.character > _utf16_end_of_line:
-            position.character = _utf16_end_of_line - 1
+        _client_end_of_line = self.client_num_units(_line)
+        if position.character > _client_end_of_line:
+            position.character = _client_end_of_line - 1
 
-        _utf16_index = 0
+        _client_index = 0
         utf32_index = 0
         while True:
-            _is_searching_queried_position = _utf16_index < position.character
+            _is_searching_queried_position = _client_index < position.character
             _is_before_end_of_line = utf32_index < _utf32_len
             _is_searching_for_position = (
                 _is_searching_queried_position and _is_before_end_of_line
@@ -116,9 +123,13 @@ class Position:
             _current_char = _line[utf32_index]
             _is_double_width = Position.is_char_beyond_multilingual_plane(_current_char)
             if _is_double_width:
-                _utf16_index += 2
+                if self.encoding == types.PositionEncodingKind.Utf32:
+                    _client_index += 1
+                if self.encoding == types.PositionEncodingKind.Utf8:
+                    _client_index += 4
+                _client_index += 2
             else:
-                _utf16_index += 1
+                _client_index += 1
             utf32_index += 1
 
         position = types.Position(line=position.line, character=utf32_index)
@@ -141,10 +152,12 @@ class Position:
             The position with `character` being converted to UTF-[32|16|8] code units.
         """
         try:
+            character = self.client_num_units(
+                lines[position.line][: position.character]
+            )
             return types.Position(
                 line=position.line,
-                character=position.character
-                + self.utf16_unit_offset(lines[position.line][: position.character]),
+                character=character,
             )
         except IndexError:
             return types.Position(line=len(lines), character=0)

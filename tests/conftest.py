@@ -112,11 +112,6 @@ json_server_client = create_client_for_server("json_server.py")
 
 
 @pytest.fixture
-def doc():
-    return TextDocument(DOC_URI, DOC)
-
-
-@pytest.fixture
 def feature_manager():
     """Return a feature manager"""
     return FeatureManager()
