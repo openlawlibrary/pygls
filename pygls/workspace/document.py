@@ -169,7 +169,7 @@ class TextDocument(object):
             lines, client_position
         )
         row, col = server_position.line, server_position.character
-        return col + sum(self.position.utf16_num_units(line) for line in lines[:row])
+        return col + sum(self.position.client_num_units(line) for line in lines[:row])
 
     @property
     def source(self) -> str:
