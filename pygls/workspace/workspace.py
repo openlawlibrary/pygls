@@ -19,11 +19,12 @@
 import copy
 import logging
 import os
-from typing import Dict, List, Optional
 import warnings
+from typing import Dict, List, Optional, Union
 
 from lsprotocol import types
 from lsprotocol.types import (
+    PositionEncodingKind,
     TextDocumentSyncKind,
     WorkspaceFolder,
 )
@@ -39,6 +40,9 @@ class Workspace(object):
         root_uri: Optional[str],
         sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
         workspace_folders: Optional[List[WorkspaceFolder]] = None,
+        position_encoding: Optional[
+            Union[PositionEncodingKind, str]
+        ] = PositionEncodingKind.Utf16,
     ):
         self._root_uri = root_uri
         if self._root_uri is not None:
@@ -55,6 +59,7 @@ class Workspace(object):
         self._cell_in_notebook: Dict[str, str] = {}
         self._folders: Dict[str, WorkspaceFolder] = {}
         self._docs: Dict[str, TextDocument] = {}
+        self._position_encoding = position_encoding
 
         if workspace_folders is not None:
             for folder in workspace_folders:
@@ -73,6 +78,7 @@ class Workspace(object):
             version=version,
             language_id=language_id,
             sync_kind=self._sync_kind,
+            position_encoding=self._position_encoding,
         )
 
     def add_folder(self, folder: WorkspaceFolder):

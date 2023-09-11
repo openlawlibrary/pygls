@@ -17,177 +17,175 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
-from typing import List
+from typing import List, Optional
 
-from lsprotocol.types import (
-    Position,
-    Range,
-)
+from lsprotocol import types
 
 
 log = logging.getLogger(__name__)
 
 
-def is_char_beyond_multilingual_plane(char: str) -> bool:
-    return ord(char) > 0xFFFF
+class Position:
+    def __init__(
+        self,
+        encoding: Optional[
+            types.PositionEncodingKind | str
+        ] = types.PositionEncodingKind.Utf16,
+    ):
+        self.encoding = encoding
 
+    @classmethod
+    def is_char_beyond_multilingual_plane(cls, char: str) -> bool:
+        return ord(char) > 0xFFFF
 
-def utf16_unit_offset(chars: str):
-    """
-    Calculate the number of characters which need two utf-16 code units.
+    def utf16_unit_offset(self, chars: str):
+        """
+        Calculate the number of characters which need two utf-16 code units.
 
-    Arguments:
-        chars (str): The string to count occurrences of utf-16 code units for.
-    """
-    return sum(is_char_beyond_multilingual_plane(ch) for ch in chars)
+        Arguments:
+            chars (str): The string to count occurrences of utf-16 code units for.
+        """
+        return sum(self.is_char_beyond_multilingual_plane(ch) for ch in chars)
 
+    def utf16_num_units(self, chars: str):
+        """
+        Calculate the length of `str` in utf-16 code units.
 
-def utf16_num_units(chars: str):
-    """
-    Calculate the length of `str` in utf-16 code units.
+        Arguments:
+            chars (str): The string to return the length in utf-16 code units for.
+        """
+        return len(chars) + self.utf16_unit_offset(chars)
 
-    Arguments:
-        chars (str): The string to return the length in utf-16 code units for.
-    """
-    return len(chars) + utf16_unit_offset(chars)
+    def position_from_client_units(
+        self, lines: List[str], position: types.Position
+    ) -> types.Position:
+        """
+        Convert the position.character from UTF-[32|16|8] code units to UTF-32.
 
+        A python application can't use the character member of `Position`
+        directly. As per specification it is represented as a zero-based line and
+        character offset based on posible a UTF-[32|16|8] string representation.
 
-def position_from_utf16(lines: List[str], position: Position) -> Position:
-    """
-    Convert the position.character from utf-16 code units to utf-32.
+        All characters whose code point exceeds the Basic Multilingual Plane are
+        represented by 2 UTF-16 or 4 UTF-8 code units.
 
-    A python application can't use the character member of `Position`
-    directly. As per specification it is represented as a zero-based line and
-    character offset based on a UTF-16 string representation.
+        The offset of the closing quotation mark in x="😋" is
+        - 7 in UTF-8 representation
+        - 5 in UTF-16 representation
+        - 4 in UTF-32 representation
 
-    All characters whose code point exceeds the Basic Multilingual Plane are
-    represented by 2 UTF-16 code units.
+        see: https://github.com/microsoft/language-server-protocol/issues/376
 
-    The offset of the closing quotation mark in x="😋" is
-    - 5 in UTF-16 representation
-    - 4 in UTF-32 representation
+        Arguments:
+            lines (list):
+                The content of the document which the position refers to.
+            position (Position):
+                The line and character offset in UTF-[32|16|8] code units.
 
-    see: https://github.com/microsoft/language-server-protocol/issues/376
+        Returns:
+            The position with `character` being converted to UTF-32 code units.
+        """
+        if len(lines) == 0:
+            return types.Position(0, 0)
+        if position.line >= len(lines):
+            return types.Position(len(lines) - 1, self.utf16_num_units(lines[-1]))
 
-    Arguments:
-        lines (list):
-            The content of the document which the position refers to.
-        position (Position):
-            The line and character offset in utf-16 code units.
+        _line = lines[position.line]
+        _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
+        _utf16_len = self.utf16_num_units(_line)
+        _utf32_len = len(_line)
 
-    Returns:
-        The position with `character` being converted to utf-32 code units.
-    """
-    if len(lines) == 0:
-        return Position(0, 0)
-    if position.line >= len(lines):
-        return Position(len(lines) - 1, utf16_num_units(lines[-1]))
+        if _utf16_len == 0:
+            return types.Position(position.line, 0)
 
-    _line = lines[position.line]
-    _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
-    _utf16_len = utf16_num_units(_line)
-    _utf32_len = len(_line)
+        _utf16_end_of_line = self.utf16_num_units(_line)
+        if position.character > _utf16_end_of_line:
+            position.character = _utf16_end_of_line - 1
 
-    if _utf16_len == 0:
-        return Position(position.line, 0)
+        _utf16_index = 0
+        utf32_index = 0
+        while True:
+            _is_searching_queried_position = _utf16_index < position.character
+            _is_before_end_of_line = utf32_index < _utf32_len
+            _is_searching_for_position = (
+                _is_searching_queried_position and _is_before_end_of_line
+            )
+            if not _is_searching_for_position:
+                break
 
-    _utf16_end_of_line = utf16_num_units(_line)
-    if position.character > _utf16_end_of_line:
-        position.character = _utf16_end_of_line - 1
+            _current_char = _line[utf32_index]
+            _is_double_width = Position.is_char_beyond_multilingual_plane(_current_char)
+            if _is_double_width:
+                _utf16_index += 2
+            else:
+                _utf16_index += 1
+            utf32_index += 1
 
-    _utf16_index = 0
-    utf32_index = 0
-    while True:
-        _is_searching_queried_position = _utf16_index < position.character
-        _is_before_end_of_line = utf32_index < _utf32_len
-        _is_searching_for_position = (
-            _is_searching_queried_position and _is_before_end_of_line
+        position = types.Position(line=position.line, character=utf32_index)
+        return position
+
+    def position_to_client_unit(
+        self, lines: List[str], position: types.Position
+    ) -> types.Position:
+        """
+        Convert the position.character from its internal UTF-32 representation
+        to client-supported UTF-[32|16|8] code units.
+
+        Arguments:
+            lines (list):
+                The content of the document which the position refers to.
+            position (Position):
+                The line and character offset in UTF-32 code units.
+
+        Returns:
+            The position with `character` being converted to UTF-[32|16|8] code units.
+        """
+        try:
+            return types.Position(
+                line=position.line,
+                character=position.character
+                + self.utf16_unit_offset(lines[position.line][: position.character]),
+            )
+        except IndexError:
+            return types.Position(line=len(lines), character=0)
+
+    def range_from_client_units(
+        self, lines: List[str], range: types.Range
+    ) -> types.Range:
+        """
+        Convert range.[start|end].character from UTF-[32|16|8] code units to UTF-32.
+
+        Arguments:
+            lines (list):
+                The content of the document which the range refers to.
+            range (Range):
+                The line and character offset in UTF-[32|16|8] code units.
+
+        Returns:
+            The range with `character` offsets being converted to UTF-32 code units.
+        """
+        range_new = types.Range(
+            start=self.position_from_client_units(lines, range.start),
+            end=self.position_from_client_units(lines, range.end),
         )
-        if not _is_searching_for_position:
-            break
+        return range_new
 
-        _current_char = _line[utf32_index]
-        _is_double_width = is_char_beyond_multilingual_plane(_current_char)
-        if _is_double_width:
-            _utf16_index += 2
-        else:
-            _utf16_index += 1
-        utf32_index += 1
+    def range_to_client_units(
+        self, lines: List[str], range: types.Range
+    ) -> types.Range:
+        """
+        Convert range.[start|end].character from UTF-32 to UTF-[32|16|8] code units.
 
-    position = Position(line=position.line, character=utf32_index)
-    return position
+        Arguments:
+            lines (list):
+                The content of the document which the range refers to.
+            range (Range):
+                The line and character offset in  code units.
 
-
-def position_to_utf16(lines: List[str], position: Position) -> Position:
-    """
-    Convert the position.character from utf-32 to utf-16 code units.
-
-    A python application can't use the character member of `Position`
-    directly as per specification it is represented as a zero-based line and
-    character offset based on a UTF-16 string representation.
-
-    All characters whose code point exceeds the Basic Multilingual Plane are
-    represented by 2 UTF-16 code units.
-
-    The offset of the closing quotation mark in x="😋" is
-    - 5 in UTF-16 representation
-    - 4 in UTF-32 representation
-
-    see: https://github.com/microsoft/language-server-protocol/issues/376
-
-    Arguments:
-        lines (list):
-            The content of the document which the position refers to.
-        position (Position):
-            The line and character offset in utf-32 code units.
-
-    Returns:
-        The position with `character` being converted to utf-16 code units.
-    """
-    try:
-        return Position(
-            line=position.line,
-            character=position.character
-            + utf16_unit_offset(lines[position.line][: position.character]),
+        Returns:
+            The range with `character` offsets being converted to UTF-[32|16|8] code units.
+        """
+        return types.Range(
+            start=self.position_to_client_unit(lines, range.start),
+            end=self.position_to_client_unit(lines, range.end),
         )
-    except IndexError:
-        return Position(line=len(lines), character=0)
-
-
-def range_from_utf16(lines: List[str], range: Range) -> Range:
-    """
-    Convert range.[start|end].character from utf-16 code units to utf-32.
-
-    Arguments:
-        lines (list):
-            The content of the document which the range refers to.
-        range (Range):
-            The line and character offset in utf-32 code units.
-
-    Returns:
-        The range with `character` offsets being converted to utf-16 code units.
-    """
-    range_new = Range(
-        start=position_from_utf16(lines, range.start),
-        end=position_from_utf16(lines, range.end),
-    )
-    return range_new
-
-
-def range_to_utf16(lines: List[str], range: Range) -> Range:
-    """
-    Convert range.[start|end].character from utf-32 to utf-16 code units.
-
-    Arguments:
-        lines (list):
-            The content of the document which the range refers to.
-        range (Range):
-            The line and character offset in utf-16 code units.
-
-    Returns:
-        The range with `character` offsets being converted to utf-32 code units.
-    """
-    return Range(
-        start=position_to_utf16(lines, range.start),
-        end=position_to_utf16(lines, range.end),
-    )
