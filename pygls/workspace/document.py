@@ -20,21 +20,12 @@ import io
 import logging
 import os
 import re
-from typing import List, Optional, Pattern
+from typing import List, Optional, Pattern, Union
 
-from lsprotocol.types import (
-    Position,
-    TextDocumentContentChangeEvent,
-    TextDocumentContentChangeEvent_Type1,
-    TextDocumentSyncKind,
-)
+from lsprotocol import types
 
 from pygls.uris import to_fs_path
-from pygls.workspace.position import (
-    position_from_utf16,
-    range_from_utf16,
-    utf16_num_units,
-)
+from pygls.workspace.position import Position
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
@@ -51,7 +42,10 @@ class TextDocument(object):
         version: Optional[int] = None,
         language_id: Optional[str] = None,
         local: bool = True,
-        sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
+        sync_kind: types.TextDocumentSyncKind = types.TextDocumentSyncKind.Incremental,
+        position_encoding: Optional[
+            Union[types.PositionEncodingKind, str]
+        ] = types.PositionEncodingKind.Utf16,
     ):
         self.uri = uri
         self.version = version
@@ -65,22 +59,26 @@ class TextDocument(object):
         self._local = local
         self._source = source
 
-        self._is_sync_kind_full = sync_kind == TextDocumentSyncKind.Full
-        self._is_sync_kind_incremental = sync_kind == TextDocumentSyncKind.Incremental
-        self._is_sync_kind_none = sync_kind == TextDocumentSyncKind.None_
+        self._is_sync_kind_full = sync_kind == types.TextDocumentSyncKind.Full
+        self._is_sync_kind_incremental = (
+            sync_kind == types.TextDocumentSyncKind.Incremental
+        )
+        self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
+
+        self.position = Position(encoding=position_encoding)
 
     def __str__(self):
         return str(self.uri)
 
     def _apply_incremental_change(
-        self, change: TextDocumentContentChangeEvent_Type1
+        self, change: types.TextDocumentContentChangeEvent_Type1
     ) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
         change_range = change.range
 
-        range = range_from_utf16(lines, change_range)  # type: ignore
+        range = self.position.range_from_client_units(lines, change_range)
         start_line = range.start.line
         start_col = range.start.character
         end_line = range.end.line
@@ -114,18 +112,18 @@ class TextDocument(object):
 
         self._source = new.getvalue()
 
-    def _apply_full_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def _apply_full_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a ``Full`` text change to the document."""
         self._source = change.text
 
-    def _apply_none_change(self, _: TextDocumentContentChangeEvent) -> None:
+    def _apply_none_change(self, _: types.TextDocumentContentChangeEvent) -> None:
         """Apply a ``None`` text change to the document
 
         Currently does nothing, provided for consistency.
         """
         pass
 
-    def apply_change(self, change: TextDocumentContentChangeEvent) -> None:
+    def apply_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind
 
         Performs either
@@ -142,7 +140,7 @@ class TextDocument(object):
            content update client requests in the pygls Python library.
 
         """
-        if isinstance(change, TextDocumentContentChangeEvent_Type1):
+        if isinstance(change, types.TextDocumentContentChangeEvent_Type1):
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return
@@ -164,12 +162,14 @@ class TextDocument(object):
     def lines(self) -> List[str]:
         return self.source.splitlines(True)
 
-    def offset_at_position(self, position: Position) -> int:
-        """Return the character offset pointed at by the given position."""
+    def offset_at_position(self, client_position: types.Position) -> int:
+        """Return the character offset pointed at by the given client_position."""
         lines = self.lines
-        pos = position_from_utf16(lines, position)
-        row, col = pos.line, pos.character
-        return col + sum(utf16_num_units(line) for line in lines[:row])
+        server_position = self.position.position_from_client_units(
+            lines, client_position
+        )
+        row, col = server_position.line, server_position.character
+        return col + sum(self.position.utf16_num_units(line) for line in lines[:row])
 
     @property
     def source(self) -> str:
@@ -180,7 +180,7 @@ class TextDocument(object):
 
     def word_at_position(
         self,
-        position: Position,
+        client_position: types.Position,
         re_start_word: Pattern[str] = RE_START_WORD,
         re_end_word: Pattern[str] = RE_END_WORD,
     ) -> str:
@@ -214,11 +214,13 @@ class TextDocument(object):
            The word (obtained by concatenating the two matches) at position.
         """
         lines = self.lines
-        if position.line >= len(lines):
+        if client_position.line >= len(lines):
             return ""
 
-        pos = position_from_utf16(lines, position)
-        row, col = pos.line, pos.character
+        server_position = self.position.position_from_client_units(
+            lines, client_position
+        )
+        row, col = server_position.line, server_position.character
         line = lines[row]
         # Split word in two
         start = line[:col]

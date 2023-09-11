@@ -18,27 +18,18 @@
 ############################################################################
 import re
 
-from lsprotocol.types import (
-    Position,
-    Range,
-    TextDocumentContentChangeEvent_Type1,
-    TextDocumentSyncKind,
-)
-from pygls.workspace.position import (
-    position_from_utf16,
-    position_to_utf16,
-    range_from_utf16,
-    range_to_utf16,
-)
+from lsprotocol import types
+from pygls.workspace.position import Position
 from pygls.workspace.document import Document
 from .conftest import DOC, DOC_URI
 
 
 def test_document_empty_edit():
     doc = Document("file:///uri", "")
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=0, character=0), end=Position(line=0, character=0)
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=0, character=0),
+            end=types.Position(line=0, character=0),
         ),
         range_length=0,
         text="f",
@@ -51,9 +42,10 @@ def test_document_end_of_file_edit():
     old = ["print 'a'\n", "print 'b'\n"]
     doc = Document("file:///uri", "".join(old))
 
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=2, character=0), end=Position(line=2, character=0)
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=2, character=0),
+            end=types.Position(line=2, character=0),
         ),
         range_length=0,
         text="o",
@@ -69,10 +61,13 @@ def test_document_end_of_file_edit():
 
 def test_document_full_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = Document("file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Full)
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=1, character=4), end=Position(line=2, character=11)
+    doc = Document(
+        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
+    )
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=1, character=4),
+            end=types.Position(line=2, character=11),
         ),
         range_length=0,
         text="print a, b",
@@ -81,8 +76,16 @@ def test_document_full_edit():
 
     assert doc.lines == ["print a, b"]
 
-    doc = Document("file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Full)
-    change = TextDocumentContentChangeEvent_Type1(range=None, text="print a, b")
+    doc = Document(
+        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
+    )
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=0, character=0),
+            end=types.Position(line=0, character=0),
+        ),
+        text="print a, b",
+    )
     doc.apply_change(change)
 
     assert doc.lines == ["print a, b"]
@@ -90,9 +93,10 @@ def test_document_full_edit():
 
 def test_document_line_edit():
     doc = Document("file:///uri", "itshelloworld")
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=0, character=3), end=Position(line=0, character=8)
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=0, character=3),
+            end=types.Position(line=0, character=8),
         ),
         range_length=0,
         text="goodbye",
@@ -109,11 +113,12 @@ def test_document_lines(doc):
 def test_document_multiline_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
     doc = Document(
-        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Incremental
+        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=1, character=4), end=Position(line=2, character=11)
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=1, character=4),
+            end=types.Position(line=2, character=11),
         ),
         range_length=0,
         text="print a, b",
@@ -123,11 +128,12 @@ def test_document_multiline_edit():
     assert doc.lines == ["def hello(a, b):\n", "    print a, b\n"]
 
     doc = Document(
-        "file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.Incremental
+        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=1, character=4), end=Position(line=2, character=11)
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=1, character=4),
+            end=types.Position(line=2, character=11),
         ),
         text="print a, b",
     )
@@ -138,10 +144,13 @@ def test_document_multiline_edit():
 
 def test_document_no_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = Document("file:///uri", "".join(old), sync_kind=TextDocumentSyncKind.None_)
-    change = TextDocumentContentChangeEvent_Type1(
-        range=Range(
-            start=Position(line=1, character=4), end=Position(line=2, character=11)
+    doc = Document(
+        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.None_
+    )
+    change = types.TextDocumentContentChangeEvent_Type1(
+        range=types.Range(
+            start=types.Position(line=1, character=4),
+            end=types.Position(line=2, character=11),
         ),
         range_length=0,
         text="print a, b",
@@ -163,133 +172,155 @@ def test_document_source_unicode():
 
 
 def test_position_from_utf16():
-    assert position_from_utf16(['x="😋"'], Position(line=0, character=3)) == Position(
-        line=0, character=3
-    )
-    assert position_from_utf16(['x="😋"'], Position(line=0, character=5)) == Position(
-        line=0, character=4
-    )
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
+    assert position.position_from_client_units(
+        ['x="😋"'], types.Position(line=0, character=3)
+    ) == types.Position(line=0, character=3)
+    assert position.position_from_client_units(
+        ['x="😋"'], types.Position(line=0, character=5)
+    ) == types.Position(line=0, character=4)
 
-    position = Position(line=0, character=5)
-    position_from_utf16(['x="😋"'], position)
-    assert position == Position(line=0, character=5)
+    actual = types.Position(line=0, character=5)
+    position.position_from_client_units(['x="😋"'], actual)
+    assert actual == types.Position(line=0, character=5)
 
 
 def test_position_to_utf16():
-    assert position_to_utf16(['x="😋"'], Position(line=0, character=3)) == Position(
-        line=0, character=3
-    )
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
+    assert position.position_to_client_unit(
+        ['x="😋"'], types.Position(line=0, character=3)
+    ) == types.Position(line=0, character=3)
 
-    assert position_to_utf16(['x="😋"'], Position(line=0, character=4)) == Position(
-        line=0, character=5
-    )
+    assert position.position_to_client_unit(
+        ['x="😋"'], types.Position(line=0, character=4)
+    ) == types.Position(line=0, character=5)
 
-    position = Position(line=0, character=4)
-    position_to_utf16(['x="😋"'], position)
-    assert position == Position(line=0, character=4)
+    actual = types.Position(line=0, character=4)
+    position.position_to_client_unit(['x="😋"'], actual)
+    assert actual == types.Position(line=0, character=4)
 
 
 def test_range_from_utf16():
-    assert range_from_utf16(
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
+    assert position.range_from_client_units(
         ['x="😋"'],
-        Range(start=Position(line=0, character=3), end=Position(line=0, character=5)),
-    ) == Range(start=Position(line=0, character=3), end=Position(line=0, character=4))
-
-    range = Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=5)
+        types.Range(
+            start=types.Position(line=0, character=3),
+            end=types.Position(line=0, character=5),
+        ),
+    ) == types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=4),
     )
-    actual = range_from_utf16(['x="😋😋"'], range)
-    expected = Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=4)
+
+    range = types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=5),
+    )
+    actual = position.range_from_client_units(['x="😋😋"'], range)
+    expected = types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=4),
     )
     assert actual == expected
 
 
 def test_range_to_utf16():
-    assert range_to_utf16(
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
+    assert position.range_to_client_units(
         ['x="😋"'],
-        Range(start=Position(line=0, character=3), end=Position(line=0, character=4)),
-    ) == Range(start=Position(line=0, character=3), end=Position(line=0, character=5))
-
-    range = Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=4)
+        types.Range(
+            start=types.Position(line=0, character=3),
+            end=types.Position(line=0, character=4),
+        ),
+    ) == types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=5),
     )
-    actual = range_to_utf16(['x="😋😋"'], range)
-    expected = Range(
-        start=Position(line=0, character=3), end=Position(line=0, character=5)
+
+    range = types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=4),
+    )
+    actual = position.range_to_client_units(['x="😋😋"'], range)
+    expected = types.Range(
+        start=types.Position(line=0, character=3),
+        end=types.Position(line=0, character=5),
     )
     assert actual == expected
 
 
 def test_offset_at_position(doc):
-    assert doc.offset_at_position(Position(line=0, character=8)) == 8
-    assert doc.offset_at_position(Position(line=1, character=5)) == 12
-    assert doc.offset_at_position(Position(line=2, character=0)) == 13
-    assert doc.offset_at_position(Position(line=2, character=4)) == 17
-    assert doc.offset_at_position(Position(line=3, character=6)) == 27
-    assert doc.offset_at_position(Position(line=3, character=7)) == 28
-    assert doc.offset_at_position(Position(line=3, character=8)) == 28
-    assert doc.offset_at_position(Position(line=4, character=0)) == 40
-    assert doc.offset_at_position(Position(line=5, character=0)) == 40
+    assert doc.offset_at_position(types.Position(line=0, character=8)) == 8
+    assert doc.offset_at_position(types.Position(line=1, character=5)) == 12
+    assert doc.offset_at_position(types.Position(line=2, character=0)) == 13
+    assert doc.offset_at_position(types.Position(line=2, character=4)) == 17
+    assert doc.offset_at_position(types.Position(line=3, character=6)) == 27
+    assert doc.offset_at_position(types.Position(line=3, character=7)) == 28
+    assert doc.offset_at_position(types.Position(line=3, character=8)) == 28
+    assert doc.offset_at_position(types.Position(line=4, character=0)) == 40
+    assert doc.offset_at_position(types.Position(line=5, character=0)) == 40
 
 
-def test_utf16_to_utf32_position_cast(doc):
+def test_utf16_to_utf32_position_cast():
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
     lines = ["", "😋😋", ""]
-    assert position_from_utf16(lines, Position(line=0, character=0)) == Position(
-        line=0, character=0
-    )
-    assert position_from_utf16(lines, Position(line=0, character=1)) == Position(
-        line=0, character=0
-    )
-    assert position_from_utf16(lines, Position(line=1, character=0)) == Position(
-        line=1, character=0
-    )
-    assert position_from_utf16(lines, Position(line=1, character=2)) == Position(
-        line=1, character=1
-    )
-    assert position_from_utf16(lines, Position(line=1, character=3)) == Position(
-        line=1, character=2
-    )
-    assert position_from_utf16(lines, Position(line=1, character=4)) == Position(
-        line=1, character=2
-    )
-    assert position_from_utf16(lines, Position(line=1, character=100)) == Position(
-        line=1, character=2
-    )
-    assert position_from_utf16(lines, Position(line=3, character=0)) == Position(
-        line=2, character=0
-    )
-    assert position_from_utf16(lines, Position(line=4, character=10)) == Position(
-        line=2, character=0
-    )
+    assert position.position_from_client_units(
+        lines, types.Position(line=0, character=0)
+    ) == types.Position(line=0, character=0)
+    assert position.position_from_client_units(
+        lines, types.Position(line=0, character=1)
+    ) == types.Position(line=0, character=0)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=0)
+    ) == types.Position(line=1, character=0)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=2)
+    ) == types.Position(line=1, character=1)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=3)
+    ) == types.Position(line=1, character=2)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=4)
+    ) == types.Position(line=1, character=2)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=100)
+    ) == types.Position(line=1, character=2)
+    assert position.position_from_client_units(
+        lines, types.Position(line=3, character=0)
+    ) == types.Position(line=2, character=0)
+    assert position.position_from_client_units(
+        lines, types.Position(line=4, character=10)
+    ) == types.Position(line=2, character=0)
 
 
-def test_position_for_line_endings(doc):
+def test_position_for_line_endings():
+    position = Position(encoding=types.PositionEncodingKind.Utf16)
     lines = ["x\r\n", "y\n"]
-    assert position_from_utf16(lines, Position(line=0, character=10)) == Position(
-        line=0, character=1
-    )
-    assert position_from_utf16(lines, Position(line=1, character=10)) == Position(
-        line=1, character=1
-    )
+    assert position.position_from_client_units(
+        lines, types.Position(line=0, character=10)
+    ) == types.Position(line=0, character=1)
+    assert position.position_from_client_units(
+        lines, types.Position(line=1, character=10)
+    ) == types.Position(line=1, character=1)
 
 
 def test_word_at_position(doc):
     """
     Return word under the cursor (or last in line if past the end)
     """
-    assert doc.word_at_position(Position(line=0, character=8)) == "document"
-    assert doc.word_at_position(Position(line=0, character=1000)) == "document"
-    assert doc.word_at_position(Position(line=1, character=5)) == "for"
-    assert doc.word_at_position(Position(line=2, character=0)) == "testing"
-    assert doc.word_at_position(Position(line=3, character=10)) == "unicode"
-    assert doc.word_at_position(Position(line=4, character=0)) == ""
-    assert doc.word_at_position(Position(line=4, character=0)) == ""
+    assert doc.word_at_position(types.Position(line=0, character=8)) == "document"
+    assert doc.word_at_position(types.Position(line=0, character=1000)) == "document"
+    assert doc.word_at_position(types.Position(line=1, character=5)) == "for"
+    assert doc.word_at_position(types.Position(line=2, character=0)) == "testing"
+    assert doc.word_at_position(types.Position(line=3, character=10)) == "unicode"
+    assert doc.word_at_position(types.Position(line=4, character=0)) == ""
+    assert doc.word_at_position(types.Position(line=4, character=0)) == ""
     re_start_word = re.compile(r"[A-Za-z_0-9.]*$")
     re_end_word = re.compile(r"^[A-Za-z_0-9.]*")
     assert (
         doc.word_at_position(
-            Position(
+            types.Position(
                 line=3,
                 character=10,
             ),

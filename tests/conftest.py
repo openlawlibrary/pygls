@@ -41,7 +41,7 @@ for
 testing
 with "😋" unicode.
 """
-DOC_URI = uris.from_fs_path(__file__)
+DOC_URI = uris.from_fs_path(__file__) or ""
 
 
 ClientServer = NativeClientServer

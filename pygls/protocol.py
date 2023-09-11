@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from __future__ import annotations
 import asyncio
 import enum
 import functools
@@ -27,7 +28,11 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import lru_cache, partial
 from itertools import zip_longest
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygls.server import Server
+
 
 import attrs
 from cattrs.errors import ClassValidationError
@@ -244,7 +249,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     VERSION = "2.0"
 
-    def __init__(self, server, converter):
+    def __init__(self, server: Server, converter):
         self._server = server
         self._converter = converter
 
@@ -817,7 +822,10 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         # Initialize the workspace
         workspace_folders = params.workspace_folders or []
         self._workspace = Workspace(
-            root_uri, text_document_sync_kind, workspace_folders
+            root_uri,
+            text_document_sync_kind,
+            workspace_folders,
+            self.server_capabilities.position_encoding,
         )
 
         self.trace = TraceValues.Off
