@@ -17,7 +17,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from lsprotocol import types
 
@@ -29,7 +29,7 @@ class Position:
     def __init__(
         self,
         encoding: Optional[
-            types.PositionEncodingKind | str
+            Union[types.PositionEncodingKind, str]
         ] = types.PositionEncodingKind.Utf16,
     ):
         self.encoding = encoding

@@ -15,7 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 from functools import reduce
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 import logging
 
 from lsprotocol.types import (
@@ -119,7 +119,7 @@ class ServerCapabilitiesBuilder:
         feature_options: Dict[str, Any],
         commands: List[str],
         text_document_sync_kind: TextDocumentSyncKind,
-        notebook_document_sync: NotebookDocumentSyncOptions,
+        notebook_document_sync: Optional[NotebookDocumentSyncOptions] = None,
     ):
         self.client_capabilities = client_capabilities
         self.features = features
