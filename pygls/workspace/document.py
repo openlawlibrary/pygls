@@ -54,7 +54,7 @@ class TextDocument(object):
             raise Exception("`path` cannot be None")
         self.path = path
         self.language_id = language_id
-        self.filename: str | None = os.path.basename(self.path)
+        self.filename: Optional[str] = os.path.basename(self.path)
 
         self._local = local
         self._source = source

@@ -35,7 +35,13 @@ from typing import (
 import cattrs
 from pygls import IS_PYODIDE
 from pygls.lsp import ConfigCallbackType, ShowDocumentCallbackType
-from pygls.exceptions import PyglsError, JsonRpcException, FeatureRequestError
+from pygls.exceptions import (
+    FeatureNotificationError,
+    JsonRpcInternalError,
+    PyglsError,
+    JsonRpcException,
+    FeatureRequestError,
+)
 from lsprotocol.types import (
     ClientCapabilities,
     Diagnostic,
@@ -61,6 +67,14 @@ if not IS_PYODIDE:
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable)
+
+ServerErrors = Union[
+    PyglsError,
+    JsonRpcException,
+    Type[JsonRpcInternalError],
+    Type[FeatureNotificationError],
+    Type[FeatureRequestError],
+]
 
 
 async def aio_readline(loop, executor, stop_event, rfile, proxy):
@@ -204,7 +218,9 @@ class Server:
             self._owns_loop = False
 
         self.loop = loop
-        self.lsp = protocol_cls(self, converter_factory())
+
+        # TODO: Will move this to `LanguageServer` in next commit
+        self.lsp = protocol_cls(self, converter_factory())  # type: ignore
 
     def shutdown(self):
         """Shutdown server."""
@@ -404,6 +420,7 @@ class LanguageServer(Server):
         self.version = version
         self._text_document_sync_kind = text_document_sync_kind
         self._notebook_document_sync = notebook_document_sync
+        self.process_id: Optional[Union[int, None]] = None
         super().__init__(protocol_cls, converter_factory, loop, max_workers)
 
     def apply_edit(
@@ -541,7 +558,9 @@ class LanguageServer(Server):
         self.lsp.show_message_log(message, msg_type)
 
     def _report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self,
+        error: Exception,
+        source: ServerErrors,
     ):
         # Prevent recursive error reporting
         try:
@@ -549,9 +568,7 @@ class LanguageServer(Server):
         except Exception:
             logger.warning("Failed to report error to client")
 
-    def report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
-    ):
+    def report_server_error(self, error: Exception, source: ServerErrors):
         """
         Sends error to the client for displaying.
 

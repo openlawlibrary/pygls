@@ -28,10 +28,22 @@ from collections import namedtuple
 from concurrent.futures import Future
 from functools import lru_cache, partial
 from itertools import zip_longest
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    TYPE_CHECKING,
+)
+
+from pygls.server import WebSocketTransportAdapter
 
 if TYPE_CHECKING:
-    from pygls.server import Server
+    from pygls.server import LanguageServer
 
 
 import attrs
@@ -249,19 +261,21 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     VERSION = "2.0"
 
-    def __init__(self, server: Server, converter):
+    def __init__(self, server: LanguageServer, converter):
         self._server = server
         self._converter = converter
 
         self._shutdown = False
 
         # Book keeping for in-flight requests
-        self._request_futures = {}
-        self._result_types = {}
+        self._request_futures: Dict[str, Future[Any]] = {}
+        self._result_types: Dict[str, Any] = {}
 
         self.fm = FeatureManager(server)
-        self.transport = None
-        self._message_buf = []
+        self.transport: Optional[
+            Union[asyncio.WriteTransport, WebSocketTransportAdapter]
+        ] = None
+        self._message_buf: List[bytes] = []
 
         self._send_only_body = False
 
@@ -514,7 +528,9 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.info("Sending data: %s", body)
 
             if self._send_only_body:
-                self.transport.write(body)
+                # Mypy/Pyright seem to think `write()` wants `"bytes | bytearray | memoryview"`
+                # But runtime errors with anything but `str`.
+                self.transport.write(body)  # type: ignore
                 return
 
             header = (
@@ -554,7 +570,10 @@ class JsonRPCProtocol(asyncio.Protocol):
         logger.error("Connection to the client is lost! Shutting down the server.")
         sys.exit(1)
 
-    def connection_made(self, transport: asyncio.BaseTransport):
+    def connection_made(  # type: ignore # see: https://github.com/python/typeshed/issues/3021
+        self,
+        transport: asyncio.Transport,
+    ):
         """Method from base class, called when connection is established"""
         self.transport = transport
 

@@ -21,7 +21,7 @@ A collection of URI utilities with logic built on the VSCode URI library.
 
 https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef13bb9/lib/index.ts
 """
-from typing import Tuple
+from typing import Optional, Tuple
 
 import re
 from urllib import parse
@@ -118,12 +118,12 @@ def uri_scheme(uri: str):
 # TODO: Use `URLParts` type
 def uri_with(
     uri: str,
-    scheme: str | None = None,
-    netloc: str | None = None,
-    path: str | None = None,
-    params: str | None = None,
-    query: str | None = None,
-    fragment: str | None = None,
+    scheme: Optional[str] = None,
+    netloc: Optional[str] = None,
+    path: Optional[str] = None,
+    params: Optional[str] = None,
+    query: Optional[str] = None,
+    fragment: Optional[str] = None,
 ):
     """
     Return a URI with the given part(s) replaced.
