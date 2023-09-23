@@ -219,7 +219,7 @@ class Server:
 
         self.loop = loop
 
-        # TODO: Will move this to `LanguageServer` in next commit
+        # TODO: Will move this to `LanguageServer` soon
         self.lsp = protocol_cls(self, converter_factory())  # type: ignore
 
     def shutdown(self):
