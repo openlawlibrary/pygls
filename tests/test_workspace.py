@@ -22,7 +22,7 @@ import pytest
 from lsprotocol import types
 
 from pygls import uris
-from pygls.workspace.workspace import Workspace
+from pygls.workspace import Workspace
 
 DOC_URI = uris.from_fs_path(__file__)
 DOC_TEXT = """test"""

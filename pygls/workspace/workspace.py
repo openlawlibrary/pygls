@@ -29,7 +29,7 @@ from lsprotocol.types import (
     WorkspaceFolder,
 )
 from pygls.uris import to_fs_path, uri_scheme
-from pygls.workspace.document import TextDocument
+from pygls.workspace.text_document import TextDocument
 
 logger = logging.getLogger(__name__)
 

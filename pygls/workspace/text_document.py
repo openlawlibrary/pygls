@@ -25,7 +25,7 @@ from typing import List, Optional, Pattern, Union
 from lsprotocol import types
 
 from pygls.uris import to_fs_path
-from pygls.workspace.position import Position
+from .position import Position
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
@@ -232,7 +232,3 @@ class TextDocument(object):
         m_end = re_end_word.findall(end)
 
         return m_start[0] + m_end[-1]
-
-
-# For backwards compatibility
-Document = TextDocument

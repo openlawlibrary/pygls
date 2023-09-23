@@ -19,13 +19,12 @@
 import re
 
 from lsprotocol import types
-from pygls.workspace.position import Position
-from pygls.workspace.document import Document
+from pygls.workspace import TextDocument, Position
 from .conftest import DOC, DOC_URI
 
 
 def test_document_empty_edit():
-    doc = Document("file:///uri", "")
+    doc = TextDocument("file:///uri", "")
     change = types.TextDocumentContentChangeEvent_Type1(
         range=types.Range(
             start=types.Position(line=0, character=0),
@@ -40,7 +39,7 @@ def test_document_empty_edit():
 
 def test_document_end_of_file_edit():
     old = ["print 'a'\n", "print 'b'\n"]
-    doc = Document("file:///uri", "".join(old))
+    doc = TextDocument("file:///uri", "".join(old))
 
     change = types.TextDocumentContentChangeEvent_Type1(
         range=types.Range(
@@ -61,7 +60,7 @@ def test_document_end_of_file_edit():
 
 def test_document_full_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = Document(
+    doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
     )
     change = types.TextDocumentContentChangeEvent_Type1(
@@ -76,7 +75,7 @@ def test_document_full_edit():
 
     assert doc.lines == ["print a, b"]
 
-    doc = Document(
+    doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
     )
     change = types.TextDocumentContentChangeEvent_Type1(
@@ -92,7 +91,7 @@ def test_document_full_edit():
 
 
 def test_document_line_edit():
-    doc = Document("file:///uri", "itshelloworld")
+    doc = TextDocument("file:///uri", "itshelloworld")
     change = types.TextDocumentContentChangeEvent_Type1(
         range=types.Range(
             start=types.Position(line=0, character=3),
@@ -106,14 +105,14 @@ def test_document_line_edit():
 
 
 def test_document_lines():
-    doc = Document(DOC_URI, DOC)
+    doc = TextDocument(DOC_URI, DOC)
     assert len(doc.lines) == 4
     assert doc.lines[0] == "document\n"
 
 
 def test_document_multiline_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = Document(
+    doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
     change = types.TextDocumentContentChangeEvent_Type1(
@@ -128,7 +127,7 @@ def test_document_multiline_edit():
 
     assert doc.lines == ["def hello(a, b):\n", "    print a, b\n"]
 
-    doc = Document(
+    doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
     change = types.TextDocumentContentChangeEvent_Type1(
@@ -145,7 +144,7 @@ def test_document_multiline_edit():
 
 def test_document_no_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = Document(
+    doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.None_
     )
     change = types.TextDocumentContentChangeEvent_Type1(
@@ -162,15 +161,15 @@ def test_document_no_edit():
 
 
 def test_document_props():
-    doc = Document(DOC_URI, DOC)
+    doc = TextDocument(DOC_URI, DOC)
 
     assert doc.uri == DOC_URI
     assert doc.source == DOC
 
 
 def test_document_source_unicode():
-    document_mem = Document(DOC_URI, "my source")
-    document_disk = Document(DOC_URI)
+    document_mem = TextDocument(DOC_URI, "my source")
+    document_disk = TextDocument(DOC_URI)
     assert isinstance(document_mem.source, type(document_disk.source))
 
 
@@ -206,33 +205,33 @@ def test_position_from_utf8():
 
 def test_position_to_utf16():
     position = Position(encoding=types.PositionEncodingKind.Utf16)
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
     ) == types.Position(line=0, character=3)
 
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=4)
     ) == types.Position(line=0, character=5)
 
 
 def test_position_to_utf32():
     position = Position(encoding=types.PositionEncodingKind.Utf32)
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
     ) == types.Position(line=0, character=3)
 
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=4)
     ) == types.Position(line=0, character=4)
 
 
 def test_position_to_utf8():
     position = Position(encoding=types.PositionEncodingKind.Utf8)
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
     ) == types.Position(line=0, character=3)
 
-    assert position.position_to_client_unit(
+    assert position.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=4)
     ) == types.Position(line=0, character=6)
 
@@ -288,7 +287,7 @@ def test_range_to_utf16():
 
 
 def test_offset_at_position_utf16():
-    doc = Document(DOC_URI, DOC)
+    doc = TextDocument(DOC_URI, DOC)
     assert doc.offset_at_position(types.Position(line=0, character=8)) == 8
     assert doc.offset_at_position(types.Position(line=1, character=5)) == 12
     assert doc.offset_at_position(types.Position(line=2, character=0)) == 13
@@ -301,13 +300,13 @@ def test_offset_at_position_utf16():
 
 
 def test_offset_at_position_utf32():
-    doc = Document(DOC_URI, DOC, position_encoding=types.PositionEncodingKind.Utf32)
+    doc = TextDocument(DOC_URI, DOC, position_encoding=types.PositionEncodingKind.Utf32)
     assert doc.offset_at_position(types.Position(line=0, character=8)) == 8
     assert doc.offset_at_position(types.Position(line=5, character=0)) == 39
 
 
 def test_offset_at_position_utf8():
-    doc = Document(DOC_URI, DOC, position_encoding=types.PositionEncodingKind.Utf8)
+    doc = TextDocument(DOC_URI, DOC, position_encoding=types.PositionEncodingKind.Utf8)
     assert doc.offset_at_position(types.Position(line=0, character=8)) == 8
     assert doc.offset_at_position(types.Position(line=5, character=0)) == 41
 
@@ -359,7 +358,7 @@ def test_word_at_position():
     """
     Return word under the cursor (or last in line if past the end)
     """
-    doc = Document(DOC_URI, DOC)
+    doc = TextDocument(DOC_URI, DOC)
 
     assert doc.word_at_position(types.Position(line=0, character=8)) == "document"
     assert doc.word_at_position(types.Position(line=0, character=1000)) == "document"
