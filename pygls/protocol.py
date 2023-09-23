@@ -123,7 +123,7 @@ from lsprotocol.types import (
     WorkDoneProgressCancelParams,
 )
 from pygls.uris import from_fs_path
-from pygls.workspace.workspace import Workspace
+from pygls.workspace import Workspace
 
 logger = logging.getLogger(__name__)
 

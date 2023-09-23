@@ -25,7 +25,7 @@ from lsprotocol import types
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
-from pygls.workspace.workspace import Workspace
+from pygls.workspace import Workspace
 
 from .ls_setup import (
     NativeClientServer,

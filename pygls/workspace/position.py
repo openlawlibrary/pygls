@@ -135,7 +135,7 @@ class Position:
         position = types.Position(line=position.line, character=utf32_index)
         return position
 
-    def position_to_client_unit(
+    def position_to_client_units(
         self, lines: List[str], position: types.Position
     ) -> types.Position:
         """
@@ -199,6 +199,6 @@ class Position:
             The range with `character` offsets being converted to UTF-[32|16|8] code units.
         """
         return types.Range(
-            start=self.position_to_client_unit(lines, range.start),
-            end=self.position_to_client_unit(lines, range.end),
+            start=self.position_to_client_units(lines, range.start),
+            end=self.position_to_client_units(lines, range.end),
         )
