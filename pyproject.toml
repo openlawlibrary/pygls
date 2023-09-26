@@ -31,6 +31,7 @@ mypy = "^1.4.1"
 black = "22.8"
 
 [tool.poetry.group.test.dependencies]
+coverage = { version = "^7.2.1", extras = ["toml"] }
 pytest = "7.1.2"
 pytest-asyncio = "^0.21.0"
 
@@ -47,7 +48,6 @@ selenium = "^4.10.0"
 asyncio_mode = "auto"
 
 [tool.poe.tasks]
-test = "pytest"
 test-pyodide = "python tests/pyodide_testrunner/run.py"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
@@ -64,6 +64,18 @@ generate_client = "python scripts/generate_client.py --output pygls/lsp/client.p
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
 
+[tool.poe.tasks.test]
+env = { COVERAGE_PROCESS_START = "pyproject.toml" }
+sequence = [
+     { cmd = "python -c 'import pathlib,sys; pathlib.Path(f\"{sys.path[-1]}/cov.pth\").write_text(\"import coverage; coverage.process_startup()\");'"},
+     { cmd = "coverage erase" },
+     { cmd = "coverage run -m pytest" },
+     { cmd = "coverage combine" },
+     { cmd = "coverage report" },
+]
+ignore_fail = "return_non_zero"
+
+
 [tool.pyright]
 strict = ["pygls"]
 
@@ -75,6 +87,15 @@ line-length = 120
 [tool.black]
 line-length = 88
 extend-exclude = "pygls/lsp/client.py"
+
+[tool.coverage.run]
+parallel = true
+source_pkgs = ["pygls"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+sort = "Cover"
 
 [tool.mypy]
 check_untyped_defs = true
