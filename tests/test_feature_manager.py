@@ -610,7 +610,50 @@ def server_capabilities(**kwargs):
                     resolve_provider=False,
                 ),
             ),
-        )
+        ),
+        (
+            lsp.TEXT_DOCUMENT_DIAGNOSTIC,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                diagnostic_provider=lsp.DiagnosticOptions(
+                    inter_file_dependencies=False,
+                    workspace_diagnostics=False,
+                ),
+            ),
+        ),
+        (
+            lsp.TEXT_DOCUMENT_DIAGNOSTIC,
+            lsp.DiagnosticOptions(
+                workspace_diagnostics=True,
+                inter_file_dependencies=True,
+            ),
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                diagnostic_provider=lsp.DiagnosticOptions(
+                    inter_file_dependencies=True,
+                    workspace_diagnostics=False,
+                ),
+            ),
+        ),
+        (
+            lsp.TEXT_DOCUMENT_ON_TYPE_FORMATTING,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                document_on_type_formatting_provider=None,
+            ),
+        ),
+        (
+            lsp.TEXT_DOCUMENT_ON_TYPE_FORMATTING,
+            lsp.DocumentOnTypeFormattingOptions(first_trigger_character=":"),
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                document_on_type_formatting_provider=lsp.DocumentOnTypeFormattingOptions(
+                    first_trigger_character=":",
+                ),
+            ),
+        ),
     ],
 )
 def test_register_feature(
@@ -658,9 +701,7 @@ def test_register_feature(
     assert expected == actual
 
 
-def test_register_inlay_hint_resolve(
-    feature_manager: FeatureManager,
-):
+def test_register_inlay_hint_resolve(feature_manager: FeatureManager):
     @feature_manager.feature(lsp.TEXT_DOCUMENT_INLAY_HINT)
     def _():
         pass
@@ -685,14 +726,10 @@ def test_register_inlay_hint_resolve(
     assert expected == actual
 
 
-def test_register_workspace_symbol_resolve(
-    feature_manager: FeatureManager,
-):
-
+def test_register_workspace_symbol_resolve(feature_manager: FeatureManager):
     @feature_manager.feature(lsp.WORKSPACE_SYMBOL)
     def _():
         pass
-
 
     @feature_manager.feature(lsp.WORKSPACE_SYMBOL_RESOLVE)
     def _():
@@ -700,6 +737,42 @@ def test_register_workspace_symbol_resolve(
 
     expected = server_capabilities(
         workspace_symbol_provider=lsp.WorkspaceSymbolOptions(resolve_provider=True),
+    )
+
+    actual = ServerCapabilitiesBuilder(
+        lsp.ClientCapabilities(),
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+        None,
+    ).build()
+
+    assert expected == actual
+
+
+def test_register_workspace_diagnostics(feature_manager: FeatureManager):
+    @feature_manager.feature(
+        lsp.TEXT_DOCUMENT_DIAGNOSTIC,
+        lsp.DiagnosticOptions(
+            identifier="example",
+            inter_file_dependencies=False,
+            workspace_diagnostics=False,
+        ),
+    )
+    def _():
+        pass
+
+    @feature_manager.feature(lsp.WORKSPACE_DIAGNOSTIC)
+    def _():
+        pass
+
+    expected = server_capabilities(
+        diagnostic_provider=lsp.DiagnosticOptions(
+            identifier="example",
+            inter_file_dependencies=False,
+            workspace_diagnostics=True,
+        ),
     )
 
     actual = ServerCapabilitiesBuilder(
