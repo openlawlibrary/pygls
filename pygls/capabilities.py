@@ -233,7 +233,9 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_document_on_type_formatting(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_ON_TYPE_FORMATTING, default=True)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_ON_TYPE_FORMATTING, default=None
+        )
         if value is not None:
             self.server_cap.document_on_type_formatting_provider = value
         return self
@@ -372,9 +374,14 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_diagnostic_provider(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DIAGNOSTIC, default=True)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_DIAGNOSTIC,
+            default=types.DiagnosticOptions(
+                inter_file_dependencies=False, workspace_diagnostics=False
+            ),
+        )
         if value is not None:
-            value.workspace_diagnostics = self._provider_options(types.WORKSPACE_DIAGNOSTICS, default=True)
+            value.workspace_diagnostics = types.WORKSPACE_DIAGNOSTIC in self.features
             self.server_cap.diagnostic_provider = value
         return self
 
