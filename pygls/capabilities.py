@@ -15,13 +15,14 @@
 # limitations under the License.                                           #
 ############################################################################
 from functools import reduce
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union, TypeVar
 import logging
 
 from lsprotocol import types
 
 
 logger = logging.getLogger(__name__)
+T = TypeVar("T")
 
 
 def get_capability(
@@ -63,7 +64,7 @@ class ServerCapabilitiesBuilder:
 
         self.server_cap = types.ServerCapabilities()
 
-    def _provider_options(self, feature, default=True):
+    def _provider_options(self, feature: str, default: T) -> Optional[Union[T, Any]]:
         if feature in self.features:
             return self.feature_options.get(feature, default)
         return None
@@ -117,7 +118,7 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_hover(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_HOVER)
+        value = self._provider_options(types.TEXT_DOCUMENT_HOVER, default=True)
         if value is not None:
             self.server_cap.hover_provider = value
         return self
@@ -131,13 +132,13 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_declaration(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DECLARATION)
+        value = self._provider_options(types.TEXT_DOCUMENT_DECLARATION, default=True)
         if value is not None:
             self.server_cap.declaration_provider = value
         return self
 
     def _with_definition(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DEFINITION)
+        value = self._provider_options(types.TEXT_DOCUMENT_DEFINITION, default=True)
         if value is not None:
             self.server_cap.definition_provider = value
         return self
@@ -168,25 +169,29 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_references(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_REFERENCES)
+        value = self._provider_options(types.TEXT_DOCUMENT_REFERENCES, default=True)
         if value is not None:
             self.server_cap.references_provider = value
         return self
 
     def _with_document_highlight(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT, default=True
+        )
         if value is not None:
             self.server_cap.document_highlight_provider = value
         return self
 
     def _with_document_symbol(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DOCUMENT_SYMBOL)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_DOCUMENT_SYMBOL, default=True
+        )
         if value is not None:
             self.server_cap.document_symbol_provider = value
         return self
 
     def _with_code_action(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_CODE_ACTION)
+        value = self._provider_options(types.TEXT_DOCUMENT_CODE_ACTION, default=True)
         if value is not None:
             self.server_cap.code_action_provider = value
         return self
@@ -208,37 +213,39 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_color(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DOCUMENT_COLOR)
+        value = self._provider_options(types.TEXT_DOCUMENT_DOCUMENT_COLOR, default=True)
         if value is not None:
             self.server_cap.color_provider = value
         return self
 
     def _with_document_formatting(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_FORMATTING)
+        value = self._provider_options(types.TEXT_DOCUMENT_FORMATTING, default=True)
         if value is not None:
             self.server_cap.document_formatting_provider = value
         return self
 
     def _with_document_range_formatting(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_RANGE_FORMATTING)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_RANGE_FORMATTING, default=True
+        )
         if value is not None:
             self.server_cap.document_range_formatting_provider = value
         return self
 
     def _with_document_on_type_formatting(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_ON_TYPE_FORMATTING)
+        value = self._provider_options(types.TEXT_DOCUMENT_ON_TYPE_FORMATTING, default=True)
         if value is not None:
             self.server_cap.document_on_type_formatting_provider = value
         return self
 
     def _with_rename(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_RENAME)
+        value = self._provider_options(types.TEXT_DOCUMENT_RENAME, default=True)
         if value is not None:
             self.server_cap.rename_provider = value
         return self
 
     def _with_folding_range(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_FOLDING_RANGE)
+        value = self._provider_options(types.TEXT_DOCUMENT_FOLDING_RANGE, default=True)
         if value is not None:
             self.server_cap.folding_range_provider = value
         return self
@@ -250,19 +257,25 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_selection_range(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_SELECTION_RANGE)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_SELECTION_RANGE, default=True
+        )
         if value is not None:
             self.server_cap.selection_range_provider = value
         return self
 
     def _with_call_hierarchy(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY, default=True
+        )
         if value is not None:
             self.server_cap.call_hierarchy_provider = value
         return self
 
     def _with_type_hierarchy(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY, default=True
+        )
         if value is not None:
             self.server_cap.type_hierarchy_provider = value
         return self
@@ -274,9 +287,10 @@ class ServerCapabilitiesBuilder:
             types.TEXT_DOCUMENT_SEMANTIC_TOKENS_RANGE,
         ]
 
+        value = None
         for provider in providers:
-            value = self._provider_options(provider, None)
-            if value:
+            value = self._provider_options(provider, default=None)
+            if value is not None:
                 break
 
         if value is None:
@@ -305,13 +319,15 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_linked_editing_range(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_LINKED_EDITING_RANGE)
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_LINKED_EDITING_RANGE, default=True
+        )
         if value is not None:
             self.server_cap.linked_editing_range_provider = value
         return self
 
     def _with_moniker(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_MONIKER)
+        value = self._provider_options(types.TEXT_DOCUMENT_MONIKER, default=True)
         if value is not None:
             self.server_cap.moniker_provider = value
         return self
@@ -343,7 +359,7 @@ class ServerCapabilitiesBuilder:
             )
 
             if client_supports_method:
-                value = self._provider_options(method_name, None)
+                value = self._provider_options(method_name, default=None)
                 setattr(file_operations, capability_name, value)
 
         self.server_cap.workspace = types.ServerCapabilitiesWorkspaceType(
@@ -356,14 +372,14 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_diagnostic_provider(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_DIAGNOSTIC)
+        value = self._provider_options(types.TEXT_DOCUMENT_DIAGNOSTIC, default=True)
         if value is not None:
-            value.workspace_diagnostics = self._provider_options(types.WORKSPACE_DIAGNOSTIC)
+            value.workspace_diagnostics = self._provider_options(types.WORKSPACE_DIAGNOSTICS, default=True)
             self.server_cap.diagnostic_provider = value
         return self
 
     def _with_inline_value_provider(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_INLINE_VALUE)
+        value = self._provider_options(types.TEXT_DOCUMENT_INLINE_VALUE, default=True)
         if value is not None:
             self.server_cap.inline_value_provider = value
         return self
