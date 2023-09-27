@@ -317,9 +317,11 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_workspace_symbol(self):
-        value = self._provider_options(types.WORKSPACE_SYMBOL)
+        value = self._provider_options(
+            types.WORKSPACE_SYMBOL, default=types.WorkspaceSymbolOptions()
+        )
         if value is not None:
-            value.resolve_provider = self._provider_options(types.WORKSPACE_SYMBOL_RESOLVE)
+            value.resolve_provider = types.WORKSPACE_SYMBOL_RESOLVE in self.features
             self.server_cap.workspace_symbol_provider = value
         return self
 

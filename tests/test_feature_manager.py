@@ -601,6 +601,16 @@ def server_capabilities(**kwargs):
                 )
             ),
         ),
+        (
+            lsp.WORKSPACE_SYMBOL,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                workspace_symbol_provider=lsp.WorkspaceSymbolOptions(
+                    resolve_provider=False,
+                ),
+            ),
+        )
     ],
 )
 def test_register_feature(
@@ -661,6 +671,35 @@ def test_register_inlay_hint_resolve(
 
     expected = server_capabilities(
         inlay_hint_provider=lsp.InlayHintOptions(resolve_provider=True),
+    )
+
+    actual = ServerCapabilitiesBuilder(
+        lsp.ClientCapabilities(),
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+        None,
+    ).build()
+
+    assert expected == actual
+
+
+def test_register_workspace_symbol_resolve(
+    feature_manager: FeatureManager,
+):
+
+    @feature_manager.feature(lsp.WORKSPACE_SYMBOL)
+    def _():
+        pass
+
+
+    @feature_manager.feature(lsp.WORKSPACE_SYMBOL_RESOLVE)
+    def _():
+        pass
+
+    expected = server_capabilities(
+        workspace_symbol_provider=lsp.WorkspaceSymbolOptions(resolve_provider=True),
     )
 
     actual = ServerCapabilitiesBuilder(
