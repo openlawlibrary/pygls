@@ -25,7 +25,7 @@ from lsprotocol import types
 log = logging.getLogger(__name__)
 
 
-class Position:
+class PositionCodec:
     def __init__(
         self,
         encoding: Optional[
@@ -121,7 +121,9 @@ class Position:
                 break
 
             _current_char = _line[utf32_index]
-            _is_double_width = Position.is_char_beyond_multilingual_plane(_current_char)
+            _is_double_width = PositionCodec.is_char_beyond_multilingual_plane(
+                _current_char
+            )
             if _is_double_width:
                 if self.encoding == types.PositionEncodingKind.Utf32:
                     _client_index += 1
