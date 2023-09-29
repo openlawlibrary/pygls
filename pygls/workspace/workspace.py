@@ -30,6 +30,7 @@ from lsprotocol.types import (
 )
 from pygls.uris import to_fs_path, uri_scheme
 from pygls.workspace.text_document import TextDocument
+from pygls.workspace.position_codec import PositionCodec
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,19 @@ class Workspace(object):
         self._folders: Dict[str, WorkspaceFolder] = {}
         self._docs: Dict[str, TextDocument] = {}
         self._position_encoding = position_encoding
+        self._position_codec = PositionCodec(encoding=position_encoding)
 
         if workspace_folders is not None:
             for folder in workspace_folders:
                 self.add_folder(folder)
+
+    @property
+    def position_encoding(self) -> Optional[Union[PositionEncodingKind, str]]:
+        return self._position_encoding
+
+    @property
+    def position_codec(self) -> PositionCodec:
+        return self._position_codec
 
     def _create_text_document(
         self,
@@ -78,7 +88,7 @@ class Workspace(object):
             version=version,
             language_id=language_id,
             sync_kind=self._sync_kind,
-            position_encoding=self._position_encoding,
+            position_codec=self._position_codec,
         )
 
     def add_folder(self, folder: WorkspaceFolder):

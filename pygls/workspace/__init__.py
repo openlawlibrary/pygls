@@ -5,11 +5,11 @@ from lsprotocol import types
 
 from .workspace import Workspace
 from .text_document import TextDocument
-from .position import Position
+from .position_codec import PositionCodec
 
 Workspace = Workspace
 TextDocument = TextDocument
-Position = Position
+PositionCodec = PositionCodec
 
 # For backwards compatibility
 Document = TextDocument
@@ -17,65 +17,71 @@ Document = TextDocument
 
 def utf16_unit_offset(chars: str):
     warnings.warn(
-        "'utf16_unit_offset' has been deprecated, use "
-        "'Position.utf16_unit_offset' instead",
+        "'utf16_unit_offset' has been deprecated, instead use "
+        "'PositionCodec.utf16_unit_offset' via 'workspace.position_codec' "
+        "or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.utf16_unit_offset(chars)
+    _codec = PositionCodec()
+    return _codec.utf16_unit_offset(chars)
 
 
 def utf16_num_units(chars: str):
     warnings.warn(
-        "'utf16_num_units' has been deprecated, use "
-        "'Position.client_num_units' instead",
+        "'utf16_num_units' has been deprecated, instead use "
+        "'PositionCodec.client_num_units' via 'workspace.position_codec' "
+        "or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.client_num_units(chars)
+    _codec = PositionCodec()
+    return _codec.client_num_units(chars)
 
 
 def position_from_utf16(lines: List[str], position: types.Position):
     warnings.warn(
-        "'position_from_utf16' has been deprecated, use "
-        "'Position.position_from_client_units' instead",
+        "'position_from_utf16' has been deprecated, instead use "
+        "'PositionCodec.position_from_client_units' via "
+        "'workspace.position_codec' or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.position_from_client_units(lines, position)
+    _codec = PositionCodec()
+    return _codec.position_from_client_units(lines, position)
 
 
 def position_to_utf16(lines: List[str], position: types.Position):
     warnings.warn(
-        "'position_to_utf16' has been deprecated, use "
-        "'Position.position_to_client_units' instead",
+        "'position_to_utf16' has been deprecated, instead use "
+        "'PositionCodec.position_to_client_units' via "
+        "'workspace.position_codec' or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.position_to_client_units(lines, position)
+    _codec = PositionCodec()
+    return _codec.position_to_client_units(lines, position)
 
 
 def range_from_utf16(lines: List[str], range: types.Range):
     warnings.warn(
-        "'range_from_utf16' has been deprecated, use "
-        "'Position.range_from_client_units' instead",
+        "'range_from_utf16' has been deprecated, instead use "
+        "'PositionCodec.range_from_client_units' via "
+        "'workspace.position_codec' or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.range_from_client_units(lines, range)
+    _codec = PositionCodec()
+    return _codec.range_from_client_units(lines, range)
 
 
 def range_to_utf16(lines: List[str], range: types.Range):
     warnings.warn(
-        "'range_to_utf16' has been deprecated, use "
-        "'Position.range_to_client_units' instead",
+        "'range_to_utf16' has been deprecated, instead use "
+        "'PositionCodec.range_to_client_units' via 'workspace.position_codec' "
+        "or 'text_document.position_codec'",
         DeprecationWarning,
         stacklevel=2,
     )
-    _position = Position()
-    return _position.range_to_client_units(lines, range)
+    _codec = PositionCodec()
+    return _codec.range_to_client_units(lines, range)

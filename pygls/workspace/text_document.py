@@ -20,12 +20,12 @@ import io
 import logging
 import os
 import re
-from typing import List, Optional, Pattern, Union
+from typing import List, Optional, Pattern
 
 from lsprotocol import types
 
 from pygls.uris import to_fs_path
-from .position import Position
+from .position_codec import PositionCodec
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
@@ -43,9 +43,7 @@ class TextDocument(object):
         language_id: Optional[str] = None,
         local: bool = True,
         sync_kind: types.TextDocumentSyncKind = types.TextDocumentSyncKind.Incremental,
-        position_encoding: Optional[
-            Union[types.PositionEncodingKind, str]
-        ] = types.PositionEncodingKind.Utf16,
+        position_codec: Optional[PositionCodec] = None,
     ):
         self.uri = uri
         self.version = version
@@ -65,10 +63,14 @@ class TextDocument(object):
         )
         self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
 
-        self.position = Position(encoding=position_encoding)
+        self._position_codec = position_codec if position_codec else PositionCodec()
 
     def __str__(self):
         return str(self.uri)
+
+    @property
+    def position_codec(self) -> PositionCodec:
+        return self._position_codec
 
     def _apply_incremental_change(
         self, change: types.TextDocumentContentChangeEvent_Type1
@@ -78,7 +80,7 @@ class TextDocument(object):
         text = change.text
         change_range = change.range
 
-        range = self.position.range_from_client_units(lines, change_range)
+        range = self._position_codec.range_from_client_units(lines, change_range)
         start_line = range.start.line
         start_col = range.start.character
         end_line = range.end.line
@@ -165,11 +167,13 @@ class TextDocument(object):
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
         lines = self.lines
-        server_position = self.position.position_from_client_units(
+        server_position = self._position_codec.position_from_client_units(
             lines, client_position
         )
         row, col = server_position.line, server_position.character
-        return col + sum(self.position.client_num_units(line) for line in lines[:row])
+        return col + sum(
+            self._position_codec.client_num_units(line) for line in lines[:row]
+        )
 
     @property
     def source(self) -> str:
@@ -217,7 +221,7 @@ class TextDocument(object):
         if client_position.line >= len(lines):
             return ""
 
-        server_position = self.position.position_from_client_units(
+        server_position = self._position_codec.position_from_client_units(
             lines, client_position
         )
         row, col = server_position.line, server_position.character
