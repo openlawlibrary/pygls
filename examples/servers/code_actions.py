@@ -29,7 +29,7 @@ from lsprotocol.types import (
 )
 
 
-ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=\s*$")
+ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
 server = LanguageServer("code-action-server", "v0.1")
 
 
