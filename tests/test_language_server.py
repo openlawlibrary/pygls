@@ -82,9 +82,9 @@ def test_bf_text_document_did_open(client_server):
 
     sleep(1)
 
-    assert len(server.lsp.workspace.documents) == 1
+    assert len(server.lsp.workspace.text_documents) == 1
 
-    document = server.workspace.get_document(__file__)
+    document = server.workspace.get_text_document(__file__)
     assert document.uri == __file__
     assert document.version == 1
     assert document.source == "test"
