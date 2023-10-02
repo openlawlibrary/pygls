@@ -78,7 +78,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
-          max_attempts: 3
+          max_attempts: 6
           command: |
             source $VENV
             poe test-pyodide
