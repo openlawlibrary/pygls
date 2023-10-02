@@ -26,7 +26,7 @@ jobs:
           args: --verbose --latest
       - name: Update the changelog
         run: |
-          cat "${{ steps.git-cliff.outputs.contents }} | "sed -i "3r /dev/stdin" CHANGELOG.md
+          echo "${{ steps.git-cliff.outputs.contents }}" | sed -i "3r /dev/stdin" CHANGELOG.md
           git config --global user.name 'Github Action'
           git config --global user.email 'github.action@users.noreply.github.com'
           git commit -am "chore: update changelog"
