@@ -8,7 +8,7 @@ body = """
 {% else %}\
     ## [unreleased]
 {% endif %}\
-More details: https://github.com/openlawlibrary/pygls/releases/tag/v{{version}}
+More details: https://github.com/openlawlibrary/pygls/releases/tag/{{version}}
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}

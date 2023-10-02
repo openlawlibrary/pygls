@@ -12,6 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ssh-key: ${{secrets.CI_RELEASE_DEPLOY_KEY}}
           fetch-depth: 0
       - name: Use Python "3.10"
         uses: actions/setup-python@v4
@@ -23,19 +24,27 @@ jobs:
         uses: orhun/git-cliff-action@v2
         id: git-cliff
         with:
+          config: cliff.toml
           args: --verbose --latest
+        env:
+          OUTPUT: git-cliff-changes.tmp.md
       - name: Update the changelog
         run: |
-          echo "${{ steps.git-cliff.outputs.contents }}" | sed -i "3r /dev/stdin" CHANGELOG.md
+          git checkout main
+          cat git-cliff-changes.tmp.md | sed -i "3r /dev/stdin" CHANGELOG.md
           git config --global user.name 'Github Action'
           git config --global user.email 'github.action@users.noreply.github.com'
-          git commit -am "chore: update changelog"
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md"
           git push
       - name: Update CONTRIBUTORS.md
         run: |
+          git checkout main
+          poetry install
           poetry run poe generate_contributors_md
           if [[ $(git diff --stat CONTRIBUTORS.md) != '' ]]; then
-            git commit -am "chore: update CONTRIBUTORS.md"
+            git add CONTRIBUTORS.md
+            git commit -m "chore: update CONTRIBUTORS.md"
             git push
           fi
       - name: Release
