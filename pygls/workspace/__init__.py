@@ -7,10 +7,6 @@ from .workspace import Workspace
 from .text_document import TextDocument
 from .position_codec import PositionCodec
 
-Workspace = Workspace
-TextDocument = TextDocument
-PositionCodec = PositionCodec
-
 # For backwards compatibility
 Document = TextDocument
 
@@ -85,3 +81,17 @@ def range_to_utf16(lines: List[str], range: types.Range):
     )
     _codec = PositionCodec()
     return _codec.range_to_client_units(lines, range)
+
+
+__all__ = (
+    "Workspace",
+    "TextDocument",
+    "PositionCodec",
+    "Document",
+    "utf16_unit_offset",
+    "utf16_num_units",
+    "position_from_utf16",
+    "position_to_utf16",
+    "range_from_utf16",
+    "range_to_utf16",
+)
