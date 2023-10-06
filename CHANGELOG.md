@@ -1,6 +1,27 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2023-10-06
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.1.1
+
+### Bug Fixes
+
+- Prevent AttributeError root_path when no workspace
+
+### CI
+
+- Fix release process
+
+### Miscellaneous Tasks
+
+- Manual changes for v1.1.0 release
+- Explicit exports from pygls.workspace
+
+### Build
+
+- Bump urllib3 from 2.0.5 to 2.0.6
+- V1.1.1
+
 ## [1.1.0] - 2023-10-02
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.1.0
 
