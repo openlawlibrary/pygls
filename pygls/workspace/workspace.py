@@ -52,6 +52,8 @@ class Workspace(object):
             if root_path is None:
                 raise Exception("Couldn't get `root_path` from `root_uri`")
             self._root_path = root_path
+        else:
+            self._root_path = None
         self._sync_kind = sync_kind
         self._text_documents: Dict[str, TextDocument] = {}
         self._notebook_documents: Dict[str, types.NotebookDocument] = {}

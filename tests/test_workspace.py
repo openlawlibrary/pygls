@@ -433,3 +433,10 @@ def test_workspace_folders():
 
     assert workspace.folders["/ws/f1"] is wf1
     assert workspace.folders["/ws/f2"] is wf2
+
+
+def test_null_workspace():
+    workspace = Workspace(None)
+
+    assert workspace.root_uri is None
+    assert workspace.root_path is None
