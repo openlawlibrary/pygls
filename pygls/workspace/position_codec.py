@@ -49,10 +49,10 @@ class PositionCodec:
 
     def client_num_units(self, chars: str):
         """
-        Calculate the length of `str` in utf-16 code units.
+        Calculate the length of `str` in client-supported UTF-[32|16|8] code units.
 
         Arguments:
-            chars (str): The string to return the length in utf-16 code units for.
+            chars (str): The string to return the length in UTF-[32|16|8] code units for.
         """
         utf32_units = len(chars)
         if self.encoding == types.PositionEncodingKind.Utf32:
