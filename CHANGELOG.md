@@ -1,6 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2023-10-28
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.1.2
+
+### Documentation
+
+- Correct doc comment for PositionCodec.client_num_units
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Split protocol.py into own folder/files
+
+### Build
+
+- Bump urllib3 from 2.0.6 to 2.0.7
+- Allow installation with typeguard 4.x
+- V1.1.2
+
 ## [1.1.1] - 2023-10-06
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.1.1
 
