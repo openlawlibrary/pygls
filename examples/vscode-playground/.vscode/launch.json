@@ -9,16 +9,15 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "--folder-uri=${workspaceRoot}/../workspace",
                 "--folder-uri=${workspaceRoot}/../servers",
             ],
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
             ],
-            // "preLaunchTask": {
-            //     "type": "npm",
-            //     "script": "compile"
-            // },
+            "preLaunchTask": {
+                "type": "npm",
+                "script": "watch"
+            },
         },
     ],
 }

@@ -145,17 +145,18 @@ async function startLangServer() {
         await stopLangServer()
     }
 
-    const pythonPath = await getPythonPath()
-    if (!pythonPath) {
-        clientStarting = false
-        return
-    }
-
     const cwd = getCwd()
     const serverPath = getServerPath()
 
     logger.info(`cwd: '${cwd}'`)
     logger.info(`server: '${serverPath}'`)
+
+    const resource = vscode.Uri.joinPath(vscode.Uri.file(cwd), serverPath)
+    const pythonPath = await getPythonPath(resource)
+    if (!pythonPath) {
+        clientStarting = false
+        return
+    }
 
     const serverOptions: ServerOptions = {
         command: pythonPath,
@@ -283,14 +284,25 @@ function getServerPath(): string {
  *
  * @returns The python interpreter to use to launch the server
  */
-async function getPythonPath(): Promise<string | undefined> {
+async function getPythonPath(resource?: vscode.Uri): Promise<string | undefined> {
+
+    const config = vscode.workspace.getConfiguration("pygls.server", resource)
+    const pythonPath = config.get<string>('pythonPath')
+    if (pythonPath) {
+        logger.info(`Using user configured python environment: '${pythonPath}'`)
+        return pythonPath
+    }
+
     if (!python) {
         return
     }
 
+    if (resource) {
+        logger.info(`Looking for environment in which to execute: '${resource.toString()}'`)
+    }
     // Use whichever python interpreter the user has configured.
-    const activeEnvPath = python.environments.getActiveEnvironmentPath()
-    logger.info(`Using environment: ${activeEnvPath.id}: ${activeEnvPath.path}`)
+    const activeEnvPath = python.environments.getActiveEnvironmentPath(resource)
+    logger.info(`Found environment: ${activeEnvPath.id}: ${activeEnvPath.path}`)
 
     const activeEnv = await python.environments.resolveEnvironment(activeEnvPath)
     if (!activeEnv) {
