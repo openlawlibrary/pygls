@@ -49,19 +49,26 @@
         "title": "Server Configuration",
         "properties": {
           "pygls.server.cwd": {
-            "scope": "window",
+            "scope": "resource",
             "type": "string",
             "description": "The working directory from which to launch the server.",
             "markdownDescription": "The working directory from which to launch the server.\nIf blank, this will default to the `examples/servers` directory."
           },
           "pygls.server.launchScript": {
-            "scope": "window",
+            "scope": "resource",
             "type": "string",
             "default": "json_server.py",
-            "description": "The python script to run when launching the server."
+            "description": "The python script to run when launching the server.",
+            "markdownDescription": "The python script to run when launching the server.\n Relative to #pygls.server.cwd#"
+          },
+          "pygls.server.pythonPath": {
+            "scope": "resource",
+            "type": "string",
+            "default": "",
+            "description": "The python interpreter to use to run the server.\nBy default, this extension will attempt to use the Python interpreter configured via the Python extension, setting this setting will override this behavior."
           },
           "pygls.trace.server": {
-            "scope": "window",
+            "scope": "resource",
             "type": "string",
             "default": "off",
             "enum": [
