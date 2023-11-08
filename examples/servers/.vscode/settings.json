@@ -1,0 +1,18 @@
+{
+    // Uncomment to override Python interpreter used.
+    // "pygls.server.pythonPath": "/path/to/python",
+    "pygls.server.launchScript": "json_server.py",
+    "pygls.trace.server": "off",
+    "pygls.client.documentSelector": [
+        {
+            "scheme": "file",
+            "language": "json"
+        }
+        // Uncomment to use code_actions or inlay_hints servers
+        // {
+        //     "scheme": "file",
+        //     "language": "plaintext"
+        // }
+    ],
+    // "pygls.jsonServer.exampleConfiguration": "some value here",
+}

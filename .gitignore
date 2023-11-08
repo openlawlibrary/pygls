@@ -1,4 +1,3 @@
-.vscode/settings.json
 .idea
 .dir-locals.el
 
@@ -117,3 +116,4 @@ venv.bak/
 
 # VS Code settings
 .vscode/
+!examples/servers/.vscode

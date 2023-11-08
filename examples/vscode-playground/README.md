@@ -53,14 +53,11 @@ Open terminal in the same directory as this file and execute following commands:
 
 1. Select `Launch Client` and press `F5`, this will open a second VSCode window with the `vscode-playground` extension enabled.
 
-1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`. 
-   The `Python: Select Interpreter` command can be used to pick the correct one
+1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`.
+   The `Python: Select Interpreter` command can be used to pick the correct one.
 
-   If you see a window like the following
+   Alternatively, you can set the `pygls.server.pythonPath` option in the `.vscode/settings.json` file
 
-   ![Screenshot of the VSCode workspace folder selection dialog](https://user-images.githubusercontent.com/2675694/262779751-367c568e-37d7-490a-b83e-910da1596298.png)
-
-   be sure to select the one corresponding with the `pygls/examples/workspace` folder.
 
 #### Selecting the document language
 
