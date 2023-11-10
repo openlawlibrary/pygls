@@ -190,7 +190,9 @@ class FeatureManager:
 
             if options:
                 options_type = get_method_options_type(feature_name)
-                if options_type and not is_instance(self.converter, options, options_type):
+                if options_type and not is_instance(
+                    self.converter, options, options_type
+                ):
                     raise TypeError(
                         (
                             f'Options of method "{feature_name}"'
