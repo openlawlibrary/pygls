@@ -103,12 +103,13 @@ class FeatureManager:
                                     2. name: LanguageServer - add typings
     """
 
-    def __init__(self, server=None):
+    def __init__(self, server=None, converter=None):
         self._builtin_features = {}
         self._feature_options = {}
         self._features = {}
         self._commands = {}
         self.server = server
+        self.converter = converter
 
     def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
         """Registers builtin (predefined) feature."""
@@ -189,7 +190,7 @@ class FeatureManager:
 
             if options:
                 options_type = get_method_options_type(feature_name)
-                if options_type and not is_instance(options, options_type):
+                if options_type and not is_instance(self.converter, options, options_type):
                     raise TypeError(
                         (
                             f'Options of method "{feature_name}"'

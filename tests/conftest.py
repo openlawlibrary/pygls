@@ -21,7 +21,7 @@ import pathlib
 import sys
 
 import pytest
-from lsprotocol import types
+from lsprotocol import types, converters
 
 from pygls import uris, IS_PYODIDE, IS_WIN
 from pygls.feature_manager import FeatureManager
@@ -113,7 +113,7 @@ json_server_client = create_client_for_server("json_server.py")
 @pytest.fixture
 def feature_manager():
     """Return a feature manager"""
-    return FeatureManager()
+    return FeatureManager(None, converters.get_converter())
 
 
 @pytest.fixture

@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import cattrs
 from typing import Any, Callable, List, Optional, Union
 
 from lsprotocol.types import (
@@ -35,7 +36,6 @@ from lsprotocol.types import (
     SemanticTokensRegistrationOptions,
     ShowDocumentResult,
 )
-from typeguard import check_type
 
 from pygls.exceptions import MethodTypeNotRegisteredError
 
@@ -131,9 +131,10 @@ def get_method_return_type(method_name, lsp_methods_map=METHOD_TO_TYPES):
         raise MethodTypeNotRegisteredError(method_name)
 
 
-def is_instance(o, t):
+def is_instance(cv: cattrs.Converter, o, t):
     try:
-        check_type(o, t)
+        v = cv.unstructure(o, t)
+        cv.structure(v, t)
         return True
     except TypeError:
         return False
