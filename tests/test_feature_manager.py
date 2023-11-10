@@ -31,6 +31,7 @@ from pygls.feature_manager import (
 )
 from lsprotocol import types as lsp
 
+
 class Temp:
     pass
 
@@ -102,9 +103,7 @@ def test_register_feature_with_wrong_options(feature_manager):
 
     with pytest.raises(
         AttributeError,
-        match=(
-            "'Options' object has no attribute 'trigger_characters'"
-        ),  # noqa
+        match=("'Options' object has no attribute 'trigger_characters'"),  # noqa
     ):
 
         @feature_manager.feature(lsp.TEXT_DOCUMENT_COMPLETION, Options())
