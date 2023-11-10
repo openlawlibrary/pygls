@@ -30,9 +30,6 @@ from pygls.feature_manager import (
     wrap_with_server,
 )
 from lsprotocol import types as lsp
-from typeguard import TypeCheckError
-from typeguard._utils import qualified_name
-
 
 class Temp:
     pass
@@ -104,10 +101,9 @@ def test_register_feature_with_wrong_options(feature_manager):
         pass
 
     with pytest.raises(
-        TypeCheckError,
+        AttributeError,
         match=(
-            f"{qualified_name(Options)} is not an instance of "
-            "lsprotocol.types.CompletionOptions"
+            "'Options' object has no attribute 'trigger_characters'"
         ),  # noqa
     ):
 

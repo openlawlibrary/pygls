@@ -129,7 +129,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         self._request_futures: Dict[str, Future[Any]] = {}
         self._result_types: Dict[str, Any] = {}
 
-        self.fm = FeatureManager(server)
+        self.fm = FeatureManager(server, converter)
         self.transport: Optional[
             Union[asyncio.WriteTransport, WebSocketTransportAdapter]
         ] = None
