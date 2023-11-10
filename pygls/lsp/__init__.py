@@ -133,8 +133,7 @@ def get_method_return_type(method_name, lsp_methods_map=METHOD_TO_TYPES):
 
 def is_instance(cv: cattrs.Converter, o, t):
     try:
-        v = cv.unstructure(o, t)
-        cv.structure(v, t)
+        cv.unstructure(o, t)
         return True
     except TypeError:
         return False
