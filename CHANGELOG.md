@@ -27,6 +27,32 @@ More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.2.0
 
 - Move workspace/ into servers/ dir
 
+## [1.2.0] - 2023-11-18
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.2.0
+
+### Bug Fixes
+
+- Remove dependency on typeguard
+- Linting and formatting issues
+- Simplify option validation check
+- Index error on empty workspace
+
+### Features
+
+- Allow user to override Python interpreter
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Update `poetry.lock` after removing typeguard
+- Add example configuration
+- Pin lsprotocol to 2023.0.0
+
+### Refactor
+
+- Move workspace/ into servers/ dir
+
 ## [1.1.2] - 2023-10-28
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.1.2
 
