@@ -19,6 +19,7 @@
 import traceback
 from typing import Set
 from typing import Type
+from lsprotocol.types import ResponseError
 
 
 class JsonRpcException(Exception):
@@ -56,14 +57,8 @@ class JsonRpcException(Exception):
         # Defaults to UnknownErrorCode
         return getattr(cls, "CODE", -32001) == code
 
-    def to_dict(self):
-        exception_dict = {
-            "code": self.code,
-            "message": self.message,
-        }
-        if self.data is not None:
-            exception_dict["data"] = str(self.data)
-        return exception_dict
+    def to_response_error(self) -> ResponseError:
+        return ResponseError(code=self.code, message=self.message, data=self.data)
 
 
 class JsonRpcInternalError(JsonRpcException):
