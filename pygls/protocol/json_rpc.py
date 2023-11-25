@@ -46,6 +46,7 @@ from lsprotocol.types import (
     CANCEL_REQUEST,
     EXIT,
     WORKSPACE_EXECUTE_COMMAND,
+    ResponseError,
     ResponseErrorMessage,
 )
 
@@ -157,7 +158,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             try:
                 raise future.exception()
             except Exception:
-                error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
+                error = JsonRpcInternalError.of(sys.exc_info())
                 logger.exception('Exception occurred in notification: "%s"', error)
 
             # Revisit. Client does not support response with msg_id = None
@@ -196,20 +197,20 @@ class JsonRPCProtocol(asyncio.Protocol):
                     msg_id,
                     error=JsonRpcRequestCancelled(
                         f'Request with id "{msg_id}" is canceled'
-                    ),
+                    ).to_response_error(),
                 )
             self._request_futures.pop(msg_id, None)
         except Exception:
-            error = JsonRpcInternalError.of(sys.exc_info()).to_dict()
+            error = JsonRpcInternalError.of(sys.exc_info())
             logger.exception('Exception occurred for message "%s": %s', msg_id, error)
-            self._send_response(msg_id, error=error)
+            self._send_response(msg_id, error=error.to_response_error())
 
     def _execute_request_err_callback(self, msg_id, exc):
         """Error callback used for coroutine request message."""
         exc_info = (type(exc), exc, None)
-        error = JsonRpcInternalError.of(exc_info).to_dict()
+        error = JsonRpcInternalError.of(exc_info)
         logger.exception('Exception occurred for message "%s": %s', msg_id, error)
-        self._send_response(msg_id, error=error)
+        self._send_response(msg_id, error=error.to_response_error())
 
     def _get_handler(self, feature_name):
         """Returns builtin or used defined feature by name if exists."""
@@ -272,7 +273,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                 params,
                 exc_info=True,
             )
-            self._send_response(msg_id, None, error.to_dict())
+            self._send_response(msg_id, None, error.to_response_error())
             self._server._report_server_error(error, FeatureRequestError)
         except Exception as error:
             logger.exception(
@@ -282,7 +283,7 @@ class JsonRPCProtocol(asyncio.Protocol):
                 params,
                 exc_info=True,
             )
-            err = JsonRpcInternalError.of(sys.exc_info()).to_dict()
+            err = JsonRpcInternalError.of(sys.exc_info()).to_response_error()
             self._send_response(msg_id, None, err)
             self._server._report_server_error(error, FeatureRequestError)
 
@@ -401,7 +402,9 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.exception("Error sending data", exc_info=True)
             self._server._report_server_error(error, JsonRpcInternalError)
 
-    def _send_response(self, msg_id, result=None, error=None):
+    def _send_response(
+        self, msg_id, result=None, error: Union[ResponseError, None] = None
+    ):
         """Sends a JSON RPC response to the client.
 
         Args:
