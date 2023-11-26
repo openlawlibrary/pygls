@@ -53,10 +53,11 @@ There are also other Language Servers with "general" in their descriptons, or at
   * https://github.com/jose-elias-alvarez/null-ls.nvim (Neovim only)
 
 ## Tests
+All Pygls sub-tasks require the Poetry `poe` plugin: https://github.com/nat-n/poethepoet
 
 * `poetry install --all-extras`
-* `poetry run test`
-* `poetry run test-pyodide`
+* `poetry run poe test`
+* `poetry run poe test-pyodide`
 
 
 ## Contributing

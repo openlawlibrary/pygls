@@ -12,36 +12,42 @@ documentation = "https://pygls.readthedocs.io/en/latest"
 license = "Apache 2.0"
 readme = "README.md"
 
+# You may want to use the Poetry "Up" plugin to automatically update all dependencies to
+# their latest major versions. But bear in mind that this is a library, so the non-development
+# dependency versions will be forced on downstream users. Therefore the very latest versions
+# may be too restrictive.
+# See https://github.com/MousaZeidBaker/poetry-plugin-up
 [tool.poetry.dependencies]
-python = ">=3.8.18,<4"
+python = ">=3.8"
 lsprotocol = "2023.0.0"
-websockets = { version = "^11.0.3", optional = true }
+websockets = { version = ">=11.0.3", optional = true }
 
 [tool.poetry.extras]
 ws = ["websockets"]
 
 [tool.poetry.group.dev.dependencies]
 # Replaces (amongst many other things) flake8 and bandit
-ruff = "^0.0.275"
+ruff = ">=0.1.6"
 # TODO `poethepoet>=0.20` needs python 3.8
-poethepoet = "^0.19.0"
-mypy = "^1.4.1"
+poethepoet = ">=0.24.4"
+mypy = ">=1.7.1"
 # TODO `black>=23` needs python 3.8
-black = "22.8"
+black = ">=23.11.0"
 
 [tool.poetry.group.test.dependencies]
-coverage = { version = "^7.2.1", extras = ["toml"] }
-pytest = "7.1.2"
-pytest-asyncio = "^0.21.0"
+# Note: `coverage` requires that your Python was built with system `sqlite` development files
+coverage = { version = ">=7.3.2", extras = ["toml"] }
+pytest = ">=7.4.3"
+# TODO: tests freeze on v0.21.1
+pytest-asyncio = "0.21.0"
 
 [tool.poetry.group.docs.dependencies]
-# TODO `sphinx==7` needs python 3.8
-sphinx = "^5"
-# TODO `sphinx-rtd-theme==1.3.0` will support `sphinx==7`
-sphinx-rtd-theme = "^1.2.2"
+# TODO `sphinx>=7.26` needs python 3.9
+sphinx = ">=7.1.2"
+sphinx-rtd-theme = ">=1.3.0"
 
 [tool.poetry.group.pyodide.dependencies]
-selenium = "^4.10.0"
+selenium = "^4.15.2"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -55,6 +61,7 @@ check_commit_style = "npx commitlint --from origin/main --to HEAD --verbose --co
 generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
+poetry_lock_check = "poetry check"
 
 [tool.poe.tasks.test]
 env = { COVERAGE_PROCESS_START = "pyproject.toml" }
@@ -73,7 +80,8 @@ sequence = [
     "mypy",
     "check_generated_client",
     "check_commit_style",
-    "black_check"
+    "black_check",
+    "poetry_lock_check"
 ]
 ignore_fail = "return_non_zero"
 
