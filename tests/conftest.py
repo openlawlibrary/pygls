@@ -18,12 +18,11 @@
 ############################################################################
 import asyncio
 import pathlib
-import sys
 
 import pytest
 from lsprotocol import types, converters
 
-from pygls import uris, IS_PYODIDE, IS_WIN
+from pygls import uris, IS_PYODIDE
 from pygls.feature_manager import FeatureManager
 from pygls.workspace import Workspace
 
@@ -84,11 +83,7 @@ def event_loop():
     """Redefine `pytest-asyncio's default event_loop fixture to match the scope
     of our client fixture."""
 
-    # Only required for Python 3.7 on Windows.
-    if sys.version_info.minor == 7 and IS_WIN:
-        policy = asyncio.WindowsProactorEventLoopPolicy()
-    else:
-        policy = asyncio.get_event_loop_policy()
+    policy = asyncio.get_event_loop_policy()
 
     loop = policy.new_event_loop()
     yield loop
