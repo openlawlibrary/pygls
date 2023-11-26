@@ -208,7 +208,7 @@ Depending on the use case, handlers can be registered in three different ways:
 *Asynchronous* Functions (*Coroutines*)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*pygls* supports ``python 3.7+`` which has a keyword ``async`` to
+*pygls* supports ``python 3.8+`` which has a keyword ``async`` to
 specify coroutines.
 
 The code snippet below shows how to register a command as a coroutine:
