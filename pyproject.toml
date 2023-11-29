@@ -19,6 +19,7 @@ readme = "README.md"
 # See https://github.com/MousaZeidBaker/poetry-plugin-up
 [tool.poetry.dependencies]
 python = ">=3.8"
+cattrs = ">=23.1.2"
 lsprotocol = "2023.0.0"
 websockets = { version = ">=11.0.3", optional = true }
 
