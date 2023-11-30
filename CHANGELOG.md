@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2023-11-30
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.2.1
+
+### Bug Fixes
+
+- Handle ResponseErrors correctly
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Clean CHANGELOG
+
+### Build
+
+- V1.2.1
+
 ## [1.2.0] - 2023-11-18
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.2.0
 
