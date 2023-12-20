@@ -23,3 +23,10 @@
 | _zc.buildout Language Server_   | [Jérome Perrin](https://github.com/perrinjerome) | [zc.buildout.languageserver](https://github.com/perrinjerome/vscode-zc-buildout)   | Language Server for [zc.buildout](http://docs.buildout.org/en/latest/) profiles.  |
 
 ## _(alphabetic by name, maintainer)_
+
+# Tools Based on _pygls_
+
+| Name                     | Maintainer                                                            | Repository (optional)                                                      | Notes                                                                                                                         |
+|--------------------------|-----------------------------------------------------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| _lsp-devtools_ | [Alex Carney](https://github.com/alcarney) | [lsp-devtools](https://github.com/swyddfa/lsp-devtools) | An experiment in building web browser inspired developer tooling for language servers |
+| _pytest-lsp_ | [Alex Carney](https://github.com/alcarney) | [lsp-devtools](https://github.com/swyddfa/lsp-devtools) | pytest plugin for testing language servers |
