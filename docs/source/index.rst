@@ -38,7 +38,6 @@ User Guide
 .. toctree::
    :maxdepth: 2
 
-   pages/getting_started
    pages/tutorial
    pages/user-guide
    pages/testing
