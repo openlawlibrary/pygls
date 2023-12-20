@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    "sphinx_design",
 ]
 
 autodoc_member_order = "groupwise"
