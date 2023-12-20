@@ -73,12 +73,14 @@
             "default": "off",
             "enum": [
               "off",
+              "messages",
               "verbose"
             ],
             "description": "Controls if LSP messages send to/from the server should be logged.",
             "enumDescriptions": [
               "do not log any lsp messages",
-              "log all lsp messages sent to/from the server"
+              "log all lsp messages sent to/from the server",
+              "log all lsp messages sent to/from the server, including their contents"
             ]
           }
         }
