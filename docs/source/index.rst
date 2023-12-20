@@ -41,9 +41,14 @@ User Guide
    pages/tutorial
    pages/user-guide
    pages/testing
-   pages/migrating-to-v1
    pages/reference
 
+
+.. toctree::
+   :hidden:
+   :caption: How To
+
+   Migrate to v1 <howto/migrate-to-v1>
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language server: https://langserver.org/
