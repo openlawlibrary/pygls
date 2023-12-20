@@ -24,13 +24,12 @@ import * as vscode from "vscode";
 import * as semver from "semver";
 
 import { PythonExtension } from "@vscode/python-extension";
-import { LanguageClient, LanguageClientOptions, ServerOptions, State } from "vscode-languageclient/node";
+import { LanguageClient, LanguageClientOptions, ServerOptions, State, integer } from "vscode-languageclient/node";
 
 const MIN_PYTHON = semver.parse("3.7.9")
 
 // Some other nice to haves.
 // TODO: Check selected env satisfies pygls' requirements - if not offer to run the select env command.
-// TODO: Start a debug session for the currently configured server.
 // TODO: TCP Transport
 // TODO: WS Transport
 // TODO: Web Extension support (requires WASM-WASI!)
@@ -144,7 +143,7 @@ async function startLangServer() {
     if (client) {
         await stopLangServer()
     }
-
+    const config = vscode.workspace.getConfiguration("pygls.server")
     const cwd = getCwd()
     const serverPath = getServerPath()
 
@@ -152,25 +151,33 @@ async function startLangServer() {
     logger.info(`server: '${serverPath}'`)
 
     const resource = vscode.Uri.joinPath(vscode.Uri.file(cwd), serverPath)
-    const pythonPath = await getPythonPath(resource)
-    if (!pythonPath) {
+    const pythonCommand = await getPythonCommand(resource)
+    if (!pythonCommand) {
         clientStarting = false
         return
     }
 
+    logger.debug(`python: ${pythonCommand.join(" ")}`)
     const serverOptions: ServerOptions = {
-        command: pythonPath,
-        args: [serverPath],
+        command: pythonCommand[0],
+        args: [...pythonCommand.slice(1), serverPath],
         options: { cwd },
     };
 
     client = new LanguageClient('pygls', serverOptions, getClientOptions());
-    try {
-        await client.start()
-        clientStarting = false
-    } catch (err) {
-        clientStarting = false
-        logger.error(`Unable to start server: ${err}`)
+    const promises = [client.start()]
+
+    if (config.get<boolean>("debug")) {
+        promises.push(startDebugging())
+    }
+
+    const results = await Promise.allSettled(promises)
+    clientStarting = false
+
+    for (const result of results) {
+        if (result.status === "rejected") {
+            logger.error(`There was a error starting the server: ${result.reason}`)
+        }
     }
 }
 
@@ -185,6 +192,17 @@ async function stopLangServer(): Promise<void> {
 
     client.dispose()
     client = undefined
+}
+
+function startDebugging(): Promise<void> {
+    if (!vscode.workspace.workspaceFolders) {
+        logger.error("Unable to start debugging, there is no workspace.")
+        return Promise.reject("Unable to start debugging, there is no workspace.")
+    }
+    // TODO: Is there a more reliable way to ensure the debug adapter is ready?
+    setTimeout(async () => {
+        await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "pygls: Debug Server")
+    }, 2000)
 }
 
 function getClientOptions(): LanguageClientOptions {
@@ -270,7 +288,7 @@ function getCwd(): string {
 
 /**
  *
- * @returns The python script to launch the server with
+ * @returns The python script that implements the server.
  */
 function getServerPath(): string {
     const config = vscode.workspace.getConfiguration("pygls.server")
@@ -279,13 +297,49 @@ function getServerPath(): string {
 }
 
 /**
+ * Return the python command to use when starting the server.
+ *
+ * If debugging is enabled, this will also included the arguments to required
+ * to wrap the server in a debug adapter.
+ *
+ * @returns The full python command needed in order to start the server.
+ */
+async function getPythonCommand(resource?: vscode.Uri): Promise<string[] | undefined> {
+    const config = vscode.workspace.getConfiguration("pygls.server", resource)
+    const pythonPath = await getPythonInterpreter(resource)
+    if (!pythonPath) {
+        return
+    }
+    const command = [pythonPath]
+    const enableDebugger = config.get<boolean>('debug')
+
+    if (!enableDebugger) {
+        return command
+    }
+
+    const debugHost = config.get<string>('debugHost')
+    const debugPort = config.get<integer>('debugPort')
+    try {
+        const debugArgs = await python.debug.getRemoteLauncherCommand(debugHost, debugPort, true)
+        // Debugpy recommends we disable frozen modules
+        command.push("-Xfrozen_modules=off", ...debugArgs)
+    } catch (err) {
+        logger.error(`Unable to get debugger command: ${err}`)
+        logger.error("Debugger will not be available.")
+    }
+
+    return command
+}
+
+/**
+ * Return the python interpreter to use when starting the server.
+ *
  * This uses the official python extension to grab the user's currently
  * configured environment.
  *
  * @returns The python interpreter to use to launch the server
  */
-async function getPythonPath(resource?: vscode.Uri): Promise<string | undefined> {
-
+async function getPythonInterpreter(resource?: vscode.Uri): Promise<string | undefined> {
     const config = vscode.workspace.getConfiguration("pygls.server", resource)
     const pythonPath = config.get<string>('pythonPath')
     if (pythonPath) {

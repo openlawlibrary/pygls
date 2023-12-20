@@ -75,3 +75,10 @@ The `code_actions.py` example is intended to be used with text files (e.g. the p
 ```
 
 You can find the full list of known language identifiers [here](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
+
+#### Debugging the server
+
+To debug the language server set the `pygls.server.debug` option to `true`.
+The server should be restarted and the debugger connect automatically.
+
+You can control the host and port that the debugger uses through the `pygls.server.debugHost` and `pygls.server.debugPort` options.
