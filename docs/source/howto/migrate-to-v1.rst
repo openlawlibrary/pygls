@@ -1,5 +1,5 @@
-Migrating to v1.0
-=================
+How To Migrate to v1.0
+======================
 
 The most notable change of the ``v1.0`` release of ``pygls`` is the removal of its hand written LSP type and method definitions in favour of relying on the types provided by the `lsprotocol`_ library which are automatically generated from the LSP specification.
 As as side effect this has also meant the removal of `pydantic`_ as a dependency, since ``lsprotocol`` uses `attrs`_ and `cattrs`_ for serialisation and validation.
