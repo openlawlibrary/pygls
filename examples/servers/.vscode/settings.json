@@ -1,6 +1,9 @@
 {
     // Uncomment to override Python interpreter used.
     // "pygls.server.pythonPath": "/path/to/python",
+    "pygls.server.debug": false,
+    // "pygls.server.debugHost": "localhost",
+    // "pygls.server.debugPort": 5678,
     "pygls.server.launchScript": "json_server.py",
     "pygls.trace.server": "off",
     "pygls.client.documentSelector": [

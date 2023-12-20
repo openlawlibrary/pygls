@@ -54,6 +54,24 @@
             "description": "The working directory from which to launch the server.",
             "markdownDescription": "The working directory from which to launch the server.\nIf blank, this will default to the `examples/servers` directory."
           },
+          "pygls.server.debug": {
+            "scope": "resource",
+            "default": false,
+            "type": "boolean",
+            "description": "Enable debugging of the server process."
+          },
+          "pygls.server.debugHost": {
+            "scope": "resource",
+            "default": "localhost",
+            "type": "string",
+            "description": "The host on which the server process to debug is running."
+          },
+          "pygls.server.debugPort": {
+            "scope": "resource",
+            "default": 5678,
+            "type": "integer",
+            "description": "The port number on which the server process to debug is listening."
+          },
           "pygls.server.launchScript": {
             "scope": "resource",
             "type": "string",
