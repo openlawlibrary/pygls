@@ -41,8 +41,6 @@ User Guide
    pages/tutorial
    pages/user-guide
    pages/testing
-   pages/reference
-
 
 .. toctree::
    :hidden:
@@ -51,6 +49,12 @@ User Guide
    Handle Invalid Data <howto/handle-invalid-data>
    Migrate to v1 <howto/migrate-to-v1>
 
+.. toctree::
+   :hidden:
+   :glob:
+   :caption: API Reference
+
+   reference/*
 
 .. toctree::
    :hidden:
