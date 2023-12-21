@@ -51,6 +51,15 @@ User Guide
    Handle Invalid Data <howto/handle-invalid-data>
    Migrate to v1 <howto/migrate-to-v1>
 
+
+.. toctree::
+   :hidden:
+   :caption: About
+
+   implementations
+   history
+   changelog
+
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language server: https://langserver.org/
 .. _pygls: https://github.com/openlawlibrary/pygls
