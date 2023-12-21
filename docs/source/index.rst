@@ -48,6 +48,7 @@ User Guide
    :hidden:
    :caption: How To
 
+   Handle Invalid Data <howto/handle-invalid-data>
    Migrate to v1 <howto/migrate-to-v1>
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
