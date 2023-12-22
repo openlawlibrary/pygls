@@ -1,42 +1,42 @@
-.. pygls documentation master file, created by
-   sphinx-quickstart on Sun Nov 25 16:16:27 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 *pygls*
 =======
 
 `pygls`_ (pronounced like “pie glass”) is a generic implementation of
 the `Language Server Protocol`_ written in the Python programming language. It
-allows you to write your own `language server`_ in just a few lines of code.
+allows you to write your own `language server`_ in just a few lines of code::
 
-Features
---------
+   from pygls.server import LanguageServer
+   from lsprotocol import types
 
--  cross-platform support
--  TCP/IP and STDIO communication
--  runs in asyncio event loop
--  register LSP features and custom commands as:
+   server = LanguageServer("example-server", "v0.1")
 
-   -  asynchronous functions (coroutines)
-   -  synchronous functions
-   -  functions that will be executed in separate thread
+   @server.feature(types.TEXT_DOCUMENT_COMPLETION)
+   def completions(params: types.CompletionParams):
+       items = []
+       document = server.workspace.get_text_document(params.text_document.uri)
+       current_line = document.lines[params.position.line].strip()
+       if current_line.endswith("hello."):
+           items = [
+               types.CompletionItem(label="world"),
+               types.CompletionItem(label="friend"),
+           ]
+       return types.CompletionList(is_incomplete=False, items=items)
 
--  thread management
--  in-memory workspace with *full* and *incremental* document updates
--  type-checking
--  good test coverage
+   if __name__ == "__main__":
+       server.start_io()
 
-Python Versions
----------------
+*pygls* supports
 
-*pygls* works with Python 3.8+.
-
-User Guide
-----------
+- Python 3.8+ on Windows, MacOS and Linux
+- STDIO, TCP/IP and WEBSOCKET communication
+- Both sync and async styles of programming
+- Running code in background threads
+- Automatic text and notebook document syncronisation
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
+   :caption: User Guide
 
    pages/tutorial
    pages/user-guide
@@ -63,6 +63,31 @@ User Guide
    implementations
    history
    changelog
+
+
+The documentation is divided up into the following sections
+
+.. grid:: 1 2 2 2
+   :gutter: 2
+
+   .. grid-item-card:: User Guide
+      :text-align: center
+
+      Step-by-step guides on writing your first language server with *pygls*.
+
+   .. grid-item-card:: How To Guides
+      :link: /howto
+      :link-type: doc
+      :text-align: center
+
+      Short, focused articles on how to acheive a particular outcome
+
+   .. grid-item-card:: API Reference
+      :columns: 12
+      :text-align: center
+
+      Comprehensive, detailed documentation on all of the features provided by *pygls*.
+
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language server: https://langserver.org/
