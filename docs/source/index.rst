@@ -42,23 +42,10 @@ allows you to write your own `language server`_ in just a few lines of code::
    :hidden:
    :caption: User Guide
 
-   pages/tutorial
-   pages/user-guide
-   pages/testing
-
-.. toctree::
-   :hidden:
-   :caption: How To
-
-   Handle Invalid Data <howto/handle-invalid-data>
-   Migrate to v1 <howto/migrate-to-v1>
-
-.. toctree::
-   :hidden:
-   :glob:
-   :caption: API Reference
-
-   reference/*
+   tutorial
+   user-guide
+   How To <howto>
+   reference
 
 .. toctree::
    :hidden:
@@ -74,7 +61,9 @@ The documentation is divided up into the following sections
 .. grid:: 1 2 2 2
    :gutter: 2
 
-   .. grid-item-card:: User Guide
+   .. grid-item-card:: Tutorial
+      :link: /tutorial
+      :link-type: doc
       :text-align: center
 
       Step-by-step guides on writing your first language server with *pygls*.
@@ -87,6 +76,8 @@ The documentation is divided up into the following sections
       Short, focused articles on how to acheive a particular outcome
 
    .. grid-item-card:: API Reference
+      :link: /reference
+      :link-type: doc
       :columns: 12
       :text-align: center
 
