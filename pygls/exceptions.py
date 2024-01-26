@@ -19,6 +19,7 @@
 import traceback
 from typing import Set
 from typing import Type
+
 from lsprotocol.types import ResponseError
 
 
@@ -79,6 +80,12 @@ class JsonRpcInternalError(JsonRpcException):
 class JsonRpcInvalidParams(JsonRpcException):
     CODE = -32602
     MESSAGE = "Invalid Params"
+
+    @classmethod
+    def of(cls, exc: Exception):
+        return cls(
+            message=f"{cls.MESSAGE}: {exc}",
+        )
 
 
 class JsonRpcInvalidRequest(JsonRpcException):
