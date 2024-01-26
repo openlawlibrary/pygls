@@ -14,30 +14,34 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from __future__ import annotations
+
 import asyncio
 import functools
 import inspect
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional, get_type_hints
+import typing
+from typing import Any
+from typing import Callable
+from typing import Optional
+from typing import get_type_hints
 
-from pygls.constants import (
-    ATTR_COMMAND_TYPE,
-    ATTR_EXECUTE_IN_THREAD,
-    ATTR_FEATURE_TYPE,
-    ATTR_REGISTERED_NAME,
-    ATTR_REGISTERED_TYPE,
-    PARAM_LS,
-)
-from pygls.exceptions import (
-    CommandAlreadyRegisteredError,
-    FeatureAlreadyRegisteredError,
-    ThreadDecoratorError,
-    ValidationError,
-)
-from pygls.lsp import get_method_options_type, is_instance
+import cattrs
 
-logger = logging.getLogger(__name__)
+from pygls.constants import ATTR_COMMAND_TYPE
+from pygls.constants import ATTR_EXECUTE_IN_THREAD
+from pygls.constants import ATTR_FEATURE_TYPE
+from pygls.constants import ATTR_REGISTERED_NAME
+from pygls.constants import ATTR_REGISTERED_TYPE
+from pygls.constants import PARAM_LS
+from pygls.exceptions import CommandAlreadyRegisteredError
+from pygls.exceptions import FeatureAlreadyRegisteredError
+from pygls.exceptions import ThreadDecoratorError
+from pygls.exceptions import ValidationError
+
+if typing.TYPE_CHECKING:
+    from . import JsonRPCHandler
 
 
 def assign_help_attrs(f, reg_name, reg_type):
@@ -70,18 +74,18 @@ def is_thread_function(f):
     return getattr(f, ATTR_EXECUTE_IN_THREAD, False)
 
 
-def wrap_with_server(f, server):
-    """Returns a new callable/coroutine with server as first argument."""
-    if not has_ls_param_or_annotation(f, type(server)):
+def wrap_with_handler(f, handler):
+    """Returns a new callable/coroutine with handler as first argument."""
+    if not has_ls_param_or_annotation(f, type(handler)):
         return f
 
     if asyncio.iscoroutinefunction(f):
 
         async def wrapped(*args, **kwargs):
-            return await f(server, *args, **kwargs)
+            return await f(handler, *args, **kwargs)
 
     else:
-        wrapped = functools.partial(f, server)
+        wrapped = functools.partial(f, handler)
         if is_thread_function(f):
             assign_thread_attr(wrapped)
 
@@ -89,39 +93,37 @@ def wrap_with_server(f, server):
 
 
 class FeatureManager:
-    """A class for managing server features.
+    """A class for managing server features."""
 
-    Attributes:
-        _builtin_features(dict): Predefined set of lsp methods
-        _feature_options(dict): Registered feature's options
-        _features(dict): Registered features
-        _commands(dict): Registered commands
-        server(LanguageServer): Reference to the language server
-                                If passed, server will be passed to registered
-                                features/commands with first parameter:
-                                    1. ls - parameter naming convention
-                                    2. name: LanguageServer - add typings
-    """
+    def __init__(
+        self,
+        converter: cattrs.Converter,
+        logger: Optional[logging.Logger] = None,
+    ):
+        self.builtin_features = {}
+        """Features that are internal to pygls."""
 
-    def __init__(self, server=None, converter=None):
-        self._builtin_features = {}
-        self._feature_options = {}
-        self._features = {}
-        self._commands = {}
-        self.server = server
+        self.user_features = {}
+        """Features provided by the user."""
+
+        self.user_options = {}
+        """Additional options for features provided by the user."""
+
+        self.commands = {}
+        """Custom commands provided by the user."""
+
         self.converter = converter
+        """The converter instance to use"""
+
+        self.logger = logger or logging.getLogger(__name__)
+        """The logger instance to use"""
 
     def add_builtin_feature(self, feature_name: str, func: Callable) -> None:
         """Registers builtin (predefined) feature."""
-        self._builtin_features[feature_name] = func
-        logger.info("Registered builtin feature %s", feature_name)
+        self.builtin_features[feature_name] = func
+        self.logger.debug("Registered builtin feature %s", feature_name)
 
-    @property
-    def builtin_features(self) -> Dict:
-        """Returns server builtin features."""
-        return self._builtin_features
-
-    def command(self, command_name: str) -> Callable:
+    def command(self, handler: JsonRPCHandler, command_name: str) -> Callable:
         """Decorator used to register custom commands.
 
         Example:
@@ -131,91 +133,71 @@ class FeatureManager:
         def decorator(f):
             # Validate
             if command_name is None or command_name.strip() == "":
-                logger.error("Missing command name.")
+                self.logger.error("Missing command name.")
                 raise ValidationError("Command name is required.")
 
             # Check if not already registered
-            if command_name in self._commands:
-                logger.error('Command "%s" is already registered.', command_name)
+            if command_name in self.commands:
+                self.logger.error('Command "%s" is already registered.', command_name)
                 raise CommandAlreadyRegisteredError(command_name)
 
             assign_help_attrs(f, command_name, ATTR_COMMAND_TYPE)
 
-            wrapped = wrap_with_server(f, self.server)
+            wrapped = wrap_with_handler(f, handler)
+
             # Assign help attributes for thread decorator
             assign_help_attrs(wrapped, command_name, ATTR_COMMAND_TYPE)
 
-            self._commands[command_name] = wrapped
+            self.commands[command_name] = wrapped
 
-            logger.info('Command "%s" is successfully registered.', command_name)
+            self.logger.debug('Command "%s" is successfully registered.', command_name)
 
             return f
 
         return decorator
 
-    @property
-    def commands(self) -> Dict:
-        """Returns registered custom commands."""
-        return self._commands
-
     def feature(
         self,
+        handler: JsonRPCHandler,
         feature_name: str,
         options: Optional[Any] = None,
+        **kwargs,
     ) -> Callable:
-        """Decorator used to register LSP features.
-
-        Example:
-            @ls.feature('textDocument/completion', CompletionItems(trigger_characters=['.']))
-        """
+        """Decorator used to register LSP features."""
 
         def decorator(f):
             # Validate
             if feature_name is None or feature_name.strip() == "":
-                logger.error("Missing feature name.")
+                self.logger.error("Missing feature name.")
                 raise ValidationError("Feature name is required.")
 
             # Add feature if not exists
-            if feature_name in self._features:
-                logger.error('Feature "%s" is already registered.', feature_name)
+            if feature_name in self.user_features:
+                self.logger.error('Feature "%s" is already registered.', feature_name)
                 raise FeatureAlreadyRegisteredError(feature_name)
 
             assign_help_attrs(f, feature_name, ATTR_FEATURE_TYPE)
 
-            wrapped = wrap_with_server(f, self.server)
+            wrapped = wrap_with_handler(f, handler)
             # Assign help attributes for thread decorator
             assign_help_attrs(wrapped, feature_name, ATTR_FEATURE_TYPE)
 
-            self._features[feature_name] = wrapped
+            opts = {}
+            if options is not None:
+                opts = self.converter.unstructure(options)
 
-            if options:
-                options_type = get_method_options_type(feature_name)
-                if options_type and not is_instance(
-                    self.converter, options, options_type
-                ):
-                    raise TypeError(
-                        (
-                            f'Options of method "{feature_name}"'
-                            f" should be instance of type {options_type}"
-                        )
-                    )
-                self._feature_options[feature_name] = options
+            user_options = {**opts, **kwargs}
+            if len(user_options) > 0:
+                self.user_options[feature_name] = user_options
 
-            logger.info('Registered "%s" with options "%s"', feature_name, options)
+            self.user_features[feature_name] = wrapped
+            self.logger.debug(
+                'Registered "%s" with options "%s"', feature_name, user_options
+            )
 
             return f
 
         return decorator
-
-    @property
-    def feature_options(self) -> Dict:
-        """Returns feature options for registered features."""
-        return self._feature_options
-
-    @property
-    def features(self) -> Dict:
-        """Returns registered features"""
-        return self._features
 
     def thread(self) -> Callable:
         """Decorator that mark function to execute it in a thread."""
@@ -232,7 +214,7 @@ class FeatureManager:
                 reg_type = getattr(f, ATTR_REGISTERED_TYPE)
 
                 if reg_type is ATTR_FEATURE_TYPE:
-                    assign_thread_attr(self.features[reg_name])
+                    assign_thread_attr(self.user_features[reg_name])
                 elif reg_type is ATTR_COMMAND_TYPE:
                     assign_thread_attr(self.commands[reg_name])
 

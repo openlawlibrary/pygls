@@ -1,78 +1,38 @@
-import json
-from typing import Any
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
+from pygls import IS_WASM
 
-from collections import namedtuple
+from ._features import FeatureManager
+from .json_rpc import JsonRPCProtocol
+from .json_rpc import MsgId
+from .json_rpc import basic_converter
 
-from lsprotocol import converters
-
-from pygls.protocol.json_rpc import (
-    JsonRPCNotification,
-    JsonRPCProtocol,
-    JsonRPCRequestMessage,
-    JsonRPCResponseMessage,
-)
-from pygls.protocol.language_server import LanguageServerProtocol, lsp_method
-from pygls.protocol.lsp_meta import LSPMeta, call_user_feature
-
-
-def _dict_to_object(d: Any):
-    """Create nested objects (namedtuple) from dict."""
-
-    if d is None:
-        return None
-
-    if not isinstance(d, dict):
-        return d
-
-    type_name = d.pop("type_name", "Object")
-    return json.loads(
-        json.dumps(d),
-        object_hook=lambda p: namedtuple(type_name, p.keys(), rename=True)(*p.values()),
-    )
-
-
-def _params_field_structure_hook(obj, cls):
-    if "params" in obj:
-        obj["params"] = _dict_to_object(obj["params"])
-
-    return cls(**obj)
-
-
-def _result_field_structure_hook(obj, cls):
-    if "result" in obj:
-        obj["result"] = _dict_to_object(obj["result"])
-
-    return cls(**obj)
-
-
-def default_converter():
-    """Default converter factory function."""
-
-    converter = converters.get_converter()
-    converter.register_structure_hook(
-        JsonRPCRequestMessage, _params_field_structure_hook
-    )
-
-    converter.register_structure_hook(
-        JsonRPCResponseMessage, _result_field_structure_hook
-    )
-
-    converter.register_structure_hook(JsonRPCNotification, _params_field_structure_hook)
-
-    return converter
-
+if IS_WASM:
+    from ._sync_handler import JsonRPCHandler
+    from ._sync_handler import rpc_main_loop
+else:
+    from ._async_handler import JsonRPCHandler
+    from ._async_handler import rpc_main_loop
 
 __all__ = (
+    "FeatureManager",
+    "JsonRPCHandler",
     "JsonRPCProtocol",
-    "LanguageServerProtocol",
-    "JsonRPCRequestMessage",
-    "JsonRPCResponseMessage",
-    "JsonRPCNotification",
-    "LSPMeta",
-    "call_user_feature",
-    "_dict_to_object",
-    "_params_field_structure_hook",
-    "_result_field_structure_hook",
-    "default_converter",
-    "lsp_method",
+    "MsgId",
+    "basic_converter",
+    "rpc_main_loop",
 )
