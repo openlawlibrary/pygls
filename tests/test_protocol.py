@@ -14,43 +14,29 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import io
+import asyncio
 import json
-from concurrent.futures import Future
-from pathlib import Path
 from typing import Optional
-from unittest.mock import Mock
 
 import attrs
 import pytest
 
-from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
-from lsprotocol.types import (
-    PROGRESS,
-    TEXT_DOCUMENT_COMPLETION,
-    ClientCapabilities,
-    CompletionItem,
-    CompletionItemKind,
-    CompletionParams,
-    InitializeParams,
-    InitializeResult,
-    ProgressParams,
-    Position,
-    ShutdownResponse,
-    TextDocumentCompletionResponse,
-    TextDocumentIdentifier,
-    WorkDoneProgressBegin,
-)
-from pygls.protocol import (
-    default_converter,
-    JsonRPCProtocol,
-    JsonRPCRequestMessage,
-    JsonRPCResponseMessage,
-    JsonRPCNotification,
-)
+from pygls.exceptions import JsonRpcException
+from pygls.exceptions import JsonRpcInvalidParams
+from pygls.protocol import JsonRPCHandler
+from pygls.protocol import JsonRPCProtocol
+from pygls.protocol import basic_converter
+from pygls.protocol.json_rpc import _Notification
+from pygls.protocol.json_rpc import _Request
+from pygls.protocol.json_rpc import _Result
 
 EXAMPLE_NOTIFICATION = "example/notification"
 EXAMPLE_REQUEST = "example/request"
+
+
+@pytest.fixture()
+def handler():
+    return JsonRPCHandler(protocol=JsonRPCProtocol(basic_converter))
 
 
 @attrs.define
@@ -85,37 +71,43 @@ class ExampleRequest:
     params: ExampleParams = attrs.field(default=None)
 
 
-EXAMPLE_LSP_METHODS_MAP = {
+METHOD_MAP = {
     EXAMPLE_NOTIFICATION: (ExampleNotification, None, ExampleParams, None),
     EXAMPLE_REQUEST: (ExampleRequest, None, ExampleParams, None),
 }
 
 
 class ExampleProtocol(JsonRPCProtocol):
-    def get_message_type(self, method: str):
-        return EXAMPLE_LSP_METHODS_MAP.get(method, (None,))[0]
+    """A test example of creating a custom JsonRPCProtocol."""
+
+    def get_notification_type(self, method: str):
+        return METHOD_MAP.get(method, (None,))[0]
+
+    def get_request_type(self, method: str):
+        return METHOD_MAP.get(method, (None,))[0]
 
 
 @pytest.fixture()
 def protocol():
-    return ExampleProtocol(None, default_converter())
+    return ExampleProtocol(basic_converter)
 
 
-def test_deserialize_notification_message_valid_params(protocol):
-    params = f"""
+def test_decode_notification(protocol):
+    """Ensure that we can decode a notification message correctly."""
+    message = f"""
     {{
         "jsonrpc": "2.0",
         "method": "{EXAMPLE_NOTIFICATION}",
         "params": {{
-            "fieldA": "test_a",
-            "fieldB": {{
-                "innerField": "test_inner"
+            "field_a": "test_a",
+            "field_b": {{
+                "inner_field": "test_inner"
             }}
         }}
     }}
-    """
+    """.encode()
 
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = protocol.decode_message(message)
 
     assert isinstance(
         result, ExampleNotification
@@ -130,8 +122,10 @@ def test_deserialize_notification_message_valid_params(protocol):
     assert result.params.field_b.inner_field == "test_inner"
 
 
-def test_deserialize_notification_message_unknown_type(protocol):
-    params = """
+def test_decode_notification_unknown_type(protocol):
+    """Ensure that we can decode a notificiation, even when the message is not known to
+    be part of the protocol."""
+    message = b"""
     {
         "jsonrpc": "2.0",
         "method": "random",
@@ -144,18 +138,20 @@ def test_deserialize_notification_message_unknown_type(protocol):
     }
     """
 
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = protocol.decode_message(message)
 
-    assert isinstance(result, JsonRPCNotification)
+    assert isinstance(result, _Notification)
     assert result.jsonrpc == "2.0"
     assert result.method == "random"
 
-    assert result.params.field_a == "test_a"
-    assert result.params.field_b.inner_field == "test_inner"
+    assert result.params["field_a"] == "test_a"
+    assert result.params["field_b"]["inner_field"] == "test_inner"
 
 
-def test_deserialize_notification_message_bad_params_should_raise_error(protocol):
-    params = f"""
+def test_decode_notification_invalid_params(protocol):
+    """Ensure that the appropriate error is raised when decoding a message with invalid
+    parameters."""
+    message = f"""
     {{
         "jsonrpc": "2.0",
         "method": "{EXAMPLE_NOTIFICATION}",
@@ -166,14 +162,18 @@ def test_deserialize_notification_message_bad_params_should_raise_error(protocol
             }}
         }}
     }}
-    """
+    """.encode()
 
     with pytest.raises(JsonRpcInvalidParams):
-        json.loads(params, object_hook=protocol._deserialize_message)
+        protocol.decode_message(message)
 
 
-def test_deserialize_response_message_custom_converter():
-    params = """
+def test_decode_message_custom_converter():
+    """Ensure that we can decode messages with a user defined converter.
+
+    Just for fun, let's create a converter that reverses all the keys in a dict.
+    """
+    message = b"""
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -181,8 +181,6 @@ def test_deserialize_response_message_custom_converter():
     }
     """
 
-    # Just for fun, let's create a converter that reverses all the keys in a dict.
-    #
     @attrs.define
     class egasseM:
         cprnosj: str
@@ -194,13 +192,13 @@ def test_deserialize_response_message_custom_converter():
         return cls(**params)
 
     def custom_converter():
-        converter = default_converter()
+        converter = basic_converter()
         converter.register_structure_hook(egasseM, structure_hook)
         return converter
 
-    protocol = JsonRPCProtocol(None, custom_converter())
+    protocol = JsonRPCProtocol(custom_converter)
     protocol._result_types["id"] = egasseM
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = protocol.decode_message(message)
 
     assert isinstance(result, egasseM)
     assert result.cprnosj == "2.0"
@@ -212,83 +210,49 @@ def test_deserialize_response_message_custom_converter():
     "method, params, expected",
     [
         (
-            # Known notification type.
-            PROGRESS,
-            ProgressParams(
-                token="id1",
-                value=WorkDoneProgressBegin(
-                    title="Begin progress",
-                    percentage=0,
-                ),
-            ),
-            {
-                "jsonrpc": "2.0",
-                "method": "$/progress",
-                "params": {
-                    "token": "id1",
-                    "value": {
-                        "kind": "begin",
-                        "percentage": 0,
-                        "title": "Begin progress",
-                    },
-                },
-            },
-        ),
-        (
             # Custom notification type.
             EXAMPLE_NOTIFICATION,
             ExampleParams(
                 field_a="field one",
                 field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
-            {
-                "jsonrpc": "2.0",
-                "method": EXAMPLE_NOTIFICATION,
-                "params": {
-                    "fieldA": "field one",
-                    "fieldB": {
-                        "innerField": "field two",
-                    },
-                },
-            },
+            ExampleNotification(
+                params=ExampleParams(
+                    field_a="field one",
+                    field_b=ExampleParams.InnerType(inner_field="field two"),
+                )
+            ),
         ),
         (
             # Custom notification with dict params.
-            EXAMPLE_NOTIFICATION,
+            "random",
             {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
-            {
-                "jsonrpc": "2.0",
-                "method": EXAMPLE_NOTIFICATION,
-                "params": {
+            _Notification(
+                jsonrpc="2.0",
+                method="random",
+                params={
                     "fieldA": "field one",
                     "fieldB": {
                         "innerField": "field two",
                     },
                 },
-            },
+            ),
         ),
     ],
 )
-def test_serialize_notification_message(method, params, expected):
-    """
-    Ensure that we can serialize notification messages, retaining all
-    expected fields.
-    """
+def test_encode_notification_message(method, params, expected):
+    """Ensure that we can encode notification messages."""
 
-    buffer = io.StringIO()
-
-    protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
-
-    protocol.notify(method, params=params)
-    actual = json.loads(buffer.getvalue())
+    protocol = ExampleProtocol(basic_converter)
+    data = protocol.encode_notification(method, params=params, include_headers=False)
+    actual = protocol.decode_message(data)
 
     assert actual == expected
 
 
-def test_deserialize_response_message(protocol):
-    params = """
+def test_decode_response(protocol):
+    """Ensure that we can decode response messages correctly."""
+    message = b"""
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -296,7 +260,7 @@ def test_deserialize_response_message(protocol):
     }
     """
     protocol._result_types["id"] = IntResult
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = protocol.decode_message(message)
 
     assert isinstance(result, IntResult)
     assert result.jsonrpc == "2.0"
@@ -304,8 +268,10 @@ def test_deserialize_response_message(protocol):
     assert result.result == 1
 
 
-def test_deserialize_response_message_unknown_type(protocol):
-    params = """
+def test_decode_response_unknown_type(protocol):
+    """Ensure that we can decode response messages, even when it is not known to the
+    protocol."""
+    message = b"""
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -317,32 +283,33 @@ def test_deserialize_response_message_unknown_type(protocol):
         }
     }
     """
-    protocol._result_types["id"] = JsonRPCResponseMessage
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    protocol._result_types["id"] = _Result
+    result = protocol.decode_message(message)
 
-    assert isinstance(result, JsonRPCResponseMessage)
+    assert isinstance(result, _Result)
     assert result.jsonrpc == "2.0"
     assert result.id == "id"
 
-    assert result.result.field_a == "test_a"
-    assert result.result.field_b.inner_field == "test_inner"
+    assert result.result["field_a"] == "test_a"
+    assert result.result["field_b"]["inner_field"] == "test_inner"
 
 
-def test_deserialize_request_message_with_registered_type(protocol):
-    params = f"""
+def test_decode_request(protocol):
+    """Ensure that we can decode request messages."""
+    message = f"""
     {{
         "jsonrpc": "2.0",
         "id": "id",
         "method": "{EXAMPLE_REQUEST}",
         "params": {{
-            "fieldA": "test_a",
-            "fieldB": {{
-                "innerField": "test_inner"
+            "field_a": "test_a",
+            "field_b": {{
+                "inner_field": "test_inner"
             }}
         }}
     }}
-    """
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    """.encode()
+    result = protocol.decode_message(message)
 
     assert isinstance(result, ExampleRequest)
     assert result.jsonrpc == "2.0"
@@ -356,8 +323,10 @@ def test_deserialize_request_message_with_registered_type(protocol):
     assert result.params.field_b.inner_field == "test_inner"
 
 
-def test_deserialize_request_message_without_registered_type(protocol):
-    params = """
+def test_decode_request_without_registered_type(protocol):
+    """Ensure that we can decode request messages, even when the type is not known to
+    the protocol."""
+    message = b"""
     {
         "jsonrpc": "2.0",
         "id": "id",
@@ -370,91 +339,59 @@ def test_deserialize_request_message_without_registered_type(protocol):
         }
     }
     """
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = protocol.decode_message(message)
 
-    assert isinstance(result, JsonRPCRequestMessage)
+    assert isinstance(result, _Request)
     assert result.jsonrpc == "2.0"
     assert result.id == "id"
     assert result.method == "random"
 
-    assert result.params.field_a == "test_a"
-    assert result.params.field_b.inner_field == "test_inner"
+    assert result.params["field_a"] == "test_a"
+    assert result.params["field_b"]["inner_field"] == "test_inner"
 
 
 @pytest.mark.parametrize(
     "msg_type, result, expected",
     [
-        (ShutdownResponse, None, {"jsonrpc": "2.0", "id": "1", "result": None}),
-        (
-            TextDocumentCompletionResponse,
-            [
-                CompletionItem(label="example-one"),
-                CompletionItem(
-                    label="example-two",
-                    kind=CompletionItemKind.Class,
-                    preselect=False,
-                    deprecated=True,
-                ),
-            ],
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "result": [
-                    {"label": "example-one"},
-                    {
-                        "label": "example-two",
-                        "kind": 7,  # CompletionItemKind.Class
-                        "preselect": False,
-                        "deprecated": True,
-                    },
-                ],
-            },
-        ),
         (  # Unknown type with object params.
-            JsonRPCResponseMessage,
+            _Result,
             ExampleParams(
                 field_a="field one",
                 field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "result": {
-                    "fieldA": "field one",
-                    "fieldB": {"innerField": "field two"},
+            _Result(
+                id="1",
+                jsonrpc="2.0",
+                result={
+                    "field_a": "field one",
+                    "field_b": {"inner_field": "field two"},
                 },
-            },
+            ),
         ),
         (  # Unknown type with dict params.
-            JsonRPCResponseMessage,
+            _Result,
             {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "result": {
+            _Result(
+                id="1",
+                jsonrpc="2.0",
+                result={
                     "fieldA": "field one",
                     "fieldB": {"innerField": "field two"},
                 },
-            },
+            ),
         ),
     ],
 )
-def test_serialize_response_message(msg_type, result, expected):
-    """
-    Ensure that we can serialize response messages, retaining all expected
-    fields.
-    """
+def test_encode_response(msg_type, result, expected):
+    """Ensure that we can encode response messages"""
 
-    buffer = io.StringIO()
-
-    protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
-
+    protocol = JsonRPCProtocol(basic_converter)
     protocol._result_types["1"] = msg_type
 
-    protocol._send_response("1", result=result)
-    actual = json.loads(buffer.getvalue())
+    data = protocol.encode_result("1", result=result, include_headers=False)
+
+    protocol._result_types["1"] = msg_type
+    actual = protocol.decode_message(data)
 
     assert actual == expected
 
@@ -462,155 +399,52 @@ def test_serialize_response_message(msg_type, result, expected):
 @pytest.mark.parametrize(
     "method, params, expected",
     [
-        (
-            TEXT_DOCUMENT_COMPLETION,
-            CompletionParams(
-                text_document=TextDocumentIdentifier(uri="file:///file.txt"),
-                position=Position(line=1, character=0),
-            ),
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "method": TEXT_DOCUMENT_COMPLETION,
-                "params": {
-                    "textDocument": {"uri": "file:///file.txt"},
-                    "position": {"line": 1, "character": 0},
-                },
-            },
-        ),
         (  # Unknown type with object params.
             EXAMPLE_REQUEST,
             ExampleParams(
                 field_a="field one",
                 field_b=ExampleParams.InnerType(inner_field="field two"),
             ),
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "method": EXAMPLE_REQUEST,
-                "params": {
-                    "fieldA": "field one",
-                    "fieldB": {"innerField": "field two"},
+            _Request(
+                jsonrpc="2.0",
+                id="1",
+                method=EXAMPLE_REQUEST,
+                params={
+                    "field_a": "field one",
+                    "field_b": {"inner_field": "field two"},
                 },
-            },
+            ),
         ),
         (  # Unknown type with dict params.
             EXAMPLE_REQUEST,
             {"fieldA": "field one", "fieldB": {"innerField": "field two"}},
-            {
-                "jsonrpc": "2.0",
-                "id": "1",
-                "method": EXAMPLE_REQUEST,
-                "params": {
+            _Request(
+                jsonrpc="2.0",
+                id="1",
+                method=EXAMPLE_REQUEST,
+                params={
                     "fieldA": "field one",
                     "fieldB": {"innerField": "field two"},
                 },
-            },
+            ),
         ),
     ],
 )
-def test_serialize_request_message(method, params, expected):
-    """
-    Ensure that we can serialize request messages, retaining all expected
-    fields.
-    """
+def test_encode_request(method, params, expected):
+    """Ensure that we can encode request messages."""
 
-    buffer = io.StringIO()
+    protocol = JsonRPCProtocol(basic_converter)
 
-    protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
-
-    protocol.send_request(method, params, callback=None, msg_id="1")
-    actual = json.loads(buffer.getvalue())
+    data = protocol.encode_request(method, params, msg_id="1", include_headers=False)
+    actual = protocol.decode_message(data)
 
     assert actual == expected
 
 
-def test_data_received_without_content_type(client_server):
-    _, server = client_server
-    body = json.dumps(
-        {
-            "jsonrpc": "2.0",
-            "method": "test",
-            "params": 1,
-        }
-    )
-    message = "\r\n".join(
-        (
-            "Content-Length: " + str(len(body)),
-            "",
-            body,
-        )
-    )
-    data = bytes(message, "utf-8")
-    server.lsp.data_received(data)
-
-
-def test_data_received_content_type_first_should_handle_message(client_server):
-    _, server = client_server
-    body = json.dumps(
-        {
-            "jsonrpc": "2.0",
-            "method": "test",
-            "params": 1,
-        }
-    )
-    message = "\r\n".join(
-        (
-            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
-            "Content-Length: " + str(len(body)),
-            "",
-            body,
-        )
-    )
-    data = bytes(message, "utf-8")
-    server.lsp.data_received(data)
-
-
-def dummy_message(param=1):
-    body = json.dumps(
-        {
-            "jsonrpc": "2.0",
-            "method": "test",
-            "params": param,
-        }
-    )
-    message = "\r\n".join(
-        (
-            "Content-Length: " + str(len(body)),
-            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
-            "",
-            body,
-        )
-    )
-    return bytes(message, "utf-8")
-
-
-def test_data_received_single_message_should_handle_message(client_server):
-    _, server = client_server
-    data = dummy_message()
-    server.lsp.data_received(data)
-
-
-def test_data_received_partial_message_should_handle_message(client_server):
-    _, server = client_server
-    data = dummy_message()
-    partial = len(data) - 5
-    server.lsp.data_received(data[:partial])
-    server.lsp.data_received(data[partial:])
-
-
-def test_data_received_multi_message_should_handle_messages(client_server):
-    _, server = client_server
-    messages = (dummy_message(i) for i in range(3))
-    data = b"".join(messages)
-    server.lsp.data_received(data)
-
-
-def test_data_received_error_should_raise_jsonrpc_error(client_server):
-    _, server = client_server
-    body = json.dumps(
+@pytest.mark.asyncio
+async def test_error_should_raise(handler: JsonRPCHandler):
+    """Ensure that when an error response is received, an appropriate error is raised."""
+    message = json.dumps(
         {
             "jsonrpc": "2.0",
             "id": "err",
@@ -619,42 +453,10 @@ def test_data_received_error_should_raise_jsonrpc_error(client_server):
                 "message": "message for you sir",
             },
         }
-    )
-    message = "\r\n".join(
-        [
-            "Content-Length: " + str(len(body)),
-            "Content-Type: application/vscode-jsonrpc; charset=utf-8",
-            "",
-            body,
-        ]
-    ).encode("utf-8")
-    future = server.lsp._request_futures["err"] = Future()
-    server.lsp.data_received(message)
+    ).encode()
+
+    future = handler._futures["err"] = asyncio.get_running_loop().create_future()
+    handler(message)
+
     with pytest.raises(JsonRpcException, match="message for you sir"):
         future.result()
-
-
-def test_initialize_should_return_server_capabilities(client_server):
-    _, server = client_server
-    params = InitializeParams(
-        process_id=1234,
-        root_uri=Path(__file__).parent.as_uri(),
-        capabilities=ClientCapabilities(),
-    )
-
-    server_capabilities = server.lsp.lsp_initialize(params)
-
-    assert isinstance(server_capabilities, InitializeResult)
-
-
-def test_ignore_unknown_notification(client_server):
-    _, server = client_server
-
-    fn = server.lsp._execute_notification
-    server.lsp._execute_notification = Mock()
-
-    server.lsp._handle_notification("random/notification", None)
-    assert not server.lsp._execute_notification.called
-
-    # Remove mock
-    server.lsp._execute_notification = fn

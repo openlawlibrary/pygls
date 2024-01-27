@@ -1,25 +1,25 @@
 """This server does nothing but print invalid JSON."""
 import asyncio
-import threading
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import threading
+from functools import partial
 
-from pygls.server import aio_readline
+from pygls.protocol import rpc_main_loop
+from pygls.server._async_server import get_sdtio_streams
 
 
-def handler(data):
+def write_data(writer: asyncio.StreamWriter, data):
     content = 'Content-Length: 5\r\n\r\n{"ll}'.encode("utf8")
-    sys.stdout.buffer.write(content)
-    sys.stdout.flush()
+    writer.write(content)
 
 
 async def main():
-    await aio_readline(
-        asyncio.get_running_loop(),
-        ThreadPoolExecutor(),
-        threading.Event(),
-        sys.stdin.buffer,
-        handler,
+    reader, writer = await get_sdtio_streams(sys.stdin.buffer, sys.stdout.buffer)
+
+    await rpc_main_loop(
+        reader=reader,
+        stop_event=threading.Event(),
+        message_handler=partial(write_data, writer),
     )
 
 

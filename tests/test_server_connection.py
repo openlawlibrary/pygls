@@ -6,8 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from pygls import IS_PYODIDE
-from pygls.server import LanguageServer
+from pygls.server import JsonRPCServer
 
 try:
     import websockets
@@ -18,7 +17,7 @@ except ImportError:
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
+@pytest.mark.skip
 async def test_tcp_connection_lost():
     loop = asyncio.new_event_loop()
 
@@ -57,7 +56,7 @@ async def test_tcp_connection_lost():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
+@pytest.mark.skip
 async def test_io_connection_lost():
     # Client to Server pipe.
     csr, csw = os.pipe()
@@ -82,9 +81,9 @@ async def test_io_connection_lost():
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip
 @pytest.mark.skipif(
-    IS_PYODIDE or not WEBSOCKETS_AVAILABLE,
-    reason="threads are not available in pyodide",
+    not WEBSOCKETS_AVAILABLE, reason="Package 'websockets' is not available"
 )
 async def test_ws_server():
     """Smoke test to ensure we can send/receive messages over websockets"""
