@@ -14,18 +14,35 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import Tuple
+from __future__ import annotations
 
+import typing
+
+import pytest_asyncio
 from lsprotocol import types
 
-from ..client import LanguageClient
+if typing.TYPE_CHECKING:
+    from typing import Tuple
+
+    from pygls.lsp.client import LanguageClient
+
+
+@pytest_asyncio.fixture()
+async def inlay_hints(get_client_for):
+    client, response = await get_client_for("inlay_hints.py")
+    yield client, response
+
+    await client.shutdown(None)
+    client.exit(None)
+
+    await client.stop()
 
 
 async def test_code_actions(
-    inlay_hints_client: Tuple[LanguageClient, types.InitializeResult], uri_for
+    inlay_hints: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code action server is working as expected."""
-    client, initialize_result = inlay_hints_client
+    client, initialize_result = inlay_hints
 
     inlay_hint_provider = initialize_result.capabilities.inlay_hint_provider
     assert inlay_hint_provider.resolve_provider is True
@@ -33,7 +50,7 @@ async def test_code_actions(
     test_uri = uri_for("sums.txt")
     assert test_uri is not None
 
-    response = await client.text_document_inlay_hint_async(
+    response = await client.text_document_inlay_hint(
         types.InlayHintParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
             range=types.Range(
@@ -52,5 +69,5 @@ async def test_code_actions(
     assert three.label == ":11"
     assert three.tooltip is None
 
-    resolved = await client.inlay_hint_resolve_async(three)
+    resolved = await client.inlay_hint_resolve(three)
     assert resolved.tooltip == "Binary representation of the number: 3"

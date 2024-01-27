@@ -15,54 +15,62 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
-import re
+from datetime import datetime
 
 from lsprotocol import types
 
 from pygls import IS_WASM
 from pygls.lsp.server import LanguageServer
 
-ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
-server = LanguageServer("code-action-server", "v1")
+DATE_FORMATS = [
+    "%H:%M:%S",
+    "%d/%m/%y",
+    "%Y-%m-%d",
+    "%Y-%m-%dT%H:%M:%S",
+]
+server = LanguageServer("hover-server", "v1")
 
 
-@server.feature(
-    types.TEXT_DOCUMENT_CODE_ACTION,
-    types.CodeActionOptions(code_action_kinds=[types.CodeActionKind.QuickFix]),
-)
-def code_actions(params: types.CodeActionParams):
-    items = []
+@server.feature(types.TEXT_DOCUMENT_HOVER)
+def hover(params: types.HoverParams):
+    pos = params.position
     document_uri = params.text_document.uri
     document = server.workspace.get_text_document(document_uri)
 
-    start_line = params.range.start.line
-    end_line = params.range.end.line
+    try:
+        line = document.lines[pos.line]
+    except IndexError:
+        return None
 
-    lines = document.lines[start_line : end_line + 1]
-    for idx, line in enumerate(lines):
-        match = ADDITION.match(line)
-        if match is not None:
-            range_ = types.Range(
-                start=types.Position(line=start_line + idx, character=0),
-                end=types.Position(line=start_line + idx, character=len(line) - 1),
-            )
+    for fmt in DATE_FORMATS:
+        try:
+            value = datetime.strptime(line.strip(), fmt)
+            break
+        except ValueError:
+            pass
 
-            left = int(match.group(1))
-            right = int(match.group(2))
-            answer = left + right
+    else:
+        # No valid datetime found.
+        return None
 
-            text_edit = types.TextEdit(
-                range=range_, new_text=f"{line.strip()} {answer}!"
-            )
+    hover_content = [
+        f"# {value.strftime('%a %d %b %Y')}",
+        "",
+        "| Format | Value |",
+        "|:-|-:|",
+        *[f"| `{fmt}` | {value.strftime(fmt)} |" for fmt in DATE_FORMATS],
+    ]
 
-            action = types.CodeAction(
-                title=f"Evaluate '{match.group(0)}'",
-                kind=types.CodeActionKind.QuickFix,
-                edit=types.WorkspaceEdit(changes={document_uri: [text_edit]}),
-            )
-            items.append(action)
-
-    return items
+    return types.Hover(
+        contents=types.MarkupContent(
+            kind=types.MarkupKind.Markdown,
+            value="\n".join(hover_content),
+        ),
+        range=types.Range(
+            start=types.Position(line=pos.line, character=0),
+            end=types.Position(line=pos.line + 1, character=0),
+        ),
+    )
 
 
 if __name__ == "__main__":
