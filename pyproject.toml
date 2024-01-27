@@ -49,6 +49,7 @@ asyncio_mode = "auto"
 
 [tool.poe.tasks]
 test-pyodide = "pytest tests/e2e --lsp-runtime pyodide"
+test-wasi = "pytest tests/e2e --lsp-runtime wasi --log-cli-level debug"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
 check_generated_client = "python scripts/check_client_is_uptodate.py"
