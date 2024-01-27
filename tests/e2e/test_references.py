@@ -24,7 +24,7 @@ from lsprotocol import types
 if typing.TYPE_CHECKING:
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture()
@@ -34,7 +34,7 @@ async def goto(get_client_for):
 
 
 async def test_type_definition(
-    goto: Tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
+    goto: Tuple[LanguageClient, types.InitializeResult], path_for, uri_for
 ):
     """Ensure that we can implement type definition requests."""
     client, initialize_result = goto
@@ -56,7 +56,7 @@ async def test_type_definition(
         )
     )
 
-    response = await client.text_document_references_async(
+    response = await client.text_document_references(
         types.ReferenceParams(
             context=types.ReferenceContext(include_declaration=True),
             text_document=types.TextDocumentIdentifier(uri=test_uri),
@@ -65,7 +65,7 @@ async def test_type_definition(
     )
     assert response is None
 
-    response = await client.text_document_references_async(
+    response = await client.text_document_references(
         types.ReferenceParams(
             context=types.ReferenceContext(include_declaration=True),
             text_document=types.TextDocumentIdentifier(uri=test_uri),

@@ -17,9 +17,11 @@
 import logging
 import re
 
+import attrs
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
 server = LanguageServer("code-lens-server", "v1")
@@ -74,7 +76,7 @@ def code_lens_resolve(ls: LanguageServer, item: types.CodeLens):
     right = item.data["right"]
     uri = item.data["uri"]
 
-    args = dict(
+    args = EvaluateSumArguments(
         uri=uri,
         left=left,
         right=right,
@@ -84,40 +86,59 @@ def code_lens_resolve(ls: LanguageServer, item: types.CodeLens):
     item.command = types.Command(
         title=f"Evaluate {left} + {right}",
         command="codeLens.evaluateSum",
-        arguments=[args],
+        arguments=[ls.converter.unstructure(args)],
     )
     return item
 
 
-@server.command("codeLens.evaluateSum")
-def evaluate_sum(ls: LanguageServer, args):
-    logging.info("arguments: %s", args)
+@attrs.define
+class EvaluateSumArguments:
+    """Represents the arguments to be passed to ``codeLens.evaluateSum``"""
 
-    arguments = args[0]
-    document = ls.workspace.get_text_document(arguments["uri"])
-    line = document.lines[arguments["line"]]
+    uri: str
+    line: int
+    left: int
+    right: int
+
+
+@server.command("codeLens.evaluateSum")
+def evaluate_sum(ls: LanguageServer, arguments: EvaluateSumArguments):
+    logging.info("arguments: %s", arguments)
+
+    document = ls.workspace.get_text_document(arguments.uri)
+    line = document.lines[arguments.line]
 
     # Compute the edit that will update the document with the result.
-    answer = arguments["left"] + arguments["right"]
+    answer = arguments.left + arguments.right
     edit = types.TextDocumentEdit(
         text_document=types.OptionalVersionedTextDocumentIdentifier(
-            uri=arguments["uri"], version=document.version
+            uri=arguments.uri, version=document.version
         ),
         edits=[
             types.TextEdit(
                 new_text=f"{line.strip()} {answer}\n",
                 range=types.Range(
-                    start=types.Position(line=arguments["line"], character=0),
-                    end=types.Position(line=arguments["line"] + 1, character=0),
+                    start=types.Position(line=arguments.line, character=0),
+                    end=types.Position(line=arguments.line + 1, character=0),
                 ),
             )
         ],
     )
 
     # Apply the edit.
-    ls.apply_edit(types.WorkspaceEdit(document_changes=[edit]))
+    ls.workspace_apply_edit(
+        types.ApplyWorkspaceEditParams(
+            edit=types.WorkspaceEdit(document_changes=[edit]),
+        )
+    )
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())

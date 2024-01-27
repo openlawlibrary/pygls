@@ -24,7 +24,7 @@ from lsprotocol import types
 if typing.TYPE_CHECKING:
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture()
@@ -34,7 +34,7 @@ async def goto(get_client_for):
 
 
 async def test_declaration(
-    goto: Tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
+    goto: Tuple[LanguageClient, types.InitializeResult], path_for, uri_for
 ):
     """Ensure that we can implement declaration requests."""
     client, initialize_result = goto
@@ -56,7 +56,7 @@ async def test_declaration(
         )
     )
 
-    response = await client.text_document_declaration_async(
+    response = await client.text_document_declaration(
         types.DeclarationParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
             position=types.Position(line=6, character=47),
@@ -64,7 +64,7 @@ async def test_declaration(
     )
     assert response is None
 
-    response = await client.text_document_declaration_async(
+    response = await client.text_document_declaration(
         types.DeclarationParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
             position=types.Position(line=5, character=52),
