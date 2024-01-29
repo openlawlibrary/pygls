@@ -1,6 +1,37 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2024-01-29
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.3.0
+
+### Bug Fixes
+
+- Add missing value to `pygls.trace.server`
+
+### CI
+
+- Don't let Pyodide test fail the whole build
+- Don't trigger CI on both push and pull_request
+
+### Features
+
+- Drop Python 3.7 support
+- Update dependencies to latest(ish)
+- Enable debugging of servers in the playground
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Cattrs is a direct dependency
+- Update pytest-asyncio
+- Add pytest-lsp and lsp-devtools to Implementations.md
+- Update lsprotocol to 2023.0.1
+
+### Build
+
+- V1.3.0
+
 ## [1.2.1] - 2023-11-30
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.2.1
 
