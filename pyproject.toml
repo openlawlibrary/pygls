@@ -9,7 +9,7 @@ maintainers = [
 ]
 repository = "https://github.com/openlawlibrary/pygls"
 documentation = "https://pygls.readthedocs.io/en/latest"
-license = "Apache 2.0"
+license = "Apache-2.0"
 readme = "README.md"
 
 # You may want to use the Poetry "Up" plugin to automatically update all dependencies to
