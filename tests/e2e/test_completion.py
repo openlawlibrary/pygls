@@ -14,27 +14,38 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import Tuple
+from __future__ import annotations
 
+import typing
+
+import pytest_asyncio
 from lsprotocol import types
 
+if typing.TYPE_CHECKING:
+    from typing import Tuple
 
-from ..client import LanguageClient
+    from pygls.lsp.client import BaseLanguageClient
+
+
+@pytest_asyncio.fixture()
+async def json_server(get_client_for):
+    async for result in get_client_for("json_server.py"):
+        yield result
 
 
 async def test_completion(
-    json_server_client: Tuple[LanguageClient, types.InitializeResult],
+    json_server: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
 ):
     """Ensure that the completion methods are working as expected."""
-    client, initialize_result = json_server_client
+    client, initialize_result = json_server
 
     completion_provider = initialize_result.capabilities.completion_provider
     assert completion_provider
     assert completion_provider.trigger_characters == [","]
     assert completion_provider.all_commit_characters == [":"]
 
-    test_uri = uri_for("example.json")
+    test_uri = uri_for("test.json")
     assert test_uri is not None
 
     response = await client.text_document_completion_async(
