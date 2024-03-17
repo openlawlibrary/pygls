@@ -18,12 +18,14 @@
 ############################################################################
 import asyncio
 import pathlib
+import sys
 
 import pytest
 from lsprotocol import types, converters
 
 from pygls import uris, IS_PYODIDE
 from pygls.feature_manager import FeatureManager
+from pygls.lsp.client import BaseLanguageClient
 from pygls.workspace import Workspace
 
 from .ls_setup import (
@@ -32,7 +34,6 @@ from .ls_setup import (
     setup_ls_features,
 )
 
-from .client import create_client_for_server
 
 DOC = """document
 for
@@ -40,6 +41,10 @@ testing
 with "😋" unicode.
 """
 DOC_URI = uris.from_fs_path(__file__) or ""
+
+REPO_DIR = pathlib.Path(__file__, "..", "..").resolve()
+SERVER_DIR = REPO_DIR / "examples" / "servers"
+WORKSPACE_DIR = REPO_DIR / "examples" / "servers" / "workspace"
 
 
 ClientServer = NativeClientServer
@@ -64,20 +69,6 @@ def client_server(request):
     client_server.stop()
 
 
-@pytest.fixture(scope="session")
-def uri_for():
-    """Returns the uri corresponsing to a file in the example workspace."""
-    base_dir = pathlib.Path(
-        __file__, "..", "..", "examples", "servers", "workspace"
-    ).resolve()
-
-    def fn(*args):
-        fpath = pathlib.Path(base_dir, *args)
-        return uris.from_fs_path(str(fpath))
-
-    return fn
-
-
 @pytest.fixture()
 def event_loop():
     """Redefine `pytest-asyncio's default event_loop fixture to match the scope
@@ -95,18 +86,6 @@ def event_loop():
         pass
 
 
-@pytest.fixture(scope="session")
-def server_dir():
-    """Returns the directory where all the example language servers live"""
-    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
-    return path.resolve()
-
-
-code_action_client = create_client_for_server("code_actions.py")
-inlay_hints_client = create_client_for_server("inlay_hints.py")
-json_server_client = create_client_for_server("json_server.py")
-
-
 @pytest.fixture
 def feature_manager():
     """Return a feature manager"""
@@ -120,3 +99,110 @@ def workspace(tmpdir):
         uris.from_fs_path(str(tmpdir)),
         sync_kind=types.TextDocumentSyncKind.Incremental,
     )
+
+
+class LanguageClient(BaseLanguageClient):
+    """Language client to use for testing."""
+
+    async def server_exit(self, server: asyncio.subprocess.Process):
+        # -15: terminated (probably by the client)
+        #   0: all ok
+        if server.returncode not in {-15, 0}:
+            if server.stderr is not None:
+                err = await server.stderr.read()
+                print(f"stderr: {err.decode('utf8')}", file=sys.stderr)
+
+
+def pytest_addoption(parser):
+    """Add extra cli arguments to pytest."""
+    group = parser.getgroup("pygls")
+    group.addoption(
+        "--lsp-runtime",
+        dest="lsp_runtime",
+        action="store",
+        default="cpython",
+        choices=("cpython",),
+        help="Choose the runtime in which to run servers under test.",
+    )
+
+
+@pytest.fixture(scope="session")
+def runtime(request):
+    """This fixture is the source of truth as to which environment we should run the
+    end-to-end tests in."""
+    return request.config.getoption("lsp_runtime")
+
+
+@pytest.fixture(scope="session")
+def path_for():
+    """Returns the path corresponding to a file in the example workspace"""
+
+    def fn(*args):
+        fpath = pathlib.Path(WORKSPACE_DIR, *args)
+        assert fpath.exists()
+
+        return fpath
+
+    return fn
+
+
+@pytest.fixture(scope="session")
+def uri_for(runtime, path_for):
+    """Returns the uri corresponsing to a file in the example workspace.
+
+    Takes into account the runtime.
+    """
+
+    def fn(*args):
+        fpath = path_for(*args)
+        uri = uris.from_fs_path(str(fpath))
+
+        assert uri is not None
+        return uri
+
+    return fn
+
+
+@pytest.fixture(scope="session")
+def server_dir():
+    """Returns the directory where all the example language servers live"""
+    path = pathlib.Path(__file__) / ".." / ".." / "examples" / "servers"
+    return path.resolve()
+
+
+def get_client_for_cpython_server(uri_fixture):
+    """Return a client configured to communicate with a server running under cpython."""
+
+    async def fn(server_name: str):
+        client = LanguageClient("pygls-test-suite", "v1")
+        await client.start_io(sys.executable, str(SERVER_DIR / server_name))
+
+        response = await client.initialize_async(
+            types.InitializeParams(
+                capabilities=types.ClientCapabilities(),
+                root_uri=uri_fixture(""),
+            )
+        )
+        assert response is not None
+        yield client, response
+
+        await client.shutdown_async(None)
+        client.exit(None)
+
+        await client.stop()
+
+    return fn
+
+
+@pytest.fixture(scope="session")
+def get_client_for(runtime, uri_for):
+    """Return a client configured to communicate with the specified server.
+
+    Takes into account the current runtime.
+
+    It's the consuming fixture's responsibility to stop the client.
+    """
+    if runtime not in {"cpython"}:
+        raise NotImplementedError(f"get_client_for: {runtime=}")
+
+    return get_client_for_cpython_server(uri_for)
