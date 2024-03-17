@@ -1,0 +1,12 @@
+red is #ff0000 green is #00ff00 and blue is #0000ff
+some more colors are below
+
+yellow #ffff00
+
+pink #ff00ff
+
+cyan #00ffff
+
+short form colors are recognised too, e.g. #f00, #0f0, #00f
+
+hover over a color to reveal a color picker!
