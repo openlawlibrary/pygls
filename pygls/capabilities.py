@@ -145,7 +145,7 @@ class ServerCapabilitiesBuilder:
 
     def _with_type_definition(self):
         value = self._provider_options(
-            types.TEXT_DOCUMENT_TYPE_DEFINITION, default=types.TypeDefinitionOptions()
+            types.TEXT_DOCUMENT_TYPE_DEFINITION, default=True
         )
         if value is not None:
             self.server_cap.type_definition_provider = value
@@ -161,9 +161,7 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_implementation(self):
-        value = self._provider_options(
-            types.TEXT_DOCUMENT_IMPLEMENTATION, default=types.ImplementationOptions()
-        )
+        value = self._provider_options(types.TEXT_DOCUMENT_IMPLEMENTATION, default=True)
         if value is not None:
             self.server_cap.implementation_provider = value
         return self
