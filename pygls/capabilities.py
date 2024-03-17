@@ -201,6 +201,7 @@ class ServerCapabilitiesBuilder:
             types.TEXT_DOCUMENT_CODE_LENS, default=types.CodeLensOptions()
         )
         if value is not None:
+            value.resolve_provider = types.CODE_LENS_RESOLVE in self.features
             self.server_cap.code_lens_provider = value
         return self
 
