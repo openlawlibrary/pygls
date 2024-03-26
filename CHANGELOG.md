@@ -1,6 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2024-03-26
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.3.1
+
+### Documentation
+
+- Add systemd-language-server to implementations
+- Update implementations.md with Chapel's language server
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Apache license missing dash
+
+### Build
+
+- V1.3.1
+
 ## [1.3.0] - 2024-01-29
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.3.0
 
