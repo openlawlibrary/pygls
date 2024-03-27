@@ -14,14 +14,31 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from .client import LanguageClient
-from .protocol import LanguageServerProtocol
-from .protocol import default_converter
-from .server import LanguageServer
+import sys
+from typing import BinaryIO
+from typing import Optional
+from typing import Type
 
-__all__ = (
-    "LanguageClient",
-    "LanguageServerProtocol",
-    "LanguageServer",
-    "default_converter",
-)
+from pygls.protocol import JsonRPCHandler
+from pygls.protocol import JsonRPCProtocol
+from pygls.protocol import rpc_main_loop
+
+
+class JsonRPCServer(JsonRPCHandler):
+    """Base JSON-RPC server built on the syncronous JsonRPCHandler."""
+
+    def __init__(
+        self, *args, protocol_cls: Type[JsonRPCProtocol] = JsonRPCProtocol, **kwargs
+    ):
+        super().__init__(*args, protocol=protocol_cls(), **kwargs)
+
+    def start_io(
+        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+    ):
+        self._writer = stdout or sys.stdout.buffer
+
+        rpc_main_loop(
+            reader=stdin or sys.stdin.buffer,
+            stop_event=self._stop_event,
+            message_handler=self,
+        )

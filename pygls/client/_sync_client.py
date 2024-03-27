@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from .client import LanguageClient
-from .protocol import LanguageServerProtocol
-from .protocol import default_converter
-from .server import LanguageServer
+from pygls.protocol import JsonRPCHandler
 
-__all__ = (
-    "LanguageClient",
-    "LanguageServerProtocol",
-    "LanguageServer",
-    "default_converter",
-)
+
+class JsonRPCClient(JsonRPCHandler):
+
+    def __init__(self, *args, **kwargs):
+        # The primary use case for a fully synchronous client would be for one of the
+        # WebAssembly runtimes. However, since they cannot (yet) make network
+        # connections or spawn processes there does not seem to be much point in
+        # implementing a client at this time.
+        raise NotImplementedError("Synchronous clients not currently supported.")

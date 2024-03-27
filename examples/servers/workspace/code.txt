@@ -1,0 +1,6 @@
+type Rectangle(x, y, w, h) = {x: x, y: y, width: w, height: h }
+type Square(x, y, s) = Rectangle(x, y, s, s)
+
+fn area(rect: Rectangle) -> rect.width * rect.height
+
+fn volume(rect: Rectangle, length: float) -> area(rect) * length
