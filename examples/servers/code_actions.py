@@ -14,33 +14,26 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import logging
 import re
-from pygls.server import LanguageServer
-from lsprotocol.types import (
-    TEXT_DOCUMENT_CODE_ACTION,
-    CodeAction,
-    CodeActionKind,
-    CodeActionOptions,
-    CodeActionParams,
-    Position,
-    Range,
-    TextEdit,
-    WorkspaceEdit,
-)
 
+from lsprotocol import types
+
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
-server = LanguageServer("code-action-server", "v0.1")
+server = LanguageServer("code-action-server", "v1")
 
 
 @server.feature(
-    TEXT_DOCUMENT_CODE_ACTION,
-    CodeActionOptions(code_action_kinds=[CodeActionKind.QuickFix]),
+    types.TEXT_DOCUMENT_CODE_ACTION,
+    types.CodeActionOptions(code_action_kinds=[types.CodeActionKind.QuickFix]),
 )
-def code_actions(params: CodeActionParams):
+def code_actions(params: types.CodeActionParams):
     items = []
     document_uri = params.text_document.uri
-    document = server.workspace.get_document(document_uri)
+    document = server.workspace.get_text_document(document_uri)
 
     start_line = params.range.start.line
     end_line = params.range.end.line
@@ -49,21 +42,23 @@ def code_actions(params: CodeActionParams):
     for idx, line in enumerate(lines):
         match = ADDITION.match(line)
         if match is not None:
-            range_ = Range(
-                start=Position(line=start_line + idx, character=0),
-                end=Position(line=start_line + idx, character=len(line) - 1),
+            range_ = types.Range(
+                start=types.Position(line=start_line + idx, character=0),
+                end=types.Position(line=start_line + idx, character=len(line) - 1),
             )
 
             left = int(match.group(1))
             right = int(match.group(2))
             answer = left + right
 
-            text_edit = TextEdit(range=range_, new_text=f"{line.strip()} {answer}!")
+            text_edit = types.TextEdit(
+                range=range_, new_text=f"{line.strip()} {answer}!"
+            )
 
-            action = CodeAction(
+            action = types.CodeAction(
                 title=f"Evaluate '{match.group(0)}'",
-                kind=CodeActionKind.QuickFix,
-                edit=WorkspaceEdit(changes={document_uri: [text_edit]}),
+                kind=types.CodeActionKind.QuickFix,
+                edit=types.WorkspaceEdit(changes={document_uri: [text_edit]}),
             )
             items.append(action)
 
@@ -71,4 +66,11 @@ def code_actions(params: CodeActionParams):
 
 
 if __name__ == "__main__":
-    server.start_io()
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s]: %(message)s")
+
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())

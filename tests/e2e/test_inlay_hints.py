@@ -24,7 +24,7 @@ from lsprotocol import types
 if typing.TYPE_CHECKING:
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture()
@@ -34,7 +34,7 @@ async def inlay_hints(get_client_for):
 
 
 async def test_inlay_hints(
-    inlay_hints: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    inlay_hints: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code action server is working as expected."""
     client, initialize_result = inlay_hints
@@ -43,9 +43,7 @@ async def test_inlay_hints(
     assert inlay_hint_provider.resolve_provider is True
 
     test_uri = uri_for("sums.txt")
-    assert test_uri is not None
-
-    response = await client.text_document_inlay_hint_async(
+    response = await client.text_document_inlay_hint(
         types.InlayHintParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
             range=types.Range(
@@ -64,5 +62,5 @@ async def test_inlay_hints(
     assert three.label == ":11"
     assert three.tooltip is None
 
-    resolved = await client.inlay_hint_resolve_async(three)
+    resolved = await client.inlay_hint_resolve(three)
     assert resolved.tooltip == "Binary representation of the number: 3"

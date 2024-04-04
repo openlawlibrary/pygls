@@ -24,7 +24,7 @@ from lsprotocol import types
 if typing.TYPE_CHECKING:
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture()
@@ -34,7 +34,7 @@ async def code_actions(get_client_for):
 
 
 async def test_code_actions(
-    code_actions: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    code_actions: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code action server is working as expected."""
     client, initialize_result = code_actions
@@ -45,7 +45,7 @@ async def test_code_actions(
     test_uri = uri_for("sums.txt")
     assert test_uri is not None
 
-    response = await client.text_document_code_action_async(
+    response = await client.text_document_code_action(
         types.CodeActionParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
             range=types.Range(

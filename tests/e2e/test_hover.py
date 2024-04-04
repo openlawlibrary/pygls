@@ -26,7 +26,7 @@ if typing.TYPE_CHECKING:
     from typing import List
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -73,7 +73,7 @@ async def hover(get_client_for):
 )
 @pytest.mark.asyncio(scope="module")
 async def test_hover(
-    hover: Tuple[BaseLanguageClient, types.InitializeResult],
+    hover: Tuple[LanguageClient, types.InitializeResult],
     uri_for,
     position: types.Position,
     expected: List[str],
@@ -85,7 +85,7 @@ async def test_hover(
     assert hover_options is True
 
     test_uri = uri_for("dates.txt")
-    response = await client.text_document_hover_async(
+    response = await client.text_document_hover(
         types.HoverParams(
             position=position,
             text_document=types.TextDocumentIdentifier(uri=test_uri),

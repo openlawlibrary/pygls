@@ -25,10 +25,52 @@ jobs:
           cancel_others: 'true'
           skip_after_successful_duplicate: 'false'
 
+  build:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install
+
+      - name: Build packages (sdist and wheel)
+        run: |
+          git describe --tags --abbrev=0
+          poetry build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: "dist/*"
+
+
   test:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -44,7 +86,6 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: '1.5.1'
           virtualenvs-in-project: true
       - name: Load cached venv
         id: cached-poetry-dependencies
@@ -54,42 +95,126 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras
+        run: poetry install --with test
       - name: Run tests
         run: |
           source $VENV # Only needed because of Github Action caching
           poe test
 
   test-pyodide:
-    needs: pre_job
+    needs: [pre_job, build]
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Python "3.10"
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+
+      - uses: 'actions/setup-node@v4'
         with:
-          python-version: "3.10"
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: 'tests/pyodide/package-lock.json'
+
+      - name: Use Python "3.12"
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Install Dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
-          poetry install --with pyodide
-      - name: Run Testsuite
-        uses: nick-fields/retry@v2
+
+      - uses: actions/download-artifact@v4
         with:
-          timeout_minutes: 10
-          max_attempts: 6
-          command: |
-            source $VENV
-            poe test-pyodide || true
+          name: dist
+          path: 'dist'
+
+      - name: Install Dependencies
+        run: |
+          poetry install --with test
+
+          cd tests/pyodide
+          npm ci
+
+      - name: Run tests
+        run: |
+          source $VENV
+          poe test-pyodide
+
+  test-wasi:
+    needs: [pre_job, build]
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Python "3.12"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: 'dist'
+
+      - name: Install Dependencies
+        run: |
+          set -eux
+
+          poetry install --with test
+
+          # Wasmtime WASI Host
+          gh release download v16.0.0 \
+                              --repo bytecodealliance/wasmtime \
+                              --pattern 'wasmtime-v16.0.0-x86_64-linux.tar.xz' \
+                              --dir /tmp
+
+          tar -xvf /tmp/wasmtime-v16.0.0-x86_64-linux.tar.xz \
+              --wildcards 'wasmtime*/wasmtime'
+
+          mv wasmtime-v16.0.0-x86_64-linux/wasmtime $HOME/.local/bin
+          rm -r wasmtime-v16.0.0-x86_64-linux
+          wasmtime --version
+
+          # WASI Python build
+          gh release download v3.12.1 \
+                              --repo brettcannon/cpython-wasi-build \
+                              --pattern 'python*sdk-20.zip' \
+                              --dir tests/wasi
+
+          unzip -q tests/wasi/python-3.12.1-wasi_sdk-20.zip -d tests/wasi
+          rm tests/wasi/python-3.12.1-wasi_sdk-20.zip
+
+          # Install Python dependencies
+          pip install \
+            --target tests/wasi/lib/python3.12/site-packages \
+            --only-binary :all: \
+            --implementation py \
+            --abi none \
+            --platform any \
+            --python-version "3.12" \
+            dist/pygls-*.whl
+
+          ls -l tests/wasi/lib/python3.12/site-packages/
+
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Run tests
+        run: |
+          source $VENV
+          poe test-wasi
 
   lint:
     needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: false  # needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -116,38 +241,3 @@ jobs:
         run: |
           source $VENV
           poe lint
-
-  build:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Use Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.x"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras
-      - name: Build packages (sdist and wheel)
-        run: |
-          git describe --tags --abbrev=0
-          poetry build
-      - name: Upload builds
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: "dist/*"

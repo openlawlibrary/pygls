@@ -14,12 +14,14 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import logging
 import re
 from typing import Optional
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 
 NUMBER = re.compile(r"\d+")
 COMMENT = re.compile(r"^#$")
@@ -113,4 +115,10 @@ def inlay_hint_resolve(hint: types.InlayHint):
 
 
 if __name__ == "__main__":
-    server.start_io()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())

@@ -29,10 +29,8 @@ ws = ["websockets"]
 [tool.poetry.group.dev.dependencies]
 # Replaces (amongst many other things) flake8 and bandit
 ruff = ">=0.1.6"
-# TODO `poethepoet>=0.20` needs python 3.8
 poethepoet = ">=0.24.4"
 mypy = ">=1.7.1"
-# TODO `black>=23` needs python 3.8
 black = ">=23.11.0"
 
 [tool.poetry.group.test.dependencies]
@@ -46,19 +44,17 @@ pytest-asyncio = ">=0.21.0"
 sphinx = ">=7.1.2"
 sphinx-rtd-theme = ">=1.3.0"
 
-[tool.poetry.group.pyodide.dependencies]
-selenium = "^4.15.2"
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
 [tool.poe.tasks]
-test-pyodide = "python tests/pyodide_testrunner/run.py"
+test-pyodide = "pytest tests/e2e --lsp-runtime pyodide"
+test-wasi = "pytest tests/e2e --lsp-runtime wasi --log-cli-level debug"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
 check_generated_client = "python scripts/check_client_is_uptodate.py"
 check_commit_style = "npx commitlint --from origin/main --to HEAD --verbose --config commitlintrc.yaml"
-generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
+generate_code = "python scripts/generate_base_lsp_classes.py --outdir pygls/lsp"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
 poetry_lock_check = "poetry check"

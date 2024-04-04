@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from .client import LanguageClient
-from .protocol import LanguageServerProtocol
-from .protocol import default_converter
-from .server import LanguageServer
+from pygls import IS_WASM
 
-__all__ = (
-    "LanguageClient",
-    "LanguageServerProtocol",
-    "LanguageServer",
-    "default_converter",
-)
+if not IS_WASM:
+    from ._async_client import JsonRPCClient
+else:
+    from ._sync_client import JsonRPCClient
+
+__all__ = [
+    "JsonRPCClient",
+]

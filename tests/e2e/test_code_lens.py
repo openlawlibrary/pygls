@@ -25,7 +25,7 @@ from lsprotocol import types
 if typing.TYPE_CHECKING:
     from typing import Tuple
 
-    from pygls.lsp.client import BaseLanguageClient
+    from pygls.lsp.client import LanguageClient
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -36,7 +36,7 @@ async def code_lens(get_client_for):
 
 @pytest.mark.asyncio(scope="module")
 async def test_code_lens(
-    code_lens: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    code_lens: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code lens server is working as expected."""
     client, initialize_result = code_lens
@@ -45,7 +45,7 @@ async def test_code_lens(
     assert code_lens_options.resolve_provider is True
 
     test_uri = uri_for("sums.txt")
-    response = await client.text_document_code_lens_async(
+    response = await client.text_document_code_lens(
         types.CodeLensParams(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
         )
@@ -77,15 +77,13 @@ async def test_code_lens(
 
 @pytest.mark.asyncio(scope="module")
 async def test_code_lens_resolve(
-    code_lens: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    code_lens: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code lens server can resolve a code lens correctly."""
 
     client, _ = code_lens
 
     test_uri = uri_for("sums.txt")
-    assert test_uri is not None
-
     lens = types.CodeLens(
         range=types.Range(
             start=types.Position(line=0, character=0),
@@ -94,7 +92,7 @@ async def test_code_lens_resolve(
         data=dict(left=1, right=1, uri=test_uri),
     )
 
-    result = await client.code_lens_resolve_async(lens)
+    result = await client.code_lens_resolve(lens)
 
     # The existing fields should not be modified.
     assert result.range == lens.range
@@ -110,7 +108,7 @@ async def test_code_lens_resolve(
 
 @pytest.mark.asyncio(scope="module")
 async def test_evaluate_sum(
-    code_lens: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    code_lens: Tuple[LanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code lens server can execute the ``evaluateSum`` command
     correctly."""
@@ -127,9 +125,7 @@ async def test_evaluate_sum(
     assert provider.commands == ["codeLens.evaluateSum"]
 
     test_uri = uri_for("sums.txt")
-    assert test_uri is not None
-
-    await client.workspace_execute_command_async(
+    await client.workspace_execute_command(
         types.ExecuteCommandParams(
             command="codeLens.evaluateSum",
             arguments=[dict(uri=test_uri, left=1, right=1, line=0)],
@@ -144,7 +140,7 @@ async def test_evaluate_sum(
             ),
             edits=[
                 types.TextEdit(
-                    new_text="1 + 1 = 2\n",
+                    new_text=f"1 + 1 = 2\n",
                     range=types.Range(
                         start=types.Position(line=0, character=0),
                         end=types.Position(line=1, character=0),

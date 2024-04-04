@@ -19,7 +19,8 @@ import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ARGUMENT = re.compile(r"(?P<name>\w+): (?P<type>\w+)")
@@ -111,6 +112,11 @@ def goto_definition(ls: GotoLanguageServer, params: types.DefinitionParams):
     if index is None:
         return
 
+    try:
+        line = doc.lines[params.position.line]
+    except IndexError:
+        line = ""
+
     word = doc.word_at_position(params.position)
 
     # Is word a type?
@@ -191,4 +197,10 @@ def find_references(ls: GotoLanguageServer, params: types.ReferenceParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())

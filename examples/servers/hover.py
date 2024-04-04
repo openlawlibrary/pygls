@@ -19,7 +19,8 @@ from datetime import datetime
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 
 DATE_FORMATS = [
     "%H:%M:%S",
@@ -75,4 +76,9 @@ def hover(params: types.HoverParams):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    server.start_io()
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())

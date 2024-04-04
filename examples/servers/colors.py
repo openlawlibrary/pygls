@@ -19,7 +19,8 @@ import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls import IS_WASM
+from pygls.lsp.server import LanguageServer
 
 COLOR = re.compile(r"""\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})(?!\w)""")
 server = LanguageServer("color-server", "v1")
@@ -82,4 +83,10 @@ def color_presentation(params: types.ColorPresentationParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+
+    if IS_WASM:
+        server.start_io()
+    else:
+        import asyncio
+
+        asyncio.run(server.start_io())
