@@ -24,6 +24,14 @@ from lsprotocol import types
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
+_SUPPORTED_ENCODINGS = frozenset(
+    [
+        types.PositionEncodingKind.Utf8,
+        types.PositionEncodingKind.Utf16,
+        types.PositionEncodingKind.Utf32,
+    ]
+)
+
 
 def get_capability(
     client_capabilities: types.ClientCapabilities, field: str, default: Any = None
@@ -401,16 +409,11 @@ class ServerCapabilitiesBuilder:
         if encodings is None:
             return self
 
-        if types.PositionEncodingKind.Utf16 in encodings:
-            return self
-
-        if types.PositionEncodingKind.Utf32 in encodings:
-            self.server_cap.position_encoding = types.PositionEncodingKind.Utf32
-            return self
-
-        if types.PositionEncodingKind.Utf8 in encodings:
-            self.server_cap.position_encoding = types.PositionEncodingKind.Utf8
-            return self
+        # We match client preference where this an overlap between its and our supported encodings.
+        for encoding in encodings:
+            if encoding in _SUPPORTED_ENCODINGS:
+                self.server_cap.position_encoding = encoding
+                return self
 
         logger.warning(f"Unknown `PositionEncoding`s: {encodings}")
 
