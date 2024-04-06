@@ -240,6 +240,19 @@ def server_capabilities(**kwargs):
                     ]
                 )
             ),
+            server_capabilities(position_encoding=lsp.PositionEncodingKind.Utf8),
+        ),
+        (
+            lsp.INITIALIZE,
+            None,
+            lsp.ClientCapabilities(
+                general=lsp.GeneralClientCapabilities(
+                    position_encodings=[
+                        lsp.PositionEncodingKind.Utf32,
+                        lsp.PositionEncodingKind.Utf8,
+                    ]
+                )
+            ),
             server_capabilities(position_encoding=lsp.PositionEncodingKind.Utf32),
         ),
         (
