@@ -1,5 +1,6 @@
 """Script to automatically generate a lanaguge client from `lsprotocol` type definitons
 """
+
 import argparse
 import inspect
 import pathlib

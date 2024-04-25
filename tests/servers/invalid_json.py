@@ -1,4 +1,5 @@
 """This server does nothing but print invalid JSON."""
+
 import asyncio
 import threading
 import sys

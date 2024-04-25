@@ -59,8 +59,7 @@ class PyodideTestTransportAdapter:
     def __init__(self, dest: LanguageServer):
         self.dest = dest
 
-    def close(self):
-        ...
+    def close(self): ...
 
     def write(self, data):
         object_hook = self.dest.lsp._deserialize_message
@@ -84,8 +83,7 @@ class PyodideClientServer:
     def start(self):
         self.initialize()
 
-    def stop(self):
-        ...
+    def stop(self): ...
 
     @classmethod
     def decorate(cls):
