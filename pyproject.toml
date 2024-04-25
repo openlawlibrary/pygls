@@ -32,8 +32,7 @@ ruff = ">=0.1.6"
 # TODO `poethepoet>=0.20` needs python 3.8
 poethepoet = ">=0.24.4"
 mypy = ">=1.7.1"
-# TODO `black>=23` needs python 3.8
-black = ">=23.11.0"
+black = "^24.4.1"
 
 [tool.poetry.group.test.dependencies]
 # Note: `coverage` requires that your Python was built with system `sqlite` development files
