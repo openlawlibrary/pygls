@@ -11,6 +11,7 @@
 | `inlay_hints.py` | `sums.txt` | Use inlay hints to show the binary representation of numbers in the file |
 | `publish_diagnostics.py` | `sums.txt` | Use "push-model" diagnostics to highlight missing or incorrect answers |
 | `pull_diagnostics.py` | `sums.txt` | Use "pull-model" diagnostics to highlight missing or incorrect answers |
+| `rename.py` | `code.txt` | Implements symbol renaming |
 
 
 [^1]: To enable as-you-type formatting, be sure to uncomment the `editor.formatOnType` option in `.vscode/settings.json`
