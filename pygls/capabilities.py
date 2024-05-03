@@ -248,9 +248,25 @@ class ServerCapabilitiesBuilder:
         return self
 
     def _with_rename(self):
-        value = self._provider_options(types.TEXT_DOCUMENT_RENAME, default=True)
-        if value is not None:
-            self.server_cap.rename_provider = value
+        server_supports_rename = types.TEXT_DOCUMENT_RENAME in self.features
+        if server_supports_rename is False:
+            return self
+
+        client_prepare_support = get_capability(
+            self.client_capabilities, "text_document.rename.prepare_support", False
+        )
+
+        # From the spec:
+        # > RenameOptions may only be specified if the client states that it supports
+        # > prepareSupport in its initial initialize request.
+        if not client_prepare_support:
+            self.server_cap.rename_provider = server_supports_rename
+
+        else:
+            self.server_cap.rename_provider = types.RenameOptions(
+                prepare_provider=types.TEXT_DOCUMENT_PREPARE_RENAME in self.features
+            )
+
         return self
 
     def _with_folding_range(self):

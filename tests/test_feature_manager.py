@@ -709,6 +709,60 @@ def test_register_feature(
     assert expected == actual
 
 
+def test_register_prepare_rename_no_client_support(feature_manager: FeatureManager):
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_RENAME)
+    def _():
+        pass
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_PREPARE_RENAME)
+    def _():
+        pass
+
+    expected = server_capabilities(rename_provider=True)
+
+    actual = ServerCapabilitiesBuilder(
+        lsp.ClientCapabilities(),
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+        None,
+    ).build()
+
+    assert expected == actual
+
+
+def test_register_prepare_rename_with_client_support(feature_manager: FeatureManager):
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_RENAME)
+    def _():
+        pass
+
+    @feature_manager.feature(lsp.TEXT_DOCUMENT_PREPARE_RENAME)
+    def _():
+        pass
+
+    expected = server_capabilities(
+        rename_provider=lsp.RenameOptions(prepare_provider=True)
+    )
+
+    actual = ServerCapabilitiesBuilder(
+        lsp.ClientCapabilities(
+            text_document=lsp.TextDocumentClientCapabilities(
+                rename=lsp.RenameClientCapabilities(prepare_support=True)
+            )
+        ),
+        feature_manager.features.keys(),
+        feature_manager.feature_options,
+        [],
+        None,
+        None,
+    ).build()
+
+    assert expected == actual
+
+
 def test_register_inlay_hint_resolve(feature_manager: FeatureManager):
     @feature_manager.feature(lsp.TEXT_DOCUMENT_INLAY_HINT)
     def _():
