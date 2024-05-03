@@ -19,6 +19,7 @@
 import asyncio
 import pathlib
 import sys
+from typing import Optional
 
 import pytest
 from lsprotocol import types, converters
@@ -173,13 +174,15 @@ def server_dir():
 def get_client_for_cpython_server(uri_fixture):
     """Return a client configured to communicate with a server running under cpython."""
 
-    async def fn(server_name: str):
+    async def fn(
+        server_name: str, capabilities: Optional[types.ClientCapabilities] = None
+    ):
         client = LanguageClient("pygls-test-suite", "v1")
         await client.start_io(sys.executable, str(SERVER_DIR / server_name))
 
         response = await client.initialize_async(
             types.InitializeParams(
-                capabilities=types.ClientCapabilities(),
+                capabilities=capabilities or types.ClientCapabilities(),
                 root_uri=uri_fixture(""),
             )
         )
