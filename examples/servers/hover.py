@@ -31,10 +31,10 @@ server = LanguageServer("hover-server", "v1")
 
 
 @server.feature(types.TEXT_DOCUMENT_HOVER)
-def hover(params: types.HoverParams):
+def hover(ls: LanguageServer, params: types.HoverParams):
     pos = params.position
     document_uri = params.text_document.uri
-    document = server.workspace.get_text_document(document_uri)
+    document = ls.workspace.get_text_document(document_uri)
 
     try:
         line = document.lines[pos.line]
