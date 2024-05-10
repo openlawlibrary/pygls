@@ -18,6 +18,7 @@
 | _VSCode `black` extension_   | [Microsoft](https://github.com/microsoft) | [vscode-black-formatter](https://github.com/microsoft/vscode-black-formatter) | VSCode extension for Python's [black](https://github.com/psf/black) |
 | _VSCode `isort` extension_   | [Microsoft](https://github.com/microsoft) | [vscode-isort](https://github.com/microsoft/vscode-isort) | VSCode extension for Python's [isort](https://pycqa.github.io/isort) |
 | _VSCode `flake8` extension_   | [Microsoft](https://github.com/microsoft) | [vscode-flake8](https://github.com/microsoft/vscode-flake8) | VSCode extension for Python's [flake8](https://github.com/PyCQA/flake8) |
+| _VSCode `Kedro` extension_   | [Kedro](https://github.com/kedro-org/kedro) | [vscode-kedro](https://github.com/kedro-org/vscode-kedro) | Kedro Langauge Server and schema validation extension |
 | _VSCode `mypy` extension_   | [Microsoft](https://github.com/microsoft) | [vscode-mypy](https://github.com/microsoft/vscode-mypy) | VSCode extension for Python's [mypy](https://github.com/python/mypy) |
 | _VSCode `pylint` extension_   | [Microsoft](https://github.com/microsoft) | [vscode-pylint](https://github.com/microsoft/vscode-pylint) | VSCode extension for Python's [pylint](https://github.com/PyCQA/pylint) |
 | _VSCode `ufmt` extension_   | [Omnilib](https://github.com/omnilib) | [vscode-ufmt](https://github.com/omnilib/vscode-ufmt) | VSCode extension for Python's [ufmt](https://ufmt.omnilib.dev/en/stable/) |
