@@ -114,7 +114,3 @@ venv.bak/
 .dmypy.json
 
 /pyodide_testrunner
-
-# VS Code settings
-.vscode/
-!examples/servers/.vscode

@@ -1,6 +1,6 @@
 # Pygls Playground
 
-![Screenshot of the vscode-playground extension in action](https://user-images.githubusercontent.com/2675694/260591942-b7001a7b-3081-439d-b702-5f8a489856db.png)
+![Screenshot of the pygls-playground extension in action](https://user-images.githubusercontent.com/2675694/260591942-b7001a7b-3081-439d-b702-5f8a489856db.png)
 
 This VSCode extension aims to serve two purposes.
 
@@ -21,7 +21,12 @@ Open a terminal in the repository's root directory
    python -m venv env
    ```
 
-1. Install pygls
+1. Activate the environment
+   ```
+   source ./env/bin/activate
+   ```
+
+1. Install `pygls`
    ```
    python -m pip install -e .
    ```
@@ -42,7 +47,18 @@ Open terminal in the same directory as this file and execute following commands:
    ```
    Alternatively you can run `npm run watch` if you are going to be actively working on the extension itself.
 
-### Run Extension
+### Run Extension (VSCode v1.89+)
+
+1. Open the `pygls` repository in VSCode
+
+1. Goto the `Extensions` tab (`Ctrl+Shift+X`), find the `pygls-playground` extension in the *Recommended* section and click the `Install Workspace Extension` button
+
+1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`.
+   The `Python: Select Interpreter` command can be used to pick the correct one.
+
+   Alternatively, you can set the `pygls.server.pythonPath` option in the `.vscode/settings.json` file
+
+### Run Extension (VSCode v1.88 and older)
 
 1. Open this directory in VS Code
 
@@ -51,7 +67,7 @@ Open terminal in the same directory as this file and execute following commands:
 
 1. Open the Run and Debug view (`ctrl + shift + D`)
 
-1. Select `Launch Client` and press `F5`, this will open a second VSCode window with the `vscode-playground` extension enabled.
+1. Select `Launch Client` and press `F5`, this will open a second VSCode window with the `pygls-playground` extension enabled.
 
 1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`.
    The `Python: Select Interpreter` command can be used to pick the correct one.
