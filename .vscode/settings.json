@@ -1,7 +1,7 @@
 {
     "[plaintext]": {
         // Uncomment to enable `textDocument/onTypeFormatting` requests
-        //"editor.formatOnType": true
+        // "editor.formatOnType": true
     },
     // Uncomment to override Python interpreter used.
     // "pygls.server.pythonPath": "/path/to/python",
