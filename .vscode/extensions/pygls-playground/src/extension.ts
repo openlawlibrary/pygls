@@ -281,7 +281,7 @@ function getCwd(): string {
     }
 
     const serverDir = path.resolve(
-        path.join(__dirname, "..", "..", "servers")
+        path.join(__dirname, "..", "..", "..", "..", "examples", "servers")
     )
     return serverDir
 }
