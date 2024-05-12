@@ -1,8 +1,13 @@
-name: vscode-playground
+name: pygls-playground
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+    - main
+
+  pull_request:
+    branches:
+    - main
 
 jobs:
   build:
@@ -11,29 +16,24 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: examples/vscode-playground
+        working-directory: .vscode/extensions/pygls-playground
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('examples/vscode-playground/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version: "18.x"
+          cache: 'npm'
+          cache-dependency-path: '.vscode/extensions/pygls-playground/package-lock.json'
 
       - name: Install dependencies
         run: |
-          npm i
+          npm ci
           npm i vsce
 
       - name: Lint
@@ -65,10 +65,10 @@ jobs:
           npx vsce ls | grep out/extension.js
 
       - name: Upload VSIX
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: vscode-playground-vsix
+          name: pygls-playground-vsix
           # The path must be rooted from the directory GitHub Actions starts
           # from, not the working-directory.
-          path: examples/vscode-playground/*.vsix
+          path: .vscode/extensions/pygls-playground/*.vsix
           if-no-files-found: error
