@@ -216,6 +216,7 @@ class ServerCapabilitiesBuilder:
             types.TEXT_DOCUMENT_DOCUMENT_LINK, default=types.DocumentLinkOptions()
         )
         if value is not None:
+            value.resolve_provider = types.DOCUMENT_LINK_RESOLVE in self.features
             self.server_cap.document_link_provider = value
         return self
 
