@@ -268,22 +268,33 @@ async function executeServerCommand() {
 }
 
 /**
- * If the user has explicitly provided a src directory use that.
- * Otherwise, fallback to the examples/servers directory.
  *
  * @returns The working directory from which to launch the server
  */
 function getCwd(): string {
     const config = vscode.workspace.getConfiguration("pygls.server")
-    const cwd = config.get<string>('cwd')
-    if (cwd) {
-        return cwd
+    let cwd = config.get<string>('cwd')
+    if (!cwd) {
+        const message = "Please set a working directory via the `pygls.server.cwd` setting"
+        logger.error(message)
+        throw new Error(message)
     }
 
-    const serverDir = path.resolve(
-        path.join(__dirname, "..", "..", "..", "..", "examples", "servers")
-    )
-    return serverDir
+    // Check for ${workspaceFolder} etc.
+    const match = cwd.match(/^\${(\w+)}/)
+    if (match && (match[1] === 'workspaceFolder' || match[1] === 'workspaceRoot')) {
+        if (!vscode.workspace.workspaceFolders) {
+            const message = "The 'pygls-playground' extension requires an open workspace"
+            logger.error(message)
+            throw new Error(message)
+        }
+
+        // Assume a single workspace...
+        const workspaceFolder = vscode.workspace.workspaceFolders[0].uri.fsPath
+        cwd = cwd.replace(match[0], workspaceFolder)
+    }
+
+    return cwd
 }
 
 /**

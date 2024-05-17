@@ -8,14 +8,10 @@
     "pygls.server.debug": false,
     // "pygls.server.debugHost": "localhost",
     // "pygls.server.debugPort": 5678,
-    "pygls.server.launchScript": "formatting.py",
+    "pygls.server.launchScript": "formatting.py", // This is relative to `pygls.server.cwd`
+    "pygls.server.cwd": "${workspaceFolder}/examples/servers",
     "pygls.trace.server": "off",
     "pygls.client.documentSelector": [
-        // {
-        //     "scheme": "file",
-        //     "language": "json"
-        // }
-        // Uncomment to use code_actions or inlay_hints servers
         {
             "scheme": "file",
             "language": "plaintext"
