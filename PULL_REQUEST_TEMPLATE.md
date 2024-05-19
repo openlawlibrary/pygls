@@ -11,4 +11,12 @@ _Please replace this description with a concise description of this Pull Request
 - [ ] Docstrings have been included and/or updated, as appropriate
 - [ ] Standalone docs have been updated accordingly
 
+## Automated linters
+
+You can run the lints that are run on CI locally with:
+```sh
+poetry install --all-extras --with dev
+poetry run poe lint
+```
+
 [commit messages]: https://conventionalcommits.org/
