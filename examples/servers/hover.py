@@ -14,6 +14,15 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the :lsp:`textDocument/hover` request.
+
+Typically this method will be called when the user places their mouse or cursor over a
+symbol in a document, allowing you to provide documentation for the selected symbol.
+
+This server implements `textDocument/hover` for various datetime representations,
+displaying a table how the selected date would be formatted in each of the supported
+formats.
+"""
 import logging
 from datetime import datetime
 

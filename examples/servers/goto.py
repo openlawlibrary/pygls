@@ -14,6 +14,24 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the various Goto "X" requests from the specification.
+
+- :lsp:`textDocument/definition`
+- :lsp:`textDocument/declaration`
+- :lsp:`textDocument/implementation`
+- :lsp:`textDocument/typeDefinition`
+
+Along with the :lsp:`textDocument/references` request.
+
+As you will see all of these methods are essentially the same, they accept a document
+uri and they return zero or more locations (even goto definition can return multiple
+results!).
+The only difference between them are whatever the semantic differences are between say a
+definition and a declaration in your target language.
+
+This means the choices of what the example server below will return results for are
+completely arbitrary.
+"""
 import logging
 import re
 

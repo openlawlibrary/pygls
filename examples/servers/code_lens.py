@@ -14,6 +14,20 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the :lsp:`textDocument/codeLens` and :lsp:`codeLens/resolve` requests.
+
+`In VSCode <https://code.visualstudio.com/blogs/2017/02/12/code-lens-roundup>`__
+a code lens is shown as "ghost text" above some line of actual code in your document.
+These lenses are typically used to show some contextual information (e.g. number of
+references) or provide easy access to some command (e.g. run this test).
+
+This server scans the document for incomplete sums e.g. ``1 + 1 =`` and returns a code
+lens object which, when clicked, will call the ``codeLens.evaluateSum`` command to fill
+in the answer.
+Note that while we could have easily compute the ``command`` field of the code lens up
+front, this example demonstrates how the ``codeLens/resolve`` can be used to defer this
+computation until it is actually necessary.
+"""
 import logging
 import re
 

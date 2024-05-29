@@ -14,6 +14,22 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""In addition to implementing a variety of LSP methods, this larger example
+demonstrates a number of pygls' capabilities including
+
+- Defining custom commands
+- Progress updates
+- Fetching configuration values from the client
+- Running methods in a thread
+- Async methods
+- Dynamic method (un)registration
+- Starting a TCP/WebSocket server.
+
+This is left over from a time where *pygls* tried to have a single example server to
+demonstrate all of its features.
+Eventually this example will be broken up in smaller, more focused examples and how to
+guides.
+"""
 import argparse
 import asyncio
 import json

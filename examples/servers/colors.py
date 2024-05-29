@@ -14,6 +14,35 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the :lsp:`textDocument/documentColor` and
+:lsp:`textDocument/colorPresentation` requests.
+
+Together these methods allow you to teach a language client how to recognise and
+display colors that may appear in your document.
+As an example, think of the different ways you can write a color in a CSS file
+
+- ``black``
+- ``#000``
+- ``#000000``
+- ``rgb(0, 0, 0)``
+- ``hsl(...)``
+- etc.
+
+By implementing the ``textDocument/documentColor`` request you can tell the client about
+all the places within a document that represent a color, and what its equivalent RGBA
+value is.
+`In VSCode <https://code.visualstudio.com/docs/languages/css#_syntax-coloring-color-preview>`__
+these locations will be represented by a small colored square next to the color value.
+
+Some editors (like VSCode) also provide a color picker.
+By implementing the ``textDocument/colorPresentation`` request, you provide the
+conversion from an RGBA color value into its equivalent representation in your document's
+syntax.
+This will allow the user to easily choose new color values from within their text editor.
+
+This server implements the requests defined above for CSS's hex color code syntax
+(``#000`` and ``#000000``).
+"""
 import logging
 import re
 

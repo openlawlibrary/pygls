@@ -14,6 +14,21 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements :lsp:`textDocument/rename` and :lsp:`textDocument/prepareRename`
+
+The ``textDocument/rename`` method should return a collection of edits the client should
+perform in order to correctly rename all occurances of the given symbol.
+
+The ``textDocument/prepareRename`` method is used by the client to check that it
+actually makes sense to rename the given symbol, giving the server chance to reject the
+operation as invalid.
+
+.. note::
+
+   This server's rename implementation is no different to a naive find and replace,
+   a real server would have to check to make sure it only renames symbols in the
+   relevant scope.
+"""
 import logging
 import re
 from typing import List

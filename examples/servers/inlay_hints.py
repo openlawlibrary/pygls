@@ -14,32 +14,28 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the :lsp:`textDocument/inlayHint` and :lsp:`inlayHint/resolve`
+requests.
+
+In editors
+`like VSCode <https://code.visualstudio.com/Docs/editor/editingevolved#_inlay-hints>`__
+inlay hints are often rendered as inline "ghost text".
+They are typically used to show the types of variables and return values from functions.
+
+This server implements ``textDocument/inlayHint`` to scan the given document for integer
+values and returns the equivalent representation of that number in binary.
+While we could easily compute the inlay hint's tooltip in the same method, this example
+uses the ``inlayHint/resolve`` to demonstrate how you can defer expensive computations
+to when they are required.
+"""
 import re
 from typing import Optional
 
 from lsprotocol import types
-
 from pygls.server import LanguageServer
 
 NUMBER = re.compile(r"\d+")
-COMMENT = re.compile(r"^#$")
-
-
-server = LanguageServer(
-    name="inlay-hint-server",
-    version="v0.1",
-    notebook_document_sync=types.NotebookDocumentSyncOptions(
-        notebook_selector=[
-            types.NotebookDocumentSyncOptionsNotebookSelectorType2(
-                cells=[
-                    types.NotebookDocumentSyncOptionsNotebookSelectorType2CellsType(
-                        language="python"
-                    )
-                ]
-            )
-        ]
-    ),
-)
+server = LanguageServer("inlay-hint-server", "v1")
 
 
 def parse_int(chars: str) -> Optional[int]:
@@ -60,25 +56,6 @@ def inlay_hints(params: types.InlayHintParams):
 
     lines = document.lines[start_line : end_line + 1]
     for lineno, line in enumerate(lines):
-        match = COMMENT.match(line)
-        if match is not None:
-            nb = server.workspace.get_notebook_document(cell_uri=document_uri)
-            if nb is not None:
-                idx = 0
-                for idx, cell in enumerate(nb.cells):
-                    if cell.document == document_uri:
-                        break
-
-                items.append(
-                    types.InlayHint(
-                        label=f"notebook: {nb.uri}, cell {idx+1}",
-                        kind=types.InlayHintKind.Type,
-                        padding_left=False,
-                        padding_right=True,
-                        position=types.Position(line=lineno, character=match.end()),
-                    )
-                )
-
         for match in NUMBER.finditer(line):
             if not match:
                 continue
