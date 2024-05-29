@@ -21,7 +21,7 @@ allows you to write your own `language server`_ in just a few lines of code
    :hidden:
    :caption: User Guide
 
-   tutorial
+   getting-started
    user-guide
    How To <howto>
    reference
@@ -40,12 +40,12 @@ The documentation is divided up into the following sections
 .. grid:: 1 2 2 2
    :gutter: 2
 
-   .. grid-item-card:: Tutorial
-      :link: /tutorial
+   .. grid-item-card:: Getting Started
+      :link: /getting-started
       :link-type: doc
       :text-align: center
 
-      Step-by-step guides on writing your first language server with *pygls*.
+      First steps with *pygls*.
 
    .. grid-item-card:: How To Guides
       :link: /howto

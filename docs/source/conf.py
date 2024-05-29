@@ -12,10 +12,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('./ext'))
+
 import importlib.metadata
+import pathlib
 import re
 from docutils import nodes
 
@@ -45,16 +47,22 @@ description = "a pythonic generic language server"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    # Built-in extensions
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
+    # 3rd party extensions
     "myst_parser",
     "sphinx_design",
+    # Local extensions
+    "examples",
 ]
 
 autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "all"
+
+example_server_dir = pathlib.Path(__file__).parent.parent.parent / "examples" / "servers"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
