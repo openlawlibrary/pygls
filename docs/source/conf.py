@@ -12,14 +12,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('./ext'))
-
 import importlib.metadata
+import os
 import pathlib
 import re
+import sys
+
 from docutils import nodes
+
+sys.path.insert(0, os.path.abspath("./ext"))
 
 
 # -- Project information -----------------------------------------------------
@@ -62,7 +63,9 @@ autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "all"
 
-example_server_dir = pathlib.Path(__file__).parent.parent.parent / "examples" / "servers"
+example_server_dir = (
+    pathlib.Path(__file__).parent.parent.parent / "examples" / "servers"
+)
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
