@@ -4,27 +4,10 @@
 
 `pygls`_ (pronounced like “pie glass”) is a generic implementation of
 the `Language Server Protocol`_ written in the Python programming language. It
-allows you to write your own `language server`_ in just a few lines of code::
+allows you to write your own `language server`_ in just a few lines of code
 
-   from pygls.server import LanguageServer
-   from lsprotocol import types
-
-   server = LanguageServer("example-server", "v0.1")
-
-   @server.feature(types.TEXT_DOCUMENT_COMPLETION)
-   def completions(params: types.CompletionParams):
-       items = []
-       document = server.workspace.get_text_document(params.text_document.uri)
-       current_line = document.lines[params.position.line].strip()
-       if current_line.endswith("hello."):
-           items = [
-               types.CompletionItem(label="world"),
-               types.CompletionItem(label="friend"),
-           ]
-       return types.CompletionList(is_incomplete=False, items=items)
-
-   if __name__ == "__main__":
-       server.start_io()
+.. literalinclude:: ../../examples/hello-world/main.py
+   :language: python
 
 *pygls* supports
 

@@ -1,28 +1,23 @@
 from pygls.server import LanguageServer
-from lsprotocol.types import (
-    TEXT_DOCUMENT_COMPLETION,
-    CompletionItem,
-    CompletionList,
-    CompletionParams,
-)
+from lsprotocol import types
 
 server = LanguageServer("example-server", "v0.1")
 
-
-@server.feature(TEXT_DOCUMENT_COMPLETION)
-def completions(params: CompletionParams):
-    items = []
+@server.feature(
+    types.TEXT_DOCUMENT_COMPLETION,
+    types.CompletionOptions(trigger_characters=["."]),
+)
+def completions(params: types.CompletionParams):
     document = server.workspace.get_document(params.text_document.uri)
     current_line = document.lines[params.position.line].strip()
-    if current_line.endswith("hello."):
-        items = [
-            CompletionItem(label="world"),
-            CompletionItem(label="friend"),
-        ]
-    return CompletionList(
-        is_incomplete=False,
-        items=items,
-    )
 
+    if not current_line.endswith("hello."):
+        return []
 
-server.start_io()
+    return [
+        types.CompletionItem(label="world"),
+        types.CompletionItem(label="friend"),
+    ]
+
+if __name__ == "__main__":
+    server.start_io()
