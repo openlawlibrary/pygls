@@ -14,6 +14,25 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the various formatting requests from the specification
+
+- :lsp:`textDocument/formatting`: format the entire document.
+- :lsp:`textDocument/rangeFormatting`: format just the given range within a document.
+- :lsp:`textDocument/onTypeFormatting`: format the document while the user is actively
+  typing.
+
+These are typically invoked by the client when the user asks their editor to format the
+document or as part of automatic triggers (e.g. format on save).
+Depending on the client, the user may need to do some additional configuration to enable
+some of these methods e.g. setting ``editor.formatOnType`` in VSCode to enable
+``textDocument/onTypeFormatting``.
+
+This server implements basic formatting of Markdown style tables.
+
+The implementation is a little buggy in that the resulting table might not be what you
+expect (fixes welcome!), but it should be enough to demonstrate the expected interaction
+between client and server.
+"""
 import logging
 from typing import Dict
 from typing import List

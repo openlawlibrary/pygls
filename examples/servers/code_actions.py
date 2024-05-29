@@ -14,6 +14,16 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This example server implements the :lsp:`textDocument/codeAction` request.
+
+`In VSCode <https://code.visualstudio.com/docs/editor/refactoring>`__ code actions are
+typically accessed via a small lightbulb placed near the code the action will affect.
+Code actions usually modify the code in some way, usually to fix an error or refactor
+it.
+
+This server scans the document for incomplete sums e.g. ``1 + 1 =`` and returns a code
+action which, when invoked will fill in the answer.
+"""
 import re
 from pygls.server import LanguageServer
 from lsprotocol.types import (

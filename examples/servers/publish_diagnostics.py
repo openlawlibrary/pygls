@@ -14,6 +14,16 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+"""This implements the publish model of diagnostics.
+
+The original and most widely supported model of diagnostics in LSP, the publish model
+allows the server to update the client whenever it is ready.
+Unlike the push-model however, there is no way for the client to help the server
+prioritize which documents it should be computing the diagnostics for.
+
+This server scans a document for sums e.g. ``1 + 2 = 3``, highlighting any that are
+either missing answers (warnings) or incorrect (errors).
+"""
 import logging
 import re
 
