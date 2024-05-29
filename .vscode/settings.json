@@ -8,7 +8,7 @@
     "pygls.server.debug": false,
     // "pygls.server.debugHost": "localhost",
     // "pygls.server.debugPort": 5678,
-    "pygls.server.launchScript": "formatting.py", // This is relative to `pygls.server.cwd`
+    "pygls.server.launchScript": "code_actions.py", // This is relative to `pygls.server.cwd`
     "pygls.server.cwd": "${workspaceFolder}/examples/servers",
     "pygls.trace.server": "off",
     "pygls.client.documentSelector": [
