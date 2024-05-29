@@ -3,6 +3,7 @@ from lsprotocol import types
 
 server = LanguageServer("example-server", "v0.1")
 
+
 @server.feature(
     types.TEXT_DOCUMENT_COMPLETION,
     types.CompletionOptions(trigger_characters=["."]),
@@ -18,6 +19,7 @@ def completions(params: types.CompletionParams):
         types.CompletionItem(label="world"),
         types.CompletionItem(label="friend"),
     ]
+
 
 if __name__ == "__main__":
     server.start_io()

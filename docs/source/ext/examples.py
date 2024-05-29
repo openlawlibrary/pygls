@@ -1,12 +1,12 @@
 """Documentation for the example servers"""
+
 from __future__ import annotations
 
+import importlib.util as imutil
 import os
 import pathlib
 import typing
-import importlib.util as imutil
 
-from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
@@ -15,6 +15,7 @@ if typing.TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 logger = getLogger(__name__)
+
 
 class ExampleServerDirective(SphinxDirective):
     """Automate the process of documenting example servers.
@@ -74,13 +75,11 @@ class ExampleServerDirective(SphinxDirective):
 
         # Confusingly, these are processed in reverse order...
         self.state_machine.insert_input(content, "<examples>")
-        self.state_machine.insert_input(
-            self.get_docstring(filename), str(filename)
-        )
+        self.state_machine.insert_input(self.get_docstring(filename), str(filename))
 
         return []
 
 
 def setup(app: Sphinx):
-    app.add_config_value("example_server_dir", "", rebuild='env')
+    app.add_config_value("example_server_dir", "", rebuild="env")
     app.add_directive("example-server", ExampleServerDirective)
