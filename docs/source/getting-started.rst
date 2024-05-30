@@ -70,6 +70,13 @@ Each of the following example servers are focused on implementing a particular s
 
       :octicon:`info`
 
+   .. grid-item-card:: Links
+      :link: /examples/links
+      :link-type: doc
+      :text-align: center
+
+      :octicon:`link`
+
    .. grid-item-card:: Publish Diagnostics
       :link: /examples/publish-diagnostics
       :link-type: doc
@@ -110,4 +117,3 @@ Tutorial
 .. note::
 
    Coming soon\ :sup:`TM`
-
