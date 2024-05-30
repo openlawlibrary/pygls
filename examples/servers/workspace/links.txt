@@ -1,0 +1,2 @@
+pygls <github:openlawlibrary/pygls> is a framework for writing language servers in Python!
+It can be installed from PyPi <pypi:pygls>, it depends on the lsprotocol <pypi:lsprotocol> package
