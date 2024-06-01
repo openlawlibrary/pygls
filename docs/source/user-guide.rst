@@ -187,7 +187,7 @@ Registering Handlers
 
 .. seealso::
 
-   It's recommeded that you follow the :ref:`tutorial <tutorial>` before reading this section.
+   It's recommended that you follow the :ref:`tutorial <tutorial>` before reading this section.
 
 - The :func:`~pygls.server.LanguageServer.feature` decorator is used to register a handler for a given LSP message.
 - The :func:`~pygls.server.LanguageServer.command` decorator is used to register a named command.
