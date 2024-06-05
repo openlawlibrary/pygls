@@ -1,4 +1,4 @@
-Goto "X"
+Goto "X" and Find references
 ========
 
 .. example-server:: goto.py
