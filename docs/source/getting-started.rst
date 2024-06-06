@@ -98,6 +98,13 @@ Each of the following example servers are focused on implementing a particular s
 
       :octicon:`pencil`
 
+   .. grid-item-card:: Symbols
+      :link: /examples/symbols
+      :link-type: doc
+      :text-align: center
+
+      :octicon:`code`
+
 These servers are dedicated to demonstrating features of *pygls* itself
 
 .. grid:: 1 2 2 4
