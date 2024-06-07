@@ -29,9 +29,10 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -44,8 +45,12 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: '1.5.1'
+          version: '1.8.3'
           virtualenvs-in-project: true
+      - run: |
+          cat *.log
+        if: failure()
+
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v3
