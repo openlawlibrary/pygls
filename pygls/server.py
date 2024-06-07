@@ -572,7 +572,7 @@ class LanguageServer(Server):
         """
         Sends error to the client for displaying.
 
-        By default this fucntion does not handle LSP request errors. This is because LSP requests
+        By default this function does not handle LSP request errors. This is because LSP requests
         require direct responses and so already have a mechanism for including unexpected errors
         in the response body.
 
