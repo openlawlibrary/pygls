@@ -196,7 +196,8 @@ class FeatureManager:
                     raise TypeError(
                         (
                             f'Options of method "{feature_name}"'
-                            f" should be instance of type {options_type}"
+                            f" is instance of type {type(options)}"
+                            f" which is not a subtype of {options_type}"
                         )
                     )
                 self._feature_options[feature_name] = options
