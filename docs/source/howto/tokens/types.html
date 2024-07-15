@@ -1,0 +1,216 @@
+<div id="tok-types" style="display: flex; justify-content: space-between;">
+  <div style="flex-grow: 1;">
+    <ul style="display: grid; grid-template-columns: repeat(5, 1fr); margin-right: 1em;">
+      <li>
+        <span>Token</span>
+        <span>Line</span>
+        <span>Offset</span>
+        <span>Length</span>
+        <span>Type</span>
+      </li>
+      <li data-tok="tok-c-139988519967280">
+        <span>c</span>
+        <span data-line>0</span>
+        <span data-offset>0</span>
+        <span>1</span>
+        <span data-type="0">0</span>
+      </li>
+      <li data-tok="tok-=-139988521564448">
+        <span>=</span>
+        <span data-line>0</span>
+        <span data-offset>2</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+      <li data-tok="tok-sqrt-139988516372848">
+        <span>sqrt</span>
+        <span data-line>0</span>
+        <span data-offset>2</span>
+        <span>4</span>
+        <span data-type="3">3</span>
+      </li>
+      <li data-tok="tok-(-139988516372752">
+        <span>(</span>
+        <span data-line>0</span>
+        <span data-offset>4</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+      <li data-tok="tok-a-139988516379568">
+        <span>a</span>
+        <span data-line>1</span>
+        <span data-offset>2</span>
+        <span>1</span>
+        <span data-type="0">0</span>
+      </li>
+      <li data-tok="tok-^-139988516375392">
+        <span>^</span>
+        <span data-line>0</span>
+        <span data-offset>1</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+      <li data-tok="tok-2-139988516374144">
+        <span>2</span>
+        <span data-line>0</span>
+        <span data-offset>1</span>
+        <span>1</span>
+        <span data-type="1">1</span>
+      </li>
+      <li data-tok="tok-+-139988516372896">
+        <span>+</span>
+        <span data-line>0</span>
+        <span data-offset>2</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+      <li data-tok="tok-b-139988516372704">
+        <span>b</span>
+        <span data-line>0</span>
+        <span data-offset>2</span>
+        <span>1</span>
+        <span data-type="0">0</span>
+      </li>
+      <li data-tok="tok-^-139988516537312">
+        <span>^</span>
+        <span data-line>0</span>
+        <span data-offset>1</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+      <li data-tok="tok-2-139988516537264">
+        <span>2</span>
+        <span data-line>0</span>
+        <span data-offset>1</span>
+        <span>1</span>
+        <span data-type="1">1</span>
+      </li>
+      <li data-tok="tok-)-139988516537360">
+        <span>)</span>
+        <span data-line>1</span>
+        <span data-offset>0</span>
+        <span>1</span>
+        <span data-type="2">2</span>
+      </li>
+    </ul>
+  </div>
+  <div style="display: flex; gap: 1em; flex-direction: column;">
+    <ul style="display: grid; grid-template-columns: repeat(2, 1fr); margin-right: 1em;">
+      <li>
+        <span>Index</span>
+        <span>Type</span>
+      </li>
+      <li data-type="0">
+        <span>0</span>
+        <span style="justify-self: end">variable</span>
+      </li>
+      <li data-type="1">
+        <span>1</span>
+        <span style="justify-self: end">number</span>
+      </li>
+      <li data-type="2">
+        <span>2</span>
+        <span style="justify-self: end">operator</span>
+      </li>
+      <li data-type="3">
+        <span>3</span>
+        <span style="justify-self: end">function</span>
+      </li>
+    </ul>
+  </div>
+</div>
+<style>
+#tok-types {
+  --tok-border-color: gray;
+  --tok-highlight-color: lightgray;
+  --tok-before-color: olive;
+  --tok-after-color: blue;
+}
+
+#tok-types li {
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  grid-column: span 5;
+  margin: 0;
+}
+
+#tok-types span {
+  margin: 0;
+  padding: 0 0.5em;
+  justify-self: center;
+}
+
+      #tok-types li[data-tok="tok-c-139988519967280"]:hover,
+      #tok-types:has([data-tok="tok-c-139988519967280"]:hover) li[data-type="0"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-=-139988521564448"]:hover,
+      #tok-types:has([data-tok="tok-=-139988521564448"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-sqrt-139988516372848"]:hover,
+      #tok-types:has([data-tok="tok-sqrt-139988516372848"]:hover) li[data-type="3"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-(-139988516372752"]:hover,
+      #tok-types:has([data-tok="tok-(-139988516372752"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-a-139988516379568"]:hover,
+      #tok-types:has([data-tok="tok-a-139988516379568"]:hover) li[data-type="0"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-^-139988516375392"]:hover,
+      #tok-types:has([data-tok="tok-^-139988516375392"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-2-139988516374144"]:hover,
+      #tok-types:has([data-tok="tok-2-139988516374144"]:hover) li[data-type="1"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-+-139988516372896"]:hover,
+      #tok-types:has([data-tok="tok-+-139988516372896"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-b-139988516372704"]:hover,
+      #tok-types:has([data-tok="tok-b-139988516372704"]:hover) li[data-type="0"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-^-139988516537312"]:hover,
+      #tok-types:has([data-tok="tok-^-139988516537312"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-2-139988516537264"]:hover,
+      #tok-types:has([data-tok="tok-2-139988516537264"]:hover) li[data-type="1"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+      #tok-types li[data-tok="tok-)-139988516537360"]:hover,
+      #tok-types:has([data-tok="tok-)-139988516537360"]:hover) li[data-type="2"] {
+        border: solid 1px;
+        background: var(--tok-highlight-color);
+      }
+
+</style>
