@@ -98,6 +98,13 @@ Each of the following example servers are focused on implementing a particular s
 
       :octicon:`pencil`
 
+   .. grid-item-card:: Semantic Tokens
+      :link: /examples/semantic-tokens
+      :link-type: doc
+      :text-align: center
+
+      :octicon:`file-binary`
+
    .. grid-item-card:: Symbols
       :link: /examples/symbols
       :link-type: doc
