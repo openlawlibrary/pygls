@@ -33,7 +33,6 @@ guides.
 import argparse
 import asyncio
 import json
-import re
 import time
 import uuid
 from json import JSONDecodeError
@@ -202,37 +201,6 @@ async def did_open(ls, params: lsp.DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message("Text Document Did Open")
     _validate(ls, params)
-
-
-@json_server.feature(
-    lsp.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    lsp.SemanticTokensLegend(token_types=["operator"], token_modifiers=[]),
-)
-def semantic_tokens(ls: JsonLanguageServer, params: lsp.SemanticTokensParams):
-    """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
-    for details on how semantic tokens are encoded."""
-
-    TOKENS = re.compile('".*"(?=:)')
-
-    uri = params.text_document.uri
-    doc = ls.workspace.get_document(uri)
-
-    last_line = 0
-    last_start = 0
-
-    data = []
-
-    for lineno, line in enumerate(doc.lines):
-        last_start = 0
-
-        for match in TOKENS.finditer(line):
-            start, end = match.span()
-            data += [(lineno - last_line), (start - last_start), (end - start), 0, 0]
-
-            last_line = lineno
-            last_start = start
-
-    return lsp.SemanticTokens(data=data)
 
 
 @json_server.feature(lsp.TEXT_DOCUMENT_INLINE_VALUE)
