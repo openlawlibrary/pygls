@@ -8,12 +8,6 @@
                 "host": "${config:pygls.server.debugHost}",
                 "port": "${config:pygls.server.debugPort}"
             },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
-                }
-            ],
             "justMyCode": false
         },
         {
