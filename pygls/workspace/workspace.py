@@ -20,7 +20,7 @@ import copy
 import logging
 import os
 import warnings
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Sequence, Union
 
 from lsprotocol import types
 from lsprotocol.types import (
@@ -40,7 +40,7 @@ class Workspace(object):
         self,
         root_uri: Optional[str],
         sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
-        workspace_folders: Optional[List[WorkspaceFolder]] = None,
+        workspace_folders: Optional[Sequence[WorkspaceFolder]] = None,
         position_encoding: Optional[
             Union[PositionEncodingKind, str]
         ] = PositionEncodingKind.Utf16,

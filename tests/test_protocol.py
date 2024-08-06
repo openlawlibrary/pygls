@@ -37,7 +37,7 @@ from lsprotocol.types import (
     ProgressParams,
     Position,
     ShutdownResponse,
-    TextDocumentCompletionResponse,
+    CompletionResponse,
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
 )
@@ -386,7 +386,7 @@ def test_deserialize_request_message_without_registered_type(protocol):
     [
         (ShutdownResponse, None, {"jsonrpc": "2.0", "id": "1", "result": None}),
         (
-            TextDocumentCompletionResponse,
+            CompletionResponse,
             [
                 CompletionItem(label="example-one"),
                 CompletionItem(

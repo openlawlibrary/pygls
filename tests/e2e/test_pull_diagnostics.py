@@ -103,7 +103,7 @@ async def test_document_diagnostics(
                 uri=test_uri, version=1
             ),
             content_changes=[
-                types.TextDocumentContentChangeEvent_Type1(
+                types.TextDocumentContentChangePartial(
                     text=" 2",
                     range=types.Range(
                         start=types.Position(line=0, character=7),

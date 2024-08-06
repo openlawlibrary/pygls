@@ -203,7 +203,7 @@ def server_capabilities(**kwargs):
         kwargs["execute_command_provider"] = lsp.ExecuteCommandOptions(commands=[])
 
     if "workspace" not in kwargs:
-        kwargs["workspace"] = lsp.ServerCapabilitiesWorkspaceType(
+        kwargs["workspace"] = lsp.WorkspaceOptions(
             workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                 supported=True, change_notifications=True
             ),
@@ -374,7 +374,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),
@@ -417,7 +417,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),
@@ -462,7 +462,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),
@@ -505,7 +505,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),
@@ -550,7 +550,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),
@@ -593,7 +593,7 @@ def server_capabilities(**kwargs):
                 )
             ),
             server_capabilities(
-                workspace=lsp.ServerCapabilitiesWorkspaceType(
+                workspace=lsp.WorkspaceOptions(
                     workspace_folders=lsp.WorkspaceFoldersServerCapabilities(
                         supported=True, change_notifications=True
                     ),

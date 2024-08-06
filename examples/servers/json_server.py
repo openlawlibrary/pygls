@@ -261,7 +261,7 @@ async def show_configuration_async(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
         config = await ls.get_configuration_async(
-            lsp.WorkspaceConfigurationParams(
+            lsp.ConfigurationParams(
                 items=[
                     lsp.ConfigurationItem(
                         scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
@@ -292,7 +292,7 @@ def show_configuration_callback(ls: JsonLanguageServer, *args):
             ls.show_message_log(f"Error ocurred: {e}")
 
     ls.get_configuration(
-        lsp.WorkspaceConfigurationParams(
+        lsp.ConfigurationParams(
             items=[
                 lsp.ConfigurationItem(
                     scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
@@ -309,7 +309,7 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
         config = ls.get_configuration(
-            lsp.WorkspaceConfigurationParams(
+            lsp.ConfigurationParams(
                 items=[
                     lsp.ConfigurationItem(
                         scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION

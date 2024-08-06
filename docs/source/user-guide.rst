@@ -352,7 +352,7 @@ Depending on how the handler is registered (see :ref:`here <ls-handlers>`) you c
 
       # await keyword tells event loop to switch to another task until notification is received
       config = await ls.get_configuration(
-          WorkspaceConfigurationParams(
+          ConfigurationParams(
               items=[
                   ConfigurationItem(scope_uri='doc_uri_here', section='section')
               ]
@@ -367,7 +367,7 @@ Depending on how the handler is registered (see :ref:`here <ls-handlers>`) you c
       def callback(config):
           # Omitted
 
-      params = WorkspaceConfigurationParams(
+      params = ConfigurationParams(
           items=[
               ConfigurationItem(scope_uri='doc_uri_here', section='section')
           ]
@@ -380,7 +380,7 @@ Depending on how the handler is registered (see :ref:`here <ls-handlers>`) you c
 
       # .result() will block the thread
       config = ls.get_configuration(
-          WorkspaceConfigurationParams(
+          ConfigurationParams(
               items=[
                   ConfigurationItem(scope_uri='doc_uri_here', section='section')
               ]

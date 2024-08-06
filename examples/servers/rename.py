@@ -149,7 +149,7 @@ def prepare_rename(ls: RenameLanguageServer, params: types.PrepareRenameParams):
     # For simplicity we can tell the client to use its default behaviour however, it's
     # relatively new to the spec (LSP v3.16+) so a production server should check the
     # client's capabilities before responding in this way
-    return types.PrepareRenameResult_Type2(default_behavior=True)
+    return types.PrepareRenameDefaultBehavior(default_behavior=True)
 
 
 if __name__ == "__main__":

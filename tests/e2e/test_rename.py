@@ -46,7 +46,7 @@ async def rename(get_client_for):
         (types.Position(line=5, character=1), None),
         (
             types.Position(line=5, character=6),
-            types.PrepareRenameResult_Type2(default_behavior=True),
+            types.PrepareRenameDefaultBehavior(default_behavior=True),
         ),
     ],
 )
