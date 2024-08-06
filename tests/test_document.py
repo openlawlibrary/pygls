@@ -25,7 +25,7 @@ from .conftest import DOC, DOC_URI
 
 def test_document_empty_edit():
     doc = TextDocument("file:///uri", "")
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=0, character=0),
             end=types.Position(line=0, character=0),
@@ -41,7 +41,7 @@ def test_document_end_of_file_edit():
     old = ["print 'a'\n", "print 'b'\n"]
     doc = TextDocument("file:///uri", "".join(old))
 
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=2, character=0),
             end=types.Position(line=2, character=0),
@@ -63,7 +63,7 @@ def test_document_full_edit():
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
     )
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
             end=types.Position(line=2, character=11),
@@ -78,7 +78,7 @@ def test_document_full_edit():
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
     )
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=0, character=0),
             end=types.Position(line=0, character=0),
@@ -92,7 +92,7 @@ def test_document_full_edit():
 
 def test_document_line_edit():
     doc = TextDocument("file:///uri", "itshelloworld")
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=0, character=3),
             end=types.Position(line=0, character=8),
@@ -115,7 +115,7 @@ def test_document_multiline_edit():
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
             end=types.Position(line=2, character=11),
@@ -130,7 +130,7 @@ def test_document_multiline_edit():
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
     )
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
             end=types.Position(line=2, character=11),
@@ -147,7 +147,7 @@ def test_document_no_edit():
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.None_
     )
-    change = types.TextDocumentContentChangeEvent_Type1(
+    change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
             end=types.Position(line=2, character=11),

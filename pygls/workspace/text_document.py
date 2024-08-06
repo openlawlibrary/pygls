@@ -73,7 +73,7 @@ class TextDocument(object):
         return self._position_codec
 
     def _apply_incremental_change(
-        self, change: types.TextDocumentContentChangeEvent_Type1
+        self, change: types.TextDocumentContentChangePartial
     ) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
@@ -142,7 +142,7 @@ class TextDocument(object):
            content update client requests in the pygls Python library.
 
         """
-        if isinstance(change, types.TextDocumentContentChangeEvent_Type1):
+        if isinstance(change, types.TextDocumentContentChangePartial):
             if self._is_sync_kind_incremental:
                 self._apply_incremental_change(change)
                 return

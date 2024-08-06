@@ -82,12 +82,12 @@ from lsprotocol.types import (
     SetTraceParams,
     ShowDocumentParams,
     ShowMessageParams,
-    TraceValues,
+    TraceValue,
     UnregistrationParams,
-    WorkspaceApplyEditResponse,
+    ApplyWorkspaceEditResponse,
     WorkspaceEdit,
-    InitializeResultServerInfoType,
-    WorkspaceConfigurationParams,
+    ServerInfo,
+    ConfigurationParams,
     WorkDoneProgressCancelParams,
 )
 from pygls.protocol.json_rpc import JsonRPCProtocol
@@ -128,7 +128,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
         self.progress = Progress(self)
 
-        self.server_info = InitializeResultServerInfoType(
+        self.server_info = ServerInfo(
             name=server.name,
             version=server.version,
         )
@@ -165,7 +165,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def apply_edit(
         self, edit: WorkspaceEdit, label: Optional[str] = None
-    ) -> WorkspaceApplyEditResponse:
+    ) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.send_request(
             WORKSPACE_APPLY_EDIT, ApplyWorkspaceEditParams(edit=edit, label=label)
@@ -173,7 +173,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def apply_edit_async(
         self, edit: WorkspaceEdit, label: Optional[str] = None
-    ) -> WorkspaceApplyEditResponse:
+    ) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client. Should be called with `await`"""
         return self.send_request_async(
             WORKSPACE_APPLY_EDIT, ApplyWorkspaceEditParams(edit=edit, label=label)
@@ -229,7 +229,7 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             self.server_capabilities.position_encoding,
         )
 
-        self.trace = TraceValues.Off
+        self.trace = TraceValue.Off
 
         return InitializeResult(
             capabilities=self.server_capabilities,
@@ -335,14 +335,14 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def get_configuration(
         self,
-        params: WorkspaceConfigurationParams,
+        params: ConfigurationParams,
         callback: Optional[ConfigCallbackType] = None,
     ) -> Future:
         """Sends configuration request to the client.
 
         Args:
-            params(WorkspaceConfigurationParams): WorkspaceConfigurationParams from lsp specs
-            callback(callable): Callabe which will be called after
+            params(ConfigurationParams): ConfigurationParams from lsp specs
+            callback(callable): Callable which will be called after
                                 response from the client is received
         Returns:
             concurrent.futures.Future object that will be resolved once a
@@ -350,13 +350,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """
         return self.send_request(WORKSPACE_CONFIGURATION, params, callback)
 
-    def get_configuration_async(
-        self, params: WorkspaceConfigurationParams
-    ) -> asyncio.Future:
+    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Calls `get_configuration` method but designed to use with coroutines
 
         Args:
-            params(WorkspaceConfigurationParams): WorkspaceConfigurationParams from lsp specs
+            params(ConfigurationParams): ConfigurationParams from lsp specs
         Returns:
             asyncio.Future that can be awaited
         """
@@ -364,11 +362,11 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
 
     def log_trace(self, message: str, verbose: Optional[str] = None) -> None:
         """Sends trace notification to the client."""
-        if self.trace == TraceValues.Off:
+        if self.trace == TraceValue.Off:
             return
 
         params = LogTraceParams(message=message)
-        if verbose and self.trace == TraceValues.Verbose:
+        if verbose and self.trace == TraceValue.Verbose:
             params.verbose = verbose
 
         self.notify(LOG_TRACE, params)

@@ -326,12 +326,12 @@ class ServerCapabilitiesBuilder:
             self.server_cap.semantic_tokens_provider = value
             return self
 
-        full_support: Union[bool, types.SemanticTokensOptionsFullType1] = (
+        full_support: Union[bool, types.SemanticTokensFullDelta] = (
             types.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
         )
 
         if types.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL_DELTA in self.features:
-            full_support = types.SemanticTokensOptionsFullType1(delta=True)
+            full_support = types.SemanticTokensFullDelta(delta=True)
 
         options = types.SemanticTokensOptions(
             legend=value,
@@ -388,7 +388,7 @@ class ServerCapabilitiesBuilder:
                 value = self._provider_options(method_name, default=None)
                 setattr(file_operations, capability_name, value)
 
-        self.server_cap.workspace = types.ServerCapabilitiesWorkspaceType(
+        self.server_cap.workspace = types.WorkspaceOptions(
             workspace_folders=types.WorkspaceFoldersServerCapabilities(
                 supported=True,
                 change_notifications=True,

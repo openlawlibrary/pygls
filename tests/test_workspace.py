@@ -246,7 +246,7 @@ def test_update_notebook_cell_data(workspace):
             uri=NOTEBOOK.uri, version=31
         ),
         change=types.NotebookDocumentChangeEvent(
-            cells=types.NotebookDocumentChangeEventCellsType(
+            cells=types.NotebookDocumentCellChanges(
                 data=[
                     types.NotebookCell(
                         kind=types.NotebookCellKind.Code,
@@ -313,14 +313,14 @@ def test_update_notebook_cell_content(workspace):
             uri=NOTEBOOK.uri, version=31
         ),
         change=types.NotebookDocumentChangeEvent(
-            cells=types.NotebookDocumentChangeEventCellsType(
+            cells=types.NotebookDocumentCellChanges(
                 text_content=[
-                    types.NotebookDocumentChangeEventCellsTypeTextContentType(
+                    types.NotebookDocumentCellContentChanges(
                         document=types.VersionedTextDocumentIdentifier(
                             uri=NB_CELL_1.uri, version=13
                         ),
                         changes=[
-                            types.TextDocumentContentChangeEvent_Type1(
+                            types.TextDocumentContentChangePartial(
                                 text="new text",
                                 range=types.Range(
                                     start=types.Position(line=0, character=0),
@@ -329,19 +329,19 @@ def test_update_notebook_cell_content(workspace):
                             )
                         ],
                     ),
-                    types.NotebookDocumentChangeEventCellsTypeTextContentType(
+                    types.NotebookDocumentCellContentChanges(
                         document=types.VersionedTextDocumentIdentifier(
                             uri=NB_CELL_2.uri, version=21
                         ),
                         changes=[
-                            types.TextDocumentContentChangeEvent_Type1(
+                            types.TextDocumentContentChangePartial(
                                 text="",
                                 range=types.Range(
                                     start=types.Position(line=0, character=0),
                                     end=types.Position(line=0, character=8),
                                 ),
                             ),
-                            types.TextDocumentContentChangeEvent_Type1(
+                            types.TextDocumentContentChangePartial(
                                 text="other text",
                                 range=types.Range(
                                     start=types.Position(line=0, character=0),
@@ -399,8 +399,8 @@ def test_update_notebook_new_cells(workspace):
             uri=NOTEBOOK.uri, version=31
         ),
         change=types.NotebookDocumentChangeEvent(
-            cells=types.NotebookDocumentChangeEventCellsType(
-                structure=types.NotebookDocumentChangeEventCellsTypeStructureType(
+            cells=types.NotebookDocumentCellChanges(
+                structure=types.NotebookDocumentCellChangeStructure(
                     array=types.NotebookCellArrayChange(
                         start=1,
                         delete_count=0,

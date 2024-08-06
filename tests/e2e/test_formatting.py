@@ -163,7 +163,7 @@ async def test_document_on_type_format(
                 uri=test_uri, version=1
             ),
             content_changes=[
-                types.TextDocumentContentChangeEvent_Type1(
+                types.TextDocumentContentChangePartial(
                     text="|header one| header two |\n|-|",
                     range=range_from_str("0:0-3:0"),
                 )

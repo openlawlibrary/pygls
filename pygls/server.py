@@ -52,9 +52,9 @@ from lsprotocol.types import (
     ShowDocumentParams,
     TextDocumentSyncKind,
     UnregistrationParams,
-    WorkspaceApplyEditResponse,
+    ApplyWorkspaceEditResponse,
     WorkspaceEdit,
-    WorkspaceConfigurationParams,
+    ConfigurationParams,
 )
 from pygls.progress import Progress
 from pygls.protocol import JsonRPCProtocol, LanguageServerProtocol, default_converter
@@ -425,13 +425,13 @@ class LanguageServer(Server):
 
     def apply_edit(
         self, edit: WorkspaceEdit, label: Optional[str] = None
-    ) -> WorkspaceApplyEditResponse:
+    ) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client."""
         return self.lsp.apply_edit(edit, label)
 
     def apply_edit_async(
         self, edit: WorkspaceEdit, label: Optional[str] = None
-    ) -> WorkspaceApplyEditResponse:
+    ) -> ApplyWorkspaceEditResponse:
         """Sends apply edit request to the client. Should be called with `await`"""
         return self.lsp.apply_edit_async(edit, label)
 
@@ -472,15 +472,13 @@ class LanguageServer(Server):
 
     def get_configuration(
         self,
-        params: WorkspaceConfigurationParams,
+        params: ConfigurationParams,
         callback: Optional[ConfigCallbackType] = None,
     ) -> Future:
         """Gets the configuration settings from the client."""
         return self.lsp.get_configuration(params, callback)
 
-    def get_configuration_async(
-        self, params: WorkspaceConfigurationParams
-    ) -> asyncio.Future:
+    def get_configuration_async(self, params: ConfigurationParams) -> asyncio.Future:
         """Gets the configuration settings from the client. Should be called with `await`"""
         return self.lsp.get_configuration_async(params)
 
