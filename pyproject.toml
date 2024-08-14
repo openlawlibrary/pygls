@@ -58,7 +58,7 @@ ruff = "ruff check ."
 mypy = "mypy -p pygls"
 check_generated_client = "python scripts/check_client_is_uptodate.py"
 check_commit_style = "npx commitlint --from origin/main --to HEAD --verbose --config commitlintrc.yaml"
-generate_client = "python scripts/generate_client.py --output pygls/lsp/client.py"
+generate_client = "python scripts/generate_client_server.py pygls/lsp"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
 poetry_lock_check = "poetry check"
@@ -95,7 +95,7 @@ line-length = 120
 
 [tool.black]
 line-length = 88
-extend-exclude = "pygls/lsp/client.py"
+extend-exclude = "pygls/lsp/_base_.*.py"
 
 [tool.coverage.run]
 parallel = true
