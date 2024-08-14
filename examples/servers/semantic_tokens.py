@@ -42,7 +42,7 @@ from typing import Optional
 import attrs
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 

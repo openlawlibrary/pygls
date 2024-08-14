@@ -43,12 +43,13 @@ This will allow the user to easily choose new color values from within their tex
 This server implements the requests defined above for CSS's hex color code syntax
 (``#000`` and ``#000000``).
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 COLOR = re.compile(r"""\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})(?!\w)""")
 server = LanguageServer("color-server", "v1")

@@ -29,13 +29,14 @@ operation as invalid.
    a real server would have to check to make sure it only renames symbols in the
    relevant scope.
 """
+
 import logging
 import re
 from typing import List
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ARGUMENT = re.compile(r"(?P<name>\w+): (?P<type>\w+)")

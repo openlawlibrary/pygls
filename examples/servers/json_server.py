@@ -30,17 +30,17 @@ demonstrate all of its features.
 Eventually this example will be broken up in smaller, more focused examples and how to
 guides.
 """
+
 import argparse
 import asyncio
-import json
 import time
 import uuid
-from json import JSONDecodeError
+from functools import partial
 from typing import Optional
 
 from lsprotocol import types as lsp
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
@@ -65,85 +65,6 @@ class JsonLanguageServer(LanguageServer):
 json_server = JsonLanguageServer("pygls-json-example", "v0.1")
 
 
-def _validate(ls, params):
-    ls.show_message_log("Validating json...")
-
-    text_doc = ls.workspace.get_document(params.text_document.uri)
-
-    source = text_doc.source
-    diagnostics = _validate_json(source) if source else []
-
-    ls.publish_diagnostics(text_doc.uri, diagnostics)
-
-
-def _validate_json(source):
-    """Validates json file."""
-    diagnostics = []
-
-    try:
-        json.loads(source)
-    except JSONDecodeError as err:
-        msg = err.msg
-        col = err.colno
-        line = err.lineno
-
-        d = lsp.Diagnostic(
-            range=lsp.Range(
-                start=lsp.Position(line=line - 1, character=col - 1),
-                end=lsp.Position(line=line - 1, character=col),
-            ),
-            message=msg,
-            source=type(json_server).__name__,
-        )
-
-        diagnostics.append(d)
-
-    return diagnostics
-
-
-@json_server.feature(
-    lsp.TEXT_DOCUMENT_DIAGNOSTIC,
-    lsp.DiagnosticOptions(
-        identifier="jsonServer",
-        inter_file_dependencies=True,
-        workspace_diagnostics=True,
-    ),
-)
-def text_document_diagnostic(
-    params: lsp.DocumentDiagnosticParams,
-) -> lsp.DocumentDiagnosticReport:
-    """Returns diagnostic report."""
-    document = json_server.workspace.get_document(params.text_document.uri)
-    return lsp.RelatedFullDocumentDiagnosticReport(
-        items=_validate_json(document.source),
-        kind=lsp.DocumentDiagnosticReportKind.Full,
-    )
-
-
-@json_server.feature(lsp.WORKSPACE_DIAGNOSTIC)
-def workspace_diagnostic(
-    params: lsp.WorkspaceDiagnosticParams,
-) -> lsp.WorkspaceDiagnosticReport:
-    """Returns diagnostic report."""
-    documents = json_server.workspace.text_documents.keys()
-
-    if len(documents) == 0:
-        items = []
-    else:
-        first = list(documents)[0]
-        document = json_server.workspace.get_document(first)
-        items = [
-            lsp.WorkspaceFullDocumentDiagnosticReport(
-                uri=document.uri,
-                version=document.version,
-                items=_validate_json(document.source),
-                kind=lsp.DocumentDiagnosticReportKind.Full,
-            )
-        ]
-
-    return lsp.WorkspaceDiagnosticReport(items=items)
-
-
 @json_server.feature(
     lsp.TEXT_DOCUMENT_COMPLETION,
     lsp.CompletionOptions(trigger_characters=[","], all_commit_characters=[":"]),
@@ -163,50 +84,35 @@ def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.Completion
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
-def count_down_10_seconds_blocking(ls, *args):
+def count_down_10_seconds_blocking(ls: JsonLanguageServer, *args):
     """Starts counting down and showing message synchronously.
     It will `block` the main thread, which can be tested by trying to show
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}")
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message=f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}",
+                type=lsp.MessageType.Info,
+            ),
+        )
         time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
-async def count_down_10_seconds_non_blocking(ls, *args):
+async def count_down_10_seconds_non_blocking(ls: JsonLanguageServer, *args):
     """Starts counting down and showing message asynchronously.
     It won't `block` the main thread, which can be tested by trying to show
     completion items.
     """
     for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}")
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message=f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}",
+                type=lsp.MessageType.Info,
+            ),
+        )
         await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
-
-
-@json_server.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
-def did_change(ls, params: lsp.DidChangeTextDocumentParams):
-    """Text document did change notification."""
-    _validate(ls, params)
-
-
-@json_server.feature(lsp.TEXT_DOCUMENT_DID_CLOSE)
-def did_close(server: JsonLanguageServer, params: lsp.DidCloseTextDocumentParams):
-    """Text document did close notification."""
-    server.show_message("Text Document Did Close")
-
-
-@json_server.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
-async def did_open(ls, params: lsp.DidOpenTextDocumentParams):
-    """Text document did open notification."""
-    ls.show_message("Text Document Did Open")
-    _validate(ls, params)
-
-
-@json_server.feature(lsp.TEXT_DOCUMENT_INLINE_VALUE)
-def inline_value(params: lsp.InlineValueParams):
-    """Returns inline value."""
-    return [lsp.InlineValueText(range=params.range, text="Inline value")]
 
 
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)
@@ -214,25 +120,25 @@ async def progress(ls: JsonLanguageServer, *args):
     """Create and start the progress on the client."""
     token = str(uuid.uuid4())
     # Create
-    await ls.progress.create_async(token)
+    await ls.work_done_progress.create_async(token)
     # Begin
-    ls.progress.begin(
+    ls.work_done_progress.begin(
         token,
         lsp.WorkDoneProgressBegin(title="Indexing", percentage=0, cancellable=True),
     )
     # Report
     for i in range(1, 10):
         # Check for cancellation from client
-        if ls.progress.tokens[token].cancelled():
+        if ls.work_done_progress.tokens[token].cancelled():
             # ... and stop the computation if client cancelled
             return
-        ls.progress.report(
+        ls.work_done_progress.report(
             token,
             lsp.WorkDoneProgressReport(message=f"{i * 10}%", percentage=i * 10),
         )
         await asyncio.sleep(2)
     # End
-    ls.progress.end(token, lsp.WorkDoneProgressEnd(message="Finished"))
+    ls.work_done_progress.end(token, lsp.WorkDoneProgressEnd(message="Finished"))
 
 
 @json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
@@ -247,83 +153,22 @@ async def register_completions(ls: JsonLanguageServer, *args):
             )
         ]
     )
-    response = await ls.register_capability_async(params)
-    if response is None:
-        ls.show_message("Successfully registered completions method")
-    else:
-        ls.show_message(
-            "Error happened during completions registration.", lsp.MessageType.Error
-        )
 
-
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
-async def show_configuration_async(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using coroutines."""
     try:
-        config = await ls.get_configuration_async(
-            lsp.ConfigurationParams(
-                items=[
-                    lsp.ConfigurationItem(
-                        scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
-                    )
-                ]
-            )
+        await ls.client_register_capability_async(params)
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message="Successfully registered completions method",
+                type=lsp.MessageType.Info,
+            ),
         )
-
-        example_config = config[0].get("exampleConfiguration")
-
-        ls.show_message(f"jsonServer.exampleConfiguration value: {example_config}")
-
-    except Exception as e:
-        ls.show_message_log(f"Error ocurred: {e}")
-
-
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
-def show_configuration_callback(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using callback."""
-
-    def _config_callback(config):
-        try:
-            example_config = config[0].get("exampleConfiguration")
-
-            ls.show_message(f"jsonServer.exampleConfiguration value: {example_config}")
-
-        except Exception as e:
-            ls.show_message_log(f"Error ocurred: {e}")
-
-    ls.get_configuration(
-        lsp.ConfigurationParams(
-            items=[
-                lsp.ConfigurationItem(
-                    scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
-                )
-            ]
-        ),
-        _config_callback,
-    )
-
-
-@json_server.thread()
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
-def show_configuration_thread(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using thread pool."""
-    try:
-        config = ls.get_configuration(
-            lsp.ConfigurationParams(
-                items=[
-                    lsp.ConfigurationItem(
-                        scope_uri="", section=JsonLanguageServer.CONFIGURATION_SECTION
-                    )
-                ]
-            )
-        ).result(2)
-
-        example_config = config[0].get("exampleConfiguration")
-
-        ls.show_message(f"jsonServer.exampleConfiguration value: {example_config}")
-
-    except Exception as e:
-        ls.show_message_log(f"Error ocurred: {e}")
+    except Exception:
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message="Error happened during completions registration.",
+                type=lsp.MessageType.Error,
+            ),
+        )
 
 
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)
@@ -332,17 +177,98 @@ async def unregister_completions(ls: JsonLanguageServer, *args):
     params = lsp.UnregistrationParams(
         unregisterations=[
             lsp.Unregistration(
-                id=str(uuid.uuid4()), method=lsp.TEXT_DOCUMENT_COMPLETION
-            )
-        ]
+                id=str(uuid.uuid4()),
+                method=lsp.TEXT_DOCUMENT_COMPLETION,
+            ),
+        ],
     )
-    response = await ls.unregister_capability_async(params)
-    if response is None:
-        ls.show_message("Successfully unregistered completions method")
-    else:
-        ls.show_message(
-            "Error happened during completions unregistration.", lsp.MessageType.Error
+
+    try:
+        await ls.client_unregister_capability_async(params)
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message="Successfully unregistered completions method",
+                type=lsp.MessageType.Info,
+            ),
         )
+    except Exception:
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message="Error happened during completions unregistration.",
+                type=lsp.MessageType.Error,
+            ),
+        )
+
+
+def handle_config(ls: JsonLanguageServer, config):
+    """Handle the configuration sent by the client."""
+    try:
+        example_config = config[0].get("exampleConfiguration")
+
+        ls.window_show_message(
+            lsp.ShowMessageParams(
+                message=f"jsonServer.exampleConfiguration value: {example_config}",
+                type=lsp.MessageType.Info,
+            ),
+        )
+
+    except Exception as e:
+        ls.window_log_message(
+            lsp.LogMessageParams(
+                message=f"Error ocurred: {e}",
+                type=lsp.MessageType.Error,
+            ),
+        )
+
+
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
+async def show_configuration_async(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using coroutines."""
+    config = await ls.workspace_configuration_async(
+        lsp.ConfigurationParams(
+            items=[
+                lsp.ConfigurationItem(
+                    scope_uri="",
+                    section=JsonLanguageServer.CONFIGURATION_SECTION,
+                ),
+            ]
+        )
+    )
+    handle_config(ls, config)
+
+
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
+def show_configuration_callback(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using callback."""
+
+    ls.workspace_configuration(
+        lsp.ConfigurationParams(
+            items=[
+                lsp.ConfigurationItem(
+                    scope_uri="",
+                    section=JsonLanguageServer.CONFIGURATION_SECTION,
+                ),
+            ]
+        ),
+        callback=partial(handle_config, ls),
+    )
+
+
+@json_server.thread()
+@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
+def show_configuration_thread(ls: JsonLanguageServer, *args):
+    """Gets exampleConfiguration from the client settings using thread pool."""
+    config = ls.workspace_configuration(
+        lsp.ConfigurationParams(
+            items=[
+                lsp.ConfigurationItem(
+                    scope_uri="",
+                    section=JsonLanguageServer.CONFIGURATION_SECTION,
+                ),
+            ],
+        )
+    ).result(2)
+    handle_config(ls, config)
 
 
 def add_arguments(parser):

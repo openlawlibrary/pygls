@@ -33,7 +33,7 @@ import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 LINK = re.compile(r"<(\w+):([^>]+)>")
 server = LanguageServer("links-server", "v1")

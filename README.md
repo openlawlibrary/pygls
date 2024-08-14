@@ -6,7 +6,7 @@ _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of th
 
 ## Quickstart
 ```python
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     CompletionItem,

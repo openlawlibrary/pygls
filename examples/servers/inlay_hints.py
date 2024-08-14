@@ -28,11 +28,12 @@ While we could easily compute the inlay hint's tooltip in the same method, this 
 uses the ``inlayHint/resolve`` to demonstrate how you can defer expensive computations
 to when they are required.
 """
+
 import re
 from typing import Optional
 
 from lsprotocol import types
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 NUMBER = re.compile(r"\d+")
 server = LanguageServer("inlay-hint-server", "v1")

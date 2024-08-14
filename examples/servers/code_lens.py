@@ -28,12 +28,13 @@ Note that while we could have easily compute the ``command`` field of the code l
 front, this example demonstrates how the ``codeLens/resolve`` can be used to defer this
 computation until it is actually necessary.
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
 server = LanguageServer("code-lens-server", "v1")
@@ -115,7 +116,8 @@ def evaluate_sum(ls: LanguageServer, args):
     answer = arguments["left"] + arguments["right"]
     edit = types.TextDocumentEdit(
         text_document=types.OptionalVersionedTextDocumentIdentifier(
-            uri=arguments["uri"], version=document.version
+            uri=arguments["uri"],
+            version=document.version,
         ),
         edits=[
             types.TextEdit(
@@ -129,7 +131,11 @@ def evaluate_sum(ls: LanguageServer, args):
     )
 
     # Apply the edit.
-    ls.apply_edit(types.WorkspaceEdit(document_changes=[edit]))
+    ls.workspace_apply_edit(
+        types.ApplyWorkspaceEditParams(
+            edit=types.WorkspaceEdit(document_changes=[edit]),
+        ),
+    )
 
 
 if __name__ == "__main__":

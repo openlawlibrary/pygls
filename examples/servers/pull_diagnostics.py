@@ -26,12 +26,13 @@ This approach helps guide the server to perform work that's most relevant to the
 This server scans a document for sums e.g. ``1 + 2 = 3``, highlighting any that are
 either missing answers (warnings) or incorrect (errors).
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=\s*(\d+)?$")

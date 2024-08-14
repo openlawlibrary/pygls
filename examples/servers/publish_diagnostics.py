@@ -24,12 +24,13 @@ prioritize which documents it should be computing the diagnostics for.
 This server scans a document for sums e.g. ``1 + 2 = 3``, highlighting any that are
 either missing answers (warnings) or incorrect (errors).
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=\s*(\d+)?$")
@@ -89,7 +90,13 @@ def did_open(ls: PublishDiagnosticServer, params: types.DidOpenTextDocumentParam
     ls.parse(doc)
 
     for uri, (version, diagnostics) in ls.diagnostics.items():
-        ls.publish_diagnostics(uri=uri, version=version, diagnostics=diagnostics)
+        ls.text_document_publish_diagnostics(
+            types.PublishDiagnosticsParams(
+                uri=uri,
+                version=version,
+                diagnostics=diagnostics,
+            )
+        )
 
 
 @server.feature(types.TEXT_DOCUMENT_DID_CHANGE)
@@ -99,7 +106,13 @@ def did_change(ls: PublishDiagnosticServer, params: types.DidOpenTextDocumentPar
     ls.parse(doc)
 
     for uri, (version, diagnostics) in ls.diagnostics.items():
-        ls.publish_diagnostics(uri=uri, version=version, diagnostics=diagnostics)
+        ls.text_document_publish_diagnostics(
+            types.PublishDiagnosticsParams(
+                uri=uri,
+                version=version,
+                diagnostics=diagnostics,
+            )
+        )
 
 
 if __name__ == "__main__":
