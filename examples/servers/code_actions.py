@@ -24,8 +24,9 @@ it.
 This server scans the document for incomplete sums e.g. ``1 + 1 =`` and returns a code
 action which, when invoked will fill in the answer.
 """
+
 import re
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from lsprotocol.types import (
     TEXT_DOCUMENT_CODE_ACTION,
     CodeAction,

@@ -33,6 +33,7 @@ The implementation is a little buggy in that the resulting table might not be wh
 expect (fixes welcome!), but it should be enough to demonstrate the expected interaction
 between client and server.
 """
+
 import logging
 from typing import Dict
 from typing import List
@@ -41,7 +42,7 @@ from typing import Optional
 import attrs
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 

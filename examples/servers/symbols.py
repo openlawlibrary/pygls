@@ -33,12 +33,13 @@ the ``code.txt`` in the example workspace in the *pygls* repository.
 .. literalinclude:: ../../../examples/servers/workspace/code.txt
    :language: none
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ARGUMENT = re.compile(r"(?P<name>\w+)(: ?(?P<type>\w+))?")

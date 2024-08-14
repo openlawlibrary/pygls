@@ -32,12 +32,13 @@ definition and a declaration in your target language.
 This means the choices of what the example server below will return results for are
 completely arbitrary.
 """
+
 import logging
 import re
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 ARGUMENT = re.compile(r"(?P<name>\w+): (?P<type>\w+)")

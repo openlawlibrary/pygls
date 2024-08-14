@@ -23,12 +23,13 @@ This server implements `textDocument/hover` for various datetime representations
 displaying a table how the selected date would be formatted in each of the supported
 formats.
 """
+
 import logging
 from datetime import datetime
 
 from lsprotocol import types
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 DATE_FORMATS = [
     "%H:%M:%S",
