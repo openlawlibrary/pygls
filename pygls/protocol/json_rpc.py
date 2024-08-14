@@ -35,10 +35,6 @@ from typing import (
     TYPE_CHECKING,
 )
 
-if TYPE_CHECKING:
-    from pygls.server import LanguageServer, WebSocketTransportAdapter
-
-
 import attrs
 from cattrs.errors import ClassValidationError
 
@@ -60,6 +56,11 @@ from pygls.exceptions import (
     FeatureRequestError,
 )
 from pygls.feature_manager import FeatureManager, is_thread_function
+
+if TYPE_CHECKING:
+    from cattrs import Converter
+    from pygls.server import Server, WebSocketTransportAdapter
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +121,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     VERSION = "2.0"
 
-    def __init__(self, server: LanguageServer, converter):
+    def __init__(self, server: Server, converter: Converter):
         self._server = server
         self._converter = converter
 
@@ -554,7 +555,3 @@ class JsonRPCProtocol(asyncio.Protocol):
         return asyncio.wrap_future(
             self.send_request(method, params=params, msg_id=msg_id)
         )
-
-    def thread(self):
-        """Decorator that mark function to execute it in a thread."""
-        return self.fm.thread()
