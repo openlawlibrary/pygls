@@ -58,30 +58,30 @@ class ConfiguredLS(ClientServer):
                 assert "server_initiated_token" in params.text_document.uri
                 token = params.text_document.uri[len("file://") :]
                 if "async" in params.text_document.uri:
-                    await self.server.progress.create_async(token)
+                    await self.server.work_done_progress.create_async(token)
                 else:
-                    f = self.server.progress.create(token)
+                    f = self.server.work_done_progress.create(token)
                     await asyncio.sleep(0.1)
                     f.result()
 
             assert token
-            self.server.lsp.progress.begin(
+            self.server.protocol.progress.begin(
                 token,
                 WorkDoneProgressBegin(kind="begin", title="starting", percentage=0),
             )
             await asyncio.sleep(0.1)
-            if self.server.lsp.progress.tokens[token].cancelled():
-                self.server.lsp.progress.end(
+            if self.server.protocol.progress.tokens[token].cancelled():
+                self.server.protocol.progress.end(
                     token, WorkDoneProgressEnd(kind="end", message="cancelled")
                 )
             else:
-                self.server.lsp.progress.report(
+                self.server.protocol.progress.report(
                     token,
                     WorkDoneProgressReport(
                         kind="report", message="doing", percentage=50
                     ),
                 )
-                self.server.lsp.progress.end(
+                self.server.protocol.progress.end(
                     token, WorkDoneProgressEnd(kind="end", message="done")
                 )
             return None
@@ -91,7 +91,7 @@ class ConfiguredLS(ClientServer):
             self.client.notifications.append(params)
             if params.value["kind"] == "begin" and "cancel" in params.token:
                 # client cancels the progress token
-                self.client.lsp.notify(
+                self.client.protocol.notify(
                     WINDOW_WORK_DONE_PROGRESS_CANCEL,
                     WorkDoneProgressCancelParams(token=params.token),
                 )
@@ -115,7 +115,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 async def test_progress_notifications(client_server):
     client, _ = client_server
-    client.lsp.send_request(
+    client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://client_initiated_token"),
@@ -144,7 +144,7 @@ async def test_progress_notifications(client_server):
 @ConfiguredLS.decorate()
 async def test_server_initiated_progress_notifications(client_server, registration):
     client, _ = client_server
-    client.lsp.send_request(
+    client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(
@@ -179,7 +179,7 @@ async def test_server_initiated_progress_notifications(client_server, registrati
 @ConfiguredLS.decorate()
 def test_progress_cancel_notifications(client_server):
     client, _ = client_server
-    client.lsp.send_request(
+    client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(uri="file://client_initiated_token"),
@@ -206,7 +206,7 @@ def test_server_initiated_progress_progress_cancel_notifications(
     client_server, registration
 ):
     client, _ = client_server
-    client.lsp.send_request(
+    client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
             text_document=TextDocumentIdentifier(

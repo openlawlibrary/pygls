@@ -80,7 +80,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 def test_type_hierarchy_prepare_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         lsp.TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY,
         lsp.TypeHierarchyPrepareParams(
             text_document=lsp.TextDocumentIdentifier(uri="file://return.list"),
@@ -94,7 +94,7 @@ def test_type_hierarchy_prepare_return_list(client_server):
 @ConfiguredLS.decorate()
 def test_type_hierarchy_prepare_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         lsp.TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY,
         lsp.TypeHierarchyPrepareParams(
             text_document=lsp.TextDocumentIdentifier(uri="file://return.none"),
@@ -108,7 +108,7 @@ def test_type_hierarchy_prepare_return_none(client_server):
 @ConfiguredLS.decorate()
 def test_type_hierarchy_supertypes(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         lsp.TYPE_HIERARCHY_SUPERTYPES,
         lsp.TypeHierarchySupertypesParams(item=TYPE_HIERARCHY_ITEM),
     ).result()
@@ -119,7 +119,7 @@ def test_type_hierarchy_supertypes(client_server):
 @ConfiguredLS.decorate()
 def test_type_hierarchy_subtypes(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         lsp.TYPE_HIERARCHY_SUBTYPES,
         lsp.TypeHierarchySubtypesParams(item=TYPE_HIERARCHY_ITEM),
     ).result()

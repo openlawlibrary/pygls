@@ -33,12 +33,12 @@ from lsprotocol.types import (
     TextDocumentItem,
 )
 from pygls.protocol import LanguageServerProtocol
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
 
 def _initialize_server(server):
-    server.lsp.lsp_initialize(
+    server.protocol.lsp_initialize(
         InitializeParams(
             process_id=1234,
             root_uri=pathlib.Path(__file__).parent.as_uri(),
@@ -52,7 +52,7 @@ def test_bf_initialize(client_server):
     root_uri = pathlib.Path(__file__).parent.as_uri()
     process_id = 1234
 
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         INITIALIZE,
         InitializeParams(
             process_id=process_id,
@@ -71,7 +71,7 @@ def test_bf_text_document_did_open(client_server):
 
     _initialize_server(server)
 
-    client.lsp.notify(
+    client.protocol.notify(
         TEXT_DOCUMENT_DID_OPEN,
         DidOpenTextDocumentParams(
             text_document=TextDocumentItem(
@@ -82,7 +82,7 @@ def test_bf_text_document_did_open(client_server):
 
     sleep(1)
 
-    assert len(server.lsp.workspace.text_documents) == 1
+    assert len(server.protocol.workspace.text_documents) == 1
 
     document = server.workspace.get_text_document(__file__)
     assert document.uri == __file__
@@ -95,7 +95,7 @@ def test_bf_text_document_did_open(client_server):
 def test_command_async(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp.send_request(
+    is_called, thread_id = client.protocol.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_ASYNC)
     ).result()
 
@@ -107,7 +107,7 @@ def test_command_async(client_server):
 def test_command_sync(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp.send_request(
+    is_called, thread_id = client.protocol.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_SYNC)
     ).result()
 
@@ -119,7 +119,7 @@ def test_command_sync(client_server):
 def test_command_thread(client_server):
     client, server = client_server
 
-    is_called, thread_id = client.lsp.send_request(
+    is_called, thread_id = client.protocol.send_request(
         WORKSPACE_EXECUTE_COMMAND, ExecuteCommandParams(command=CMD_THREAD)
     ).result()
 
@@ -133,7 +133,7 @@ def test_allow_custom_protocol_derived_from_lsp():
 
     server = LanguageServer("pygls-test", "v1", protocol_cls=CustomProtocol)
 
-    assert isinstance(server.lsp, CustomProtocol)
+    assert isinstance(server.protocol, CustomProtocol)
 
 
 def test_forbid_custom_protocol_not_derived_from_lsp():

@@ -83,7 +83,7 @@ def test_capabilities(client_server):
 @pytest.mark.skip
 def test_signature_help_return_signature_help(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_SIGNATURE_HELP,
         SignatureHelpParams(
             text_document=TextDocumentIdentifier(uri="file://return.signature_help"),
@@ -129,7 +129,7 @@ def test_signature_help_return_signature_help(client_server):
 @pytest.mark.skip
 def test_signature_help_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_SIGNATURE_HELP,
         SignatureHelpParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
