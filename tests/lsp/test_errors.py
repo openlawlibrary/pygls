@@ -19,10 +19,10 @@ from typing import Any, List, Union
 import time
 
 import pytest
+from lsprotocol import types
 
 from pygls.exceptions import JsonRpcInternalError, PyglsError, JsonRpcException
-from lsprotocol.types import WINDOW_SHOW_MESSAGE, MessageType
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 from ..conftest import ClientServer
 
@@ -48,7 +48,12 @@ class CustomLanguageServerSendAll(LanguageServer):
     def report_server_error(
         self, error: Exception, source: Union[PyglsError, JsonRpcException]
     ):
-        self.show_message(self.default_error_message, msg_type=MessageType.Error)
+        self.window_show_message(
+            types.ShowMessageParams(
+                message="Error in LSP server",
+                type=types.MessageType.Error,
+            ),
+        )
 
 
 class ConfiguredLS(ClientServer):
@@ -63,7 +68,7 @@ class ConfiguredLS(ClientServer):
         def f1(params: Any):
             raise Exception(ERROR_MESSAGE)
 
-        @self.client.feature(WINDOW_SHOW_MESSAGE)
+        @self.client.feature(types.WINDOW_SHOW_MESSAGE)
         def f2(params: Any):
             self.client.messages.append(params.message)
 
@@ -89,7 +94,7 @@ def test_request_error_reporting_default(client_server):
     assert len(client.messages) == 0
 
     with pytest.raises(JsonRpcInternalError, match=ERROR_MESSAGE):
-        client.lsp.send_request(ERROR_TRIGGER).result()
+        client.protocol.send_request(ERROR_TRIGGER).result()
 
     time.sleep(0.1)
     assert len(client.messages) == 0
@@ -101,7 +106,7 @@ def test_request_error_reporting_override(client_server):
     assert len(client.messages) == 0
 
     with pytest.raises(JsonRpcInternalError, match=ERROR_MESSAGE):
-        client.lsp.send_request(ERROR_TRIGGER).result()
+        client.protocol.send_request(ERROR_TRIGGER).result()
 
     time.sleep(0.1)
     assert len(client.messages) == 1
@@ -110,17 +115,17 @@ def test_request_error_reporting_override(client_server):
 @ConfiguredLS.decorate()
 def test_notification_error_reporting(client_server):
     client, _ = client_server
-    client.lsp.notify(ERROR_TRIGGER)
+    client.protocol.notify(ERROR_TRIGGER)
     time.sleep(0.1)
 
     assert len(client.messages) == 1
-    assert client.messages[0] == LanguageServer.default_error_message
+    assert client.messages[0].startswith("Error in server:")
 
 
 @CustomConfiguredLSSafe.decorate()
 def test_overriding_error_reporting(client_server):
     client, _ = client_server
-    client.lsp.notify(ERROR_TRIGGER)
+    client.protocol.notify(ERROR_TRIGGER)
     time.sleep(0.1)
 
     assert len(client.messages) == 0
@@ -129,7 +134,7 @@ def test_overriding_error_reporting(client_server):
 @CustomConfiguredLSPotentialRecusrion.decorate()
 def test_overriding_error_reporting_with_potential_recursion(client_server):
     client, _ = client_server
-    client.lsp.notify(ERROR_TRIGGER)
+    client.protocol.notify(ERROR_TRIGGER)
     time.sleep(0.1)
 
     assert len(client.messages) == 0

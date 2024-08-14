@@ -544,7 +544,7 @@ def test_data_received_without_content_type(client_server):
         )
     )
     data = bytes(message, "utf-8")
-    server.lsp.data_received(data)
+    server.protocol.data_received(data)
 
 
 def test_data_received_content_type_first_should_handle_message(client_server):
@@ -565,7 +565,7 @@ def test_data_received_content_type_first_should_handle_message(client_server):
         )
     )
     data = bytes(message, "utf-8")
-    server.lsp.data_received(data)
+    server.protocol.data_received(data)
 
 
 def dummy_message(param=1):
@@ -590,22 +590,22 @@ def dummy_message(param=1):
 def test_data_received_single_message_should_handle_message(client_server):
     _, server = client_server
     data = dummy_message()
-    server.lsp.data_received(data)
+    server.protocol.data_received(data)
 
 
 def test_data_received_partial_message_should_handle_message(client_server):
     _, server = client_server
     data = dummy_message()
     partial = len(data) - 5
-    server.lsp.data_received(data[:partial])
-    server.lsp.data_received(data[partial:])
+    server.protocol.data_received(data[:partial])
+    server.protocol.data_received(data[partial:])
 
 
 def test_data_received_multi_message_should_handle_messages(client_server):
     _, server = client_server
     messages = (dummy_message(i) for i in range(3))
     data = b"".join(messages)
-    server.lsp.data_received(data)
+    server.protocol.data_received(data)
 
 
 def test_data_received_error_should_raise_jsonrpc_error(client_server):
@@ -628,8 +628,8 @@ def test_data_received_error_should_raise_jsonrpc_error(client_server):
             body,
         ]
     ).encode("utf-8")
-    future = server.lsp._request_futures["err"] = Future()
-    server.lsp.data_received(message)
+    future = server.protocol._request_futures["err"] = Future()
+    server.protocol.data_received(message)
     with pytest.raises(JsonRpcException, match="message for you sir"):
         future.result()
 
@@ -642,7 +642,7 @@ def test_initialize_should_return_server_capabilities(client_server):
         capabilities=ClientCapabilities(),
     )
 
-    server_capabilities = server.lsp.lsp_initialize(params)
+    server_capabilities = server.protocol.lsp_initialize(params)
 
     assert isinstance(server_capabilities, InitializeResult)
 
@@ -650,11 +650,11 @@ def test_initialize_should_return_server_capabilities(client_server):
 def test_ignore_unknown_notification(client_server):
     _, server = client_server
 
-    fn = server.lsp._execute_notification
-    server.lsp._execute_notification = Mock()
+    fn = server.protocol._execute_notification
+    server.protocol._execute_notification = Mock()
 
-    server.lsp._handle_notification("random/notification", None)
-    assert not server.lsp._execute_notification.called
+    server.protocol._handle_notification("random/notification", None)
+    assert not server.protocol._execute_notification.called
 
     # Remove mock
-    server.lsp._execute_notification = fn
+    server.protocol._execute_notification = fn

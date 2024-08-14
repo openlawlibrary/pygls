@@ -63,7 +63,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 def test_folding_range_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_FOLDING_RANGE,
         FoldingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
@@ -82,7 +82,7 @@ def test_folding_range_return_list(client_server):
 @ConfiguredLS.decorate()
 def test_folding_range_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_FOLDING_RANGE,
         FoldingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),

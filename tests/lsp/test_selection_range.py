@@ -70,7 +70,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 def test_selection_range_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_SELECTION_RANGE,
         SelectionRangeParams(
             # query="query",
@@ -98,7 +98,7 @@ def test_selection_range_return_list(client_server):
 @ConfiguredLS.decorate()
 def test_selection_range_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_SELECTION_RANGE,
         SelectionRangeParams(
             # query="query",

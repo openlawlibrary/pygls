@@ -68,7 +68,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 def test_linked_editing_ranges_return_ranges(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_LINKED_EDITING_RANGE,
         LinkedEditingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.ranges"),
@@ -92,7 +92,7 @@ def test_linked_editing_ranges_return_ranges(client_server):
 @ConfiguredLS.decorate()
 def test_linked_editing_ranges_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_LINKED_EDITING_RANGE,
         LinkedEditingRangeParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),

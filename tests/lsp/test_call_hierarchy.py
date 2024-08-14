@@ -131,7 +131,7 @@ def test_capabilities(client_server):
 @ConfiguredLS.decorate()
 def test_call_hierarchy_prepare_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
         CallHierarchyPrepareParams(
             text_document=TextDocumentIdentifier(uri="file://return.list"),
@@ -145,7 +145,7 @@ def test_call_hierarchy_prepare_return_list(client_server):
 @ConfiguredLS.decorate()
 def test_call_hierarchy_prepare_return_none(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
         CallHierarchyPrepareParams(
             text_document=TextDocumentIdentifier(uri="file://return.none"),
@@ -159,7 +159,7 @@ def test_call_hierarchy_prepare_return_none(client_server):
 @ConfiguredLS.decorate()
 def test_call_hierarchy_incoming_calls_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         CALL_HIERARCHY_INCOMING_CALLS,
         CallHierarchyIncomingCallsParams(item=CALL_HIERARCHY_ITEM),
     ).result()
@@ -177,7 +177,7 @@ def test_call_hierarchy_incoming_calls_return_list(client_server):
 @ConfiguredLS.decorate()
 def test_call_hierarchy_outgoing_calls_return_list(client_server):
     client, _ = client_server
-    response = client.lsp.send_request(
+    response = client.protocol.send_request(
         CALL_HIERARCHY_OUTGOING_CALLS,
         CallHierarchyOutgoingCallsParams(item=CALL_HIERARCHY_ITEM),
     ).result()

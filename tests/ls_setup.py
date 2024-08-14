@@ -27,7 +27,7 @@ from lsprotocol.types import (
     ClientCapabilities,
     InitializeParams,
 )
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 
 
 from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
@@ -62,8 +62,8 @@ class PyodideTestTransportAdapter:
     def close(self): ...
 
     def write(self, data):
-        object_hook = self.dest.lsp._deserialize_message
-        self.dest.lsp._procedure_handler(json.loads(data, object_hook=object_hook))
+        object_hook = self.dest.protocol._deserialize_message
+        self.dest.protocol._procedure_handler(json.loads(data, object_hook=object_hook))
 
 
 class PyodideClientServer:
@@ -74,11 +74,11 @@ class PyodideClientServer:
         self.server = LS("pygls-server", "v1")
         self.client = LS("pygls-client", "v1")
 
-        self.server.lsp.connection_made(PyodideTestTransportAdapter(self.client))
-        self.server.lsp._send_only_body = True
+        self.server.protocol.connection_made(PyodideTestTransportAdapter(self.client))
+        self.server.protocol._send_only_body = True
 
-        self.client.lsp.connection_made(PyodideTestTransportAdapter(self.server))
-        self.client.lsp._send_only_body = True
+        self.client.protocol.connection_made(PyodideTestTransportAdapter(self.server))
+        self.client.protocol._send_only_body = True
 
     def start(self):
         self.initialize()
@@ -90,7 +90,7 @@ class PyodideClientServer:
         return pytest.mark.parametrize("client_server", [cls], indirect=True)
 
     def initialize(self):
-        response = self.client.lsp.send_request(
+        response = self.client.protocol.send_request(
             INITIALIZE,
             InitializeParams(
                 process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
@@ -140,9 +140,9 @@ class NativeClientServer:
         self.initialize()
 
     def stop(self):
-        shutdown_response = self.client.lsp.send_request(SHUTDOWN).result()
+        shutdown_response = self.client.protocol.send_request(SHUTDOWN).result()
         assert shutdown_response is None
-        self.client.lsp.notify(EXIT)
+        self.client.protocol.notify(EXIT)
         self.server_thread.join()
         self.client._stop_event.set()
         try:
@@ -154,7 +154,7 @@ class NativeClientServer:
     @retry_stalled_init_fix_hack()
     def initialize(self):
         timeout = None if "DISABLE_TIMEOUT" in os.environ else 1
-        response = self.client.lsp.send_request(
+        response = self.client.protocol.send_request(
             INITIALIZE,
             InitializeParams(
                 process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
