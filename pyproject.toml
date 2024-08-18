@@ -18,7 +18,7 @@ readme = "README.md"
 # may be too restrictive.
 # See https://github.com/MousaZeidBaker/poetry-plugin-up
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 cattrs = ">=23.1.2"
 lsprotocol = "2024.0.0a2"
 websockets = { version = ">=11.0.3", optional = true }
@@ -29,7 +29,6 @@ ws = ["websockets"]
 [tool.poetry.group.dev.dependencies]
 # Replaces (amongst many other things) flake8 and bandit
 ruff = ">=0.1.6"
-# TODO `poethepoet>=0.20` needs python 3.8
 poethepoet = ">=0.24.4"
 mypy = ">=1.7.1"
 black = "^24.4.1"
