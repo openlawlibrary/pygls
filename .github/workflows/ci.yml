@@ -21,9 +21,9 @@ jobs:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@v5
         with:
-          concurrent_skipping: 'outdated_runs'
-          cancel_others: 'true'
-          skip_after_successful_duplicate: 'false'
+          concurrent_skipping: "outdated_runs"
+          cancel_others: "true"
+          skip_after_successful_duplicate: "false"
 
   test:
     needs: pre_job
@@ -45,7 +45,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: '1.8.3'
+          version: "1.8.3"
           virtualenvs-in-project: true
       - run: |
           cat *.log
@@ -101,6 +101,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Use Python
+        id: use-python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
@@ -109,11 +110,13 @@ jobs:
         with:
           virtualenvs-in-project: true
       - name: Load cached venv
+        # I wonder if we can replace this whole step with with the "Use Python" step above's `cache` field?
+        # See: https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#outputs-and-environment-variables
         id: cached-poetry-dependencies
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ hashFiles('**/poetry.lock') }}-${{ steps.use-python.outputs.python-version }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --all-extras --with dev
