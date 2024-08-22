@@ -147,7 +147,7 @@ class WebSocketTransportAdapter:
         asyncio.ensure_future(self._ws.send(data))
 
 
-class Server:
+class JsonRPCServer:
     """Base server class
 
     Parameters

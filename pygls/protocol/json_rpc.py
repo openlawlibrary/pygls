@@ -59,7 +59,7 @@ from pygls.feature_manager import FeatureManager, is_thread_function
 
 if TYPE_CHECKING:
     from cattrs import Converter
-    from pygls.server import Server, WebSocketTransportAdapter
+    from pygls.server import JsonRPCServer, WebSocketTransportAdapter
 
 
 logger = logging.getLogger(__name__)
@@ -121,7 +121,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     VERSION = "2.0"
 
-    def __init__(self, server: Server, converter: Converter):
+    def __init__(self, server: JsonRPCServer, converter: Converter):
         self._server = server
         self._converter = converter
 

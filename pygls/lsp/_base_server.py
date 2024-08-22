@@ -5,7 +5,7 @@ from concurrent.futures import Future
 from lsprotocol import types
 from pygls.protocol import LanguageServerProtocol
 from pygls.protocol import default_converter
-from pygls.server import Server
+from pygls.server import JsonRPCServer
 import typing
 from typing import Any
 from typing import Callable
@@ -14,7 +14,7 @@ from typing import Sequence
 from typing import Type
 
 
-class BaseLanguageServer(Server):
+class BaseLanguageServer(JsonRPCServer):
 
     protocol: LanguageServerProtocol
 
