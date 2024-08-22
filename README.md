@@ -4,29 +4,28 @@
 
 _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing your own [Language Servers](https://langserver.org/) in just a few lines of code.
 
+> [!IMPORTANT]
+> The next major version, *pygls v2* is ready for testing. 
+> We encourage all existing server authors to try the [migration guide](https://pygls.readthedocs.io/en/latest/howto/migrate-to-v2.html) and let us know how you get on!
+
 ## Quickstart
 ```python
 from pygls.lsp.server import LanguageServer
-from lsprotocol.types import (
-    TEXT_DOCUMENT_COMPLETION,
-    CompletionItem,
-    CompletionList,
-    CompletionParams,
-)
+from lsprotocol import types 
 
 server = LanguageServer("example-server", "v0.1")
 
-@server.feature(TEXT_DOCUMENT_COMPLETION)
-def completions(params: CompletionParams):
+@server.feature(types.TEXT_DOCUMENT_COMPLETION)
+def completions(params: types.CompletionParams):
     items = []
-    document = server.workspace.get_document(params.text_document.uri)
+    document = server.workspace.get_text_document(params.text_document.uri)
     current_line = document.lines[params.position.line].strip()
     if current_line.endswith("hello."):
         items = [
-            CompletionItem(label="world"),
-            CompletionItem(label="friend"),
+            types.CompletionItem(label="world"),
+            types.CompletionItem(label="friend"),
         ]
-    return CompletionList(is_incomplete=False, items=items)
+    return types.CompletionList(is_incomplete=False, items=items)
 
 server.start_io()
 ```
