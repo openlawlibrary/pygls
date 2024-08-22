@@ -1,4 +1,5 @@
-"""Script to automatically generate a lanaguge client from `lsprotocol` type definitons"""
+"""Script to automatically generate a lanaguge client and server from `lsprotocol` 
+type definitons."""
 
 import argparse
 import inspect
@@ -242,7 +243,7 @@ def generate_client() -> str:
         methods.append(textwrap.indent(method, "    "))
 
     code = [
-        "# GENERATED FROM scripts/generate_client_server.py -- DO NOT EDIT",
+        "# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT",
         "# flake8: noqa",
         write_imports(imports),
         "",
@@ -275,7 +276,7 @@ def generate_server() -> str:
         ("cattrs", "Converter"),
         ("pygls.protocol", "LanguageServerProtocol"),
         ("pygls.protocol", "default_converter"),
-        ("pygls.server", "Server"),
+        ("pygls.server", "JsonRPCServer"),
         ("typing", "Callable"),
         ("typing", "Optional"),
         ("typing", "Type"),
@@ -298,12 +299,12 @@ def generate_server() -> str:
         methods.append(textwrap.indent(method, "    "))
 
     code = [
-        "# GENERATED FROM scripts/generate_client_server.py -- DO NOT EDIT",
+        "# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT",
         "# flake8: noqa",
         write_imports(imports),
         "",
         "",
-        "class BaseLanguageServer(Server):",
+        "class BaseLanguageServer(JsonRPCServer):",
         "",
         "    protocol: LanguageServerProtocol",
         "",

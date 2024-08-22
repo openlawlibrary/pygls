@@ -1,4 +1,4 @@
-# GENERATED FROM scripts/generate_client_server.py -- DO NOT EDIT
+# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT
 # flake8: noqa
 from cattrs import Converter
 from concurrent.futures import Future

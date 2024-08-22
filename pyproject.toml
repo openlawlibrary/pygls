@@ -56,9 +56,9 @@ asyncio_mode = "auto"
 test-pyodide = "python tests/pyodide_testrunner/run.py"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
-check_generated_client = "python scripts/check_client_is_uptodate.py"
+check_generated_code = "python scripts/check_generated_code_is_uptodate.py"
 check_commit_style = "npx commitlint --from origin/main --to HEAD --verbose --config commitlintrc.yaml"
-generate_client = "python scripts/generate_client_server.py pygls/lsp"
+generate_code = "python scripts/generate_code.py pygls/lsp"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
 poetry_lock_check = "poetry check"
@@ -78,7 +78,7 @@ ignore_fail = "return_non_zero"
 sequence = [
     "ruff",
     "mypy",
-    "check_generated_client",
+    "check_generated_code",
     "check_commit_style",
     "black_check",
     "poetry_lock_check"
