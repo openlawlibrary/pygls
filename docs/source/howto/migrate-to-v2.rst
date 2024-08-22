@@ -349,3 +349,18 @@ As part of the update to ``lsprotocol v2024``, the following types have been ren
 ``WorkspaceWorkspaceFoldersRequest``                                                 ``WorkspaceFoldersRequest``
 ``WorkspaceWorkspaceFoldersResponse``                                                ``WorkspaceFoldersResponse``
 ===================================================================================  ==============
+
+Low Level Changes
+-----------------
+
+The following changes are unlikely to affect you directly, but have been included for completeness.
+
+``LanguageServer.lsp`` is now ``LanguageServer.protocol``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you need to access the underlying protocol object this is now via the ``protocol`` attribute.
+
+``pygls.server.Server`` is now ``pygls.server.JsonRPCServer``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+pygls' base server class has been renamed
