@@ -7,7 +7,7 @@ Servers
 .. autoclass:: pygls.progress.Progress
    :members:
 
-.. autoclass:: pygls.server.Server
+.. autoclass:: pygls.server.JsonRPCServer
    :members:
 
 
