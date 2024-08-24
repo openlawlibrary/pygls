@@ -1,6 +1,110 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0a1] - 2024-08-24
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a1
+
+### Bug Fixes
+
+- Compute `resolve_provider` value for `CodeLensOptions`
+- Respect client's preferred encoding when possible
+- Compute `prepare_provider` for `RenameOptions`
+- Default cwd for local extension
+- Compute `resolve_provider` for `DocumentLinkOptions`
+
+### CI
+
+- Update json-extension.yml to align with local extension
+- Start testing against Python 3.13
+- Stop testing on Python 3.8
+- Use Python version in cache key
+
+### Documentation
+
+- Update CONTRIBUTING.md
+- Add linter commander to PR template
+- Add `sphinx-design` plugin
+- Delete getting started guide
+- Create a "How To" section
+- Add guide on handling invalid data
+- Add about section
+- Add API Reference section
+- Update home page
+- Setup basic tutorial structure
+- Add how to guide on using the `pygls-playground`
+- Add module docstrings for the example servers
+- Include the hello world example code directly
+- Include the example servers in the documentation
+- Add Document Links example server
+- Rpm-spec-language-server to Implementations.md
+- Update GotoX title
+- Add Document and Workspace symbol example server
+- Fix typo in `server.py`
+- Fix typo in user guide
+- Add guide on implementing semantic tokens
+- Add example semantic tokens server
+- Add draft v2 migration guide
+
+### Features
+
+- Provide more detail in exception
+- Update to latest lsprotocol 2024.0.0a2
+- Generate server methods from lsp types
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Add README
+- Add Kedro VS Code extension into implementations.md
+- Update VSCode settings to align with local extension
+- Update pygls-playground README
+- Update requirements.txt for documentation
+- Regen poetry.lock
+- Fix lints
+- Remove `pathMappings`
+- Remove redundant method definitions
+- Align to new server implementation
+- Align tests with new server implementation
+- Rename scripts to `generate_code`
+- Add call for testing to README
+- Remove deprecated code
+
+### Refactor
+
+- End-to-end test infrastructure
+- Update hover.py  example to use language server argument
+- Make the playground extension workspace local
+- Rely on the `pygls.server.cwd` setting
+- Use generated `BaseLanguageServer`
+- Rename `Server` to `JsonRPCServer`
+
+### Testing
+
+- Add end-to-end test for `textDocument/hover` requests
+- Add end-to-end tests for color related methods
+- Add end-to-end tests for various "Goto X" methods
+- Add end-to-end tests for `textDocument/codeLens`
+- Add end-to-end tests for the different diagnostic approaches
+- Add end-to-end tests for the various formatting requests
+- Extend `get_client_for` to accept custom capabilities
+- Add end-to-end tests for rename methods
+- Add end-to-end semantic tokens test
+
+### Build
+
+- Upgrade black to latest (24.3.0)
+- Bump idna from 3.6 to 3.7
+- Bump jinja2 from 3.1.3 to 3.1.4
+- Requests from 2.31.0 to 2.32.0
+- Bump idna from 3.6 to 3.7 in /docs
+- Bump certifi from 2023.11.17 to 2024.7.4
+- Bump requests from 2.31.0 to 2.32.2 in /docs
+- Bump urllib3 from 2.1.0 to 2.2.2
+- Bump jinja2 from 3.1.2 to 3.1.4 in /docs
+- Bump zipp from 3.17.0 to 3.19.1
+- Bump setuptools from 69.0.2 to 70.0.0 in /docs
+
 ## [1.3.1] - 2024-03-26
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v1.3.1
 
