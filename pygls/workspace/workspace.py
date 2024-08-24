@@ -19,7 +19,6 @@
 import copy
 import logging
 import os
-import warnings
 from typing import Dict, Optional, Sequence, Union
 
 from lsprotocol import types
@@ -95,16 +94,6 @@ class Workspace(object):
 
     def add_folder(self, folder: WorkspaceFolder):
         self._folders[folder.uri] = folder
-
-    @property
-    def documents(self):
-        warnings.warn(
-            "'workspace.documents' has been deprecated, use "
-            "'workspace.text_documents' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.text_documents
 
     @property
     def notebook_documents(self):
@@ -285,39 +274,3 @@ class Workspace(object):
         doc_uri = text_doc.uri
         self._text_documents[doc_uri].apply_change(change)
         self._text_documents[doc_uri].version = text_doc.version
-
-    def get_document(self, *args, **kwargs):
-        warnings.warn(
-            "'workspace.get_document' has been deprecated, use "
-            "'workspace.get_text_document' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.get_text_document(*args, **kwargs)
-
-    def remove_document(self, *args, **kwargs):
-        warnings.warn(
-            "'workspace.remove_document' has been deprecated, use "
-            "'workspace.remove_text_document' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.remove_text_document(*args, **kwargs)
-
-    def put_document(self, *args, **kwargs):
-        warnings.warn(
-            "'workspace.put_document' has been deprecated, use "
-            "'workspace.put_text_document' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.put_text_document(*args, **kwargs)
-
-    def update_document(self, *args, **kwargs):
-        warnings.warn(
-            "'workspace.update_document' has been deprecated, use "
-            "'workspace.update_text_document' instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.update_text_document(*args, **kwargs)

@@ -1,26 +1,55 @@
-How To Migrate to v2.0     
+How To Migrate to v2.0
 ======================
+
 
 .. note::
 
    This guide is still a draft, some details may change
 
 The highlight of the *pygls* v2 release is upgrading ``lsprotocol`` to ``v2024.x`` bringing with it support for the proposed LSP v3.18 types and methods.
-It also includes standardised object names (so no more classes like ``NotebookDocumentSyncRegistrationOptionsNotebookSelectorType2CellsType``!)
+The new version includes standardised object names (so no more classes like ``NotebookDocumentSyncRegistrationOptionsNotebookSelectorType2CellsType``!)
 
+With the major version bump, this release also takes the opportunity to clean up the codebase by removing deprecated code and renaming a few things to try and improve overall consistency.
 This guide outlines how to adapt an existing server to the breaking changes introduced in this release.
 
 **Known Migrations**
 
-You may find insight and inspiration from these projects that have already successfully migrated to v2:
+You may find these projects that have already successfully migrated to v2 a useful reference:
 
-.. NOTE: The missing link below will be filled in a future PR once we have a stable hash for the commit that updates the example servers.
+- Our `example servers <https://github.com/openlawlibrary/pygls/commit/e90f88ad642a20d3a16551e00a5a0abe0a1e041f>`__
+- `pytest-lsp <https://github.com/swyddfa/lsp-devtools/pull/177>`__
+- `esbonio <https://github.com/swyddfa/esbonio/pull/882>`__
 
-- Our `example servers <>`__
+Python Support
+--------------
+
+*pygls v2* removes support for Python 3.8 and adds support for Python 3.13 (with the GIL, you are welcome to try the free-threaded version just note that it has not been tested yet!)
 
 
-Renamed LanguageServer Methods
-------------------------------
+Removed Deprecated Functions
+----------------------------
+
+The following methods and functions have been deprecated for some time and have now been removed in *pygls v2*.
+
+==================================================  ==============
+**pygls v1**                                        **pygls v2**
+==================================================  ==============
+``pygls.workspace.Document``                        ``pygls.workspace.TextDocument``
+``pygls.workspace.utf16_unit_offset``               ``TextDocument.position_codec.utf16_unit_offset`` or ``Workspace.position_codec.utf16_unit_offset``
+``pygls.workspace.utf16_num_units``                 ``TextDocument.position_codec.client_num_units`` or ``Workspace.position_codec.client_num_units``
+``pygls.workspace.position_from_utf16``             ``TextDocument.position_codec.position_from_client_units`` or ``Workspace.position_codec.position_from_client_units``
+``pygls.workspace.position_to_utf16``               ``TextDocument.position_codec.position_to_client_units`` or ``Workspace.position_codec.position_to_client_units``
+``pygls.workspace.range_from_utf16``                ``TextDocument.position_codec.range_from_client_units`` or ``Workspace.position_codec.range_from_client_units``
+``pygls.workspace.range_to_utf16``                  ``TextDocument.position_codec.range_to_client_units`` or ``Workspace.position_codec.range_to_client_units``
+``Workspace.documents``                             ``Workspace.text_documents``
+``Worspace.get_document``                           ``Workspace.get_text_document``
+``Worspace.put_document``                           ``Workspace.put_text_document``
+``Worspace.remove_document``                        ``Workspace.remove_text_document``
+``Worspace.update_document``                        ``Workspace.update_text_document``
+==================================================  ==============
+
+Renamed ``LanguageServer`` Methods
+----------------------------------
 
 The :class:`~pygls.lsp.LanuageServer` class has been moved to the ``pygls.lsp`` module::
 
@@ -32,7 +61,7 @@ The :class:`~pygls.lsp.LanuageServer` class has been moved to the ``pygls.lsp`` 
    from pygls.lsp.server import LanguageServer 
    server = LanguageServer(name="my-language-server", version="v1.0")
 
-All server-side LSP methods are now automatically generated from the specification, as a result the following methods have been renamed
+All LSP requests and notifications that can be sent by a server are now automatically generated from the specification, as a result the following methods have been renamed
 
 ==================================================  ==============
 **pygls v1**                                        **pygls v2**
@@ -364,3 +393,4 @@ If you need to access the underlying protocol object this is now via the ``proto
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 pygls' base server class has been renamed
+
