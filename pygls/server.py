@@ -23,7 +23,7 @@ import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
-from typing import Any, Callable, Optional, TextIO, Type, TypeVar, Union
+from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
 
 import cattrs
 from pygls import IS_PYODIDE
@@ -231,7 +231,9 @@ class JsonRPCServer:
         """Default error reporter."""
         logger.error("%s", error)
 
-    def start_io(self, stdin: Optional[TextIO] = None, stdout: Optional[TextIO] = None):
+    def start_io(
+        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+    ):
         """Starts IO server."""
         logger.info("Starting IO server")
 
