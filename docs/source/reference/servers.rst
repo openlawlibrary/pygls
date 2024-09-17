@@ -1,7 +1,7 @@
 Servers
 =======
 
-.. autoclass:: pygls.lsp.LanguageServer
+.. autoclass:: pygls.lsp.server.LanguageServer
    :members:
 
 .. autoclass:: pygls.progress.Progress
@@ -9,6 +9,3 @@ Servers
 
 .. autoclass:: pygls.server.JsonRPCServer
    :members:
-
-
-

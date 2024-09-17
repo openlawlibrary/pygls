@@ -124,6 +124,13 @@ These servers are dedicated to demonstrating features of *pygls* itself
 
       :octicon:`code`
 
+   .. grid-item-card:: Threaded Handlers
+      :link: /examples/threaded-handlers
+      :link-type: doc
+      :text-align: center
+
+      :octicon:`columns`
+
 
 Tutorial
 --------

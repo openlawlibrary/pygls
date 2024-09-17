@@ -51,14 +51,14 @@ The following methods and functions have been deprecated for some time and have 
 Renamed ``LanguageServer`` Methods
 ----------------------------------
 
-The :class:`~pygls.lsp.LanuageServer` class has been moved to the ``pygls.lsp`` module::
+The :class:`~pygls.lsp.server.LanuageServer` class has been moved to the ``pygls.lsp`` module::
 
    # Before
    from pygls.server import LanguageServer
    server = LanguageServer(name="my-language-server", version="v1.0")
 
    # After
-   from pygls.lsp.server import LanguageServer 
+   from pygls.lsp.server import LanguageServer
    server = LanguageServer(name="my-language-server", version="v1.0")
 
 All LSP requests and notifications that can be sent by a server are now automatically generated from the specification, as a result the following methods have been renamed
@@ -72,15 +72,15 @@ All LSP requests and notifications that can be sent by a server are now automati
 ``LanguageServer.get_configuration_async``          ``LanguageServer.workspace_configuration_async``
 ``LanguageServer.publish_diagnostics``              ``LanguageServer.text_document_publish_diagnostics``
 ``LanguageServer.register_capability``              ``LanguageServer.client_register_capability``
-``LanguageServer.register_capability_async``        ``LanguageServer.client_register_capability_async`` 
+``LanguageServer.register_capability_async``        ``LanguageServer.client_register_capability_async``
 ``LanguageServer.semantic_tokens_refresh``          ``LanguageServer.workspace_semantic_tokens_refresh``
 ``LanguageServer.semantic_tokens_refresh_async``    ``LanguageServer.workspace_semantic_tokens_refresh_async``
-``LanguageServer.show_document``                    ``LanguageServer.window_show_document`` 
-``LanguageServer.show_document_async``              ``LanguageServer.window_show_document_async`` 
-``LanguageServer.show_message``                     ``LanguageServer.window_show_message`` 
-``LanguageServer.show_message_log``                 ``LanguageServer.window_log_message``   
-``LanguageServer.unregister_capability``            ``LanguageServer.client_unregister_capability``        
-``LanguageServer.unregister_capability_async``      ``LanguageServer.client_unregister_capability_async`` 
+``LanguageServer.show_document``                    ``LanguageServer.window_show_document``
+``LanguageServer.show_document_async``              ``LanguageServer.window_show_document_async``
+``LanguageServer.show_message``                     ``LanguageServer.window_show_message``
+``LanguageServer.show_message_log``                 ``LanguageServer.window_log_message``
+``LanguageServer.unregister_capability``            ``LanguageServer.client_unregister_capability``
+``LanguageServer.unregister_capability_async``      ``LanguageServer.client_unregister_capability_async``
 ==================================================  ==============
 
 Additionally all LSP method signatures now require an instance of the corresponding ``params`` object for the method.
@@ -119,7 +119,7 @@ The helper is now accessed via ``LanguageServer.work_done_progress``
    from pygls.server import LanguageServer
 
    server = LanguageServer(name="my-language-server", version="v1.0")
-   
+
    @server.command('progress.example')
    async def progress(ls: LanguageServer, *args):
        """Create and start the progress on the client."""
@@ -394,3 +394,9 @@ If you need to access the underlying protocol object this is now via the ``proto
 
 pygls' base server class has been renamed
 
+Removed ``multiprocessing.pool.ThreadPool``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :external:py:class:`multiprocessing.pool.ThreadPool` instance has been removed, *pygls* now makes use of :external:py:class:`concurrent.futures.ThreadPoolExecutor` for all threaded tasks.
+
+The ``thread_pool_executor`` attribute of the base ``JsonRPCServer`` class has been removed, the ``ThreadPoolExecutor`` can be accessed via the ``thread_pool`` attribute instead.
