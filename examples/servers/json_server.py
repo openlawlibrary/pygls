@@ -20,7 +20,6 @@ demonstrates a number of pygls' capabilities including
 - Defining custom commands
 - Progress updates
 - Fetching configuration values from the client
-- Running methods in a thread
 - Async methods
 - Dynamic method (un)registration
 - Starting a TCP/WebSocket server.
@@ -33,7 +32,6 @@ guides.
 
 import argparse
 import asyncio
-import time
 import uuid
 from functools import partial
 from typing import Optional
@@ -42,13 +40,8 @@ from lsprotocol import types as lsp
 
 from pygls.lsp.server import LanguageServer
 
-COUNT_DOWN_START_IN_SECONDS = 10
-COUNT_DOWN_SLEEP_IN_SECONDS = 1
-
 
 class JsonLanguageServer(LanguageServer):
-    CMD_COUNT_DOWN_BLOCKING = "countDownBlocking"
-    CMD_COUNT_DOWN_NON_BLOCKING = "countDownNonBlocking"
     CMD_PROGRESS = "progress"
     CMD_REGISTER_COMPLETIONS = "registerCompletions"
     CMD_SHOW_CONFIGURATION_ASYNC = "showConfigurationAsync"
@@ -81,38 +74,6 @@ def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.Completion
             lsp.CompletionItem(label="}"),
         ],
     )
-
-
-@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
-def count_down_10_seconds_blocking(ls: JsonLanguageServer, *args):
-    """Starts counting down and showing message synchronously.
-    It will `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.window_show_message(
-            lsp.ShowMessageParams(
-                message=f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}",
-                type=lsp.MessageType.Info,
-            ),
-        )
-        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
-
-
-@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
-async def count_down_10_seconds_non_blocking(ls: JsonLanguageServer, *args):
-    """Starts counting down and showing message asynchronously.
-    It won't `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.window_show_message(
-            lsp.ShowMessageParams(
-                message=f"Counting down... {COUNT_DOWN_START_IN_SECONDS - i}",
-                type=lsp.MessageType.Info,
-            ),
-        )
-        await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.command(JsonLanguageServer.CMD_PROGRESS)
