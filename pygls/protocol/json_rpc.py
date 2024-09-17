@@ -143,18 +143,20 @@ class JsonRPCProtocol(asyncio.Protocol):
         return self
 
     def _execute_notification(self, handler, *params):
-        """Executes notification message handler."""
+        """Execute the given notification message handler."""
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(*params))
             future.add_done_callback(self._execute_notification_callback)
+
+        elif is_thread_function(handler):
+            future = self._server.thread_pool.submit(handler, *params)
+            future.add_done_callback(self._execute_notification_callback)
+
         else:
-            if is_thread_function(handler):
-                self._server.thread_pool.apply_async(handler, (*params,))
-            else:
-                handler(*params)
+            handler(*params)
 
     def _execute_notification_callback(self, future):
-        """Success callback used for coroutine notification message."""
+        """Callback used for async/threaded notification message handler."""
         if future.exception():
             try:
                 raise future.exception()
@@ -167,29 +169,23 @@ class JsonRPCProtocol(asyncio.Protocol):
             # self._send_response(None, error=error)
 
     def _execute_request(self, msg_id, handler, params):
-        """Executes request message handler."""
+        """Execute the given request message handler."""
 
         if asyncio.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(params))
             self._request_futures[msg_id] = future
             future.add_done_callback(partial(self._execute_request_callback, msg_id))
+
+        elif is_thread_function(handler):
+            future = self._server.thread_pool.submit(handler, params)
+            self._request_futures[msg_id] = future
+
+            future.add_done_callback(partial(self._execute_request_callback, msg_id))
         else:
-            # Can't be canceled
-            if is_thread_function(handler):
-                self._server.thread_pool.apply_async(
-                    handler,
-                    (params,),
-                    callback=partial(
-                        self._send_response,
-                        msg_id,
-                    ),
-                    error_callback=partial(self._execute_request_err_callback, msg_id),
-                )
-            else:
-                self._send_response(msg_id, handler(params))
+            self._send_response(msg_id, handler(params))
 
     def _execute_request_callback(self, msg_id, future):
-        """Success callback used for coroutine request message."""
+        """Callback used for async/threaded request message handler."""
         try:
             if not future.cancelled():
                 self._send_response(msg_id, result=future.result())
@@ -205,13 +201,6 @@ class JsonRPCProtocol(asyncio.Protocol):
             error = JsonRpcInternalError.of(sys.exc_info())
             logger.exception('Exception occurred for message "%s": %s', msg_id, error)
             self._send_response(msg_id, error=error.to_response_error())
-
-    def _execute_request_err_callback(self, msg_id, exc):
-        """Error callback used for coroutine request message."""
-        exc_info = (type(exc), exc, None)
-        error = JsonRpcInternalError.of(exc_info)
-        logger.exception('Exception occurred for message "%s": %s', msg_id, error)
-        self._send_response(msg_id, error=error.to_response_error())
 
     def _get_handler(self, feature_name):
         """Returns builtin or used defined feature by name if exists."""

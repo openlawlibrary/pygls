@@ -26,7 +26,6 @@ from threading import Event
 from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
 
 import cattrs
-from pygls import IS_PYODIDE
 from pygls.exceptions import (
     FeatureNotificationError,
     JsonRpcInternalError,
@@ -35,9 +34,6 @@ from pygls.exceptions import (
     FeatureRequestError,
 )
 from pygls.protocol import JsonRPCProtocol
-
-if not IS_PYODIDE:
-    from multiprocessing.pool import ThreadPool
 
 
 logger = logging.getLogger(__name__)
@@ -162,7 +158,7 @@ class JsonRPCServer:
        The asyncio event loop
 
     max_workers
-       Maximum number of workers for `ThreadPool` and `ThreadPoolExecutor`
+       Maximum number of workers for `ThreadPoolExecutor`
 
     """
 
@@ -172,17 +168,16 @@ class JsonRPCServer:
         self,
         protocol_cls: Type[JsonRPCProtocol],
         converter_factory: Callable[[], cattrs.Converter],
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        max_workers: int = 2,
+        loop: asyncio.AbstractEventLoop | None = None,
+        max_workers: int | None = None,
     ):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError("Protocol class should be subclass of asyncio.Protocol")
 
         self._max_workers = max_workers
         self._server = None
-        self._stop_event: Optional[Event] = None
-        self._thread_pool: Optional[ThreadPool] = None
-        self._thread_pool_executor: Optional[ThreadPoolExecutor] = None
+        self._stop_event: Event | None = None
+        self._thread_pool: ThreadPoolExecutor | None = None
 
         if loop is None:
             loop = asyncio.new_event_loop()
@@ -202,11 +197,7 @@ class JsonRPCServer:
             self._stop_event.set()
 
         if self._thread_pool:
-            self._thread_pool.terminate()
-            self._thread_pool.join()
-
-        if self._thread_pool_executor:
-            self._thread_pool_executor.shutdown()
+            self._thread_pool.shutdown()
 
         if self._server:
             self._server.close()
@@ -247,7 +238,7 @@ class JsonRPCServer:
             self.loop.run_until_complete(
                 aio_readline(
                     self.loop,
-                    self.thread_pool_executor,
+                    self.thread_pool,
                     self._stop_event,
                     stdin or sys.stdin.buffer,
                     self.protocol.data_received,
@@ -351,22 +342,10 @@ class JsonRPCServer:
         """
         return self.protocol.fm.feature(feature_name, options)
 
-    if not IS_PYODIDE:
+    @property
+    def thread_pool(self) -> ThreadPoolExecutor:
+        """Returns thread pool instance (lazy initialization)."""
+        if not self._thread_pool:
+            self._thread_pool = ThreadPoolExecutor(max_workers=self._max_workers)
 
-        @property
-        def thread_pool(self) -> ThreadPool:
-            """Returns thread pool instance (lazy initialization)."""
-            if not self._thread_pool:
-                self._thread_pool = ThreadPool(processes=self._max_workers)
-
-            return self._thread_pool
-
-        @property
-        def thread_pool_executor(self) -> ThreadPoolExecutor:
-            """Returns thread pool instance (lazy initialization)."""
-            if not self._thread_pool_executor:
-                self._thread_pool_executor = ThreadPoolExecutor(
-                    max_workers=self._max_workers
-                )
-
-            return self._thread_pool_executor
+        return self._thread_pool
