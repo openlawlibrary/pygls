@@ -204,13 +204,14 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     def _get_handler(self, feature_name):
         """Returns builtin or used defined feature by name if exists."""
-        try:
-            return self.fm.builtin_features[feature_name]
-        except KeyError:
-            try:
-                return self.fm.features[feature_name]
-            except KeyError:
-                raise JsonRpcMethodNotFound.of(feature_name)
+
+        if (handler := self.fm.builtin_features.get(feature_name)) is not None:
+            return handler
+
+        if (handler := self.fm.features.get(feature_name)) is not None:
+            return handler
+
+        raise JsonRpcMethodNotFound.of(feature_name)
 
     def _handle_cancel_notification(self, msg_id):
         """Handles a cancel notification from the client."""
@@ -233,11 +234,11 @@ class JsonRPCProtocol(asyncio.Protocol):
         try:
             handler = self._get_handler(method_name)
             self._execute_notification(handler, params)
-        except (KeyError, JsonRpcMethodNotFound):
-            logger.warning('Ignoring notification for unknown method "%s"', method_name)
+        except JsonRpcMethodNotFound:
+            logger.warning("Ignoring notification for unknown method %r", method_name)
         except Exception as error:
             logger.exception(
-                'Failed to handle notification "%s": %s',
+                "Failed to handle notification %r: %s",
                 method_name,
                 params,
                 exc_info=True,
@@ -255,6 +256,14 @@ class JsonRPCProtocol(asyncio.Protocol):
             else:
                 self._execute_request(msg_id, handler, params)
 
+        except JsonRpcMethodNotFound as error:
+            logger.warning(
+                "Failed to handle request %r, unknown method %r",
+                msg_id,
+                method_name,
+            )
+            self._send_response(msg_id, None, error.to_response_error())
+            self._server._report_server_error(error, FeatureRequestError)
         except JsonRpcException as error:
             logger.exception(
                 "Failed to handle request %s %s %s",
