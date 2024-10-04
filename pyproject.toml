@@ -20,7 +20,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.9"
 cattrs = ">=23.1.2"
-lsprotocol = "2024.0.0a2"
+lsprotocol = "2024.0.0b1"
 websockets = { version = ">=11.0.3", optional = true }
 
 [tool.poetry.extras]

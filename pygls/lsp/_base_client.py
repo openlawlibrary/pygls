@@ -1607,7 +1607,7 @@ class BaseLanguageClient(JsonRPCClient):
     def workspace_text_document_content(
         self,
         params: types.TextDocumentContentParams,
-        callback: Optional[Callable[[str], None]] = None,
+        callback: Optional[Callable[[types.TextDocumentContentResult], None]] = None,
     ) -> Future:
         """Make a :lsp:`workspace/textDocumentContent` request.
 
@@ -1625,7 +1625,7 @@ class BaseLanguageClient(JsonRPCClient):
     async def workspace_text_document_content_async(
         self,
         params: types.TextDocumentContentParams,
-    ) -> str:
+    ) -> types.TextDocumentContentResult:
         """Make a :lsp:`workspace/textDocumentContent` request.
 
         The `workspace/textDocumentContent` request is sent from the client to the

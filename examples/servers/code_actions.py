@@ -67,6 +67,7 @@ def code_actions(params: types.CodeActionParams):
                 title=f"Evaluate '{match.group(0)}'",
                 kind=types.CodeActionKind.QuickFix,
                 edit=types.WorkspaceEdit(changes={document_uri: [text_edit]}),
+                tags=[types.CodeActionTag.LlmGenerated],
             )
             items.append(action)
 

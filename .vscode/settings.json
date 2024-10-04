@@ -17,5 +17,10 @@
             "language": "plaintext"
         }
     ],
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
     // "pygls.jsonServer.exampleConfiguration": "some value here",
 }
