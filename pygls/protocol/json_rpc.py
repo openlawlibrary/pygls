@@ -312,7 +312,7 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         return data.__dict__
 
-    def _deserialize_message(self, data):
+    def structure_message(self, data):
         """Function used to deserialize data recevied from the client."""
 
         if "jsonrpc" not in data:
@@ -346,7 +346,7 @@ class JsonRPCProtocol(asyncio.Protocol):
             logger.error("Unable to deserialize message\n%s", traceback.format_exc())
             raise JsonRpcInternalError() from exc
 
-    def _procedure_handler(self, message):
+    def handle_message(self, message):
         """Delegates message to handlers depending on message type."""
 
         if message.jsonrpc != JsonRPCProtocol.VERSION:
@@ -470,9 +470,9 @@ class JsonRPCProtocol(asyncio.Protocol):
             self._message_buf = []
 
             # Parse the body
-            self._procedure_handler(
+            self.handle_message(
                 json.loads(
-                    body.decode(self.CHARSET), object_hook=self._deserialize_message
+                    body.decode(self.CHARSET), object_hook=self.structure_message
                 )
             )
 

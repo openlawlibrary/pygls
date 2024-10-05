@@ -292,8 +292,8 @@ class JsonRPCServer:
             """Handle new connection wrapped in the WebSocket."""
             self.protocol.transport = WebSocketTransportAdapter(websocket, self.loop)
             async for message in websocket:
-                self.protocol._procedure_handler(
-                    json.loads(message, object_hook=self.protocol._deserialize_message)
+                self.protocol.handle_message(
+                    json.loads(message, object_hook=self.protocol.structure_message)
                 )
 
         start_server = serve(connection_made, host, port, loop=self.loop)
