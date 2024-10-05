@@ -115,7 +115,7 @@ def test_deserialize_notification_message_valid_params(protocol):
     }}
     """
 
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(
         result, ExampleNotification
@@ -144,7 +144,7 @@ def test_deserialize_notification_message_unknown_type(protocol):
     }
     """
 
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, JsonRPCNotification)
     assert result.jsonrpc == "2.0"
@@ -169,7 +169,7 @@ def test_deserialize_notification_message_bad_params_should_raise_error(protocol
     """
 
     with pytest.raises(JsonRpcInvalidParams):
-        json.loads(params, object_hook=protocol._deserialize_message)
+        json.loads(params, object_hook=protocol.structure_message)
 
 
 def test_deserialize_response_message_custom_converter():
@@ -200,7 +200,7 @@ def test_deserialize_response_message_custom_converter():
 
     protocol = JsonRPCProtocol(None, custom_converter())
     protocol._result_types["id"] = egasseM
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, egasseM)
     assert result.cprnosj == "2.0"
@@ -296,7 +296,7 @@ def test_deserialize_response_message(protocol):
     }
     """
     protocol._result_types["id"] = IntResult
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, IntResult)
     assert result.jsonrpc == "2.0"
@@ -318,7 +318,7 @@ def test_deserialize_response_message_unknown_type(protocol):
     }
     """
     protocol._result_types["id"] = JsonRPCResponseMessage
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, JsonRPCResponseMessage)
     assert result.jsonrpc == "2.0"
@@ -342,7 +342,7 @@ def test_deserialize_request_message_with_registered_type(protocol):
         }}
     }}
     """
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, ExampleRequest)
     assert result.jsonrpc == "2.0"
@@ -370,7 +370,7 @@ def test_deserialize_request_message_without_registered_type(protocol):
         }
     }
     """
-    result = json.loads(params, object_hook=protocol._deserialize_message)
+    result = json.loads(params, object_hook=protocol.structure_message)
 
     assert isinstance(result, JsonRPCRequestMessage)
     assert result.jsonrpc == "2.0"
