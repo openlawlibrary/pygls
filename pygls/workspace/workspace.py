@@ -47,10 +47,7 @@ class Workspace(object):
         self._root_uri = root_uri
         if self._root_uri is not None:
             self._root_uri_scheme = uri_scheme(self._root_uri)
-            root_path = to_fs_path(self._root_uri)
-            if root_path is None:
-                raise Exception("Couldn't get `root_path` from `root_uri`")
-            self._root_path = root_path
+            self._root_path = to_fs_path(self._root_uri)
         else:
             self._root_path = None
         self._sync_kind = sync_kind
@@ -151,9 +148,14 @@ class Workspace(object):
         return self._text_documents.get(doc_uri) or self._create_text_document(doc_uri)
 
     def is_local(self):
-        return (
-            self._root_uri_scheme == "" or self._root_uri_scheme == "file"
-        ) and os.path.exists(self._root_path)
+
+        if self._root_uri_scheme not in {"", "file"}:
+            return False
+
+        if (path := self._root_path) is None:
+            return False
+
+        return os.path.exists(path)
 
     def put_notebook_document(self, params: types.DidOpenNotebookDocumentParams):
         notebook = params.notebook_document

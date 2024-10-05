@@ -19,12 +19,13 @@
 import io
 import logging
 import os
+import pathlib
 import re
 from typing import List, Optional, Pattern
 
 from lsprotocol import types
 
-from pygls.uris import to_fs_path
+from pygls.uris import urlparse, to_fs_path
 from .position_codec import PositionCodec
 
 # TODO: this is not the best e.g. we capture numbers
@@ -47,9 +48,10 @@ class TextDocument(object):
     ):
         self.uri = uri
         self.version = version
-        path = to_fs_path(uri)
-        if path is None:
-            raise Exception("`path` cannot be None")
+
+        if (path := to_fs_path(uri)) is None:
+            _, _, path, *_ = urlparse(uri)
+
         self.path = path
         self.language_id = language_id
         self.filename: Optional[str] = os.path.basename(self.path)
@@ -177,10 +179,10 @@ class TextDocument(object):
 
     @property
     def source(self) -> str:
-        if self._source is None:
-            with io.open(self.path, "r", encoding="utf-8") as f:
-                return f.read()
-        return self._source
+        if self._source is None and self.path is not None:
+            return pathlib.Path(self.path).read_text(encoding="utf-8")
+
+        return self._source or ""
 
     def word_at_position(
         self,

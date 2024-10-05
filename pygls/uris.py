@@ -21,6 +21,8 @@ A collection of URI utilities with logic built on the VSCode URI library.
 
 https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef13bb9/lib/index.ts
 """
+from __future__ import annotations
+
 from typing import Optional, Tuple
 
 import re
@@ -75,20 +77,22 @@ def from_fs_path(path: str):
         return None
 
 
-def to_fs_path(uri: str):
+def to_fs_path(uri: str) -> str | None:
     """
     Returns the filesystem path of the given URI.
 
     Will handle UNC paths and normalize windows drive letters to lower-case.
     Also uses the platform specific path separator. Will *not* validate the
     path for invalid characters and semantics.
-    Will *not* look at the scheme of this URI.
     """
     try:
         # scheme://netloc/path;parameters?query#fragment
         scheme, netloc, path, _, _, _ = urlparse(uri)
 
-        if netloc and path and scheme == "file":
+        if scheme != "file":
+            return None
+
+        if netloc and path:
             # unc path: file://shares/c$/far/boo
             value = f"//{netloc}{path}"
 

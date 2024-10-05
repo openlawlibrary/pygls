@@ -25,6 +25,11 @@ Python Support
 
 *pygls v2* removes support for Python 3.8 and adds support for Python 3.13 (with the GIL, you are welcome to try the free-threaded version just note that it has not been tested yet!)
 
+URI Handling
+------------
+
+The :func:`pygls.uris.to_fs_path` will now return ``None`` for URIs that do not have a ``file:`` scheme.
+
 
 Removed Deprecated Functions
 ----------------------------
