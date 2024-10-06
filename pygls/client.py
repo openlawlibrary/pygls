@@ -14,61 +14,29 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from __future__ import annotations
+
 import asyncio
+import json
 import logging
 import re
+import typing
 from threading import Event
-from typing import Any
-from typing import Callable
-from typing import List
-from typing import Optional
-from typing import Type
-from typing import Union
 
-from cattrs import Converter
-
-from pygls.exceptions import PyglsError, JsonRpcException
+from pygls.exceptions import PyglsError, JsonRpcException, JsonRpcInternalError
 from pygls.protocol import JsonRPCProtocol, default_converter
+
+if typing.TYPE_CHECKING:
+    from typing import Any
+    from typing import Callable
+    from typing import List
+    from typing import Optional
+    from typing import Type
+
+    from cattrs import Converter
 
 
 logger = logging.getLogger(__name__)
-
-
-async def aio_readline(stop_event, reader, message_handler):
-    CONTENT_LENGTH_PATTERN = re.compile(rb"^Content-Length: (\d+)\r\n$")
-
-    # Initialize message buffer
-    message = []
-    content_length = 0
-
-    while not stop_event.is_set():
-        # Read a header line
-        header = await reader.readline()
-        if not header:
-            break
-        message.append(header)
-
-        # Extract content length if possible
-        if not content_length:
-            match = CONTENT_LENGTH_PATTERN.fullmatch(header)
-            if match:
-                content_length = int(match.group(1))
-                logger.debug("Content length: %s", content_length)
-
-        # Check if all headers have been read (as indicated by an empty line \r\n)
-        if content_length and not header.strip():
-            # Read body
-            body = await reader.readexactly(content_length)
-            if not body:
-                break
-            message.append(body)
-
-            # Pass message to protocol
-            message_handler(b"".join(message))
-
-            # Reset the buffer
-            message = []
-            content_length = 0
 
 
 class JsonRPCClient:
@@ -79,7 +47,7 @@ class JsonRPCClient:
         protocol_cls: Type[JsonRPCProtocol] = JsonRPCProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
     ):
-        # Strictly speaking `JsonRPCProtocol` wants a `LanguageServer`, not a
+        # Strictly speaking `JsonRPCProtocol` wants a `JsonRPCServer`, not a
         # `JsonRPCClient`. However there similar enough for our purposes, which is
         # that this client will mostly be used in testing contexts.
         self.protocol = protocol_cls(self, converter_factory())  # type: ignore
@@ -128,14 +96,54 @@ class JsonRPCClient:
             **kwargs,
         )
 
+        # Keep mypy happy
+        if server.stdout is None:
+            raise RuntimeError("Server process is missing a stdout stream")
+
         self.protocol.connection_made(server.stdin)  # type: ignore
-        connection = asyncio.create_task(
-            aio_readline(self._stop_event, server.stdout, self.protocol.data_received)
-        )
+        connection = asyncio.create_task(self.run_async(server.stdout))
         notify_exit = asyncio.create_task(self._server_exit())
 
         self._server = server
         self._async_tasks.extend([connection, notify_exit])
+
+    async def run_async(self, reader: asyncio.StreamReader):
+        """Run the main message processing loop, asynchronously"""
+
+        CONTENT_LENGTH_PATTERN = re.compile(rb"^Content-Length: (\d+)\r\n$")
+        content_length = 0
+
+        while not self._stop_event.is_set():
+            # Read a header line
+            header = await reader.readline()
+            if not header:
+                break
+
+            # Extract content length if possible
+            if not content_length:
+                match = CONTENT_LENGTH_PATTERN.fullmatch(header)
+                if match:
+                    content_length = int(match.group(1))
+                    logger.debug("Content length: %s", content_length)
+
+            # Check if all headers have been read (as indicated by an empty line \r\n)
+            if content_length and not header.strip():
+                # Read body
+                body = await reader.readexactly(content_length)
+                if not body:
+                    break
+
+                try:
+                    message = json.loads(
+                        body, object_hook=self.protocol.structure_message
+                    )
+                    self.protocol.handle_message(message)
+                except Exception as exc:
+                    logger.exception("Unable to handle message")
+                    self._report_server_error(exc, JsonRpcInternalError)
+
+                # Reset
+                content_length = 0
 
     async def _server_exit(self):
         if self._server is not None:
@@ -152,15 +160,15 @@ class JsonRPCClient:
         """Called when the server process exits."""
 
     def _report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self, error: Exception, source: type[PyglsError] | type[JsonRpcException]
     ):
         try:
             self.report_server_error(error, source)
         except Exception:
-            logger.error("Unable to report error", exc_info=True)
+            logger.exception("Unable to report error")
 
     def report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self, error: Exception, source: type[PyglsError] | type[JsonRpcException]
     ):
         """Called when the server does something unexpected e.g. respond with malformed
         JSON."""
