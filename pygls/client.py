@@ -107,6 +107,15 @@ class JsonRPCClient:
         self._server = server
         self._async_tasks.extend([connection, notify_exit])
 
+    async def start_tcp(self, host: str, port: int):
+        """Start communicating with a server over TCP."""
+        reader, writer = await asyncio.open_connection(host, port)
+
+        self.protocol.connection_made(writer)  # type: ignore
+        connection = asyncio.create_task(self.run_async(reader))
+
+        self._async_tasks.extend([connection])
+
     async def run_async(self, reader: asyncio.StreamReader):
         """Run the main message processing loop, asynchronously"""
 
