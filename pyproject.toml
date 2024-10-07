@@ -38,6 +38,7 @@ black = "^24.4.1"
 coverage = { version = ">=7.3.2", extras = ["toml"] }
 pytest = ">=7.4.3"
 pytest-asyncio = ">=0.21.0"
+pytest-cov = ">=5"
 
 [tool.poetry.group.docs.dependencies]
 # TODO `sphinx>=7.26` needs python 3.9
@@ -64,13 +65,8 @@ black_check = "black --check ."
 poetry_lock_check = "poetry check"
 
 [tool.poe.tasks.test]
-env = { COVERAGE_PROCESS_START = "pyproject.toml" }
 sequence = [
-     { cmd = "python -c 'import pathlib,sys; pathlib.Path(f\"{sys.path[-1]}/cov.pth\").write_text(\"import coverage; coverage.process_startup()\");'"},
-     { cmd = "coverage erase" },
-     { cmd = "coverage run -m pytest" },
-     { cmd = "coverage combine" },
-     { cmd = "coverage report" },
+     { cmd = "pytest --cov" },
 ]
 ignore_fail = "return_non_zero"
 
