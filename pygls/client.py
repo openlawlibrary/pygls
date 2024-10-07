@@ -201,8 +201,7 @@ class JsonRPCClient:
         self._stop_event.set()
 
         if self._server is not None and self._server.returncode is None:
-            logger.debug("Terminating server process: %s", self._server.pid)
-            self._server.terminate()
+            await self._server.wait()
 
         if len(self._async_tasks) > 0:
             await asyncio.gather(*self._async_tasks)
