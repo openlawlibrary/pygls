@@ -29,6 +29,7 @@ from datetime import datetime
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 DATE_FORMATS = [
@@ -84,5 +85,4 @@ def hover(ls: LanguageServer, params: types.HoverParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    server.start_io()
+    start_server(server)

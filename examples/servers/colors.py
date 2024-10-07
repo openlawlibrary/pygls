@@ -49,6 +49,7 @@ import re
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 COLOR = re.compile(r"""\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})(?!\w)""")
@@ -112,4 +113,4 @@ def color_presentation(params: types.ColorPresentationParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+    start_server(server)

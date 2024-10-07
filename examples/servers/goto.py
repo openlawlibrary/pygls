@@ -38,6 +38,7 @@ import re
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
@@ -210,4 +211,4 @@ def find_references(ls: GotoLanguageServer, params: types.ReferenceParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+    start_server(server)
