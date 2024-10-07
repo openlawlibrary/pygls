@@ -99,4 +99,5 @@ async def test_client_large_responses():
     result = await client.protocol.send_request_async("get/numbers", {}, msg_id=1)
     assert len(result.numbers) == 100_000
 
-    await client.stop()
+    client.protocol.notify("exit", {})
+    await asyncio.wait_for(client.stop(), timeout=5.0)
