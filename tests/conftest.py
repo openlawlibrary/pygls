@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from __future__ import annotations
+
 import asyncio
 import pathlib
 import sys
@@ -126,12 +128,28 @@ def pytest_addoption(parser):
         help="Choose the runtime in which to run servers under test.",
     )
 
+    group.addoption(
+        "--lsp-transport",
+        dest="lsp_transport",
+        action="store",
+        default="stdio",
+        choices=("stdio", "tcp"),
+        help="Choose the transport to use with servers under test.",
+    )
+
 
 @pytest.fixture(scope="session")
 def runtime(request):
     """This fixture is the source of truth as to which environment we should run the
     end-to-end tests in."""
     return request.config.getoption("lsp_runtime")
+
+
+@pytest.fixture(scope="session")
+def transport(request):
+    """This fixture is the source of truth for the transport we should run the
+    end-to-end tests with."""
+    return request.config.getoption("lsp_transport")
 
 
 @pytest.fixture(scope="session")
@@ -171,14 +189,31 @@ def server_dir():
     return path.resolve()
 
 
-def get_client_for_cpython_server(uri_fixture):
+def get_client_for_cpython_server(transport, uri_fixture):
     """Return a client configured to communicate with a server running under cpython."""
 
     async def fn(
         server_name: str, capabilities: Optional[types.ClientCapabilities] = None
     ):
         client = LanguageClient("pygls-test-suite", "v1")
-        await client.start_io(sys.executable, str(SERVER_DIR / server_name))
+
+        server_cmd = [sys.executable, str(SERVER_DIR / server_name)]
+        server: asyncio.subprocess.Process | None = None
+
+        if transport == "stdio":
+            await client.start_io(*server_cmd)
+
+        elif transport == "tcp":
+            # TODO: Make host/port configurable?
+            host, port = "localhost", 8888
+            server_cmd.extend(["--tcp", "--host", host, "--port", f"{port}"])
+
+            server = await asyncio.create_subprocess_exec(*server_cmd)
+            await asyncio.sleep(1)
+            await client.start_tcp(host, port)
+
+        else:
+            raise NotImplementedError(f"Unsupported transport: {transport!r}")
 
         response = await client.initialize_async(
             types.InitializeParams(
@@ -193,19 +228,19 @@ def get_client_for_cpython_server(uri_fixture):
         client.exit(None)
 
         await client.stop()
+        if server is not None and server.returncode is None:
+            server.terminate()
 
     return fn
 
 
 @pytest.fixture(scope="session")
-def get_client_for(runtime, uri_for):
+def get_client_for(runtime, transport, uri_for):
     """Return a client configured to communicate with the specified server.
 
-    Takes into account the current runtime.
-
-    It's the consuming fixture's responsibility to stop the client.
+    Takes into account the current runtime and transport.
     """
     if runtime not in {"cpython"}:
         raise NotImplementedError(f"get_client_for: {runtime=}")
 
-    return get_client_for_cpython_server(uri_for)
+    return get_client_for_cpython_server(transport, uri_for)

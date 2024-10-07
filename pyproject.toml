@@ -67,6 +67,7 @@ poetry_lock_check = "poetry check"
 [tool.poe.tasks.test]
 sequence = [
      { cmd = "pytest --cov" },
+     { cmd = "pytest tests/e2e --lsp-transport tcp" },
 ]
 ignore_fail = "return_non_zero"
 
