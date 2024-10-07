@@ -36,6 +36,7 @@ from typing import List
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
@@ -155,4 +156,4 @@ def prepare_rename(ls: RenameLanguageServer, params: types.PrepareRenameParams):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-    server.start_io()
+    start_server(server)

@@ -33,6 +33,7 @@ import re
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 LINK = re.compile(r"<(\w+):([^>]+)>")
@@ -91,4 +92,4 @@ def document_link_resolve(link: types.DocumentLink):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+    start_server(server)

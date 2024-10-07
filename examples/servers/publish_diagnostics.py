@@ -30,6 +30,7 @@ import re
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
@@ -117,4 +118,4 @@ def did_change(ls: PublishDiagnosticServer, params: types.DidOpenTextDocumentPar
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+    start_server(server)

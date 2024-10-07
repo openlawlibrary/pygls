@@ -42,6 +42,7 @@ from typing import Optional
 import attrs
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
@@ -299,5 +300,4 @@ def semantic_tokens_full(ls: SemanticTokensServer, params: types.SemanticTokensP
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    server.start_io()
+    start_server(server)

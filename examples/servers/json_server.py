@@ -30,7 +30,6 @@ Eventually this example will be broken up in smaller, more focused examples and 
 guides.
 """
 
-import argparse
 import asyncio
 import uuid
 from functools import partial
@@ -38,6 +37,7 @@ from typing import Optional
 
 from lsprotocol import types as lsp
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 
@@ -232,27 +232,5 @@ def show_configuration_thread(ls: JsonLanguageServer, *args):
     handle_config(ls, config)
 
 
-def add_arguments(parser):
-    parser.description = "simple json server example"
-
-    parser.add_argument("--tcp", action="store_true", help="Use TCP server")
-    parser.add_argument("--ws", action="store_true", help="Use WebSocket server")
-    parser.add_argument("--host", default="127.0.0.1", help="Bind to this address")
-    parser.add_argument("--port", type=int, default=2087, help="Bind to this port")
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    add_arguments(parser)
-    args = parser.parse_args()
-
-    if args.tcp:
-        json_server.start_tcp(args.host, args.port)
-    elif args.ws:
-        json_server.start_ws(args.host, args.port)
-    else:
-        json_server.start_io()
-
-
 if __name__ == "__main__":
-    main()
+    start_server(json_server)

@@ -34,6 +34,7 @@ import re
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
@@ -140,4 +141,4 @@ def evaluate_sum(ls: LanguageServer, args):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    server.start_io()
+    start_server(server)

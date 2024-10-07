@@ -33,6 +33,7 @@ import re
 from typing import Optional
 
 from lsprotocol import types
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 NUMBER = re.compile(r"\d+")
@@ -91,4 +92,4 @@ def inlay_hint_resolve(hint: types.InlayHint):
 
 
 if __name__ == "__main__":
-    server.start_io()
+    start_server(server)

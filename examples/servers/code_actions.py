@@ -26,6 +26,7 @@ action which, when invoked will fill in the answer.
 """
 
 import re
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 from lsprotocol import types
 
@@ -74,4 +75,4 @@ def code_actions(params: types.CodeActionParams):
 
 
 if __name__ == "__main__":
-    server.start_io()
+    start_server(server)

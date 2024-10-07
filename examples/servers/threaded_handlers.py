@@ -25,6 +25,7 @@ import threading
 
 from lsprotocol import types
 
+from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
 server = LanguageServer("threaded-server", "v1")
@@ -92,4 +93,4 @@ def count_down_error(ls: LanguageServer, *args):
 
 
 if __name__ == "__main__":
-    server.start_io()
+    start_server(server)
