@@ -155,15 +155,30 @@ class JsonRPCClient:
                 content_length = 0
 
     async def _server_exit(self):
-        if self._server is not None:
-            await self._server.wait()
-            logger.debug(
-                "Server process %s exited with return code: %s",
-                self._server.pid,
-                self._server.returncode,
-            )
+        """Cleanup handler that runs when the server process managed by the client exits"""
+        if self._server is None:
+            return
+
+        await self._server.wait()
+
+        pid = self._server.pid
+        returncode = self._server.returncode
+
+        reason = f"Server process {pid} exited with return code: {returncode}"
+        logger.debug(reason)
+
+        # Cancel any pending requests
+        for id_, fut in self.protocol._request_futures.items():
+            if not fut.done():
+                fut.set_exception(RuntimeError(reason))
+                logger.debug("Cancelled pending request '%s': %s", id_, reason)
+
+        try:
             await self.server_exit(self._server)
-            self._stop_event.set()
+        except Exception:
+            logger.exception("Error in server_exit handler")
+
+        self._stop_event.set()
 
     async def server_exit(self, server: asyncio.subprocess.Process):
         """Called when the server process exits."""
