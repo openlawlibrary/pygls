@@ -61,6 +61,8 @@ async def test_code_actions(
 
     assert code_action.title == "Evaluate '1 + 1 ='"
     assert code_action.kind == types.CodeActionKind.QuickFix
+    assert code_action.tags is not None
+    assert code_action.tags == [types.CodeActionTag.LlmGenerated]
 
     fix = code_action.edit.changes[test_uri][0]
     expected_range = types.Range(
