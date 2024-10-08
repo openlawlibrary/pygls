@@ -24,6 +24,7 @@ from functools import partial
 import pytest
 import pytest_asyncio
 from lsprotocol import types
+from pygls import IS_WIN
 from pygls.exceptions import JsonRpcInternalError
 
 if typing.TYPE_CHECKING:
@@ -123,9 +124,15 @@ async def test_countdown_blocking(
 
 @pytest.mark.asyncio(scope="function")
 async def test_countdown_threaded(
-    threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult],
+    uri_for,
+    transport,
 ):
     """Ensure that the countdown threaded command is working as expected."""
+
+    if IS_WIN and transport == "tcp":
+        pytest.skip("see https://github.com/openlawlibrary/pygls/issues/502")
+
     client, initialize_result = threaded_handlers
 
     completion_options = initialize_result.capabilities.completion_provider
