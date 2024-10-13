@@ -130,13 +130,12 @@ class WebSocketTransportAdapter:
     Write method sends data via the WebSocket interface.
     """
 
-    def __init__(self, ws, loop):
+    def __init__(self, ws):
         self._ws = ws
-        self._loop = loop
 
     def close(self) -> None:
         """Stop the WebSocket server."""
-        self._ws.close()
+        asyncio.ensure_future(self._ws.close())
 
     def write(self, data: Any) -> None:
         """Create a task to write specified data into a WebSocket."""
@@ -290,7 +289,7 @@ class JsonRPCServer:
 
         async def connection_made(websocket, _):
             """Handle new connection wrapped in the WebSocket."""
-            self.protocol.transport = WebSocketTransportAdapter(websocket, self.loop)
+            self.protocol.transport = WebSocketTransportAdapter(websocket)
             async for message in websocket:
                 self.protocol.handle_message(
                     json.loads(message, object_hook=self.protocol.structure_message)
