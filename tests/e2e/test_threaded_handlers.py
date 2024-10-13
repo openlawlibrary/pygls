@@ -130,7 +130,7 @@ async def test_countdown_threaded(
 ):
     """Ensure that the countdown threaded command is working as expected."""
 
-    if IS_WIN and transport == "tcp":
+    if (IS_WIN and transport == "tcp") or transport == "websockets":
         pytest.skip("see https://github.com/openlawlibrary/pygls/issues/502")
 
     client, initialize_result = threaded_handlers

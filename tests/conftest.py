@@ -133,7 +133,7 @@ def pytest_addoption(parser):
         dest="lsp_transport",
         action="store",
         default="stdio",
-        choices=("stdio", "tcp"),
+        choices=("stdio", "tcp", "websockets"),
         help="Choose the transport to use with servers under test.",
     )
 
@@ -211,6 +211,15 @@ def get_client_for_cpython_server(transport, uri_fixture):
             server = await asyncio.create_subprocess_exec(*server_cmd)
             await asyncio.sleep(1)
             await client.start_tcp(host, port)
+
+        elif transport == "websockets":
+            # TODO: Make host/port configurable?
+            host, port = "localhost", 8888
+            server_cmd.extend(["--ws", "--host", host, "--port", f"{port}"])
+
+            server = await asyncio.create_subprocess_exec(*server_cmd)
+            await asyncio.sleep(1)
+            await client.start_ws(host, port)
 
         else:
             raise NotImplementedError(f"Unsupported transport: {transport!r}")
