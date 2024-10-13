@@ -20,11 +20,13 @@ import asyncio
 import json
 import logging
 import re
+import sys
 import typing
 from threading import Event
 
 from pygls.exceptions import PyglsError, JsonRpcException, JsonRpcInternalError
 from pygls.protocol import JsonRPCProtocol, default_converter
+from pygls.server import WebSocketTransportAdapter
 
 if typing.TYPE_CHECKING:
     from typing import Any
@@ -35,6 +37,7 @@ if typing.TYPE_CHECKING:
 
     from cattrs import Converter
 
+    from websockets.asyncio.client import ClientConnection
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +119,26 @@ class JsonRPCClient:
 
         self._async_tasks.extend([connection])
 
+    async def start_ws(self, host: str, port: int):
+        """Start communicating with a server over WebSockets."""
+
+        try:
+            from websockets.asyncio.client import connect
+        except ImportError:
+            logger.exception(
+                "Run `pip install pygls[ws]` to install dependencies required for websockets."
+            )
+            sys.exit(1)
+
+        uri = f"ws://{host}:{port}"
+        websocket = await connect(uri)
+
+        self.protocol._send_only_body = True
+        self.protocol.connection_made(WebSocketTransportAdapter(websocket))  # type: ignore
+
+        connection = asyncio.create_task(self.run_websocket(websocket))
+        self._async_tasks.extend([connection])
+
     async def run_async(self, reader: asyncio.StreamReader):
         """Run the main message processing loop, asynchronously"""
 
@@ -153,6 +176,31 @@ class JsonRPCClient:
 
                 # Reset
                 content_length = 0
+
+    async def run_websocket(self, websocket: ClientConnection):
+        """Run the main message processing loop, over websockets."""
+
+        try:
+            from websockets.exceptions import ConnectionClosedOK
+        except ImportError:
+            logger.exception(
+                "Run `pip install pygls[ws]` to install dependencies required for websockets."
+            )
+            return
+
+        while not self._stop_event.is_set():
+            try:
+                data = await websocket.recv(decode=False)
+            except ConnectionClosedOK:
+                self._stop_event.set()
+                break
+
+            try:
+                message = json.loads(data, object_hook=self.protocol.structure_message)
+                self.protocol.handle_message(message)
+            except Exception as exc:
+                logger.exception("Unable to handle message")
+                self._report_server_error(exc, JsonRpcInternalError)
 
     async def _server_exit(self):
         """Cleanup handler that runs when the server process managed by the client exits"""
