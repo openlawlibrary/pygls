@@ -1,28 +1,28 @@
 """This server does nothing but print invalid JSON."""
 
-import asyncio
-import threading
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import threading
 
-from pygls.server import aio_readline
-
-
-def handler(data):
-    content = 'Content-Length: 5\r\n\r\n{"ll}'.encode("utf8")
-    sys.stdout.buffer.write(content)
-    sys.stdout.flush()
+from pygls.io_ import run
+from pygls.protocol import JsonRPCProtocol, default_converter
 
 
-async def main():
-    await aio_readline(
-        asyncio.get_running_loop(),
-        ThreadPoolExecutor(),
+class InvalidJsonProtocol(JsonRPCProtocol):
+    """A protocol that only sends messages containing invalid JSON."""
+
+    def handle_message(self, message):
+        content = 'Content-Length: 5\r\n\r\n{"ll}'.encode("utf8")
+        sys.stdout.buffer.write(content)
+        sys.stdout.flush()
+
+
+def main():
+    run(
         threading.Event(),
         sys.stdin.buffer,
-        handler,
+        InvalidJsonProtocol(None, default_converter()),
     )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
