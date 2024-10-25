@@ -19,73 +19,22 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
 
 import cattrs
-from pygls.exceptions import (
-    FeatureNotificationError,
-    JsonRpcInternalError,
-    PyglsError,
-    JsonRpcException,
-    FeatureRequestError,
-)
-from pygls.protocol import JsonRPCProtocol
 
+from pygls.exceptions import JsonRpcException, PyglsError
+from pygls.io_ import StdinAsyncReader, run_async
+from pygls.protocol import JsonRPCProtocol
 
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable)
 
-ServerErrors = Union[
-    PyglsError,
-    JsonRpcException,
-    Type[JsonRpcInternalError],
-    Type[FeatureNotificationError],
-    Type[FeatureRequestError],
-]
-
-
-async def aio_readline(loop, executor, stop_event, rfile, proxy):
-    """Reads data from stdin in separate thread (asynchronously)."""
-
-    CONTENT_LENGTH_PATTERN = re.compile(rb"^Content-Length: (\d+)\r\n$")
-
-    # Initialize message buffer
-    message = []
-    content_length = 0
-
-    while not stop_event.is_set() and not rfile.closed:
-        # Read a header line
-        header = await loop.run_in_executor(executor, rfile.readline)
-        if not header:
-            break
-        message.append(header)
-
-        # Extract content length if possible
-        if not content_length:
-            match = CONTENT_LENGTH_PATTERN.fullmatch(header)
-            if match:
-                content_length = int(match.group(1))
-                logger.debug("Content length: %s", content_length)
-
-        # Check if all headers have been read (as indicated by an empty line \r\n)
-        if content_length and not header.strip():
-            # Read body
-            body = await loop.run_in_executor(executor, rfile.read, content_length)
-            if not body:
-                break
-            message.append(body)
-
-            # Pass message to language server protocol
-            proxy(b"".join(message))
-
-            # Reset the buffer
-            message = []
-            content_length = 0
+ServerErrors = Union[type[PyglsError], type[JsonRpcException]]
 
 
 class StdOutTransportAdapter:
@@ -228,19 +177,20 @@ class JsonRPCServer:
         logger.info("Starting IO server")
 
         self._stop_event = Event()
+        reader = StdinAsyncReader(stdin or sys.stdin.buffer, self.thread_pool)
         transport = StdOutTransportAdapter(
             stdin or sys.stdin.buffer, stdout or sys.stdout.buffer
         )
         self.protocol.connection_made(transport)  # type: ignore[arg-type]
 
         try:
-            self.loop.run_until_complete(
-                aio_readline(
-                    self.loop,
-                    self.thread_pool,
-                    self._stop_event,
-                    stdin or sys.stdin.buffer,
-                    self.protocol.data_received,
+            asyncio.run(
+                run_async(
+                    stop_event=self._stop_event,
+                    reader=reader,
+                    protocol=self.protocol,
+                    logger=logger,
+                    error_handler=self.report_server_error,
                 )
             )
         except BrokenPipeError:
