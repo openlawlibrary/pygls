@@ -213,12 +213,32 @@ class JsonRPCServer:
         """Starts TCP server."""
         logger.info("Starting TCP server on %s:%s", host, port)
 
-        self._stop_event = Event()
-        self._server = self.loop.run_until_complete(  # type: ignore[assignment]
-            self.loop.create_server(self.protocol, host, port)
-        )
+        self._stop_event = stop_event = Event()
+
+        async def lsp_connection(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+            logger.debug("Connected to client")
+            self.protocol.connection_made(writer)  # type: ignore
+            await run_async(
+                stop_event=stop_event,
+                reader=reader,
+                protocol=self.protocol,
+                logger=logger,
+                error_handler=self.report_server_error,
+            )
+            logger.debug("Main loop finished")
+            self.shutdown()
+
+        async def tcp_server(h: str, p: int):
+            self._server = await asyncio.start_server(lsp_connection, h, p)
+
+            addrs = ", ".join(str(sock.getsockname()) for sock in self._server.sockets)
+            logger.info(f"Serving on {addrs}")
+
+            async with self._server:
+                await self._server.serve_forever()
+
         try:
-            self.loop.run_forever()
+            asyncio.run(tcp_server(host, port))
         except (KeyboardInterrupt, SystemExit):
             pass
         finally:
