@@ -152,6 +152,15 @@ def transport(request):
     return request.config.getoption("lsp_transport")
 
 
+@pytest.hookimpl(tryfirst=True)
+def pytest_report_header(config: pytest.Config):
+    """Report the above settings in pytest's output"""
+    runtime = config.getoption("lsp_runtime")
+    transport = config.getoption("lsp_transport")
+
+    return [f"pygls: {runtime=}, {transport=}"]
+
+
 @pytest.fixture(scope="session")
 def path_for():
     """Returns the path corresponding to a file in the example workspace"""
