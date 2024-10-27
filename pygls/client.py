@@ -17,16 +17,14 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sys
 import typing
 from threading import Event
 
-from pygls.exceptions import JsonRpcException, JsonRpcInternalError, PyglsError
-from pygls.io_ import run_async
+from pygls.exceptions import JsonRpcException, PyglsError
+from pygls.io_ import run_async, run_websocket
 from pygls.protocol import JsonRPCProtocol, default_converter
-from pygls.server import WebSocketTransportAdapter
 
 if typing.TYPE_CHECKING:
     from typing import Any
@@ -36,8 +34,6 @@ if typing.TYPE_CHECKING:
     from typing import Type
 
     from cattrs import Converter
-
-    from websockets.asyncio.client import ClientConnection
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +53,7 @@ class JsonRPCClient:
 
         self._server: Optional[asyncio.subprocess.Process] = None
         self._stop_event = Event()
-        self._async_tasks: List[asyncio.Task] = []
+        self._async_tasks: List[asyncio.Task[Any]] = []
 
     @property
     def stopped(self) -> bool:
@@ -148,37 +144,19 @@ class JsonRPCClient:
 
         uri = f"ws://{host}:{port}"
         websocket = await connect(uri)
-
-        self.protocol._send_only_body = True
-        self.protocol.connection_made(WebSocketTransportAdapter(websocket))  # type: ignore
-
-        connection = asyncio.create_task(self.run_websocket(websocket))
+        connection = asyncio.create_task(
+            run_websocket(
+                stop_event=self._stop_event,
+                websocket=websocket,
+                protocol=self.protocol,
+                logger=logger,
+                error_handler=self.report_server_error,
+            )
+        )
         self._async_tasks.extend([connection])
 
-    async def run_websocket(self, websocket: ClientConnection):
-        """Run the main message processing loop, over websockets."""
-
-        try:
-            from websockets.exceptions import ConnectionClosedOK
-        except ImportError:
-            logger.exception(
-                "Run `pip install pygls[ws]` to install dependencies required for websockets."
-            )
-            return
-
-        while not self._stop_event.is_set():
-            try:
-                data = await websocket.recv(decode=False)
-            except ConnectionClosedOK:
-                self._stop_event.set()
-                break
-
-            try:
-                message = json.loads(data, object_hook=self.protocol.structure_message)
-                self.protocol.handle_message(message)
-            except Exception as exc:
-                logger.exception("Unable to handle message")
-                self._report_server_error(exc, JsonRpcInternalError)
+        # Yield control to the event loop, gives the run_websocket task chance to spin up.
+        await asyncio.sleep(0)
 
     async def _server_exit(self):
         """Cleanup handler that runs when the server process managed by the client exits"""

@@ -15,29 +15,29 @@
 # limitations under the License.                                           #
 ############################################################################
 from __future__ import annotations
+
 import asyncio
 import enum
 import json
 import logging
 import re
 import sys
-import uuid
 import traceback
+import uuid
 from concurrent.futures import Future
 from functools import partial
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
     Optional,
     Type,
     Union,
-    TYPE_CHECKING,
 )
 
 import attrs
 from cattrs.errors import ClassValidationError
-
 from lsprotocol.types import (
     CANCEL_REQUEST,
     EXIT,
@@ -47,19 +47,21 @@ from lsprotocol.types import (
 )
 
 from pygls.exceptions import (
+    FeatureNotificationError,
+    FeatureRequestError,
     JsonRpcException,
     JsonRpcInternalError,
     JsonRpcInvalidParams,
     JsonRpcMethodNotFound,
     JsonRpcRequestCancelled,
-    FeatureNotificationError,
-    FeatureRequestError,
 )
 from pygls.feature_manager import FeatureManager, is_thread_function
 
 if TYPE_CHECKING:
     from cattrs import Converter
-    from pygls.server import JsonRPCServer, WebSocketTransportAdapter
+
+    from pygls.io_ import WebSocketTransportAdapter
+    from pygls.server import JsonRPCServer
 
 
 logger = logging.getLogger(__name__)

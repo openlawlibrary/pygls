@@ -31,6 +31,9 @@ if typing.TYPE_CHECKING:
     from concurrent.futures import ThreadPoolExecutor
     from typing import Any, BinaryIO, Callable, Protocol
 
+    from websockets.asyncio.client import ClientConnection
+    from websockets.asyncio.server import ServerConnection
+
     from pygls.protocol import JsonRPCProtocol
 
     class Reader(Protocol):
@@ -68,6 +71,30 @@ class StdinAsyncReader:
 
     def readexactly(self, n: int) -> Awaitable[bytes]:
         return self.loop.run_in_executor(self.executor, self.stdin.read, n)
+
+
+class WebSocketTransportAdapter:
+    """Protocol adapter which calls write method.
+
+    Write method sends data via the WebSocket interface.
+    """
+
+    def __init__(self, ws: ServerConnection | ClientConnection):
+        self._ws = ws
+        self._loop: asyncio.AbstractEventLoop | None = None
+
+    @property
+    def loop(self):
+        if self._loop is None:
+            self._loop = asyncio.get_running_loop()
+
+        return self._loop
+
+    def close(self) -> None:
+        asyncio.ensure_future(self._ws.close())
+
+    def write(self, data: Any) -> None:
+        asyncio.ensure_future(self._ws.send(data))
 
 
 async def run_async(
@@ -191,3 +218,63 @@ def run(
             finally:
                 # Reset
                 content_length = 0
+
+
+async def run_websocket(
+    websocket: ClientConnection | ServerConnection,
+    stop_event: threading.Event,
+    protocol: JsonRPCProtocol,
+    logger: logging.Logger | None = None,
+    error_handler: Callable[[Exception, type[JsonRpcException]], Any] | None = None,
+):
+    """Run the main message processing loop, over websockets.
+
+    Parameters
+    ----------
+    stop_event
+       A ``threading.Event`` used to break the main loop
+
+    websocket
+       The websocket to read messages from
+
+    protocol
+       The protocol instance that should handle the messages
+
+    logger
+       The logger instance to use
+
+    error_handler
+       Function to call when an error is encountered.
+    """
+
+    logger = logger or logging.getLogger(__name__)
+    protocol._send_only_body = True  # Don't send headers within the payload
+    protocol.connection_made(WebSocketTransportAdapter(websocket))  # type: ignore
+
+    try:
+        from websockets.exceptions import ConnectionClosed
+    except ImportError:
+        logger.exception(
+            "Run `pip install pygls[ws]` to install dependencies required for websockets."
+        )
+        return
+
+    while not stop_event.is_set():
+        try:
+            logger.debug("waiting for a message...")
+            data = await websocket.recv(decode=False)
+        except ConnectionClosed:
+            logger.debug("Websocket connection closed.")
+            stop_event.set()
+            break
+
+        try:
+            message = json.loads(data, object_hook=protocol.structure_message)
+            protocol.handle_message(message)
+        except Exception as exc:
+            logger.exception("Unable to handle message")
+            if error_handler:
+                error_handler(exc, JsonRpcException)
+
+    logger.debug("Exiting main loop")
+    await websocket.close()
