@@ -72,11 +72,11 @@ class PyodideClientServer:
         self.server = LS("pygls-server", "v1")
         self.client = LS("pygls-client", "v1")
 
-        self.server.protocol.connection_made(PyodideTestTransportAdapter(self.client))
-        self.server.protocol._send_only_body = True
+        self.server.protocol.set_writer(PyodideTestTransportAdapter(self.client))
+        self.server.protocol._include_headers = True
 
-        self.client.protocol.connection_made(PyodideTestTransportAdapter(self.server))
-        self.client.protocol._send_only_body = True
+        self.client.protocol.set_writer(PyodideTestTransportAdapter(self.server))
+        self.client.protocol._include_headers = True
 
     def start(self):
         self.initialize()

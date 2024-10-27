@@ -16,8 +16,11 @@
 ############################################################################
 from __future__ import annotations
 
+import asyncio
+import inspect
 import json
 import logging
+import sys
 import typing
 from functools import lru_cache
 from itertools import zip_longest
@@ -113,8 +116,17 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     @lsp_method(types.EXIT)
     def lsp_exit(self, *args) -> None:
         """Stops the server process."""
-        if self.transport is not None:
-            self.transport.close()
+        returncode = 0 if self._shutdown else 1
+        if self.writer is None:
+            sys.exit(returncode)
+
+        res = self.writer.close()
+        if inspect.isawaitable(res):
+            # Only call sys.exit once the close task has completed.
+            fut = asyncio.ensure_future(res)
+            fut.add_done_callback(lambda t: sys.exit(returncode))
+        else:
+            sys.exit(returncode)
 
     @lsp_method(types.INITIALIZE)
     def lsp_initialize(self, params: types.InitializeParams) -> types.InitializeResult:

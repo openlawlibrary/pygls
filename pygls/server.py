@@ -26,7 +26,7 @@ from threading import Event
 import cattrs
 
 from pygls.exceptions import JsonRpcException, PyglsError
-from pygls.io_ import StdinAsyncReader, run_async, run_websocket
+from pygls.io_ import StdinAsyncReader, StdoutWriter, run_async, run_websocket
 from pygls.protocol import JsonRPCProtocol
 
 if typing.TYPE_CHECKING:
@@ -40,25 +40,6 @@ if typing.TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-class StdOutTransportAdapter:
-    """Protocol adapter which overrides write method.
-
-    Write method sends data to stdout.
-    """
-
-    def __init__(self, rfile, wfile):
-        self.rfile = rfile
-        self.wfile = wfile
-
-    def close(self):
-        self.rfile.close()
-        self.wfile.close()
-
-    def write(self, data):
-        self.wfile.write(data)
-        self.wfile.flush()
 
 
 class PyodideTransportAdapter:
@@ -146,10 +127,8 @@ class JsonRPCServer:
 
         self._stop_event = Event()
         reader = StdinAsyncReader(stdin or sys.stdin.buffer, self.thread_pool)
-        transport = StdOutTransportAdapter(
-            stdin or sys.stdin.buffer, stdout or sys.stdout.buffer
-        )
-        self.protocol.connection_made(transport)  # type: ignore[arg-type]
+        writer = StdoutWriter(stdout or sys.stdout.buffer)
+        self.protocol.set_writer(writer)
 
         try:
             asyncio.run(
@@ -174,8 +153,7 @@ class JsonRPCServer:
         # Note: We don't actually start anything running as the main event
         # loop will be handled by the web platform.
         transport = PyodideTransportAdapter(sys.stdout)
-        self.protocol.connection_made(transport)  # type: ignore[arg-type]
-        self.protocol._send_only_body = True  # Don't send headers within the payload
+        self.protocol.set_writer(transport)  # type: ignore[arg-type]
 
     def start_tcp(self, host: str, port: int) -> None:
         """Starts TCP server."""
@@ -187,7 +165,7 @@ class JsonRPCServer:
             reader: asyncio.StreamReader, writer: asyncio.StreamWriter
         ):
             logger.debug("Connected to client")
-            self.protocol.connection_made(writer)  # type: ignore
+            self.protocol.set_writer(writer)  # type: ignore
             await run_async(
                 stop_event=stop_event,
                 reader=reader,
