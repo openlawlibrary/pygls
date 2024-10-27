@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import json
 import os
 import threading
 
@@ -51,58 +50,7 @@ def setup_ls_features(server):
         return True, threading.get_ident()
 
 
-class PyodideTestTransportAdapter:
-    """Transort adapter that's only useful for tests in a pyodide environment."""
-
-    def __init__(self, dest: LanguageServer):
-        self.dest = dest
-
-    def close(self): ...
-
-    def write(self, data):
-        object_hook = self.dest.protocol._deserialize_message
-        self.dest.protocol._procedure_handler(json.loads(data, object_hook=object_hook))
-
-
-class PyodideClientServer:
-    """Implementation of the `client_server` fixture for use in a pyodide
-    environment."""
-
-    def __init__(self, LS=LanguageServer):
-        self.server = LS("pygls-server", "v1")
-        self.client = LS("pygls-client", "v1")
-
-        self.server.protocol.set_writer(PyodideTestTransportAdapter(self.client))
-        self.server.protocol._include_headers = True
-
-        self.client.protocol.set_writer(PyodideTestTransportAdapter(self.server))
-        self.client.protocol._include_headers = True
-
-    def start(self):
-        self.initialize()
-
-    def stop(self): ...
-
-    @classmethod
-    def decorate(cls):
-        return pytest.mark.parametrize("client_server", [cls], indirect=True)
-
-    def initialize(self):
-        response = self.client.protocol.send_request(
-            INITIALIZE,
-            InitializeParams(
-                process_id=12345, root_uri="file://", capabilities=ClientCapabilities()
-            ),
-        ).result(timeout=CALL_TIMEOUT)
-
-        assert response.capabilities is not None
-
-    def __iter__(self):
-        yield self.client
-        yield self.server
-
-
-class NativeClientServer:
+class ClientServer:
     def __init__(self, LS=LanguageServer):
         # Client to Server pipe
         csr, csw = os.pipe()

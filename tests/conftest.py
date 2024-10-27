@@ -24,19 +24,14 @@ import sys
 from typing import Optional
 
 import pytest
-from lsprotocol import types, converters
+from lsprotocol import converters, types
 
-from pygls import uris, IS_PYODIDE
+from pygls import uris
 from pygls.feature_manager import FeatureManager
 from pygls.lsp.client import BaseLanguageClient
 from pygls.workspace import Workspace
 
-from .ls_setup import (
-    NativeClientServer,
-    PyodideClientServer,
-    setup_ls_features,
-)
-
+from .ls_setup import ClientServer, setup_ls_features
 
 DOC = """document
 for
@@ -48,11 +43,6 @@ DOC_URI = uris.from_fs_path(__file__) or ""
 REPO_DIR = pathlib.Path(__file__, "..", "..").resolve()
 SERVER_DIR = REPO_DIR / "examples" / "servers"
 WORKSPACE_DIR = REPO_DIR / "examples" / "servers" / "workspace"
-
-
-ClientServer = NativeClientServer
-if IS_PYODIDE:
-    ClientServer = PyodideClientServer
 
 
 @pytest.fixture(autouse=False)
@@ -70,23 +60,6 @@ def client_server(request):
     yield client, server
 
     client_server.stop()
-
-
-@pytest.fixture()
-def event_loop():
-    """Redefine `pytest-asyncio's default event_loop fixture to match the scope
-    of our client fixture."""
-
-    policy = asyncio.get_event_loop_policy()
-
-    loop = policy.new_event_loop()
-    yield loop
-
-    try:
-        # Not implemented on pyodide
-        loop.close()
-    except NotImplementedError:
-        pass
 
 
 @pytest.fixture
