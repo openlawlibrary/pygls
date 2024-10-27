@@ -10,7 +10,7 @@ from pygls import IS_PYODIDE
 from pygls.lsp.server import LanguageServer
 
 try:
-    import websockets
+    from websockets.asyncio.client import connect
 
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
@@ -25,7 +25,6 @@ async def test_tcp_connection_lost():
     server = LanguageServer("pygls-test", "v1", loop=loop)
 
     server.protocol.connection_made = Mock()
-    server.protocol.connection_lost = Mock()
 
     # Run the server over TCP in a separate thread
     server_thread = Thread(
@@ -44,16 +43,18 @@ async def test_tcp_connection_lost():
 
     # Simulate client's connection
     port = server._server.sockets[0].getsockname()[1]
-    reader, writer = await asyncio.open_connection("127.0.0.1", port)
+    _, writer = await asyncio.open_connection("127.0.0.1", port)
     await asyncio.sleep(1)
 
     assert server.protocol.connection_made.called
 
     # Socket is closed (client's process is terminated)
     writer.close()
-    await asyncio.sleep(1)
+    await writer.wait_closed()
 
-    assert server.protocol.connection_lost.called
+    # Give the server chance to shutdown.
+    await asyncio.sleep(1)
+    assert server._stop_event.is_set()
 
 
 @pytest.mark.asyncio
@@ -64,7 +65,7 @@ async def test_io_connection_lost():
     # Server to client pipe.
     scr, scw = os.pipe()
 
-    server = LanguageServer("pygls-test", "v1", loop=asyncio.new_event_loop())
+    server = LanguageServer("pygls-test", "v1")
     server.protocol.connection_made = Mock()
     server_thread = Thread(
         target=server.start_io, args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb"))
@@ -89,8 +90,7 @@ async def test_io_connection_lost():
 async def test_ws_server():
     """Smoke test to ensure we can send/receive messages over websockets"""
 
-    loop = asyncio.new_event_loop()
-    server = LanguageServer("pygls-test", "v1", loop=loop)
+    server = LanguageServer("pygls-test", "v1")
 
     # Run the server over Websockets in a separate thread
     server_thread = Thread(
@@ -107,9 +107,9 @@ async def test_ws_server():
     while server._server is None:
         await asyncio.sleep(0.5)
 
-    port = server._server.sockets[0].getsockname()[1]
+    port = list(server._server.sockets)[0].getsockname()[1]
     # Simulate client's connection
-    async with websockets.connect(f"ws://127.0.0.1:{port}") as connection:
+    async with connect(f"ws://127.0.0.1:{port}") as connection:
         # Send an 'initialize' request
         msg = dict(
             jsonrpc="2.0", id=1, method="initialize", params=dict(capabilities=dict())
