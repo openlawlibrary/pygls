@@ -43,12 +43,26 @@ if typing.TYPE_CHECKING:
 
         def read(self, n: int) -> bytes: ...
 
+    class Writer(Protocol):
+        """An synchronous writer."""
+
+        def close(self) -> None: ...
+
+        def write(self, data: bytes) -> None: ...
+
     class AsyncReader(typing.Protocol):
         """An asynchronous reader."""
 
         def readline(self) -> Awaitable[bytes]: ...
 
         def readexactly(self, n: int) -> Awaitable[bytes]: ...
+
+    class AsyncWriter(typing.Protocol):
+        """An asynchronous writer."""
+
+        def close(self) -> Awaitable[None]: ...
+
+        def write(self, data: bytes) -> Awaitable[None]: ...
 
 
 class StdinAsyncReader:
@@ -73,28 +87,31 @@ class StdinAsyncReader:
         return self.loop.run_in_executor(self.executor, self.stdin.read, n)
 
 
-class WebSocketTransportAdapter:
-    """Protocol adapter which calls write method.
+class StdoutWriter:
+    """Align a stdout stream with pygls' writer interface."""
 
-    Write method sends data via the WebSocket interface.
-    """
+    def __init__(self, stdout: BinaryIO):
+        self._stdout = stdout
+
+    def close(self):
+        self._stdout.close()
+
+    def write(self, data: bytes) -> None:
+        self._stdout.write(data)
+        self._stdout.flush()
+
+
+class WebSocketWriter:
+    """Align a websocket connection with pygls' writer interface"""
 
     def __init__(self, ws: ServerConnection | ClientConnection):
         self._ws = ws
-        self._loop: asyncio.AbstractEventLoop | None = None
 
-    @property
-    def loop(self):
-        if self._loop is None:
-            self._loop = asyncio.get_running_loop()
+    def close(self) -> Awaitable[None]:
+        return self._ws.close()
 
-        return self._loop
-
-    def close(self) -> None:
-        asyncio.ensure_future(self._ws.close())
-
-    def write(self, data: Any) -> None:
-        asyncio.ensure_future(self._ws.send(data))
+    def write(self, data: bytes) -> Awaitable[None]:
+        return self._ws.send(data)
 
 
 async def run_async(
@@ -248,8 +265,7 @@ async def run_websocket(
     """
 
     logger = logger or logging.getLogger(__name__)
-    protocol._send_only_body = True  # Don't send headers within the payload
-    protocol.connection_made(WebSocketTransportAdapter(websocket))  # type: ignore
+    protocol.set_writer(WebSocketWriter(websocket), include_headers=False)
 
     try:
         from websockets.exceptions import ConnectionClosed

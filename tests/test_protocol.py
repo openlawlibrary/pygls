@@ -16,15 +16,12 @@
 ############################################################################
 import io
 import json
-from concurrent.futures import Future
 from pathlib import Path
 from typing import Optional
 from unittest.mock import Mock
 
 import attrs
 import pytest
-
-from pygls.exceptions import JsonRpcException, JsonRpcInvalidParams
 from lsprotocol.types import (
     PROGRESS,
     TEXT_DOCUMENT_COMPLETION,
@@ -32,21 +29,23 @@ from lsprotocol.types import (
     CompletionItem,
     CompletionItemKind,
     CompletionParams,
+    CompletionResponse,
     InitializeParams,
     InitializeResult,
-    ProgressParams,
     Position,
+    ProgressParams,
     ShutdownResponse,
-    CompletionResponse,
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
 )
+
+from pygls.exceptions import JsonRpcInvalidParams
 from pygls.protocol import (
-    default_converter,
+    JsonRPCNotification,
     JsonRPCProtocol,
     JsonRPCRequestMessage,
     JsonRPCResponseMessage,
-    JsonRPCNotification,
+    default_converter,
 )
 
 EXAMPLE_NOTIFICATION = "example/notification"
@@ -275,11 +274,10 @@ def test_serialize_notification_message(method, params, expected):
     expected fields.
     """
 
-    buffer = io.StringIO()
+    buffer = io.BytesIO()
 
     protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
+    protocol.set_writer(buffer, include_headers=False)
 
     protocol.notify(method, params=params)
     actual = json.loads(buffer.getvalue())
@@ -445,11 +443,10 @@ def test_serialize_response_message(msg_type, result, expected):
     fields.
     """
 
-    buffer = io.StringIO()
+    buffer = io.BytesIO()
 
     protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
+    protocol.set_writer(buffer, include_headers=False)
 
     protocol._result_types["1"] = msg_type
 
@@ -515,11 +512,10 @@ def test_serialize_request_message(method, params, expected):
     fields.
     """
 
-    buffer = io.StringIO()
+    buffer = io.BytesIO()
 
     protocol = JsonRPCProtocol(None, default_converter())
-    protocol._send_only_body = True
-    protocol.connection_made(buffer)
+    protocol.set_writer(buffer, include_headers=False)
 
     protocol.send_request(method, params, callback=None, msg_id="1")
     actual = json.loads(buffer.getvalue())

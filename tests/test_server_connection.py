@@ -24,7 +24,7 @@ async def test_tcp_connection_lost():
 
     server = LanguageServer("pygls-test", "v1", loop=loop)
 
-    server.protocol.connection_made = Mock()
+    server.protocol.set_writer = Mock()
 
     # Run the server over TCP in a separate thread
     server_thread = Thread(
@@ -46,7 +46,7 @@ async def test_tcp_connection_lost():
     _, writer = await asyncio.open_connection("127.0.0.1", port)
     await asyncio.sleep(1)
 
-    assert server.protocol.connection_made.called
+    assert server.protocol.set_writer.called
 
     # Socket is closed (client's process is terminated)
     writer.close()
@@ -66,7 +66,7 @@ async def test_io_connection_lost():
     scr, scw = os.pipe()
 
     server = LanguageServer("pygls-test", "v1")
-    server.protocol.connection_made = Mock()
+    server.protocol.set_writer = Mock()
     server_thread = Thread(
         target=server.start_io, args=(os.fdopen(csr, "rb"), os.fdopen(scw, "wb"))
     )
@@ -74,7 +74,7 @@ async def test_io_connection_lost():
     server_thread.start()
 
     # Wait for server to be ready
-    while not server.protocol.connection_made.called:
+    while not server.protocol.set_writer.called:
         await asyncio.sleep(0.5)
 
     # Pipe is closed (client's process is terminated)
@@ -116,8 +116,8 @@ async def test_ws_server():
         )
         await connection.send(json.dumps(msg))
 
-        response = await connection.recv()
-        assert "result" in response
+        response = await connection.recv(decode=False)
+        assert "result" in response.decode("utf8")
 
         # Shut the server down
         msg = dict(
@@ -125,8 +125,8 @@ async def test_ws_server():
         )
         await connection.send(json.dumps(msg))
 
-        response = await connection.recv()
-        assert "result" in response
+        response = await connection.recv(decode=False)
+        assert "result" in response.decode("utf8")
 
         # Finally, tell it to exit
         msg = dict(jsonrpc="2.0", id=2, method="exit", params=None)

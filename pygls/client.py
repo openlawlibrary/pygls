@@ -99,7 +99,11 @@ class JsonRPCClient:
         if server.stdout is None:
             raise RuntimeError("Server process is missing a stdout stream")
 
-        self.protocol.connection_made(server.stdin)  # type: ignore
+        # Keep mypy happy
+        if server.stdin is None:
+            raise RuntimeError("Server process is missing a stdin stream")
+
+        self.protocol.set_writer(server.stdin)
         connection = asyncio.create_task(
             run_async(
                 stop_event=self._stop_event,
@@ -118,7 +122,7 @@ class JsonRPCClient:
         """Start communicating with a server over TCP."""
         reader, writer = await asyncio.open_connection(host, port)
 
-        self.protocol.connection_made(writer)  # type: ignore
+        self.protocol.set_writer(writer)
         connection = asyncio.create_task(
             run_async(
                 stop_event=self._stop_event,

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import enum
+import inspect
 import json
 import logging
 import sys
@@ -28,8 +29,6 @@ from functools import partial
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    List,
     Optional,
     Type,
     Union,
@@ -59,7 +58,7 @@ from pygls.feature_manager import FeatureManager, is_thread_function
 if TYPE_CHECKING:
     from cattrs import Converter
 
-    from pygls.io_ import WebSocketTransportAdapter
+    from pygls.io_ import AsyncWriter, Writer
     from pygls.server import JsonRPCServer
 
 
@@ -120,16 +119,12 @@ class JsonRPCProtocol:
         self._shutdown = False
 
         # Book keeping for in-flight requests
-        self._request_futures: Dict[str, Future[Any]] = {}
-        self._result_types: Dict[str, Any] = {}
+        self._request_futures: dict[str, Future[Any]] = {}
+        self._result_types: dict[str, Any] = {}
 
         self.fm = FeatureManager(server, converter)
-        self.transport: Optional[
-            Union[asyncio.WriteTransport, WebSocketTransportAdapter]
-        ] = None
-        self._message_buf: List[bytes] = []
-
-        self._send_only_body = False
+        self.writer: AsyncWriter | Writer | None = None
+        self._include_headers = False
 
     def __call__(self):
         return self
@@ -369,7 +364,7 @@ class JsonRPCProtocol:
         if not data:
             return
 
-        if self.transport is None:
+        if self.writer is None:
             logger.error("Unable to send data, no available transport!")
             return
 
@@ -377,18 +372,19 @@ class JsonRPCProtocol:
             body = json.dumps(data, default=self._serialize_message)
             logger.info("Sending data: %s", body)
 
-            if self._send_only_body:
-                # Mypy/Pyright seem to think `write()` wants `"bytes | bytearray | memoryview"`
-                # But runtime errors with anything but `str`.
-                self.transport.write(body)  # type: ignore
-                return
+            if self._include_headers:
+                header = (
+                    f"Content-Length: {len(body)}\r\n"
+                    f"Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n"
+                )
+                data = header + body
+            else:
+                data = body
 
-            header = (
-                f"Content-Length: {len(body)}\r\n"
-                f"Content-Type: {self.CONTENT_TYPE}; charset={self.CHARSET}\r\n\r\n"
-            ).encode(self.CHARSET)
+            res = self.writer.write(data.encode(self.CHARSET))
+            if inspect.isawaitable(res):
+                asyncio.ensure_future(res)
 
-            self.transport.write(header + body.encode(self.CHARSET))
         except Exception as error:
             logger.exception("Error sending data", exc_info=True)
             self._server._report_server_error(error, JsonRpcInternalError)
@@ -415,15 +411,24 @@ class JsonRPCProtocol:
 
         self._send_data(response)
 
-
-    def connection_made(  # type: ignore # see: https://github.com/python/typeshed/issues/3021
+    def set_writer(
         self,
-        transport: asyncio.Transport,
+        writer: AsyncWriter | Writer,
+        include_headers: bool = True,
     ):
-        """Method from base class, called when connection is established"""
-        self.transport = transport
+        """Set the writer object to use when sending data
 
+        Parameters
+        ----------
+        writer
+           The writer object
 
+        include_headers
+           Flag indicating if headers like ``Content-Length`` should be included when
+           sending data. (Default ``True``)
+        """
+        self.writer = writer
+        self._include_headers = include_headers
 
     def get_message_type(self, method: str) -> Optional[Type]:
         """Return the type definition of the message associated with the given method."""
