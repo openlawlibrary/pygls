@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import asyncio
 import json
 import os
 import threading
@@ -27,12 +26,11 @@ from lsprotocol.types import (
     ClientCapabilities,
     InitializeParams,
 )
-from pygls.lsp.server import LanguageServer
 
+from pygls.lsp.server import LanguageServer
 
 from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 from ._init_server_stall_fix_hack import retry_stalled_init_fix_hack
-
 
 CALL_TIMEOUT = 3
 
@@ -121,7 +119,7 @@ class NativeClientServer:
         self.server_thread.daemon = True
 
         # Setup client
-        self.client = LS("client", "v1", asyncio.new_event_loop())
+        self.client = LS("client", "v1")
         self.client_thread = threading.Thread(
             name="Client Thread",
             target=self.client.start_io,
@@ -145,10 +143,7 @@ class NativeClientServer:
         self.client.protocol.notify(EXIT)
         self.server_thread.join()
         self.client._stop_event.set()
-        try:
-            self.client.loop._signal_handlers.clear()  # HACK ?
-        except AttributeError:
-            pass
+
         self.client_thread.join()
 
     @retry_stalled_init_fix_hack()
