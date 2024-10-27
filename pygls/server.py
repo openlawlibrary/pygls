@@ -42,23 +42,6 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PyodideTransportAdapter:
-    """Protocol adapter which overrides write method.
-
-    Write method sends data to stdout.
-    """
-
-    def __init__(self, wfile):
-        self.wfile = wfile
-
-    def close(self):
-        self.wfile.close()
-
-    def write(self, data):
-        self.wfile.write(data)
-        self.wfile.flush()
-
-
 class JsonRPCServer:
     """Base server class
 
@@ -146,14 +129,6 @@ class JsonRPCServer:
             pass
         finally:
             self.shutdown()
-
-    def start_pyodide(self):
-        logger.info("Starting Pyodide server")
-
-        # Note: We don't actually start anything running as the main event
-        # loop will be handled by the web platform.
-        transport = PyodideTransportAdapter(sys.stdout)
-        self.protocol.set_writer(transport)  # type: ignore[arg-type]
 
     def start_tcp(self, host: str, port: int) -> None:
         """Starts TCP server."""
