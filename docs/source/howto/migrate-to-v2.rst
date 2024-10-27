@@ -399,9 +399,22 @@ If you need to access the underlying protocol object this is now via the ``proto
 
 pygls' base server class has been renamed
 
+Removed ``loop`` argument from ``pygls.server.JsonRPCServer``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Servers and clients in pygls v2 now both use the high level asyncio API, removing the need for an explicit ``loop`` argument to be passed in.
+If you need control over the event loop used by pygls you can use functions like :external:py:function:`asyncio.set_event_loop` before starting the server/client.
+
 Removed ``multiprocessing.pool.ThreadPool``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :external:py:class:`multiprocessing.pool.ThreadPool` instance has been removed, *pygls* now makes use of :external:py:class:`concurrent.futures.ThreadPoolExecutor` for all threaded tasks.
 
 The ``thread_pool_executor`` attribute of the base ``JsonRPCServer`` class has been removed, the ``ThreadPoolExecutor`` can be accessed via the ``thread_pool`` attribute instead.
+
+New ``pygls.io_`` module
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is a new ``pygls.io_`` module containing main message parsing loop code common to both client and server
+
+- The equivlaent to pygls v1's ``pygls.server.aio_readline`` function is now ``pygls.io_.run_async``
