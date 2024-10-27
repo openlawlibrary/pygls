@@ -21,5 +21,7 @@ import sys
 
 IS_WIN = os.name == "nt"
 IS_PYODIDE = "pyodide" in sys.modules
+IS_WASI = sys.platform == "wasi"
+IS_WASM = IS_PYODIDE or IS_WASI
 
 pygls = "pygls"
