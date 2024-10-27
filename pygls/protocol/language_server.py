@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
 import typing
 from functools import lru_cache
 from itertools import zip_longest
@@ -116,8 +115,6 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         """Stops the server process."""
         if self.transport is not None:
             self.transport.close()
-
-        sys.exit(0 if self._shutdown else 1)
 
     @lsp_method(types.INITIALIZE)
     def lsp_initialize(self, params: types.InitializeParams) -> types.InitializeResult:
