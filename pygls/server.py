@@ -17,24 +17,29 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sys
+import typing
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
-from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
 
 import cattrs
 
 from pygls.exceptions import JsonRpcException, PyglsError
-from pygls.io_ import StdinAsyncReader, run_async
+from pygls.io_ import StdinAsyncReader, run_async, run_websocket
 from pygls.protocol import JsonRPCProtocol
 
+if typing.TYPE_CHECKING:
+    from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
+
+    from websockets.asyncio.server import Server as WSServer
+    from websockets.asyncio.server import ServerConnection
+
+    F = TypeVar("F", bound=Callable)
+    ServerErrors = Union[type[PyglsError], type[JsonRpcException]]
+
+
 logger = logging.getLogger(__name__)
-
-F = TypeVar("F", bound=Callable)
-
-ServerErrors = Union[type[PyglsError], type[JsonRpcException]]
 
 
 class StdOutTransportAdapter:
@@ -73,24 +78,6 @@ class PyodideTransportAdapter:
         self.wfile.flush()
 
 
-class WebSocketTransportAdapter:
-    """Protocol adapter which calls write method.
-
-    Write method sends data via the WebSocket interface.
-    """
-
-    def __init__(self, ws):
-        self._ws = ws
-
-    def close(self) -> None:
-        """Stop the WebSocket server."""
-        asyncio.ensure_future(self._ws.close())
-
-    def write(self, data: Any) -> None:
-        """Create a task to write specified data into a WebSocket."""
-        asyncio.ensure_future(self._ws.send(data))
-
-
 class JsonRPCServer:
     """Base server class
 
@@ -101,9 +88,6 @@ class JsonRPCServer:
 
     converter_factory
        Factory function to use when constructing a cattrs converter.
-
-    loop
-       The asyncio event loop
 
     max_workers
        Maximum number of workers for `ThreadPoolExecutor`
@@ -116,25 +100,16 @@ class JsonRPCServer:
         self,
         protocol_cls: Type[JsonRPCProtocol],
         converter_factory: Callable[[], cattrs.Converter],
-        loop: asyncio.AbstractEventLoop | None = None,
         max_workers: int | None = None,
     ):
         if not issubclass(protocol_cls, asyncio.Protocol):
             raise TypeError("Protocol class should be subclass of asyncio.Protocol")
 
         self._max_workers = max_workers
-        self._server = None
+        self._server: asyncio.Server | WSServer | None = None
         self._stop_event: Event | None = None
         self._thread_pool: ThreadPoolExecutor | None = None
 
-        if loop is None:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            self._owns_loop = True
-        else:
-            self._owns_loop = False
-
-        self.loop = loop
         self.protocol = protocol_cls(self, converter_factory())
 
     def shutdown(self):
@@ -149,11 +124,6 @@ class JsonRPCServer:
 
         if self._server:
             self._server.close()
-            self.loop.run_until_complete(self._server.wait_closed())
-
-        if self._owns_loop and not self.loop.is_closed():
-            logger.info("Closing the event loop.")
-            self.loop.close()
 
     def _report_server_error(
         self,
@@ -215,7 +185,9 @@ class JsonRPCServer:
 
         self._stop_event = stop_event = Event()
 
-        async def lsp_connection(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+        async def lsp_connection(
+            reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+        ):
             logger.debug("Connected to client")
             self.protocol.connection_made(writer)  # type: ignore
             await run_async(
@@ -239,43 +211,45 @@ class JsonRPCServer:
 
         try:
             asyncio.run(tcp_server(host, port))
-        except (KeyboardInterrupt, SystemExit):
-            pass
-        finally:
-            self.shutdown()
+        except asyncio.CancelledError:
+            logger.debug("Server was cancelled")
 
     def start_ws(self, host: str, port: int) -> None:
         """Starts WebSocket server."""
         try:
-            from websockets.server import serve
+            from websockets.asyncio.server import serve
         except ImportError:
-            logger.error("Run `pip install pygls[ws]` to install `websockets`.")
+            logger.error(
+                "Run `pip install pygls[ws]` to install dependencies required for websockets."
+            )
             sys.exit(1)
 
         logger.info("Starting WebSocket server on {}:{}".format(host, port))
+        self._stop_event = stop_event = Event()
 
-        self._stop_event = Event()
-        self.protocol._send_only_body = True  # Don't send headers within the payload
+        async def lsp_connection(websocket: ServerConnection):
+            await run_websocket(
+                stop_event=stop_event,
+                websocket=websocket,
+                protocol=self.protocol,
+                logger=logger,
+                error_handler=self.report_server_error,
+            )
+            self.shutdown()
 
-        async def connection_made(websocket, _):
-            """Handle new connection wrapped in the WebSocket."""
-            self.protocol.transport = WebSocketTransportAdapter(websocket)
-            async for message in websocket:
-                self.protocol.handle_message(
-                    json.loads(message, object_hook=self.protocol.structure_message)
-                )
+        async def ws_server(h: str, p: int):
+            self._server = await serve(lsp_connection, host, port)
 
-        start_server = serve(connection_made, host, port, loop=self.loop)
-        self._server = start_server.ws_server  # type: ignore[assignment]
-        self.loop.run_until_complete(start_server)
+            addrs = ", ".join(str(sock.getsockname()) for sock in self._server.sockets)
+            logger.info(f"Serving on {addrs}")
+
+            async with self._server:
+                await self._server.serve_forever()
 
         try:
-            self.loop.run_forever()
-        except (KeyboardInterrupt, SystemExit):
-            pass
-        finally:
-            self._stop_event.set()
-            self.shutdown()
+            asyncio.run(ws_server(host, port))
+        except asyncio.CancelledError:
+            logger.debug("Server was cancelled")
 
     def command(self, command_name: str) -> Callable[[F], F]:
         """Decorator used to register custom commands.
