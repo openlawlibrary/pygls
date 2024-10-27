@@ -25,8 +25,9 @@ from threading import Event
 
 import cattrs
 
+from pygls import IS_WASM
 from pygls.exceptions import JsonRpcException, PyglsError
-from pygls.io_ import StdinAsyncReader, StdoutWriter, run_async, run_websocket
+from pygls.io_ import StdinAsyncReader, StdoutWriter, run, run_async, run_websocket
 from pygls.protocol import JsonRPCProtocol
 
 if typing.TYPE_CHECKING:
@@ -105,8 +106,18 @@ class JsonRPCServer:
     def start_io(
         self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
     ):
-        """Starts IO server."""
-        logger.info("Starting IO server")
+        """Starts an IO server."""
+
+        if IS_WASM:
+            self._start_io_sync(stdin, stdout)
+        else:
+            self._start_io_async(stdin, stdout)
+
+    def _start_io_async(
+        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+    ):
+        """Starts an asynchronous IO server."""
+        logger.info("Starting async IO server")
 
         self._stop_event = Event()
         reader = StdinAsyncReader(stdin or sys.stdin.buffer, self.thread_pool)
@@ -118,6 +129,33 @@ class JsonRPCServer:
                 run_async(
                     stop_event=self._stop_event,
                     reader=reader,
+                    protocol=self.protocol,
+                    logger=logger,
+                    error_handler=self.report_server_error,
+                )
+            )
+        except BrokenPipeError:
+            logger.error("Connection to the client is lost! Shutting down the server.")
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        finally:
+            self.shutdown()
+
+    def _start_io_sync(
+        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+    ):
+        """Starts an synchronous IO server."""
+        logger.info("Starting sync IO server")
+
+        self._stop_event = Event()
+        writer = StdoutWriter(stdout or sys.stdout.buffer)
+        self.protocol.set_writer(writer)
+
+        try:
+            asyncio.run(
+                run(
+                    stop_event=self._stop_event,
+                    reader=stdin or sys.stdin.buffer,
                     protocol=self.protocol,
                     logger=logger,
                     error_handler=self.report_server_error,
