@@ -412,9 +412,16 @@ The :external:py:class:`multiprocessing.pool.ThreadPool` instance has been remov
 
 The ``thread_pool_executor`` attribute of the base ``JsonRPCServer`` class has been removed, the ``ThreadPoolExecutor`` can be accessed via the ``thread_pool`` attribute instead.
 
+``JsonRPCProtocol`` is no longer an ``asyncio.Protocol``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now the pygls v2 uses the high-level asyncio APIs, it no longer makes sense for the ``JsonRPCProtocol`` class to inherit from ``asyncio.Protocol``.
+Similarly, "output" classes are now called writers rather than transports. The ``connection_made`` method has been replaced with a corresponding ``set_writer`` method.
+
 New ``pygls.io_`` module
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 There is a new ``pygls.io_`` module containing main message parsing loop code common to both client and server
 
 - The equivlaent to pygls v1's ``pygls.server.aio_readline`` function is now ``pygls.io_.run_async``
+- It now contains classes like v1's ``WebsocketTransportAdapter``, which have been renamed to ``WebSocketWriter``
