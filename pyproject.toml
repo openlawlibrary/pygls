@@ -51,7 +51,7 @@ sphinx-rtd-theme = ">=1.3.0"
 asyncio_mode = "auto"
 
 [tool.poe.tasks]
-test-pyodide = "python tests/pyodide_testrunner/run.py"
+test-pyodide = "pytest tests/e2e --lsp-runtime pyodide"
 ruff = "ruff check ."
 mypy = "mypy -p pygls"
 check_generated_code = "python scripts/check_generated_code_is_uptodate.py"

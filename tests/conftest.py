@@ -97,7 +97,7 @@ def pytest_addoption(parser):
         dest="lsp_runtime",
         action="store",
         default="cpython",
-        choices=("cpython",),
+        choices=("cpython", "pyodide"),
         help="Choose the runtime in which to run servers under test.",
     )
 
@@ -156,7 +156,15 @@ def uri_for(runtime, path_for):
 
     def fn(*args):
         fpath = path_for(*args)
-        uri = uris.from_fs_path(str(fpath))
+
+        if runtime == "pyodide":
+            # Pyodide cannot see the whole file system, so this needs to be made relative to
+            # the workspace's parent folder
+            path = str(fpath).replace(str(WORKSPACE_DIR.parent), "")
+            uri = uris.from_fs_path(path)
+
+        else:
+            uri = uris.from_fs_path(str(fpath))
 
         assert uri is not None
         return uri
@@ -225,13 +233,52 @@ def get_client_for_cpython_server(transport, uri_fixture):
     return fn
 
 
+def get_client_for_pyodide_server(transport, uri_fixture):
+    """Return a client configured to communicate with a server running under Pyodide.
+
+    This assumes that the pyodide environment has already been bootstrapped.
+    """
+
+    if transport != "stdio":
+        pytest.skip("only STDIO is supported on pyodide")
+
+    async def fn(
+        server_name: str, capabilities: Optional[types.ClientCapabilities] = None
+    ):
+        client = LanguageClient("pygls-test-suite", "v1")
+
+        PYODIDE_DIR = REPO_DIR / "tests" / "pyodide"
+        server_py = str(SERVER_DIR / server_name)
+
+        await client.start_io("node", str(PYODIDE_DIR / "run_server.js"), server_py)
+
+        response = await client.initialize_async(
+            types.InitializeParams(
+                capabilities=capabilities or types.ClientCapabilities(),
+                root_uri=uri_fixture(""),
+            )
+        )
+        assert response is not None
+        yield client, response
+
+        await client.shutdown_async(None)
+        client.exit(None)
+
+        await client.stop()
+
+    return fn
+
+
 @pytest.fixture(scope="session")
 def get_client_for(runtime, transport, uri_for):
     """Return a client configured to communicate with the specified server.
 
     Takes into account the current runtime and transport.
     """
-    if runtime not in {"cpython"}:
+    if runtime not in {"cpython", "pyodide"}:
         raise NotImplementedError(f"get_client_for: {runtime=}")
+
+    if runtime == "pyodide":
+        return get_client_for_pyodide_server(transport, uri_for)
 
     return get_client_for_cpython_server(transport, uri_for)

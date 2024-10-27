@@ -24,6 +24,7 @@ from functools import partial
 import pytest
 import pytest_asyncio
 from lsprotocol import types
+
 from pygls import IS_WIN
 from pygls.exceptions import JsonRpcInternalError
 
@@ -126,9 +127,13 @@ async def test_countdown_blocking(
 async def test_countdown_threaded(
     threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
-    transport,
+    runtime: str,
+    transport: str,
 ):
     """Ensure that the countdown threaded command is working as expected."""
+
+    if runtime == "pyodide":
+        pytest.skip("threads not supported in pyodide")
 
     if (IS_WIN and transport == "tcp") or transport == "websockets":
         pytest.skip("see https://github.com/openlawlibrary/pygls/issues/502")
@@ -198,9 +203,15 @@ async def test_countdown_threaded(
 
 @pytest.mark.asyncio(scope="function")
 async def test_countdown_error(
-    threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult],
+    uri_for,
+    runtime: str,
 ):
     """Ensure that errors raised in threaded handlers are still handled correctly."""
+
+    if runtime == "pyodide":
+        pytest.skip("threads not supported in pyodide")
+
     client, initialize_result = threaded_handlers
 
     completion_options = initialize_result.capabilities.completion_provider
