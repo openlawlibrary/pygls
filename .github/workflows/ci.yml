@@ -66,31 +66,44 @@ jobs:
           poe test
 
   test-pyodide:
-    needs: pre_job
+    needs: [pre_job, build]
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Python "3.10"
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+
+      - uses: 'actions/setup-node@v4'
         with:
-          python-version: "3.10"
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: 'tests/pyodide/package-lock.json'
+
+      - id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Install Dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
-          poetry install --with pyodide
-      - name: Run Testsuite
-        uses: nick-fields/retry@v2
+
+      - uses: actions/download-artifact@v4
         with:
-          timeout_minutes: 10
-          max_attempts: 6
-          command: |
-            source $VENV
-            poe test-pyodide || true
+          name: build-artifacts
+          path: 'dist'
+
+      - name: Install Dependencies
+        run: |
+          poetry install --with test
+
+          cd tests/pyodide
+          npm ci
+
+      - name: Run tests
+        run: |
+          source $VENV
+          poe test-pyodide
 
   lint:
     needs: pre_job
