@@ -20,7 +20,6 @@ import asyncio
 import enum
 import json
 import logging
-import re
 import sys
 import traceback
 import uuid
@@ -101,8 +100,8 @@ class JsonRPCResponseMessage:
     result: Any
 
 
-class JsonRPCProtocol(asyncio.Protocol):
-    """Json RPC protocol implementation using on top of `asyncio.Protocol`.
+class JsonRPCProtocol:
+    """Json RPC protocol implementation
 
     Specification of the protocol can be found here:
         https://www.jsonrpc.org/specification
@@ -112,15 +111,6 @@ class JsonRPCProtocol(asyncio.Protocol):
 
     CHARSET = "utf-8"
     CONTENT_TYPE = "application/vscode-jsonrpc"
-
-    MESSAGE_PATTERN = re.compile(
-        rb"^(?:[^\r\n]+\r\n)*"
-        + rb"Content-Length: (?P<length>\d+)\r\n"
-        + rb"(?:[^\r\n]+\r\n)*\r\n"
-        + rb"(?P<body>{.*)",
-        re.DOTALL,
-    )
-
     VERSION = "2.0"
 
     def __init__(self, server: JsonRPCServer, converter: Converter):
@@ -425,12 +415,6 @@ class JsonRPCProtocol(asyncio.Protocol):
 
         self._send_data(response)
 
-    def connection_lost(self, exc):
-        """Method from base class, called when connection is lost, in which case we
-        want to shutdown the server's process as well.
-        """
-        logger.error("Connection to the client is lost! Shutting down the server.")
-        sys.exit(1)
 
     def connection_made(  # type: ignore # see: https://github.com/python/typeshed/issues/3021
         self,
@@ -439,44 +423,7 @@ class JsonRPCProtocol(asyncio.Protocol):
         """Method from base class, called when connection is established"""
         self.transport = transport
 
-    def data_received(self, data: bytes):
-        try:
-            self._data_received(data)
-        except Exception as error:
-            logger.exception("Error receiving data", exc_info=True)
-            self._server._report_server_error(error, JsonRpcInternalError)
 
-    def _data_received(self, data: bytes):
-        """Method from base class, called when server receives the data"""
-        logger.debug("Received %r", data)
-
-        while len(data):
-            # Append the incoming chunk to the message buffer
-            self._message_buf.append(data)
-
-            # Look for the body of the message
-            message = b"".join(self._message_buf)
-            found = JsonRPCProtocol.MESSAGE_PATTERN.fullmatch(message)
-
-            body = found.group("body") if found else b""
-            length = int(found.group("length")) if found else 1
-
-            if len(body) < length:
-                # Message is incomplete; bail until more data arrives
-                return
-
-            # Message is complete;
-            # extract the body and any remaining data,
-            # and reset the buffer for the next message
-            body, data = body[:length], body[length:]
-            self._message_buf = []
-
-            # Parse the body
-            self.handle_message(
-                json.loads(
-                    body.decode(self.CHARSET), object_hook=self.structure_message
-                )
-            )
 
     def get_message_type(self, method: str) -> Optional[Type]:
         """Return the type definition of the message associated with the given method."""

@@ -84,7 +84,8 @@ class JsonRPCServer:
     Parameters
     ----------
     protocol_cls
-       Protocol implementation that must be derive from :class:`~pygls.protocol.JsonRPCProtocol`
+       Protocol implementation that should derive from
+       :class:`~pygls.protocol.JsonRPCProtocol`
 
     converter_factory
        Factory function to use when constructing a cattrs converter.
@@ -102,9 +103,6 @@ class JsonRPCServer:
         converter_factory: Callable[[], cattrs.Converter],
         max_workers: int | None = None,
     ):
-        if not issubclass(protocol_cls, asyncio.Protocol):
-            raise TypeError("Protocol class should be subclass of asyncio.Protocol")
-
         self._max_workers = max_workers
         self._server: asyncio.Server | WSServer | None = None
         self._stop_event: Event | None = None
