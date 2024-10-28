@@ -403,7 +403,7 @@ Removed ``loop`` argument from ``pygls.server.JsonRPCServer``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Servers and clients in pygls v2 now both use the high level asyncio API, removing the need for an explicit ``loop`` argument to be passed in.
-If you need control over the event loop used by pygls you can use functions like :external:py:function:`asyncio.set_event_loop` before starting the server/client.
+If you need control over the event loop used by pygls you can use functions like :external:py:func:`asyncio.set_event_loop` before starting the server/client.
 
 Removed ``multiprocessing.pool.ThreadPool``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
