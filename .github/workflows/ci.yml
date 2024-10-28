@@ -35,9 +35,9 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -53,7 +53,7 @@ jobs:
 
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -110,12 +110,12 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Use Python
         id: use-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - name: Install Poetry
@@ -126,7 +126,7 @@ jobs:
         # I wonder if we can replace this whole step with with the "Use Python" step above's `cache` field?
         # See: https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#outputs-and-environment-variables
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ hashFiles('**/poetry.lock') }}-${{ steps.use-python.outputs.python-version }}
@@ -143,11 +143,11 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Use Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - name: Install Poetry
@@ -156,7 +156,7 @@ jobs:
           virtualenvs-in-project: true
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ hashFiles('**/poetry.lock') }}
@@ -168,7 +168,7 @@ jobs:
           git describe --tags --abbrev=0
           poetry build
       - name: Upload builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: "dist/*"
