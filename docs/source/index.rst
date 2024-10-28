@@ -10,7 +10,7 @@ allows you to write your own `language server`_ in just a few lines of code
 
 *pygls* supports
 
-- Python 3.8+ on Windows, MacOS and Linux
+- Python 3.9+ on Windows, MacOS and Linux
 - STDIO, TCP/IP and WEBSOCKET communication
 - Both sync and async styles of programming
 - Running code in background threads
@@ -24,6 +24,12 @@ allows you to write your own `language server`_ in just a few lines of code
    user-guide
    How To <howto>
    reference
+
+.. toctree::
+   :hidden:
+   :caption: Contributing
+
+   contributing/howto
 
 .. toctree::
    :hidden:
