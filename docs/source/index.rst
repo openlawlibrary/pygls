@@ -18,12 +18,30 @@ allows you to write your own `language server`_ in just a few lines of code
 
 .. toctree::
    :hidden:
-   :caption: User Guide
+   :caption: Language Servers
 
-   getting-started
-   user-guide
-   How To <howto>
-   reference
+   servers/getting-started
+   servers/user-guide
+   How To <servers/howto>
+
+.. toctree::
+   :hidden:
+   :caption: Language Clients
+
+   clients/index
+
+.. toctree::
+   :hidden:
+   :caption: The Protocol
+
+   protocol/howto
+
+.. toctree::
+   :hidden:
+   :caption: The Library
+
+   pygls/howto
+   pygls/reference
 
 .. toctree::
    :hidden:
@@ -39,34 +57,54 @@ allows you to write your own `language server`_ in just a few lines of code
    history
    changelog
 
+Navigation
+----------
 
-The documentation is divided up into the following sections
+*The pygls documentation tries to (with varying degrees of success!) follow the* `Diátaxis <https://diataxis.fr/>`__ *approach to writing documentation*
+
+This documentation site is divided up into the following sections
 
 .. grid:: 1 2 2 2
    :gutter: 2
 
-   .. grid-item-card:: Getting Started
-      :link: /getting-started
+   .. grid-item-card:: Language Servers
+      :link: servers/getting-started
       :link-type: doc
       :text-align: center
 
-      First steps with *pygls*.
+      Documentation specific to implementing Language Servers using *pygls*.
 
-   .. grid-item-card:: How To Guides
-      :link: /howto
+   .. grid-item-card:: Language Clients
+      :text-align: center
+
+      Documentation specific to implementing Language Clients using *pygls*.
+      Coming Soon\ :sup:`TM`!
+
+   .. grid-item-card:: The Protocol
+      :link: protocol/howto
       :link-type: doc
       :text-align: center
 
-      Short, focused articles on how to acheive a particular outcome
+      Additional articles that explain some aspect of the Language Server Protocol in general.
 
-   .. grid-item-card:: API Reference
-      :link: /reference
+   .. grid-item-card:: The Library
+      :link: pygls/howto
       :link-type: doc
-      :columns: 12
       :text-align: center
 
-      Comprehensive, detailed documentation on all of the features provided by *pygls*.
+      Documentation that applies to the *pygls* library itself e.g. migration guides.
 
+   .. grid-item-card:: Contributing
+      :link: contributing/howto
+      :link-type: doc
+      :text-align: center
+
+      Guides on how to contribute to *pygls*.
+
+   .. grid-item-card:: About
+      :text-align: center
+
+      Additional context on the *pygls* project.
 
 .. _Language Server Protocol: https://microsoft.github.io/language-server-protocol/specification
 .. _Language server: https://langserver.org/

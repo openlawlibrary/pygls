@@ -30,7 +30,7 @@ whereas ``workspace/symbol`` is a flat list.
 This server implements these requests for the pretend programming language featured in
 the ``code.txt`` in the example workspace in the *pygls* repository.
 
-.. literalinclude:: ../../../examples/servers/workspace/code.txt
+.. literalinclude:: ../../../../examples/servers/workspace/code.txt
    :language: none
 """
 

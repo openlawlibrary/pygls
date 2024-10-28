@@ -1,7 +1,15 @@
 .. _howto-semantic-tokens:
 
-How To Implement Semantic Tokens
+How To Interpret Semantic Tokens
 ================================
+
+.. seealso::
+
+   :ref:`Example Server <example-semantic-tokens>`
+      An example implementation of semantic tokens
+
+   :lsp:`textDocument/semanticTokens`
+      Semantic tokens in the LSP Specification
 
 Semantic Tokens can be thought of as "Syntax Highlighting++".
 
@@ -98,15 +106,7 @@ To quote the specification:
 
 Finally! We have managed to construct the values we need to apply semantic tokens to the snippet of code we considered at the start
 
-.. figure:: ../../assets/semantic-tokens-example.png
+.. figure:: ../../../assets/semantic-tokens-example.png
    :align: center
 
    Our semantic tokens example implemented in VSCode
-
-.. seealso::
-
-   :ref:`Example Server <example-semantic-tokens>`
-      An example implementation of semantic tokens
-
-   :lsp:`textDocument/semanticTokens`
-      Semantic tokens in the LSP Specification
