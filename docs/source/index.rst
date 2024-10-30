@@ -11,6 +11,7 @@ allows you to write your own `language server`_ in just a few lines of code
 *pygls* supports
 
 - Python 3.9+ on Windows, MacOS and Linux
+- **Experimental** support for Pyodide
 - STDIO, TCP/IP and WEBSOCKET communication
 - Both sync and async styles of programming
 - Running code in background threads
