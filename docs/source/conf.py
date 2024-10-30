@@ -69,6 +69,7 @@ example_server_dir = (
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
+    "pyodide": ("https://pyodide.org/en/stable", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
