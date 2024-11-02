@@ -197,3 +197,202 @@ It's also important to note that your language client will need to send URIs tha
 
 Using the Browser
 -----------------
+
+.. seealso::
+
+   `monaco-languageclient <https://github.com/TypeFox/monaco-languageclient>`__ GitHub repository
+       For plenty of examples on how to build an in-browser client on top of the `monaco editor <https://microsoft.github.io/monaco-editor/>`__
+
+   `This commit <https://github.com/openlawlibrary/pygls/pull/291/commits/166afdf8387fd7074af6ffadf62d6002caab3527>`__
+      For an (outdated!) example on building a simple language client for pygls servers in the browser.
+
+Getting your pygls server to run in a web browser using Pyodide as the runtime *is possible*.
+Unfortunately, it is not necessarily *easy* - mostly because you will most likely have to build your own language client at the same time!
+
+While building an in-browser language client is beyond the scope of this article, we can provide some suggestions to get you started - and if you figure out a nicer way please let us know!
+
+WebWorkers
+^^^^^^^^^^
+
+Running your language server in the browser's main thread is not a great idea since any time your server is processing some message it will block the UI.
+Instead we can run the server in a `WebWorker <https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers>`__, which we can think of as the browser's version of a background thread.
+
+Using the `monaco-editor-wrapper <https://github.com/TypeFox/monaco-languageclient/tree/main/packages/wrapper>`__ project, connecting your server to the client can be as simple as a few lines of configuration
+
+.. code-block:: typescript
+
+   import '@codingame/monaco-vscode-python-default-extension';
+   import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper'
+
+   export async function run(containerId: string) {
+     const wrapper = new MonacoEditorLanguageClientWrapper()
+     const userConfig: UserConfig = {
+       wrapperConfig: {
+         editorAppConfig: {
+           $type: 'extended',
+           codeResources: {
+             main: {
+               text: '1 + 1 =',
+               uri: '/workspace/sums.txt',
+               enforceLanguageId: 'plaintext'
+             }
+           }
+         }
+       },
+       languageClientConfig: {
+         languageId: 'plaintext',
+         options: {
+           $type: 'WorkerDirect',
+           worker: new Worker('/run_server.js')
+         },
+       }
+     }
+
+     const container = document.getElementById(containerId)
+     await wrapper.initAndStart(userConfig, container)
+   }
+
+Where ``run_server.js`` is a slightly different version of the wrapper script we used for the NodeJS section above.
+
+Overview
+^^^^^^^^
+
+.. seealso::
+
+   :external+pyodide:std:doc:`usage/webworker`
+
+
+Unlike all the other ways you will have run a pygls server up until now, the client and server will not be communicating by reading/writing bytes to/from each other.
+Intead they will be passing JSON objects directly using the ``onmessage`` event and ``postMessage`` functions.
+As a result, we will not be calling one of the server's ``start_xx`` methods either, instead we will rely on the events we receive from the client "drive" the server.
+
+.. raw:: html
+
+   <svg width="100%" height="200" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+     <g transform="translate(-50, 0)">
+       <rect x="20" y="50" width="100" height="50" fill="#D3EAF9" stroke="#2A6EAB" />
+       <text x="50" y="80" font-family="Arial" font-size="14" fill="#2A6EAB">Client</text>
+
+       <rect x="280" y="50" width="100" height="50" fill="#F9EAD3" stroke="#AB6E2A" />
+       <text x="310" y="80" font-family="Arial" font-size="14" fill="#AB6E2A">Server</text>
+
+       <line x1="120" y1="70" x2="280" y2="70" stroke="#2A6EAB" stroke-width="2" marker-end="url(#arrowhead)" />
+       <text x="170" y="65" font-family="Arial" font-size="12" fill="#2A6EAB">onmessage</text>
+
+       <line x1="280" y1="85" x2="120" y2="85" stroke="#AB6E2A" stroke-width="2" marker-end="url(#arrowhead)" />
+       <text x="170" y="105" font-family="Arial" font-size="12" fill="#AB6E2A">postMessage</text>
+
+       <defs>
+         <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+           <polyline points="1,1 5,5 1,9" fill="none" stroke="context-stroke" stroke-width="1" />
+         </marker>
+       </defs>
+     </g>
+   </svg>
+
+
+Also note that since our server code is running in a WebWorker, we will need to use the `importScripts <https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts>`__ function to pull in the Pyodide library.
+
+.. code-block:: typescript
+
+   importScripts("https://cdn.jsdelivr.net/pyodide/<pyodide_version>/full/pyodide.js");
+
+   async function initPyodide() {
+       // TODO
+   }
+
+   const pyodidePromise = initPyodide()
+
+   onmessage = async (event) => {
+       let pyodide = await pyodidePromise
+       // TODO
+   }
+
+By awaiting ``pyodidePromise`` in the ``onmessage``, we ensure that Pyodide and all our server code is ready before attempting to handle any messages.
+
+Initializing Pyodide
+^^^^^^^^^^^^^^^^^^^^
+
+The ``initPyodide`` function is fairly similar to the ``runServer`` function from the NodeJS example above.
+The main differences are
+
+- We are now redirecting ``stderr`` to ``console.log`` rather than a file
+- We are now also redirecting ``stdout``, parsing the JSON objects being written out and passing them to the ``postMessage`` function to send them onto the client.
+- We **are not** calling ``server.start_io`` in our server init code.
+
+.. code-block:: typescript
+
+   async function initPyodide() {
+       console.log("Initializing pyodide.")
+
+       /* @ts-ignore */
+       let pyodide = await loadPyodide({
+         stderr: console.log
+       })
+
+       console.log("Installing dependencies.")
+       await pyodide.loadPackage(["micropip"])
+       await pyodide.runPythonAsync(`
+           import micropip
+           await micropip.install('pygls')
+       `)
+
+       // See https://pyodide.org/en/stable/usage/api/js-api.html#pyodide.setStdout
+       pyodide.setStdout({ batched: (msg) => postMessage(JSON.parse(msg)) })
+
+       console.log("Loading server.")
+       await pyodide.runPythonAsync(`<<insert-your-server-init-code-here>>`)
+       return pyodide
+   }
+
+Initializing the Server
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Since we are not calling the server's ``start_io`` method, we need to configure the server to tell it where to write its messages.
+Ideally, this would be done by calling the :meth:`~pygls.protocol.JsonRPCProtocol.set_writer` method on the server's ``protocol`` object.
+
+However, at the time of writing there is `a bug <https://github.com/pyodide/pyodide/issues/4139>`__ in Pyodide where output is not flushed correctly, even if you call a method like ``sys.stdout.flush()``
+
+To work around this, we will instead override one of the ``protocol`` object's methods to output the server's messages as a sequence of newline separated JSON strings.
+
+.. code-block:: python
+
+   # Hack to workaround https://github.com/pyodide/pyodide/issues/4139
+   def send_data(data):
+       body = json.dumps(data, default=server.protocol._serialize_message)
+       sys.stdout.write(f"{body}\n")
+       sys.stdout.flush()
+
+   server.protocol._send_data = send_data
+
+The above code snippet should be included along with your server's init code.
+
+Handling Messages
+^^^^^^^^^^^^^^^^^
+
+Finally, with the server prepped to send messages, the only thing left to do is to implement the ``onmessage`` handler.
+
+.. code-block:: typescript
+
+   const pyodidePromise = initPyodide()
+
+   onmessage = async (event) => {
+       let pyodide = await pyodidePromise
+       console.log(event.data)
+
+       /* @ts-ignore */
+       self.client_message = JSON.stringify(event.data)
+
+       // Run Python synchronously to ensure that messages are processed in the correct order.
+       pyodide.runPython(`
+           from js import client_message
+           message = json.loads(client_message, object_hook=server.protocol.structure_message)
+           server.protocol.handle_message(message)
+       `)
+   }
+
+The above handler
+
+- Converts incoming JSON objects to a string and stores them in the ``client_message`` attribute on the WebWorker itself
+- Our server code is then able to access the ``client_message`` via the ``js`` module provided by Pyodide
+- The server parses and handles the given message.
