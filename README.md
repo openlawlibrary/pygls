@@ -6,7 +6,7 @@ _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of th
 
 > [!IMPORTANT]
 > The next major version, *pygls v2* is ready for testing. 
-> We encourage all existing server authors to try the [migration guide](https://pygls.readthedocs.io/en/latest/howto/migrate-to-v2.html) and let us know how you get on!
+> We encourage all existing server authors to try the [migration guide](https://pygls.readthedocs.io/en/latest/pygls/howto/migrate-to-v2.html) and let us know how you get on!
 
 ## Quickstart
 ```python
