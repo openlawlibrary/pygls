@@ -50,6 +50,8 @@ async def hover(get_client_for):
                     "| `%d/%m/%y` | 01/02/20 |",
                     "| `%Y-%m-%d` | 2020-02-01 |",
                     "| `%Y-%m-%dT%H:%M:%S` | 2020-02-01T00:00:00 |",
+                    "",
+                    "[Test square brackets \\[\\]]",
                 ]
             ),
         ),
@@ -66,6 +68,8 @@ async def hover(get_client_for):
                     "| `%d/%m/%y` | 02/01/21 |",
                     "| `%Y-%m-%d` | 1921-01-02 |",
                     "| `%Y-%m-%dT%H:%M:%S` | 1921-01-02T23:59:00 |",
+                    "",
+                    "[Test square brackets \\[\\]]",
                 ]
             ),
         ),

@@ -69,6 +69,8 @@ def hover(ls: LanguageServer, params: types.HoverParams):
         "| Format | Value |",
         "|:-|-:|",
         *[f"| `{fmt}` | {value.strftime(fmt)} |" for fmt in DATE_FORMATS],
+        "",
+        "[Test square brackets \\[\\]]",
     ]
 
     return types.Hover(
