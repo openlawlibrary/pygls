@@ -22,7 +22,7 @@ import json
 import logging
 import sys
 import typing
-from functools import lru_cache
+from functools import lru_cache, partial
 from itertools import zip_longest
 from typing import (
     Callable,
@@ -261,7 +261,12 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
     ) -> None:
         """Executes commands with passed arguments and returns a value."""
         cmd_handler = self.fm.commands[params.command]
-        self._execute_request(msg_id, cmd_handler, params.arguments)
+        self._execute_handler(
+            msg_id,
+            cmd_handler,
+            params.arguments,
+            partial(self._send_handler_result, msg_id=msg_id),
+        )
 
     @lsp_method(types.WINDOW_WORK_DONE_PROGRESS_CANCEL)
     def lsp_work_done_progress_cancel(
