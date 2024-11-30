@@ -14,12 +14,11 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from functools import reduce
-from typing import Any, Dict, List, Optional, Set, Union, TypeVar
 import logging
+from functools import reduce
+from typing import Any, Dict, List, Optional, Set, TypeVar, Union
 
 from lsprotocol import types
-
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -62,6 +61,7 @@ class ServerCapabilitiesBuilder:
         commands: List[str],
         text_document_sync_kind: types.TextDocumentSyncKind,
         notebook_document_sync: Optional[types.NotebookDocumentSyncOptions] = None,
+        position_encoding: types.PositionEncodingKind = types.PositionEncodingKind.Utf16,
     ):
         self.client_capabilities = client_capabilities
         self.features = features
@@ -71,11 +71,34 @@ class ServerCapabilitiesBuilder:
         self.notebook_document_sync = notebook_document_sync
 
         self.server_cap = types.ServerCapabilities()
+        self.server_cap.position_encoding = position_encoding
 
     def _provider_options(self, feature: str, default: T) -> Optional[Union[T, Any]]:
         if feature in self.features:
             return self.feature_options.get(feature, default)
         return None
+
+    @classmethod
+    def choose_position_encoding(
+        cls, client_capabilities: types.ClientCapabilities
+    ) -> types.PositionEncodingKind:
+        server_encoding = types.PositionEncodingKind.Utf16
+
+        if (general := client_capabilities.general) is None:
+            return server_encoding
+
+        if (encodings := general.position_encodings) is None:
+            return server_encoding
+
+        # We match client preference where this an overlap between its and our supported encodings.
+        for client_encoding in encodings:
+            if client_encoding in _SUPPORTED_ENCODINGS:
+                server_encoding = client_encoding
+                return server_encoding
+
+        logger.warning(f"Unknown `PositionEncoding`s: {encodings}")
+
+        return server_encoding
 
     def _with_text_document_sync(self):
         open_close = (
@@ -415,27 +438,6 @@ class ServerCapabilitiesBuilder:
             self.server_cap.inline_value_provider = value
         return self
 
-    def _with_position_encodings(self):
-        self.server_cap.position_encoding = types.PositionEncodingKind.Utf16
-
-        general = self.client_capabilities.general
-        if general is None:
-            return self
-
-        encodings = general.position_encodings
-        if encodings is None:
-            return self
-
-        # We match client preference where this an overlap between its and our supported encodings.
-        for encoding in encodings:
-            if encoding in _SUPPORTED_ENCODINGS:
-                self.server_cap.position_encoding = encoding
-                return self
-
-        logger.warning(f"Unknown `PositionEncoding`s: {encodings}")
-
-        return self
-
     def _build(self):
         return self.server_cap
 
@@ -474,6 +476,5 @@ class ServerCapabilitiesBuilder:
             ._with_workspace_capabilities()
             ._with_diagnostic_provider()
             ._with_inline_value_provider()
-            ._with_position_encodings()
             ._build()
         )

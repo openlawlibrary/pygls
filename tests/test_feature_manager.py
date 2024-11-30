@@ -18,6 +18,8 @@ import asyncio
 from typing import Any
 
 import pytest
+from lsprotocol import types as lsp
+
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.exceptions import (
     CommandAlreadyRegisteredError,
@@ -29,7 +31,6 @@ from pygls.feature_manager import (
     has_ls_param_or_annotation,
     wrap_with_server,
 )
-from lsprotocol import types as lsp
 
 
 class Temp:
@@ -704,13 +705,13 @@ def test_register_feature(
         [],
         None,
         None,
+        ServerCapabilitiesBuilder.choose_position_encoding(capabilities),
     ).build()
 
     assert expected == actual
 
 
 def test_register_prepare_rename_no_client_support(feature_manager: FeatureManager):
-
     @feature_manager.feature(lsp.TEXT_DOCUMENT_RENAME)
     def _():
         pass
@@ -734,7 +735,6 @@ def test_register_prepare_rename_no_client_support(feature_manager: FeatureManag
 
 
 def test_register_prepare_rename_with_client_support(feature_manager: FeatureManager):
-
     @feature_manager.feature(lsp.TEXT_DOCUMENT_RENAME)
     def _():
         pass
