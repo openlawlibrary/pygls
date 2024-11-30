@@ -34,7 +34,6 @@ from cattrs.errors import ClassValidationError
 from lsprotocol.types import (
     CANCEL_REQUEST,
     EXIT,
-    WORKSPACE_EXECUTE_COMMAND,
     ResponseError,
     ResponseErrorMessage,
 )
@@ -51,6 +50,8 @@ from pygls.exceptions import (
 from pygls.feature_manager import FeatureManager, is_thread_function
 
 if typing.TYPE_CHECKING:
+    from collections.abc import Generator
+
     from cattrs import Converter
 
     from pygls.io_ import AsyncWriter, Writer
@@ -130,8 +131,9 @@ class JsonRPCProtocol:
         self,
         msg_id: str | int,
         handler: MessageHandler,
-        params: Any,
         callback: MessageCallback,
+        args: tuple[Any, ...] | None = None,
+        kwargs: dict[str, Any] | None = None,
     ):
         """Execute the given message handler.
 
@@ -143,22 +145,41 @@ class JsonRPCProtocol:
         handler
            The request handler to call
 
-        params
-           The parameters object to pass to the handler
-
         callback
            An optional callback function to call upon completion of the handler
+
+        args
+           Positional arguments to pass to the handler
+
+        kwargs
+           Keyword arguments to pass to the handler
         """
 
+        args = args or tuple()
+        kwargs = kwargs or {}
+
         if asyncio.iscoroutinefunction(handler):
-            future = asyncio.ensure_future(handler(params))
+            future = asyncio.ensure_future(handler(*args, **kwargs))
             self._request_futures[msg_id] = future
             future.add_done_callback(callback)
 
         elif is_thread_function(handler):
-            future = self._server.thread_pool.submit(handler, params)
+            future = self._server.thread_pool.submit(handler, *args, **kwargs)
             self._request_futures[msg_id] = future
             future.add_done_callback(callback)
+
+        elif inspect.isgeneratorfunction(handler):
+            future: Future[Any] = Future()
+            self._request_futures[msg_id] = future
+            future.add_done_callback(callback)
+
+            try:
+                self._run_generator(
+                    future=None, gen=handler(*args, **kwargs), result_future=future
+                )
+            except Exception as exc:
+                future.set_exception(exc)
+
         else:
             # While a future is not necessary for a synchronous function, it allows us to use a single
             # pattern across all handler types
@@ -166,10 +187,60 @@ class JsonRPCProtocol:
             future.add_done_callback(callback)
 
             try:
-                result = handler(params)
+                result = handler(*args, **kwargs)
                 future.set_result(result)
             except Exception as exc:
                 future.set_exception(exc)
+
+    def _run_generator(
+        self,
+        future: Future[Any] | None,
+        *,
+        gen: Generator[Any, Any, Any],
+        result_future: Future[Any],
+    ):
+        """Run the next portion of the given generator.
+
+        Generator handlers are designed to ``yield`` to other handlers that are executed
+        separately before their results are sent back into the generator allowing
+        execution to continue.
+
+        Generator handlers are primarily used in the implementation of pygls' builtin
+        feature handlers.
+
+        Parameters
+        ----------
+        future
+           The future that contains the result of the previously executed handler, if any
+
+        gen
+           The generator to run
+
+        result_future
+           The future to send the final result to once the generator stops.
+        """
+
+        if result_future.cancelled():
+            return
+
+        try:
+            value = future.result() if future is not None else None
+            handler, args, kwargs = gen.send(value)
+
+            self._execute_handler(
+                str(uuid.uuid4()),
+                handler,
+                args=args,
+                kwargs=kwargs,
+                callback=partial(
+                    self._run_generator, gen=gen, result_future=result_future
+                ),
+            )
+        except StopIteration as result:
+            result_future.set_result(result.value)
+
+        except Exception as exc:
+            result_future.set_exception(exc)
 
     def _send_handler_result(self, future: Future[Any], *, msg_id: str | int):
         """Callback function that sends the result of the given future to the client.
@@ -192,6 +263,7 @@ class JsonRPCProtocol:
             error = JsonRpcInternalError.of(sys.exc_info())
             logger.exception('Exception occurred for message "%s": %s', msg_id, error)
             self._send_response(msg_id, error=error.to_response_error())
+            self._server._report_server_error(error, FeatureRequestError)
 
     def _check_handler_result(self, future: Future[Any]):
         """Check the result of the future to see if an error occurred.
@@ -237,7 +309,10 @@ class JsonRPCProtocol:
         try:
             handler = self._get_handler(method_name)
             self._execute_handler(
-                str(uuid.uuid4()), handler, params, self._check_handler_result
+                msg_id=str(uuid.uuid4()),
+                handler=handler,
+                args=(params,),
+                callback=self._check_handler_result,
             )
         except JsonRpcMethodNotFound:
             logger.warning("Ignoring notification for unknown method %r", method_name)
@@ -255,16 +330,12 @@ class JsonRPCProtocol:
         try:
             handler = self._get_handler(method_name)
 
-            # workspace/executeCommand is a special case
-            if method_name == WORKSPACE_EXECUTE_COMMAND:
-                handler(params, msg_id)
-            else:
-                self._execute_handler(
-                    msg_id,
-                    handler,
-                    params,
-                    callback=partial(self._send_handler_result, msg_id=msg_id),
-                )
+            self._execute_handler(
+                msg_id=msg_id,
+                handler=handler,
+                args=(params,),
+                callback=partial(self._send_handler_result, msg_id=msg_id),
+            )
 
         except JsonRpcMethodNotFound as error:
             logger.warning(
@@ -369,10 +440,10 @@ class JsonRPCProtocol:
 
         if hasattr(message, "method"):
             if hasattr(message, "id"):
-                logger.debug("Request message received.")
+                logger.debug("Request %r received", message.method)
                 self._handle_request(message.id, message.method, message.params)
             else:
-                logger.debug("Notification message received.")
+                logger.debug("Notification %r received", message.method)
                 self._handle_notification(message.method, message.params)
         else:
             if hasattr(message, "error"):
