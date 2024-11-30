@@ -190,8 +190,12 @@ class LanguageServerProtocol(JsonRPCProtocol):
         if (user_handler := self.fm.features.get(types.SHUTDOWN)) is not None:
             yield user_handler, args, None
 
-        for future in self._request_futures.values():
-            future.cancel()
+        # Don't cancel the future for this request!
+        current_id = self.msg_id
+
+        for msg_id, future in self._request_futures.items():
+            if msg_id != current_id and not future.done():
+                future.cancel()
 
         self._shutdown = True
         return None
