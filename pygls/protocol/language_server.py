@@ -22,29 +22,25 @@ import json
 import logging
 import sys
 import typing
-from functools import lru_cache, partial
+from functools import lru_cache
 from itertools import zip_longest
-from typing import (
-    Callable,
-    Optional,
-    Type,
-    TypeVar,
-)
 
 from lsprotocol import types
 
 from pygls.capabilities import ServerCapabilitiesBuilder
 from pygls.protocol.json_rpc import JsonRPCProtocol
-from pygls.protocol.lsp_meta import LSPMeta
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
 if typing.TYPE_CHECKING:
+    from collections.abc import Generator
+    from typing import Any, Callable, Optional, Type, TypeVar
+
     from cattrs import Converter
 
     from pygls.lsp.server import LanguageServer
 
-F = TypeVar("F", bound=Callable)
+    F = TypeVar("F", bound=Callable)
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +53,7 @@ def lsp_method(method_name: str) -> Callable[[F], F]:
     return decorator
 
 
-class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
+class LanguageServerProtocol(JsonRPCProtocol):
     """A class that represents language server protocol.
 
     It contains implementations for generic LSP features.
@@ -105,17 +101,22 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         return self._workspace
 
     @lru_cache()
-    def get_message_type(self, method: str) -> Optional[Type]:
+    def get_message_type(self, method: str) -> Type[Any] | None:
         """Return LSP type definitions, as provided by `lsprotocol`"""
         return types.METHOD_TO_TYPES.get(method, (None,))[0]
 
     @lru_cache()
-    def get_result_type(self, method: str) -> Optional[Type]:
+    def get_result_type(self, method: str) -> Type[Any] | None:
         return types.METHOD_TO_TYPES.get(method, (None, None))[1]
 
     @lsp_method(types.EXIT)
     def lsp_exit(self, *args) -> None:
         """Stops the server process."""
+
+        # Ensure that the user handler is called first
+        if (user_handler := self.fm.features.get(types.EXIT)) is not None:
+            yield user_handler, args, None
+
         returncode = 0 if self._shutdown else 1
         if self.writer is None:
             sys.exit(returncode)
@@ -176,13 +177,19 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         )
 
     @lsp_method(types.INITIALIZED)
-    def lsp_initialized(self, *args) -> None:
+    def lsp_initialized(self, *args):
         """Notification received when client and server are connected."""
-        pass
+
+        if (user_handler := self.fm.features.get(types.INITIALIZED)) is not None:
+            yield user_handler, args, None
 
     @lsp_method(types.SHUTDOWN)
     def lsp_shutdown(self, *args) -> None:
         """Request from client which asks server to shutdown."""
+
+        if (user_handler := self.fm.features.get(types.SHUTDOWN)) is not None:
+            yield user_handler, args, None
+
         for future in self._request_futures.values():
             future.cancel()
 
@@ -190,59 +197,86 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
         return None
 
     @lsp_method(types.TEXT_DOCUMENT_DID_CHANGE)
-    def lsp_text_document__did_change(
-        self, params: types.DidChangeTextDocumentParams
-    ) -> None:
+    def lsp_text_document__did_change(self, params: types.DidChangeTextDocumentParams):
         """Updates document's content.
         (Incremental(from server capabilities); not configurable for now)
         """
         for change in params.content_changes:
             self.workspace.update_text_document(params.text_document, change)
 
+        if (
+            user_handler := self.fm.features.get(types.TEXT_DOCUMENT_DID_CHANGE)
+        ) is not None:
+            yield user_handler, (params,), None
+
     @lsp_method(types.TEXT_DOCUMENT_DID_CLOSE)
-    def lsp_text_document__did_close(
-        self, params: types.DidCloseTextDocumentParams
-    ) -> None:
+    def lsp_text_document__did_close(self, params: types.DidCloseTextDocumentParams):
         """Removes document from workspace."""
         self.workspace.remove_text_document(params.text_document.uri)
 
+        if (
+            user_handler := self.fm.features.get(types.TEXT_DOCUMENT_DID_CLOSE)
+        ) is not None:
+            yield user_handler, (params,), None
+
     @lsp_method(types.TEXT_DOCUMENT_DID_OPEN)
-    def lsp_text_document__did_open(
-        self, params: types.DidOpenTextDocumentParams
-    ) -> None:
+    def lsp_text_document__did_open(self, params: types.DidOpenTextDocumentParams):
         """Puts document to the workspace."""
         self.workspace.put_text_document(params.text_document)
+
+        if (
+            user_handler := self.fm.features.get(types.TEXT_DOCUMENT_DID_OPEN)
+        ) is not None:
+            yield user_handler, (params,), None
 
     @lsp_method(types.NOTEBOOK_DOCUMENT_DID_OPEN)
     def lsp_notebook_document__did_open(
         self, params: types.DidOpenNotebookDocumentParams
-    ) -> None:
+    ):
         """Put a notebook document into the workspace"""
         self.workspace.put_notebook_document(params)
+
+        if (
+            user_handler := self.fm.features.get(types.NOTEBOOK_DOCUMENT_DID_OPEN)
+        ) is not None:
+            yield user_handler, (params,), None
 
     @lsp_method(types.NOTEBOOK_DOCUMENT_DID_CHANGE)
     def lsp_notebook_document__did_change(
         self, params: types.DidChangeNotebookDocumentParams
-    ) -> None:
+    ):
         """Update a notebook's contents"""
         self.workspace.update_notebook_document(params)
+
+        if (
+            user_handler := self.fm.features.get(types.NOTEBOOK_DOCUMENT_DID_CHANGE)
+        ) is not None:
+            yield user_handler, (params,), None
 
     @lsp_method(types.NOTEBOOK_DOCUMENT_DID_CLOSE)
     def lsp_notebook_document__did_close(
         self, params: types.DidCloseNotebookDocumentParams
-    ) -> None:
+    ):
         """Remove a notebook document from the workspace."""
         self.workspace.remove_notebook_document(params)
+
+        if (
+            user_handler := self.fm.features.get(types.NOTEBOOK_DOCUMENT_DID_CLOSE)
+        ) is not None:
+            yield user_handler, (params,), None
 
     @lsp_method(types.SET_TRACE)
     def lsp_set_trace(self, params: types.SetTraceParams) -> None:
         """Changes server trace value."""
         self.trace = params.value
 
+        if (user_handler := self.fm.features.get(types.SET_TRACE)) is not None:
+            yield user_handler, (params,), None
+
     @lsp_method(types.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS)
     def lsp_workspace__did_change_workspace_folders(
         self, params: types.DidChangeWorkspaceFoldersParams
-    ) -> None:
+    ):
         """Adds/Removes folders from the workspace."""
         logger.info("Workspace folders changed: %s", params)
 
@@ -255,23 +289,26 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             if f_remove:
                 self.workspace.remove_folder(f_remove.uri)
 
+        if (
+            user_handler := self.fm.features.get(
+                types.WORKSPACE_DID_CHANGE_WORKSPACE_FOLDERS
+            )
+        ) is not None:
+            yield user_handler, (params,), None
+
     @lsp_method(types.WORKSPACE_EXECUTE_COMMAND)
     def lsp_workspace__execute_command(
-        self, params: types.ExecuteCommandParams, msg_id: str
-    ) -> None:
+        self, params: types.ExecuteCommandParams
+    ) -> Generator[Any, Any, Any]:
         """Executes commands with passed arguments and returns a value."""
         cmd_handler = self.fm.commands[params.command]
-        self._execute_handler(
-            msg_id,
-            cmd_handler,
-            params.arguments,
-            partial(self._send_handler_result, msg_id=msg_id),
-        )
+
+        # Call the user's command implementation
+        result = yield cmd_handler, (params.arguments,), None
+        return result
 
     @lsp_method(types.WINDOW_WORK_DONE_PROGRESS_CANCEL)
-    def lsp_work_done_progress_cancel(
-        self, params: types.WorkDoneProgressCancelParams
-    ) -> None:
+    def lsp_work_done_progress_cancel(self, params: types.WorkDoneProgressCancelParams):
         """Received a progress cancellation from client."""
         future = self.progress.tokens.get(params.token)
         if future is None:
@@ -280,3 +317,8 @@ class LanguageServerProtocol(JsonRPCProtocol, metaclass=LSPMeta):
             )
         else:
             future.cancel()
+
+        if (
+            user_handler := self.fm.features.get(types.WINDOW_WORK_DONE_PROGRESS_CANCEL)
+        ) is not None:
+            yield user_handler, (params,), None
