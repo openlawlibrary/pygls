@@ -130,7 +130,9 @@ class LanguageServerProtocol(JsonRPCProtocol):
             sys.exit(returncode)
 
     @lsp_method(types.INITIALIZE)
-    def lsp_initialize(self, params: types.InitializeParams) -> types.InitializeResult:
+    def lsp_initialize(
+        self, params: types.InitializeParams
+    ) -> Generator[Any, Any, types.InitializeResult]:
         """Method that initializes language server.
         It will compute and return server capabilities based on
         registered features.
@@ -142,19 +144,9 @@ class LanguageServerProtocol(JsonRPCProtocol):
         text_document_sync_kind = self._server._text_document_sync_kind
         notebook_document_sync = self._server._notebook_document_sync
 
-        # Initialize server capabilities
         self.client_capabilities = params.capabilities
-        self.server_capabilities = ServerCapabilitiesBuilder(
-            self.client_capabilities,
-            set({**self.fm.features, **self.fm.builtin_features}.keys()),
-            self.fm.feature_options,
-            list(self.fm.commands.keys()),
-            text_document_sync_kind,
-            notebook_document_sync,
-        ).build()
-        logger.debug(
-            "Server capabilities: %s",
-            json.dumps(self.server_capabilities, default=self._serialize_message),
+        position_encoding = ServerCapabilitiesBuilder.choose_position_encoding(
+            self.client_capabilities
         )
 
         root_path = params.root_path
@@ -162,13 +154,32 @@ class LanguageServerProtocol(JsonRPCProtocol):
         if root_path is not None and root_uri is None:
             root_uri = from_fs_path(root_path)
 
-        # Initialize the workspace
+        # Initialize the workspace before yielding to the user's initialize handler
         workspace_folders = params.workspace_folders or []
         self._workspace = Workspace(
             root_uri,
             text_document_sync_kind,
             workspace_folders,
-            self.server_capabilities.position_encoding,
+            position_encoding,
+        )
+
+        if (user_handler := self.fm.features.get(types.INITIALIZE)) is not None:
+            yield user_handler, (params,), None
+
+        # Now that the user has had the opportunity to setup additional features, calculate
+        # the server's capabilities
+        self.server_capabilities = ServerCapabilitiesBuilder(
+            self.client_capabilities,
+            set({**self.fm.features, **self.fm.builtin_features}.keys()),
+            self.fm.feature_options,
+            list(self.fm.commands.keys()),
+            text_document_sync_kind,
+            notebook_document_sync,
+            position_encoding,
+        ).build()
+        logger.debug(
+            "Server capabilities: %s",
+            json.dumps(self.server_capabilities, default=self._serialize_message),
         )
 
         return types.InitializeResult(
