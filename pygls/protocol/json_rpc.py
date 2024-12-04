@@ -17,29 +17,24 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import enum
 import inspect
 import json
 import logging
 import sys
 import traceback
+import typing
 import uuid
 from concurrent.futures import Future
 from functools import partial
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Optional,
-    Type,
-    Union,
-)
+from typing import Any, Callable, Type, Union
 
 import attrs
 from cattrs.errors import ClassValidationError
 from lsprotocol.types import (
     CANCEL_REQUEST,
     EXIT,
-    WORKSPACE_EXECUTE_COMMAND,
     ResponseError,
     ResponseErrorMessage,
 )
@@ -55,14 +50,22 @@ from pygls.exceptions import (
 )
 from pygls.feature_manager import FeatureManager, is_thread_function
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
+    from collections.abc import Generator
+
     from cattrs import Converter
 
     from pygls.io_ import AsyncWriter, Writer
     from pygls.server import JsonRPCServer
 
+    MessageHandler = Union[Callable[[Any], Any],]
+    MessageCallback = Callable[[Future[Any]], None]
 
 logger = logging.getLogger(__name__)
+
+# cattrs needs access to this type definition so we cannot include it in the
+# TYPE_CHECKING block above
+MsgId = Union[str | int]
 
 
 @attrs.define
@@ -82,7 +85,7 @@ class JsonRPCRequestMessage:
     Used as a fallback for unknown types.
     """
 
-    id: Union[int, str]
+    id: MsgId
     method: str
     jsonrpc: str
     params: Any
@@ -94,7 +97,7 @@ class JsonRPCResponseMessage:
     Used as a fallback for unknown types.
     """
 
-    id: Union[int, str]
+    id: MsgId
     jsonrpc: str
     result: Any
 
@@ -119,8 +122,11 @@ class JsonRPCProtocol:
         self._shutdown = False
 
         # Book keeping for in-flight requests
-        self._request_futures: dict[str, Future[Any]] = {}
-        self._result_types: dict[str, Any] = {}
+        self._ctx_msg_id: contextvars.ContextVar[MsgId | None] = contextvars.ContextVar(
+            "msg_id", default=None
+        )
+        self._request_futures: dict[MsgId, Future[Any]] = {}
+        self._result_types: dict[MsgId, Any] = {}
 
         self.fm = FeatureManager(server, converter)
         self.writer: AsyncWriter | Writer | None = None
@@ -129,50 +135,134 @@ class JsonRPCProtocol:
     def __call__(self):
         return self
 
-    def _execute_notification(self, handler, *params):
-        """Execute the given notification message handler."""
+    @property
+    def msg_id(self) -> MsgId | None:
+        """Returns the id of the current context (if it exists)."""
+        ctx = contextvars.copy_context()
+        return ctx.get(self._ctx_msg_id)
+
+    def _execute_handler(
+        self,
+        msg_id: MsgId,
+        handler: MessageHandler,
+        callback: MessageCallback,
+        args: tuple[Any, ...] | None = None,
+        kwargs: dict[str, Any] | None = None,
+    ):
+        """Execute the given message handler.
+
+        Parameters
+        ----------
+        msg_id
+           The id of the message being handled
+
+        handler
+           The request handler to call
+
+        callback
+           An optional callback function to call upon completion of the handler
+
+        args
+           Positional arguments to pass to the handler
+
+        kwargs
+           Keyword arguments to pass to the handler
+        """
+
+        args = args or tuple()
+        kwargs = kwargs or {}
+
         if asyncio.iscoroutinefunction(handler):
-            future = asyncio.ensure_future(handler(*params))
-            future.add_done_callback(self._execute_notification_callback)
+            future = asyncio.ensure_future(handler(*args, **kwargs))
+            self._request_futures[msg_id] = future
+            future.add_done_callback(callback)
 
         elif is_thread_function(handler):
-            future = self._server.thread_pool.submit(handler, *params)
-            future.add_done_callback(self._execute_notification_callback)
+            future = self._server.thread_pool.submit(handler, *args, **kwargs)
+            self._request_futures[msg_id] = future
+            future.add_done_callback(callback)
 
-        else:
-            handler(*params)
+        elif inspect.isgeneratorfunction(handler):
+            future: Future[Any] = Future()
+            self._request_futures[msg_id] = future
+            future.add_done_callback(callback)
 
-    def _execute_notification_callback(self, future):
-        """Callback used for async/threaded notification message handler."""
-        if future.exception():
             try:
-                raise future.exception()
-            except Exception:
-                error = JsonRpcInternalError.of(sys.exc_info())
-                logger.exception('Exception occurred in notification: "%s"', error)
+                self._run_generator(
+                    future=None, gen=handler(*args, **kwargs), result_future=future
+                )
+            except Exception as exc:
+                future.set_exception(exc)
 
-            # Revisit. Client does not support response with msg_id = None
-            # https://stackoverflow.com/questions/31091376/json-rpc-2-0-allow-notifications-to-have-an-error-response
-            # self._send_response(None, error=error)
-
-    def _execute_request(self, msg_id, handler, params):
-        """Execute the given request message handler."""
-
-        if asyncio.iscoroutinefunction(handler):
-            future = asyncio.ensure_future(handler(params))
-            self._request_futures[msg_id] = future
-            future.add_done_callback(partial(self._execute_request_callback, msg_id))
-
-        elif is_thread_function(handler):
-            future = self._server.thread_pool.submit(handler, params)
-            self._request_futures[msg_id] = future
-
-            future.add_done_callback(partial(self._execute_request_callback, msg_id))
         else:
-            self._send_response(msg_id, handler(params))
+            # While a future is not necessary for a synchronous function, it allows us to use a single
+            # pattern across all handler types
+            future: Future[Any] = Future()
+            future.add_done_callback(callback)
 
-    def _execute_request_callback(self, msg_id, future):
-        """Callback used for async/threaded request message handler."""
+            try:
+                result = handler(*args, **kwargs)
+                future.set_result(result)
+            except Exception as exc:
+                future.set_exception(exc)
+
+    def _run_generator(
+        self,
+        future: Future[Any] | None,
+        *,
+        gen: Generator[Any, Any, Any],
+        result_future: Future[Any],
+    ):
+        """Run the next portion of the given generator.
+
+        Generator handlers are designed to ``yield`` to other handlers that are executed
+        separately before their results are sent back into the generator allowing
+        execution to continue.
+
+        Generator handlers are primarily used in the implementation of pygls' builtin
+        feature handlers.
+
+        Parameters
+        ----------
+        future
+           The future that contains the result of the previously executed handler, if any
+
+        gen
+           The generator to run
+
+        result_future
+           The future to send the final result to once the generator stops.
+        """
+
+        if result_future.cancelled():
+            return
+
+        try:
+            value = future.result() if future is not None else None
+            handler, args, kwargs = gen.send(value)
+
+            self._execute_handler(
+                str(uuid.uuid4()),
+                handler,
+                args=args,
+                kwargs=kwargs,
+                callback=partial(
+                    self._run_generator, gen=gen, result_future=result_future
+                ),
+            )
+        except StopIteration as result:
+            result_future.set_result(result.value)
+
+        except Exception as exc:
+            result_future.set_exception(exc)
+
+    def _send_handler_result(self, future: Future[Any], *, msg_id: str | int):
+        """Callback function that sends the result of the given future to the client.
+
+        Used to respond to request messages.
+        """
+        self._request_futures.pop(msg_id, None)
+
         try:
             if not future.cancelled():
                 self._send_response(msg_id, result=future.result())
@@ -183,11 +273,23 @@ class JsonRPCProtocol:
                         f'Request with id "{msg_id}" is canceled'
                     ).to_response_error(),
                 )
-            self._request_futures.pop(msg_id, None)
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info())
             logger.exception('Exception occurred for message "%s": %s', msg_id, error)
             self._send_response(msg_id, error=error.to_response_error())
+            self._server._report_server_error(error, FeatureRequestError)
+
+    def _check_handler_result(self, future: Future[Any]):
+        """Check the result of the future to see if an error occurred.
+
+        Used when handling notification messages
+        """
+        if future.exception():
+            try:
+                raise future.exception()
+            except Exception:
+                error = JsonRpcInternalError.of(sys.exc_info())
+                self._server._report_server_error(error, FeatureNotificationError)
 
     def _get_handler(self, feature_name):
         """Returns builtin or used defined feature by name if exists."""
@@ -212,7 +314,7 @@ class JsonRPCProtocol:
         if future.cancel():
             logger.info('Cancelled request with id "%s"', msg_id)
 
-    def _handle_notification(self, method_name, params):
+    def _handle_notification(self, method_name: str, params: Any):
         """Handles a notification from the client."""
         if method_name == CANCEL_REQUEST:
             self._handle_cancel_notification(params.id)
@@ -220,7 +322,12 @@ class JsonRPCProtocol:
 
         try:
             handler = self._get_handler(method_name)
-            self._execute_notification(handler, params)
+            self._execute_handler(
+                msg_id=str(uuid.uuid4()),
+                handler=handler,
+                args=(params,),
+                callback=self._check_handler_result,
+            )
         except JsonRpcMethodNotFound:
             logger.warning("Ignoring notification for unknown method %r", method_name)
         except Exception as error:
@@ -232,16 +339,19 @@ class JsonRPCProtocol:
             )
             self._server._report_server_error(error, FeatureNotificationError)
 
-    def _handle_request(self, msg_id, method_name, params):
+    def _handle_request(self, msg_id: MsgId, method_name: str, params: Any):
         """Handles a request from the client."""
         try:
             handler = self._get_handler(method_name)
 
-            # workspace/executeCommand is a special case
-            if method_name == WORKSPACE_EXECUTE_COMMAND:
-                handler(params, msg_id)
-            else:
-                self._execute_request(msg_id, handler, params)
+            # Set the request id within the current context.
+            self._ctx_msg_id.set(msg_id)
+            self._execute_handler(
+                msg_id=msg_id,
+                handler=handler,
+                args=(params,),
+                callback=partial(self._send_handler_result, msg_id=msg_id),
+            )
 
         except JsonRpcMethodNotFound as error:
             logger.warning(
@@ -344,20 +454,25 @@ class JsonRPCProtocol:
             logger.warning("Server shutting down. No more requests!")
             return
 
+        # Run each handler within its own context.
+        ctx = contextvars.copy_context()
+
         if hasattr(message, "method"):
             if hasattr(message, "id"):
-                logger.debug("Request message received.")
-                self._handle_request(message.id, message.method, message.params)
+                logger.debug("Request %r received", message.method)
+                ctx.run(
+                    self._handle_request, message.id, message.method, message.params
+                )
             else:
-                logger.debug("Notification message received.")
-                self._handle_notification(message.method, message.params)
+                logger.debug("Notification %r received", message.method)
+                ctx.run(self._handle_notification, message.method, message.params)
         else:
             if hasattr(message, "error"):
                 logger.debug("Error message received.")
-                self._handle_response(message.id, None, message.error)
+                ctx.run(self._handle_response, message.id, None, message.error)
             else:
                 logger.debug("Response message received.")
-                self._handle_response(message.id, message.result)
+                ctx.run(self._handle_response, message.id, message.result)
 
     def _send_data(self, data):
         """Sends data to the client."""
@@ -430,11 +545,11 @@ class JsonRPCProtocol:
         self.writer = writer
         self._include_headers = include_headers
 
-    def get_message_type(self, method: str) -> Optional[Type]:
+    def get_message_type(self, method: str) -> Type[Any] | None:
         """Return the type definition of the message associated with the given method."""
         return None
 
-    def get_result_type(self, method: str) -> Optional[Type]:
+    def get_result_type(self, method: str) -> Type[Any] | None:
         """Return the type definition of the result associated with the given method."""
         return None
 

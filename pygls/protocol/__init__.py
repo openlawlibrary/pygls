@@ -1,7 +1,6 @@
 import json
-from typing import Any
-
 from collections import namedtuple
+from typing import Any
 
 from lsprotocol import converters
 
@@ -12,7 +11,6 @@ from pygls.protocol.json_rpc import (
     JsonRPCResponseMessage,
 )
 from pygls.protocol.language_server import LanguageServerProtocol, lsp_method
-from pygls.protocol.lsp_meta import LSPMeta, call_user_feature
 
 
 def _dict_to_object(d: Any):
@@ -68,8 +66,6 @@ __all__ = (
     "JsonRPCRequestMessage",
     "JsonRPCResponseMessage",
     "JsonRPCNotification",
-    "LSPMeta",
-    "call_user_feature",
     "_dict_to_object",
     "_params_field_structure_hook",
     "_result_field_structure_hook",

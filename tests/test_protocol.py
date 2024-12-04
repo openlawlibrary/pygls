@@ -16,22 +16,17 @@
 ############################################################################
 import io
 import json
-from pathlib import Path
 from typing import Optional
-from unittest.mock import Mock
 
 import attrs
 import pytest
 from lsprotocol.types import (
     PROGRESS,
     TEXT_DOCUMENT_COMPLETION,
-    ClientCapabilities,
     CompletionItem,
     CompletionItemKind,
     CompletionParams,
     CompletionResponse,
-    InitializeParams,
-    InitializeResult,
     Position,
     ProgressParams,
     ShutdownResponse,
@@ -521,29 +516,3 @@ def test_serialize_request_message(method, params, expected):
     actual = json.loads(buffer.getvalue())
 
     assert actual == expected
-
-
-def test_initialize_should_return_server_capabilities(client_server):
-    _, server = client_server
-    params = InitializeParams(
-        process_id=1234,
-        root_uri=Path(__file__).parent.as_uri(),
-        capabilities=ClientCapabilities(),
-    )
-
-    server_capabilities = server.protocol.lsp_initialize(params)
-
-    assert isinstance(server_capabilities, InitializeResult)
-
-
-def test_ignore_unknown_notification(client_server):
-    _, server = client_server
-
-    fn = server.protocol._execute_notification
-    server.protocol._execute_notification = Mock()
-
-    server.protocol._handle_notification("random/notification", None)
-    assert not server.protocol._execute_notification.called
-
-    # Remove mock
-    server.protocol._execute_notification = fn
