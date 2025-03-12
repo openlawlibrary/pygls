@@ -29,7 +29,7 @@ class JsonRpcException(Exception):
         message = message or getattr(self.__class__, "MESSAGE")
         super().__init__(message)
         self.message = message
-        self.code = code or getattr(self.__class__, "CODE")
+        self.code = code or getattr(self.__class__, "CODE", -32603)
         self.data = data
 
     def __eq__(self, other):
