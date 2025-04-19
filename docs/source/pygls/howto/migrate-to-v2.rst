@@ -1,7 +1,6 @@
 How To Migrate to v2.0
 ======================
 
-
 .. note::
 
    This guide is still a draft, some details may change
@@ -404,6 +403,12 @@ Removed ``loop`` argument from ``pygls.server.JsonRPCServer``
 
 Servers and clients in pygls v2 now both use the high level asyncio API, removing the need for an explicit ``loop`` argument to be passed in.
 If you need control over the event loop used by pygls you can use functions like :external:py:func:`asyncio.set_event_loop` before starting the server/client.
+
+Removed ``pygls.protocol.lsp_meta`` module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The implementation of pygls' built-in handlers has changed in v2 and no longer relies on the ``LSPMeta`` metaclass and associated ``call_user_feature`` function.
+Therefore both items and the containing module has been removed.
 
 Removed ``multiprocessing.pool.ThreadPool``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
