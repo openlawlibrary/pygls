@@ -21,7 +21,7 @@ from __future__ import annotations
 import asyncio
 import pathlib
 import sys
-from typing import Optional
+from typing import Any, Optional
 
 import pytest
 from lsprotocol import converters, types
@@ -183,7 +183,9 @@ def get_client_for_cpython_server(transport, uri_fixture):
     """Return a client configured to communicate with a server running under cpython."""
 
     async def fn(
-        server_name: str, capabilities: Optional[types.ClientCapabilities] = None
+        server_name: str,
+        capabilities: Optional[types.ClientCapabilities] = None,
+        initialization_options: Optional[Any] = None,
     ):
         client = LanguageClient("pygls-test-suite", "v1")
 
@@ -218,6 +220,7 @@ def get_client_for_cpython_server(transport, uri_fixture):
             types.InitializeParams(
                 capabilities=capabilities or types.ClientCapabilities(),
                 root_uri=uri_fixture(""),
+                initialization_options=initialization_options,
             )
         )
         assert response is not None
@@ -243,7 +246,9 @@ def get_client_for_pyodide_server(transport, uri_fixture):
         pytest.skip("only STDIO is supported on pyodide")
 
     async def fn(
-        server_name: str, capabilities: Optional[types.ClientCapabilities] = None
+        server_name: str,
+        capabilities: Optional[types.ClientCapabilities] = None,
+        initialization_options: Optional[Any] = None,
     ):
         client = LanguageClient("pygls-test-suite", "v1")
 
@@ -256,6 +261,7 @@ def get_client_for_pyodide_server(transport, uri_fixture):
             types.InitializeParams(
                 capabilities=capabilities or types.ClientCapabilities(),
                 root_uri=uri_fixture(""),
+                initialization_options=initialization_options,
             )
         )
         assert response is not None
