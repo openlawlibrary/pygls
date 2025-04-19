@@ -186,6 +186,7 @@ def get_client_for_cpython_server(transport, uri_fixture):
         server_name: str,
         capabilities: Optional[types.ClientCapabilities] = None,
         initialization_options: Optional[Any] = None,
+        auto_shutdown: bool = True,
     ):
         client = LanguageClient("pygls-test-suite", "v1")
 
@@ -226,8 +227,9 @@ def get_client_for_cpython_server(transport, uri_fixture):
         assert response is not None
         yield client, response
 
-        await client.shutdown_async(None)
-        client.exit(None)
+        if auto_shutdown:
+            await client.shutdown_async(None)
+            client.exit(None)
 
         await client.stop()
         if server is not None and server.returncode is None:
@@ -249,6 +251,7 @@ def get_client_for_pyodide_server(transport, uri_fixture):
         server_name: str,
         capabilities: Optional[types.ClientCapabilities] = None,
         initialization_options: Optional[Any] = None,
+        auto_shutdown: bool = True,
     ):
         client = LanguageClient("pygls-test-suite", "v1")
 
@@ -267,8 +270,9 @@ def get_client_for_pyodide_server(transport, uri_fixture):
         assert response is not None
         yield client, response
 
-        await client.shutdown_async(None)
-        client.exit(None)
+        if auto_shutdown:
+            await client.shutdown_async(None)
+            client.exit(None)
 
         await client.stop()
 
