@@ -61,7 +61,9 @@ class ServerCapabilitiesBuilder:
         commands: List[str],
         text_document_sync_kind: types.TextDocumentSyncKind,
         notebook_document_sync: Optional[types.NotebookDocumentSyncOptions] = None,
-        position_encoding: types.PositionEncodingKind = types.PositionEncodingKind.Utf16,
+        position_encoding: Union[
+            types.PositionEncodingKind, str
+        ] = types.PositionEncodingKind.Utf16,
     ):
         self.client_capabilities = client_capabilities
         self.features = features
@@ -81,8 +83,10 @@ class ServerCapabilitiesBuilder:
     @classmethod
     def choose_position_encoding(
         cls, client_capabilities: types.ClientCapabilities
-    ) -> types.PositionEncodingKind:
-        server_encoding = types.PositionEncodingKind.Utf16
+    ) -> Union[types.PositionEncodingKind, str]:
+        server_encoding: Union[types.PositionEncodingKind, str] = (
+            types.PositionEncodingKind.Utf16
+        )
 
         if (general := client_capabilities.general) is None:
             return server_encoding

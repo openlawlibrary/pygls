@@ -168,7 +168,7 @@ class JsonRPCProtocol:
         kwargs
            Keyword arguments to pass to the handler
         """
-
+        future: Future[Any]
         args = args or tuple()
         kwargs = kwargs or {}
 
@@ -183,7 +183,7 @@ class JsonRPCProtocol:
             future.add_done_callback(callback)
 
         elif inspect.isgeneratorfunction(handler):
-            future: Future[Any] = Future()
+            future = Future()
             self._request_futures[msg_id] = future
             future.add_done_callback(callback)
 
@@ -197,7 +197,7 @@ class JsonRPCProtocol:
         else:
             # While a future is not necessary for a synchronous function, it allows us to use a single
             # pattern across all handler types
-            future: Future[Any] = Future()
+            future = Future()
             future.add_done_callback(callback)
 
             try:
@@ -284,9 +284,9 @@ class JsonRPCProtocol:
 
         Used when handling notification messages
         """
-        if future.exception():
+        if (exc := future.exception()) is not None:
             try:
-                raise future.exception()
+                raise exc
             except Exception:
                 error = JsonRpcInternalError.of(sys.exc_info())
                 self._server._report_server_error(error, FeatureNotificationError)

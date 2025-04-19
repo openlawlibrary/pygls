@@ -110,7 +110,7 @@ class LanguageServerProtocol(JsonRPCProtocol):
         return types.METHOD_TO_TYPES.get(method, (None, None))[1]
 
     @lsp_method(types.EXIT)
-    def lsp_exit(self, *args) -> None:
+    def lsp_exit(self, *args) -> Generator[Any, Any, None]:
         """Stops the server process."""
 
         # Ensure that the user handler is called first
@@ -195,7 +195,7 @@ class LanguageServerProtocol(JsonRPCProtocol):
             yield user_handler, args, None
 
     @lsp_method(types.SHUTDOWN)
-    def lsp_shutdown(self, *args) -> None:
+    def lsp_shutdown(self, *args) -> Generator[Any, Any, None]:
         """Request from client which asks server to shutdown."""
 
         if (user_handler := self.fm.features.get(types.SHUTDOWN)) is not None:
@@ -281,7 +281,7 @@ class LanguageServerProtocol(JsonRPCProtocol):
             yield user_handler, (params,), None
 
     @lsp_method(types.SET_TRACE)
-    def lsp_set_trace(self, params: types.SetTraceParams) -> None:
+    def lsp_set_trace(self, params: types.SetTraceParams) -> Generator[Any, Any, None]:
         """Changes server trace value."""
         self.trace = params.value
 
