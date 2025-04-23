@@ -46,9 +46,9 @@ class JsonRPCClient:
         protocol_cls: Type[JsonRPCProtocol] = JsonRPCProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
     ):
-        # Strictly speaking `JsonRPCProtocol` wants a `JsonRPCServer`, not a
-        # `JsonRPCClient`. However there similar enough for our purposes, which is
-        # that this client will mostly be used in testing contexts.
+        # Strictly speaking, `JsonRPCProtocol` wants a `JsonRPCServer`, not a
+        # `JsonRPCClient`. However they're similar enough for our purposes, which
+        # is that this client will mostly be used in testing contexts.
         self.protocol = protocol_cls(self, converter_factory())  # type: ignore
 
         self._server: Optional[asyncio.subprocess.Process] = None
