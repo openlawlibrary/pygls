@@ -34,7 +34,7 @@ if typing.TYPE_CHECKING:
     from pygls.lsp.client import BaseLanguageClient
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function", loop_scope="function")
 async def threaded_handlers(get_client_for):
     async for result in get_client_for("threaded_handlers.py"):
         client, _ = result
@@ -55,7 +55,7 @@ def record_time(result, *, timedict, key):
     return result
 
 
-@pytest.mark.asyncio(scope="function")
+@pytest.mark.asyncio(loop_scope="function")
 async def test_countdown_blocking(
     threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
@@ -123,7 +123,7 @@ async def test_countdown_blocking(
     assert times["command"] < times["completion"]
 
 
-@pytest.mark.asyncio(scope="function")
+@pytest.mark.asyncio(loop_scope="function")
 async def test_countdown_threaded(
     threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
@@ -201,7 +201,7 @@ async def test_countdown_threaded(
     assert times["completion"] < times["command"]
 
 
-@pytest.mark.asyncio(scope="function")
+@pytest.mark.asyncio(loop_scope="function")
 async def test_countdown_error(
     threaded_handlers: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
