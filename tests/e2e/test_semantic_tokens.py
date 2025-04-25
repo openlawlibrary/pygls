@@ -28,7 +28,7 @@ if typing.TYPE_CHECKING:
     from pygls.lsp.client import BaseLanguageClient
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def semantic_tokens(get_client_for):
     async for result in get_client_for("semantic_tokens.py"):
         yield result
@@ -70,7 +70,7 @@ async def semantic_tokens(get_client_for):
         ),
     ],
 )
-@pytest.mark.asyncio(scope="module")
+@pytest.mark.asyncio(loop_scope="module")
 async def test_semantic_tokens_full(
     semantic_tokens: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,

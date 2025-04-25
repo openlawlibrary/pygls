@@ -29,7 +29,7 @@ if typing.TYPE_CHECKING:
     from pygls.lsp.client import BaseLanguageClient
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def hover(get_client_for):
     async for result in get_client_for("hover.py"):
         yield result
@@ -71,7 +71,7 @@ async def hover(get_client_for):
         ),
     ],
 )
-@pytest.mark.asyncio(scope="module")
+@pytest.mark.asyncio(loop_scope="module")
 async def test_hover(
     hover: Tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,

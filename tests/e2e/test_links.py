@@ -28,7 +28,7 @@ if typing.TYPE_CHECKING:
     from pygls.lsp.client import BaseLanguageClient
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def links(get_client_for):
     async for result in get_client_for("links.py"):
         yield result
@@ -45,7 +45,7 @@ def range_from_str(range_: str) -> types.Range:
     )
 
 
-@pytest.mark.asyncio(scope="module")
+@pytest.mark.asyncio(loop_scope="module")
 async def test_document_link(
     links: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
@@ -78,7 +78,7 @@ async def test_document_link(
     ]
 
 
-@pytest.mark.asyncio(scope="module")
+@pytest.mark.asyncio(loop_scope="module")
 async def test_document_link_resolve(
     links: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
