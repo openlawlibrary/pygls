@@ -36,7 +36,7 @@ You will only need to have installed Pygls on your system. Eg; `pip install pygl
       \ 'name': 'hello-world-pygls-example',
       \ 'cmd': {server_info->['python', 'path-to-hello-world-example/main.py']},
       \ 'allowlist': ['*']
-      \ }})
+      \ })
   augroup END
   ```
 </details>
