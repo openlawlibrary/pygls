@@ -55,13 +55,21 @@ def get_help_attrs(f):
     )
 
 
-def has_ls_param_or_annotation(f, annotation):
-    """Returns true if callable has first parameter named `ls` or type of
-    annotation"""
+def has_ls_param_or_annotation(f, actual_type):
+    """Returns true if the given callable's first parameter is
+
+    - named `ls`
+    - has a type annotation compatible with the given type
+    """
     try:
         sig = inspect.signature(f)
         first_p = next(itertools.islice(sig.parameters.values(), 0, 1))
-        return first_p.name == PARAM_LS or get_type_hints(f)[first_p.name] == annotation
+
+        if first_p.name == PARAM_LS:
+            return True
+
+        expected_type = get_type_hints(f)[first_p.name]
+        return issubclass(actual_type, expected_type)
     except Exception:
         return False
 

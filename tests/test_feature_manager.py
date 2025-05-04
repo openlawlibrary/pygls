@@ -31,25 +31,46 @@ from pygls.feature_manager import (
     has_ls_param_or_annotation,
     wrap_with_server,
 )
+from pygls.lsp.client import BaseLanguageClient, LanguageClient
+from pygls.lsp.server import BaseLanguageServer, LanguageServer
 
 
-class Temp:
-    pass
+def f1(ls, a, b, c): ...
+def f2(server: LanguageServer, a, b, c): ...
+def f3(server: "LanguageServer", a, b, c): ...
+def f4(server: BaseLanguageServer, a, b, c): ...
+def f5(server: "BaseLanguageServer", a, b, c): ...
+def f6(client: LanguageClient, a, b, c): ...
+def f7(client: "LanguageClient", a, b, c): ...
+def f8(client: BaseLanguageClient, a, b, c): ...
+def f9(client: "BaseLanguageClient", a, b, c): ...
 
 
-def test_has_ls_param_or_annotation():
-    def f1(ls, a, b, c):
-        pass
-
-    def f2(temp: Temp, a, b, c):
-        pass
-
-    def f3(temp: "Temp", a, b, c):
-        pass
-
-    assert has_ls_param_or_annotation(f1, None)
-    assert has_ls_param_or_annotation(f2, Temp)
-    assert has_ls_param_or_annotation(f3, Temp)
+@pytest.mark.parametrize(
+    "fn,cls,result",
+    [
+        (f1, None, True),
+        (f2, LanguageServer, True),
+        (f2, BaseLanguageServer, False),
+        (f3, LanguageServer, True),
+        (f3, BaseLanguageServer, False),
+        (f4, BaseLanguageServer, True),
+        (f4, LanguageServer, True),
+        (f5, BaseLanguageServer, True),
+        (f5, LanguageServer, True),
+        (f6, LanguageClient, True),
+        (f6, BaseLanguageClient, False),
+        (f7, LanguageClient, True),
+        (f7, BaseLanguageClient, False),
+        (f8, BaseLanguageClient, True),
+        (f8, LanguageClient, True),
+        (f9, BaseLanguageClient, True),
+        (f9, LanguageClient, True),
+    ],
+)
+def test_has_ls_param_or_annotation(fn, cls, result: bool):
+    """Ensure that the ``has_ls_param_or_annotation`` works as expected"""
+    assert has_ls_param_or_annotation(fn, cls) == result
 
 
 def test_register_command_validation_error(feature_manager):
