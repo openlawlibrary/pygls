@@ -22,10 +22,10 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         protocol_cls: Type[LanguageServerProtocol] = LanguageServerProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
-        loop=None,
+        max_workers: Optional[int] = None,
         **kwargs,
     ):
-        super().__init__(protocol_cls, converter_factory, loop, **kwargs)
+        super().__init__(protocol_cls, converter_factory, max_workers, **kwargs)
 
     def client_register_capability(
         self,
