@@ -20,9 +20,7 @@ except ImportError:
 @pytest.mark.asyncio
 @pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 async def test_tcp_connection_lost():
-    loop = asyncio.new_event_loop()
-
-    server = LanguageServer("pygls-test", "v1", loop=loop)
+    server = LanguageServer("pygls-test", "v1")
 
     server.protocol.set_writer = Mock()
 
