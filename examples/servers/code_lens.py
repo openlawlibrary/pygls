@@ -32,6 +32,7 @@ computation until it is actually necessary.
 import logging
 import re
 
+import attrs
 from lsprotocol import types
 
 from pygls.cli import start_server
@@ -77,6 +78,23 @@ def code_lens(params: types.CodeLensParams):
     return items
 
 
+@attrs.define
+class EvaluateSumArgs:
+    """Represents the arguments to pass to the ``codeLens.evaluateSum`` command"""
+
+    uri: str
+    """The uri of the document to edit"""
+
+    left: int
+    """The left argument to ``+``"""
+
+    right: int
+    """The right argument to ``+``"""
+
+    line: int
+    """The line number to edit"""
+
+
 @server.feature(types.CODE_LENS_RESOLVE)
 def code_lens_resolve(ls: LanguageServer, item: types.CodeLens):
     """Resolve the ``command`` field of the given code lens.
@@ -90,7 +108,7 @@ def code_lens_resolve(ls: LanguageServer, item: types.CodeLens):
     right = item.data["right"]
     uri = item.data["uri"]
 
-    args = dict(
+    args = EvaluateSumArgs(
         uri=uri,
         left=left,
         right=right,
@@ -106,26 +124,25 @@ def code_lens_resolve(ls: LanguageServer, item: types.CodeLens):
 
 
 @server.command("codeLens.evaluateSum")
-def evaluate_sum(ls: LanguageServer, args):
+def evaluate_sum(ls: LanguageServer, args: EvaluateSumArgs):
     logging.info("arguments: %s", args)
 
-    arguments = args[0]
-    document = ls.workspace.get_text_document(arguments["uri"])
-    line = document.lines[arguments["line"]]
+    document = ls.workspace.get_text_document(args.uri)
+    line = document.lines[args.line]
 
     # Compute the edit that will update the document with the result.
-    answer = arguments["left"] + arguments["right"]
+    answer = args.left + args.right
     edit = types.TextDocumentEdit(
         text_document=types.OptionalVersionedTextDocumentIdentifier(
-            uri=arguments["uri"],
+            uri=args.uri,
             version=document.version,
         ),
         edits=[
             types.TextEdit(
                 new_text=f"{line.strip()} {answer}\n",
                 range=types.Range(
-                    start=types.Position(line=arguments["line"], character=0),
-                    end=types.Position(line=arguments["line"] + 1, character=0),
+                    start=types.Position(line=args.line, character=0),
+                    end=types.Position(line=args.line + 1, character=0),
                 ),
             )
         ],
