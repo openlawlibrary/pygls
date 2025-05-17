@@ -52,6 +52,106 @@ The following methods and functions have been deprecated for some time and have 
 ``Worspace.update_document``                        ``Workspace.update_text_document``
 ==================================================  ==============
 
+Server commands can now use type annotations
+--------------------------------------------
+
+*pygls* will now inspect a function's type annotations when handling ``workspace/executeCommand`` requests, automatically converting JSON values to ``attrs`` class instances, or responding with an error if appropriate.
+
+It is **not mandatory** to start using type annotations in your command definitions, but you may notice a difference in how *pygls* calls your server command methods.
+
+**Before**
+
+::
+
+   @server.command("codeLens.evaluateSum")
+   def evaluate_sum(ls: LanguageServer, args):
+       logging.info("arguments: %s", args)
+
+       arguments = args[0]
+       document = ls.workspace.get_text_document(arguments["uri"])
+       line = document.lines[arguments["line"]]
+
+       # Compute the edit that will update the document with the result.
+       answer = arguments["left"] + arguments["right"]
+       edit = types.TextDocumentEdit(
+           text_document=types.OptionalVersionedTextDocumentIdentifier(
+               uri=arguments["uri"],
+               version=document.version,
+           ),
+           edits=[
+               types.TextEdit(
+                   new_text=f"{line.strip()} {answer}\n",
+                   range=types.Range(
+                       start=types.Position(line=arguments["line"], character=0),
+                       end=types.Position(line=arguments["line"] + 1, character=0),
+                   ),
+               )
+           ],
+       )
+
+       # Apply the edit.
+       ls.workspace_apply_edit(
+           types.ApplyWorkspaceEditParams(
+               edit=types.WorkspaceEdit(document_changes=[edit]),
+           ),
+       )
+
+**After**
+
+::
+
+    @attrs.define
+    class EvaluateSumArgs:
+        """Represents the arguments to pass to the ``codeLens.evaluateSum`` command"""
+
+        uri: str
+        """The uri of the document to edit"""
+
+        left: int
+        """The left argument to ``+``"""
+
+        right: int
+        """The right argument to ``+``"""
+
+        line: int
+        """The line number to edit"""
+
+
+    @server.command("codeLens.evaluateSum")
+    def evaluate_sum(ls: LanguageServer, args: EvaluateSumArgs):
+        logging.info("arguments: %s", args)
+
+        document = ls.workspace.get_text_document(args.uri)
+        line = document.lines[args.line]
+
+        # Compute the edit that will update the document with the result.
+        answer = args.left + args.right
+        edit = types.TextDocumentEdit(
+            text_document=types.OptionalVersionedTextDocumentIdentifier(
+                uri=args.uri,
+                version=document.version,
+            ),
+            edits=[
+                types.TextEdit(
+                    new_text=f"{line.strip()} {answer}\n",
+                    range=types.Range(
+                        start=types.Position(line=args.line, character=0),
+                        end=types.Position(line=args.line + 1, character=0),
+                    ),
+                )
+            ],
+        )
+
+        # Apply the edit.
+        ls.workspace_apply_edit(
+            types.ApplyWorkspaceEditParams(
+                edit=types.WorkspaceEdit(document_changes=[edit]),
+            ),
+        )
+
+
+
+
 Renamed ``LanguageServer`` Methods
 ----------------------------------
 
