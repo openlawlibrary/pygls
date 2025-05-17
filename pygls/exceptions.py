@@ -17,6 +17,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import traceback
+from typing import Any
 from typing import Set
 from typing import Type
 from lsprotocol.types import ResponseError
@@ -24,6 +25,8 @@ from lsprotocol.types import ResponseError
 
 class JsonRpcException(Exception):
     """A class used as a base class for json rpc exceptions."""
+
+    MESSAGE = ""
 
     def __init__(self, message=None, code=None, data=None):
         message = message or getattr(self.__class__, "MESSAGE")
@@ -51,6 +54,15 @@ class JsonRpcException(Exception):
                 )
 
         return JsonRpcException(code=error.code, message=error.message, data=error.data)
+
+    @classmethod
+    def of(cls, exc: Any):
+        """Default ``of`` implementation that raises a ``JsonRpcException`` derived from
+        the given exception
+        """
+        return cls(
+            message=f"{cls.MESSAGE}: {exc}",
+        )
 
     @classmethod
     def supports_code(cls, code):
@@ -91,7 +103,7 @@ class JsonRpcMethodNotFound(JsonRpcException):
     MESSAGE = "Method Not Found"
 
     @classmethod
-    def of(cls, method):
+    def of(cls, method: str):
         return cls(message=cls.MESSAGE + ": " + method)
 
 

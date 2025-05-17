@@ -28,6 +28,8 @@ from itertools import zip_longest
 from lsprotocol import types
 
 from pygls.capabilities import ServerCapabilitiesBuilder
+from pygls.constants import PARAM_LS
+from pygls.exceptions import JsonRpcInvalidParams
 from pygls.protocol.json_rpc import JsonRPCProtocol
 from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
@@ -316,10 +318,19 @@ class LanguageServerProtocol(JsonRPCProtocol):
         self, params: types.ExecuteCommandParams
     ) -> Generator[Any, Any, Any]:
         """Executes commands with passed arguments and returns a value."""
-        cmd_handler = self.fm.commands[params.command]
 
-        # Call the user's command implementation
-        result = yield cmd_handler, (params.arguments,), None
+        if (handler := self.fm.commands.get(params.command, None)) is None:
+            raise JsonRpcInvalidParams.of(
+                ValueError(f"Command name {params.command!r} is not defined")
+            )
+
+        try:
+            args, kwargs = _prepare_command_arguments(handler, params, self._converter)
+        except Exception as exc:
+            raise JsonRpcInvalidParams.of(exc)
+
+        # Call the user's command handler.
+        result = yield handler, args, kwargs
         return result
 
     @lsp_method(types.WINDOW_WORK_DONE_PROGRESS_CANCEL)
@@ -337,3 +348,83 @@ class LanguageServerProtocol(JsonRPCProtocol):
             user_handler := self.fm.features.get(types.WINDOW_WORK_DONE_PROGRESS_CANCEL)
         ) is not None:
             yield user_handler, (params,), None
+
+
+def _prepare_command_arguments(
+    handler: Callable[..., Any],
+    params: types.ExecuteCommandParams,
+    converter: Converter,
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    """Prepare the arguments to pass to the command handler."""
+
+    if params.arguments is None:
+        return tuple(), {}
+
+    # Import this here to not introduce an import cycle at the module level
+    from pygls.lsp.server import LanguageServer
+
+    param_vals = iter(params.arguments)
+    param_defs, annotations = _get_handler_params_annotations(handler)
+
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
+
+    # param_defs is an OrderedDict so *in theory* at least we don't have to
+    # worry about argument order.
+    found_ls = False
+    for idx, (name, param) in enumerate(param_defs.items()):
+        ptype = annotations.get(name, None)
+
+        # We don't need to provide the injected server instance here.
+        # The @server.command decorator will have already handled it.
+        if idx == 0:
+            if name == PARAM_LS:
+                found_ls = True
+                continue
+
+            if (ptype is not None) and issubclass(ptype, LanguageServer):
+                found_ls = True
+                continue
+
+        if param.kind == inspect.Parameter.VAR_POSITIONAL:  # i.e. *args
+            # consume the remaining values
+            args.extend(param_vals)
+
+        else:
+            try:
+                value = converter.structure(next(param_vals), ptype)
+            except StopIteration as exc:
+                raise TypeError(
+                    f"Expected {len(param_defs) - found_ls} arguments, "
+                    f"got {len(params.arguments)}"
+                ) from exc
+
+            args.append(value)
+
+    # did we consume all the values?
+    if len(list(param_vals)) > 0:
+        raise TypeError(
+            f"Expected {len(param_defs) - found_ls} arguments, "
+            f"got {len(params.arguments)}"
+        )
+
+    return tuple(args), kwargs
+
+
+def _get_handler_params_annotations(handler: Callable[..., Any]):
+    """Return the parameters and corresponding type annotations for the given handler
+    function."""
+
+    try:
+        annotations = typing.get_type_hints(handler)
+        params = inspect.signature(handler).parameters
+    except TypeError:
+        # If the user's handler requests the language server instance, the real function
+        # is wrapped inside whatever `functools.partial()` returns.
+        if not hasattr(handler, "func"):
+            raise
+
+        annotations = typing.get_type_hints(handler.func)
+        params = inspect.signature(handler.func).parameters
+
+    return params, annotations
