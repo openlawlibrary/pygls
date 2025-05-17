@@ -273,9 +273,14 @@ class JsonRPCProtocol:
                         f'Request with id "{msg_id}" is canceled'
                     ).to_response_error(),
                 )
+        except JsonRpcException as exc:
+            logger.exception('Exception occurred for message "%s"', msg_id)
+            self._send_response(msg_id, error=exc.to_response_error())
+            self._server._report_server_error(exc, FeatureRequestError)
+
         except Exception:
             error = JsonRpcInternalError.of(sys.exc_info())
-            logger.exception('Exception occurred for message "%s": %s', msg_id, error)
+            logger.exception('Exception occurred for message "%s"', msg_id)
             self._send_response(msg_id, error=error.to_response_error())
             self._server._report_server_error(error, FeatureRequestError)
 
