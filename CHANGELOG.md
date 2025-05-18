@@ -1,6 +1,53 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0a3] - 2025-05-18
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a3
+
+### Bug Fixes
+
+- Add fallback JsonRpcException code for malformed server errors ([#520](https://github.com/openlawlibrary/pygls/issues/520))
+- Don't cancel the future handling the shutdown request
+- Use `issubclass` to check client/server instance
+- Error when passing max_workers
+- Don't wrap JsonRpcExceptions
+
+### Documentation
+
+- Tweak a comment in client.py ([#521](https://github.com/openlawlibrary/pygls/issues/521))
+- Update v2 migration guide
+- Remove a surplus `}` in examples/hello-world/README.md ([#523](https://github.com/openlawlibrary/pygls/issues/523))
+- Update code lens example command to use type annotations
+- Update v2 migration guide
+
+### Features
+
+- Yield to the user's initialize before calculating capabilities
+- Use type annotations to parse command arguments
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Fix migration guide link
+- Add missing version number
+- Fix mypy errors
+- Resolve `pytest-asyncio` deprecation warnings
+
+### Refactor
+
+- Unify message handler execution
+- Re-implement pygls' builtin handlers using generators
+
+### Testing
+
+- Add test ensuring we can register handlers during `initialize`
+- Ensure async user shutdown handlers are executed correctly
+
+### Build
+
+- V2.0.0a3
+
 ## [2.0.0a2] - 2024-11-04
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a2
 
