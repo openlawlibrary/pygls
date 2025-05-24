@@ -9,7 +9,7 @@ server = LanguageServer("example-server", "v0.1")
     types.CompletionOptions(trigger_characters=["."]),
 )
 def completions(params: types.CompletionParams):
-    document = server.workspace.get_document(params.text_document.uri)
+    document = server.workspace.get_text_document(params.text_document.uri)
     current_line = document.lines[params.position.line].strip()
 
     if not current_line.endswith("hello."):
