@@ -415,16 +415,14 @@ def _get_handler_params_annotations(handler: Callable[..., Any]):
     """Return the parameters and corresponding type annotations for the given handler
     function."""
 
-    try:
-        annotations = typing.get_type_hints(handler)
-        params = inspect.signature(handler).parameters
-    except TypeError:
-        # If the user's handler requests the language server instance, the real function
-        # is wrapped inside whatever `functools.partial()` returns.
-        if not hasattr(handler, "func"):
-            raise
-
+    # If the user's handler requests the language server instance, the real function
+    # is wrapped inside whatever `functools.partial()` returns.
+    if hasattr(handler, "func"):
         annotations = typing.get_type_hints(handler.func)
         params = inspect.signature(handler.func).parameters
+
+    else:
+        annotations = typing.get_type_hints(handler)
+        params = inspect.signature(handler).parameters
 
     return params, annotations

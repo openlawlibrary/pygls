@@ -88,6 +88,10 @@ def wrap_with_server(f, server):
         async def wrapped(*args, **kwargs):
             return await f(server, *args, **kwargs)
 
+        # Used by `workspace/executeCommand` to access the original function's
+        # signature. Mirrors how functools.partial works.
+        wrapped.func = f  # type: ignore[attr-defined]
+
     else:
         wrapped = functools.partial(f, server)
         if is_thread_function(f):

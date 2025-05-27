@@ -180,14 +180,23 @@ async def test_calculate_pow_invalid(
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize(
     "name",
-    ["calculate.pow", "calculate.pow.wrapped"],
+    [
+        "calculate.pow",
+        "calculate.pow.async",
+        "calculate.pow.wrapped",
+        "calculate.pow.async.wrapped",
+    ],
 )
 async def test_calculate_pow(
     commands: Tuple[LanguageClient, types.InitializeResult],
     name: str,
+    runtime: str,
 ):
     """Ensure that the example commands server can execute both the wrapped and
     unwrapped ``calculate.pow`` commands correctly."""
+
+    if runtime in {"pyodide"} and "async" in name:
+        pytest.skip("async handlers not supported in this runtime")
 
     client, initialize_result = commands
 

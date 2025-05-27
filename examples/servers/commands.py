@@ -18,6 +18,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 
@@ -64,18 +65,36 @@ def calculate_sum_wrapped(s: LanguageServer, *args):
 
 @server.command("calculate.pow")
 def calculate_pow(x: float, n):
-    """"""
+    """One typed, one un-typed argument"""
     logging.info("x: %r, n: %r", x, n)
     return x**n
 
 
 @server.command("calculate.pow.wrapped")
 def calculate_pow_wrapped(s: LanguageServer, x, n: int):
-    """Using *args to accept any number of arguments"""
+    """One typed, one un-typed argument"""
     s.window_log_message(
         types.LogMessageParams(type=types.MessageType.Info, message=f"{x=}, {n=}")
     )
     return calculate_pow(x, n)
+
+
+@server.command("calculate.pow.async")
+async def calculate_pow_async(x: float, n):
+    """One typed, one un-typed argument, async"""
+    await asyncio.sleep(1)
+
+    logging.info("x: %r, n: %r", x, n)
+    return x**n
+
+
+@server.command("calculate.pow.async.wrapped")
+async def calculate_pow_async_wrapped(s: LanguageServer, x, n: int):
+    """One typed, one un-typed argument, async"""
+    s.window_log_message(
+        types.LogMessageParams(type=types.MessageType.Info, message=f"{x=}, {n=}")
+    )
+    return await calculate_pow_async(x, n)
 
 
 @server.command("calculate.div")
