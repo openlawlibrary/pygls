@@ -227,7 +227,7 @@ async def test_calculate_div_invalid(
     assert name in provider.commands
 
     with pytest.raises(
-        JsonRpcInternalError, match="ZeroDivisionError: float division by zero"
+        JsonRpcInternalError, match="ZeroDivisionError:.*division by zero"
     ):
         await client.workspace_execute_command_async(
             types.ExecuteCommandParams(
