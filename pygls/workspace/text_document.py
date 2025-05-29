@@ -58,6 +58,7 @@ class TextDocument(object):
 
         self._local = local
         self._source = source
+        self._lines = None
 
         self._is_sync_kind_full = sync_kind == types.TextDocumentSyncKind.Full
         self._is_sync_kind_incremental = (
@@ -164,7 +165,10 @@ class TextDocument(object):
 
     @property
     def lines(self) -> List[str]:
-        return self.source.splitlines(True)
+        if self._lines is None:
+            self._lines = self.source.splitlines(True)
+
+        return self._lines
 
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
