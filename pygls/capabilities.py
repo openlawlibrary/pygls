@@ -15,10 +15,11 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
-from functools import reduce
 from typing import Any, Dict, List, Optional, Set, TypeVar, Union
 
 from lsprotocol import types
+
+from pygls.lsp._capabilities import get_capability
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -30,22 +31,6 @@ _SUPPORTED_ENCODINGS = frozenset(
         types.PositionEncodingKind.Utf32,
     ]
 )
-
-
-def get_capability(
-    client_capabilities: types.ClientCapabilities, field: str, default: Any = None
-) -> Any:
-    """Check if ClientCapabilities has some nested value without raising
-    AttributeError.
-    e.g. get_capability('text_document.synchronization.will_save')
-    """
-    try:
-        value = reduce(getattr, field.split("."), client_capabilities)
-    except AttributeError:
-        return default
-
-    # If we reach the desired leaf value but it's None, return the default.
-    return default if value is None else value
 
 
 class ServerCapabilitiesBuilder:

@@ -6,12 +6,16 @@ import inspect
 import pathlib
 import re
 import textwrap
+import typing
+from typing import Any
 from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Type
 
 from lsprotocol._hooks import _resolve_forward_references
+from lsprotocol.types import ClientCapabilities
+from lsprotocol.types import ServerCapabilities
 from lsprotocol.types import METHOD_TO_TYPES
 from lsprotocol.types import message_direction
 
@@ -133,7 +137,15 @@ def write_server_notification(
 def get_response_type(response: Type, imports: Set[Tuple[str, str]]) -> str:
     # Find the response type.
     result_field = [f for f in response.__attrs_attrs__ if f.name == "result"][0]
-    result = re.sub(r"<class '([\w.]+)'>", r"\1", str(result_field.type))
+    return rewrite_type(str(result_field.type), imports)
+
+
+def rewrite_type(type_name: str, imports: set[tuple[str, str]]) -> str:
+    result = re.sub(r"<class '([\w.]+)'>", r"\1", type_name)
+
+    # For some reason enum reprs are not namespaced...
+    result = re.sub(r"<enum '([\w.]+)'>", r"types.\1", result)
+
     result = re.sub(r"ForwardRef\('([\w.]+)'\)", r"lsprotocol.types.\1", result)
     result = result.replace("NoneType", "None")
 
@@ -370,6 +382,169 @@ def generate_server() -> str:
     return "\n".join(code)
 
 
+def write_overload(fn: str, args: list[tuple[str, str]], result: str) -> str:
+    """Write a typing overload for the given function"""
+
+    arguments = ", ".join([f"{pname}: {ptype}" for pname, ptype in args])
+
+    lines = [
+        "@typing.overload",
+        f"def {fn}({arguments}) -> {result}: ...",
+    ]
+
+    return "\n".join(lines)
+
+
+def write_capability_overloads_for(
+    base_type: str,
+    obj: type[Any],
+    overloads: list[str],
+    imports: set[tuple[str, str]],
+    processed_capabilities: set[str],
+    prefix: str = "",
+):
+    """Write the ``get_capability`` overloads for the given type
+
+    This function will iterate over all of the fields of ``obj`` and
+    append a corresponding overload to ``overloads``. It will then
+    recurse on each of the fields of ``obj`` so that we eventually emit
+    an overload for each nested field under the original ``base_type``.
+
+    Parameters
+    ----------
+    base_type
+       The type of the ``capabilities`` argument to ``get_capabilities``
+
+    obj
+       The type we are currently generating overloads for
+
+    overloads
+       The list of overloads written so far
+
+    imports
+       The set of import statements to add to the generated module
+
+    processed_capabilities
+       The set of capabilities we have processed so far, used to prevent
+       generating duplicated overloads.
+
+    prefix
+       The common prefix to assign to all fields of ``obj``
+       e.g. ``text_document.completion``
+    """
+
+    if not hasattr(obj, "__attrs_attrs__"):
+        return
+
+    base_args = [("capabilities", base_type)]
+
+    for field in obj.__attrs_attrs__:
+        if prefix:
+            field_name = f"{prefix}.{field.name}"
+        else:
+            field_name = field.name
+
+        result_types = []
+        result_type_names = {"T", "None"}
+
+        if "typing." in str(field.type):
+            inner_types = typing.get_args(field.type)
+            for field_type in inner_types:
+                result_types.append(field_type)
+                field_type_name = rewrite_type(str(field_type), imports)
+                result_type_names.add(field_type_name)
+        else:
+            field_type = field.type
+            result_types.append(field_type)
+            result_type_names.add(rewrite_type(str(field_type), imports))
+
+        args = [
+            *base_args,
+            ("field", f"Literal['{field_name}']"),
+            ("default", "T | None = None"),
+        ]
+
+        if field_name not in processed_capabilities:
+            processed_capabilities.add(field_name)
+            overloads.append(
+                write_overload(
+                    "get_capability",
+                    args,
+                    # sort values so that we get a consistent result
+                    " | ".join(sorted(result_type_names, key=len, reverse=True)),
+                )
+            )
+
+        for nested_type in result_types:
+            write_capability_overloads_for(
+                base_type,
+                nested_type,
+                overloads,
+                imports,
+                processed_capabilities,
+                prefix=field_name,
+            )
+
+
+def generate_capabilities() -> str:
+    imports = {
+        "typing",
+        ("functools", "reduce"),
+    }
+
+    typing_imports = {
+        ("typing", "Literal"),
+        ("typing", "TypeVar"),
+        ("lsprotocol", "types"),
+    }
+
+    overloads = []
+    write_capability_overloads_for(
+        "types.ClientCapabilities",
+        ClientCapabilities,
+        overloads,
+        typing_imports,
+        processed_capabilities=set(),
+        prefix="",
+    )
+    write_capability_overloads_for(
+        "types.ServerCapabilities",
+        ServerCapabilities,
+        overloads,
+        typing_imports,
+        processed_capabilities=set(),
+        prefix="",
+    )
+
+    code = [
+        LICENSE_HEADER,
+        "# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT",
+        "# flake8: noqa",
+        "from __future__ import annotations",
+        "",
+        write_imports(imports),
+        "",
+        write_typing_imports(typing_imports),
+        "",
+        "    T = TypeVar('T')",
+        "",
+        *overloads,
+        "@typing.overload",
+        "def get_capability(capabilities: Any, field: str, default: Any | None = None) -> Any | None: ...",
+        "def get_capability(capabilities, field, default = None):",
+        '    """Return the value of some nested capability with a fallback value to use in the',
+        '       case where it does not exist."""' "",
+        "    try:",
+        '        value = reduce(getattr, field.split("."), capabilities)',
+        "    except AttributeError:",
+        "        return default",
+        "",
+        "    return value if value is not None else default",
+        "",
+    ]
+    return "\n".join(code)
+
+
 def main():
     args = cli.parse_args()
 
@@ -383,6 +558,10 @@ def main():
     server = generate_server()
     output = args.output / "_base_server.py"
     output.write_text(server)
+
+    capabilities = generate_capabilities()
+    output = args.output / "_capabilities.py"
+    output.write_text(capabilities)
 
 
 if __name__ == "__main__":

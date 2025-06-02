@@ -91,7 +91,7 @@ line-length = 120
 
 [tool.black]
 line-length = 88
-extend-exclude = "pygls/lsp/_base_.*.py"
+extend-exclude = "pygls/lsp/_base_.*.py|pygls/lsp/_capabilities.py"
 
 [tool.coverage.run]
 parallel = true
