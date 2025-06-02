@@ -28,7 +28,7 @@ import typing
 import uuid
 from concurrent.futures import Future
 from functools import partial
-from typing import Any, Callable, Type, Union
+from typing import Any, Callable, Protocol, Type, Union, runtime_checkable
 
 import attrs
 from cattrs.errors import ClassValidationError
@@ -66,6 +66,38 @@ logger = logging.getLogger(__name__)
 # cattrs needs access to this type definition so we cannot include it in the
 # TYPE_CHECKING block above
 MsgId = Union[str, int]
+
+
+@runtime_checkable
+class RPCNotification(Protocol):
+    method: str
+    jsonrpc: str
+    params: Any
+
+
+@runtime_checkable
+class RPCRequest(Protocol):
+    id: MsgId
+    method: str
+    jsonrpc: str
+    params: Any
+
+
+@runtime_checkable
+class RPCResponse(Protocol):
+    id: MsgId
+    jsonrpc: str
+    result: Any
+
+
+@runtime_checkable
+class RPCError(Protocol):
+    id: MsgId
+    jsonrpc: str
+    error: Any
+
+
+RPCMessage = Union[RPCNotification, RPCResponse, RPCRequest, RPCError]
 
 
 @attrs.define
@@ -256,7 +288,7 @@ class JsonRPCProtocol:
         except Exception as exc:
             result_future.set_exception(exc)
 
-    def _send_handler_result(self, future: Future[Any], *, msg_id: str | int):
+    def _send_handler_result(self, future: Future[Any], *, msg_id: MsgId):
         """Callback function that sends the result of the given future to the client.
 
         Used to respond to request messages.
@@ -296,7 +328,7 @@ class JsonRPCProtocol:
                 error = JsonRpcInternalError.of(sys.exc_info())
                 self._server._report_server_error(error, FeatureNotificationError)
 
-    def _get_handler(self, feature_name):
+    def _get_handler(self, feature_name: str) -> MessageHandler:
         """Returns builtin or used defined feature by name if exists."""
 
         if (handler := self.fm.builtin_features.get(feature_name)) is not None:
@@ -307,7 +339,7 @@ class JsonRPCProtocol:
 
         raise JsonRpcMethodNotFound.of(feature_name)
 
-    def _handle_cancel_notification(self, msg_id):
+    def _handle_cancel_notification(self, msg_id: MsgId):
         """Handles a cancel notification from the client."""
         future = self._request_futures.pop(msg_id, None)
 
@@ -388,7 +420,12 @@ class JsonRPCProtocol:
             self._send_response(msg_id, None, err)
             self._server._report_server_error(error, FeatureRequestError)
 
-    def _handle_response(self, msg_id, result=None, error=None):
+    def _handle_response(
+        self,
+        msg_id: MsgId,
+        result: Any | None = None,
+        error: ResponseError | None = None,
+    ):
         """Handles a response from the client."""
         future = self._request_futures.pop(msg_id, None)
 
@@ -403,7 +440,7 @@ class JsonRPCProtocol:
             logger.debug('Received result for message "%s": %s', msg_id, result)
             future.set_result(result)
 
-    def _serialize_message(self, data):
+    def _serialize_message(self, data: Any) -> dict[str, Any]:
         """Function used to serialize data sent to the client."""
 
         if hasattr(data, "__attrs_attrs__"):
@@ -414,7 +451,7 @@ class JsonRPCProtocol:
 
         return data.__dict__
 
-    def structure_message(self, data):
+    def structure_message(self, data: dict[str, Any]):
         """Function used to deserialize data recevied from the client."""
 
         if "jsonrpc" not in data:
@@ -448,7 +485,7 @@ class JsonRPCProtocol:
             logger.error("Unable to deserialize message\n%s", traceback.format_exc())
             raise JsonRpcInternalError() from exc
 
-    def handle_message(self, message):
+    def handle_message(self, message: RPCMessage):
         """Delegates message to handlers depending on message type."""
 
         if message.jsonrpc != JsonRPCProtocol.VERSION:
@@ -462,24 +499,23 @@ class JsonRPCProtocol:
         # Run each handler within its own context.
         ctx = contextvars.copy_context()
 
-        if hasattr(message, "method"):
-            if hasattr(message, "id"):
-                logger.debug("Request %r received", message.method)
-                ctx.run(
-                    self._handle_request, message.id, message.method, message.params
-                )
-            else:
-                logger.debug("Notification %r received", message.method)
-                ctx.run(self._handle_notification, message.method, message.params)
-        else:
-            if hasattr(message, "error"):
-                logger.debug("Error message received.")
-                ctx.run(self._handle_response, message.id, None, message.error)
-            else:
-                logger.debug("Response message received.")
-                ctx.run(self._handle_response, message.id, message.result)
+        if isinstance(message, RPCRequest):
+            logger.debug("Request %r received", message.method)
+            ctx.run(self._handle_request, message.id, message.method, message.params)
 
-    def _send_data(self, data):
+        elif isinstance(message, RPCNotification):
+            logger.debug("Notification %r received", message.method)
+            ctx.run(self._handle_notification, message.method, message.params)
+
+        elif isinstance(message, RPCResponse):
+            logger.debug("Response message received.")
+            ctx.run(self._handle_response, message.id, message.result)
+
+        else:
+            logger.debug("Error message received.")
+            ctx.run(self._handle_response, message.id, None, message.error)
+
+    def _send_data(self, data: Any):
         """Sends data to the client."""
         if not data:
             return
@@ -510,14 +546,28 @@ class JsonRPCProtocol:
             self._server._report_server_error(error, JsonRpcInternalError)
 
     def _send_response(
-        self, msg_id, result=None, error: Union[ResponseError, None] = None
+        self,
+        msg_id: MsgId,
+        result: Any | None = None,
+        error: Union[ResponseError, None] = None,
     ):
-        """Sends a JSON RPC response to the client.
+        """Send a JSON-RPC response
 
-        Args:
-            msg_id(str): Id from request
-            result(any): Result returned by handler
-            error(any): Error returned by handler
+        .. important::
+
+           You should only set ``result`` OR ``error``.
+           If both are set, then the ``result`` value will be ignored.
+
+        Parameters
+        ----------
+        msg_id
+           The id of the message to respond to
+
+        result
+           The result to send in the event of a success
+
+        error
+           The error to send in the event of a failure
         """
 
         if error is not None:
@@ -558,9 +608,24 @@ class JsonRPCProtocol:
         """Return the type definition of the result associated with the given method."""
         return None
 
-    def notify(self, method: str, params=None):
-        """Sends a JSON RPC notification to the client."""
+    def notify(self, method: str, params: Any | None = None):
+        """Send a JSON-RPC notification.
 
+        .. note::
+
+           Notifications are "fire-and-forget", there is no way for the recipient to
+           respond directly to a notification. If you expect a response to this message,
+           use ``send_request``.
+
+        Parameters
+        ----------
+        method
+           The method name of the message to send
+
+        params
+           The payload of the message
+
+        """
         logger.debug("Sending notification: '%s' %s", method, params)
 
         notification_type = self.get_message_type(method) or JsonRPCNotification
@@ -570,15 +635,35 @@ class JsonRPCProtocol:
 
         self._send_data(notification)
 
-    def send_request(self, method, params=None, callback=None, msg_id=None):
-        """Sends a JSON RPC request to the client.
+    def send_request(
+        self,
+        method: str,
+        params: Any | None = None,
+        callback: Callable[[Any], None] | None = None,
+        msg_id: MsgId | None = None,
+    ) -> Future[Any]:
+        """Send a JSON-RPC request
 
-        Args:
-            method(str): The method name of the message to send
-            params(any): The payload of the message
+        Parameters
+        ----------
+        method
+           The method name of the message to send
 
-        Returns:
-            Future that will be resolved once a response has been received
+        params
+           The payload of the message
+
+        callback
+           If set, the given callback will be called with the result of the future
+           when it resolves
+
+        msg_id
+           Send the request using the given id, if ``None``, an id will be automatically
+           generated
+
+        Returns
+        -------
+        Future[Any]
+           A future that will resolve once a response has been received
         """
 
         if msg_id is None:
@@ -594,12 +679,12 @@ class JsonRPCProtocol:
             jsonrpc=JsonRPCProtocol.VERSION,
         )
 
-        future = Future()  # type: ignore[var-annotated]
+        future: Future[Any] = Future()
         # If callback function is given, call it when result is received
         if callback:
 
-            def wrapper(future: Future):
-                result = future.result()
+            def wrapper(fut: Future[Any]):
+                result = fut.result()
                 logger.info("Client response for %s received: %s", params, result)
                 callback(result)
 
@@ -612,17 +697,34 @@ class JsonRPCProtocol:
 
         return future
 
-    def send_request_async(self, method, params=None, msg_id=None):
-        """Calls `send_request` and wraps `concurrent.futures.Future` with
-        `asyncio.Future` so it can be used with `await` keyword.
+    def send_request_async(
+        self, method: str, params: Any | None = None, msg_id: MsgId | None = None
+    ):
+        """Send a JSON-RPC request, asynchronously.
 
-        Args:
-            method(str): The method name of the message to send
-            params(any): The payload of the message
-            msg_id(str|int): Optional, message id
+        This method calls `send_request`, wrapping the resulting future with
+        ``asyncio.wrap_future`` so it can be used in an ``async def`` function and
+        awaited with the ``await`` keyword.
 
-        Returns:
-            `asyncio.Future` that can be awaited
+        Parameters
+        ----------
+        method
+           The method name of the message to send
+
+        params
+           The payload of the message
+
+        callback
+           If set, the given callback will be called with the result of the future
+           when it resolves
+
+        msg_id
+           Send the request using the given id, if ``None``, an id will be automatically
+           generated
+
+        Returns
+        -------
+        `asyncio.Future` that can be awaited
         """
         return asyncio.wrap_future(
             self.send_request(method, params=params, msg_id=msg_id)

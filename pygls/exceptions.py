@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+from __future__ import annotations
+
 import traceback
 from typing import Any
 from typing import Set
@@ -26,16 +28,23 @@ from lsprotocol.types import ResponseError
 class JsonRpcException(Exception):
     """A class used as a base class for json rpc exceptions."""
 
+    CODE = -32603
     MESSAGE = ""
 
-    def __init__(self, message=None, code=None, data=None):
-        message = message or getattr(self.__class__, "MESSAGE")
+    def __init__(
+        self,
+        message: str | None = None,
+        code: int | None = None,
+        data: Any | None = None,
+    ):
+        message = message or self.MESSAGE
+
         super().__init__(message)
-        self.message = message
-        self.code = code or getattr(self.__class__, "CODE", -32603)
+        self.message: str = message
+        self.code: int = code or self.CODE
         self.data = data
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         return (
             isinstance(other, self.__class__)
             and self.code == other.code
@@ -46,7 +55,7 @@ class JsonRpcException(Exception):
         return hash((self.code, self.message))
 
     @staticmethod
-    def from_error(error):
+    def from_error(error: ResponseError):
         for exc_class in _EXCEPTIONS:
             if exc_class.supports_code(error.code):
                 return exc_class(
@@ -65,7 +74,7 @@ class JsonRpcException(Exception):
         )
 
     @classmethod
-    def supports_code(cls, code):
+    def supports_code(cls, code: int):
         # Defaults to UnknownErrorCode
         return getattr(cls, "CODE", -32001) == code
 
