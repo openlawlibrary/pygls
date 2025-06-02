@@ -468,7 +468,8 @@ class JsonRPCProtocol:
                     return self._converter.structure(data, request_type)
                 else:
                     response_type = (
-                        self._result_types.pop(data["id"]) or JsonRPCResponseMessage
+                        self._result_types.pop(data["id"], None)
+                        or JsonRPCResponseMessage
                     )
                     return self._converter.structure(data, response_type)
 
