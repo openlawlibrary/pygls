@@ -1,15 +1,38 @@
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
+
 # GENERATED FROM scripts/generate_code.py -- DO NOT EDIT
 # flake8: noqa
-from concurrent.futures import Future
+from __future__ import annotations
+
 from lsprotocol import types
 from pygls.client import JsonRPCClient
 from pygls.protocol import LanguageServerProtocol
 from pygls.protocol import default_converter
-from typing import Any
-from typing import Callable
-from typing import Optional
-from typing import Sequence
-from typing import Union
+import typing
+
+if typing.TYPE_CHECKING:
+    import cattrs
+    from concurrent.futures import Future
+    from typing import Any
+    from typing import Callable
+    from typing import Optional
+    from typing import Sequence
+    from typing import Union
 
 
 class BaseLanguageClient(JsonRPCClient):
@@ -18,19 +41,18 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         name: str,
         version: str,
-        protocol_cls=LanguageServerProtocol,
-        converter_factory=default_converter,
-        **kwargs,
+        protocol_cls: type[LanguageServerProtocol] = LanguageServerProtocol,
+        converter_factory: Callable[[], cattrs.Converter] = default_converter,
     ):
         self.name = name
         self.version = version
-        super().__init__(protocol_cls, converter_factory, **kwargs)
+        super().__init__(protocol_cls, converter_factory)
 
     def call_hierarchy_incoming_calls(
         self,
         params: types.CallHierarchyIncomingCallsParams,
         callback: Optional[Callable[[Optional[Sequence[types.CallHierarchyIncomingCall]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.CallHierarchyIncomingCall]]]:
         """Make a :lsp:`callHierarchy/incomingCalls` request.
 
         A request to resolve the incoming calls for a given `CallHierarchyItem`.
@@ -61,7 +83,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CallHierarchyOutgoingCallsParams,
         callback: Optional[Callable[[Optional[Sequence[types.CallHierarchyOutgoingCall]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.CallHierarchyOutgoingCall]]]:
         """Make a :lsp:`callHierarchy/outgoingCalls` request.
 
         A request to resolve the outgoing calls for a given `CallHierarchyItem`.
@@ -92,7 +114,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CodeAction,
         callback: Optional[Callable[[types.CodeAction], None]] = None,
-    ) -> Future:
+    ) -> Future[types.CodeAction]:
         """Make a :lsp:`codeAction/resolve` request.
 
         Request to resolve additional information for a given code action.The request's
@@ -123,7 +145,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CodeLens,
         callback: Optional[Callable[[types.CodeLens], None]] = None,
-    ) -> Future:
+    ) -> Future[types.CodeLens]:
         """Make a :lsp:`codeLens/resolve` request.
 
         A request to resolve a command for a given code lens.
@@ -150,7 +172,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CompletionItem,
         callback: Optional[Callable[[types.CompletionItem], None]] = None,
-    ) -> Future:
+    ) -> Future[types.CompletionItem]:
         """Make a :lsp:`completionItem/resolve` request.
 
         Request to resolve additional information for a given completion item.The request's
@@ -181,7 +203,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentLink,
         callback: Optional[Callable[[types.DocumentLink], None]] = None,
-    ) -> Future:
+    ) -> Future[types.DocumentLink]:
         """Make a :lsp:`documentLink/resolve` request.
 
         Request to resolve additional information for a given document link. The request's
@@ -212,7 +234,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.InitializeParams,
         callback: Optional[Callable[[types.InitializeResult], None]] = None,
-    ) -> Future:
+    ) -> Future[types.InitializeResult]:
         """Make a :lsp:`initialize` request.
 
         The initialize request is sent from the client to the server.
@@ -247,7 +269,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.InlayHint,
         callback: Optional[Callable[[types.InlayHint], None]] = None,
-    ) -> Future:
+    ) -> Future[types.InlayHint]:
         """Make a :lsp:`inlayHint/resolve` request.
 
         A request to resolve additional properties for an inlay hint.
@@ -282,7 +304,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`shutdown` request.
 
         A shutdown request is sent from the client to the server.
@@ -315,7 +337,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CodeActionParams,
         callback: Optional[Callable[[Optional[Sequence[Union[types.Command, types.CodeAction]]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[Union[types.Command, types.CodeAction]]]]:
         """Make a :lsp:`textDocument/codeAction` request.
 
         A request to provide commands for the given text document and range.
@@ -342,7 +364,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CodeLensParams,
         callback: Optional[Callable[[Optional[Sequence[types.CodeLens]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.CodeLens]]]:
         """Make a :lsp:`textDocument/codeLens` request.
 
         A request to provide code lens for the given text document.
@@ -369,7 +391,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.ColorPresentationParams,
         callback: Optional[Callable[[Sequence[types.ColorPresentation]], None]] = None,
-    ) -> Future:
+    ) -> Future[Sequence[types.ColorPresentation]]:
         """Make a :lsp:`textDocument/colorPresentation` request.
 
         A request to list all presentation for a color. The request's
@@ -402,7 +424,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CompletionParams,
         callback: Optional[Callable[[Union[Sequence[types.CompletionItem], types.CompletionList, None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[Sequence[types.CompletionItem], types.CompletionList, None]]:
         """Make a :lsp:`textDocument/completion` request.
 
         Request to request completion at a given text document position. The request's
@@ -445,7 +467,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DeclarationParams,
         callback: Optional[Callable[[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]]:
         """Make a :lsp:`textDocument/declaration` request.
 
         A request to resolve the type definition locations of a symbol at a given text
@@ -478,7 +500,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DefinitionParams,
         callback: Optional[Callable[[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]]:
         """Make a :lsp:`textDocument/definition` request.
 
         A request to resolve the definition location of a symbol at a given text
@@ -511,7 +533,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentDiagnosticParams,
         callback: Optional[Callable[[Union[types.RelatedFullDocumentDiagnosticReport, types.RelatedUnchangedDocumentDiagnosticReport]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.RelatedFullDocumentDiagnosticReport, types.RelatedUnchangedDocumentDiagnosticReport]]:
         """Make a :lsp:`textDocument/diagnostic` request.
 
         The document diagnostic request definition.
@@ -542,7 +564,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentColorParams,
         callback: Optional[Callable[[Sequence[types.ColorInformation]], None]] = None,
-    ) -> Future:
+    ) -> Future[Sequence[types.ColorInformation]]:
         """Make a :lsp:`textDocument/documentColor` request.
 
         A request to list all color symbols found in a given text document. The request's
@@ -575,7 +597,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentHighlightParams,
         callback: Optional[Callable[[Optional[Sequence[types.DocumentHighlight]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.DocumentHighlight]]]:
         """Make a :lsp:`textDocument/documentHighlight` request.
 
         Request to resolve a {@link DocumentHighlight} for a given
@@ -608,7 +630,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentLinkParams,
         callback: Optional[Callable[[Optional[Sequence[types.DocumentLink]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.DocumentLink]]]:
         """Make a :lsp:`textDocument/documentLink` request.
 
         A request to provide document links
@@ -635,7 +657,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentSymbolParams,
         callback: Optional[Callable[[Union[Sequence[types.SymbolInformation], Sequence[types.DocumentSymbol], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[Sequence[types.SymbolInformation], Sequence[types.DocumentSymbol], None]]:
         """Make a :lsp:`textDocument/documentSymbol` request.
 
         A request to list all symbols found in a given text document. The request's
@@ -668,7 +690,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.FoldingRangeParams,
         callback: Optional[Callable[[Optional[Sequence[types.FoldingRange]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.FoldingRange]]]:
         """Make a :lsp:`textDocument/foldingRange` request.
 
         A request to provide folding ranges in a document. The request's
@@ -701,7 +723,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentFormattingParams,
         callback: Optional[Callable[[Optional[Sequence[types.TextEdit]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TextEdit]]]:
         """Make a :lsp:`textDocument/formatting` request.
 
         A request to format a whole document.
@@ -728,7 +750,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.HoverParams,
         callback: Optional[Callable[[Optional[types.Hover]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.Hover]]:
         """Make a :lsp:`textDocument/hover` request.
 
         Request to request hover information at a given text document position. The request's
@@ -759,7 +781,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.ImplementationParams,
         callback: Optional[Callable[[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]]:
         """Make a :lsp:`textDocument/implementation` request.
 
         A request to resolve the implementation locations of a symbol at a given text
@@ -790,7 +812,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.InlayHintParams,
         callback: Optional[Callable[[Optional[Sequence[types.InlayHint]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.InlayHint]]]:
         """Make a :lsp:`textDocument/inlayHint` request.
 
         A request to provide inlay hints in a document. The request's parameter is of
@@ -825,7 +847,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.InlineCompletionParams,
         callback: Optional[Callable[[Union[types.InlineCompletionList, Sequence[types.InlineCompletionItem], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.InlineCompletionList, Sequence[types.InlineCompletionItem], None]]:
         """Make a :lsp:`textDocument/inlineCompletion` request.
 
         A request to provide inline completions in a document. The request's parameter is of
@@ -862,7 +884,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.InlineValueParams,
         callback: Optional[Callable[[Optional[Sequence[Union[types.InlineValueText, types.InlineValueVariableLookup, types.InlineValueEvaluatableExpression]]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[Union[types.InlineValueText, types.InlineValueVariableLookup, types.InlineValueEvaluatableExpression]]]]:
         """Make a :lsp:`textDocument/inlineValue` request.
 
         A request to provide inline values in a document. The request's parameter is of
@@ -897,7 +919,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.LinkedEditingRangeParams,
         callback: Optional[Callable[[Optional[types.LinkedEditingRanges]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.LinkedEditingRanges]]:
         """Make a :lsp:`textDocument/linkedEditingRange` request.
 
         A request to provide ranges that can be edited together.
@@ -928,7 +950,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.MonikerParams,
         callback: Optional[Callable[[Optional[Sequence[types.Moniker]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.Moniker]]]:
         """Make a :lsp:`textDocument/moniker` request.
 
         A request to get the moniker of a symbol at a given text document position.
@@ -959,7 +981,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentOnTypeFormattingParams,
         callback: Optional[Callable[[Optional[Sequence[types.TextEdit]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TextEdit]]]:
         """Make a :lsp:`textDocument/onTypeFormatting` request.
 
         A request to format a document on type.
@@ -986,7 +1008,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CallHierarchyPrepareParams,
         callback: Optional[Callable[[Optional[Sequence[types.CallHierarchyItem]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.CallHierarchyItem]]]:
         """Make a :lsp:`textDocument/prepareCallHierarchy` request.
 
         A request to result a `CallHierarchyItem` in a document at a given position.
@@ -1019,7 +1041,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.PrepareRenameParams,
         callback: Optional[Callable[[Union[types.Range, types.PrepareRenamePlaceholder, types.PrepareRenameDefaultBehavior, None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.Range, types.PrepareRenamePlaceholder, types.PrepareRenameDefaultBehavior, None]]:
         """Make a :lsp:`textDocument/prepareRename` request.
 
         A request to test and perform the setup necessary for a rename.
@@ -1050,7 +1072,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.TypeHierarchyPrepareParams,
         callback: Optional[Callable[[Optional[Sequence[types.TypeHierarchyItem]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TypeHierarchyItem]]]:
         """Make a :lsp:`textDocument/prepareTypeHierarchy` request.
 
         A request to result a `TypeHierarchyItem` in a document at a given position.
@@ -1083,7 +1105,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentRangesFormattingParams,
         callback: Optional[Callable[[Optional[Sequence[types.TextEdit]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TextEdit]]]:
         """Make a :lsp:`textDocument/rangesFormatting` request.
 
         A request to format ranges in a document.
@@ -1116,7 +1138,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DocumentRangeFormattingParams,
         callback: Optional[Callable[[Optional[Sequence[types.TextEdit]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TextEdit]]]:
         """Make a :lsp:`textDocument/rangeFormatting` request.
 
         A request to format a range in a document.
@@ -1143,7 +1165,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.ReferenceParams,
         callback: Optional[Callable[[Optional[Sequence[types.Location]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.Location]]]:
         """Make a :lsp:`textDocument/references` request.
 
         A request to resolve project-wide references for the symbol denoted
@@ -1176,7 +1198,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.RenameParams,
         callback: Optional[Callable[[Optional[types.WorkspaceEdit]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.WorkspaceEdit]]:
         """Make a :lsp:`textDocument/rename` request.
 
         A request to rename a symbol.
@@ -1203,7 +1225,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.SelectionRangeParams,
         callback: Optional[Callable[[Optional[Sequence[types.SelectionRange]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.SelectionRange]]]:
         """Make a :lsp:`textDocument/selectionRange` request.
 
         A request to provide selection ranges in a document. The request's
@@ -1236,7 +1258,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.SemanticTokensParams,
         callback: Optional[Callable[[Optional[types.SemanticTokens]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.SemanticTokens]]:
         """Make a :lsp:`textDocument/semanticTokens/full` request.
 
         @since 3.16.0
@@ -1263,7 +1285,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.SemanticTokensDeltaParams,
         callback: Optional[Callable[[Union[types.SemanticTokens, types.SemanticTokensDelta, None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.SemanticTokens, types.SemanticTokensDelta, None]]:
         """Make a :lsp:`textDocument/semanticTokens/full/delta` request.
 
         @since 3.16.0
@@ -1290,7 +1312,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.SemanticTokensRangeParams,
         callback: Optional[Callable[[Optional[types.SemanticTokens]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.SemanticTokens]]:
         """Make a :lsp:`textDocument/semanticTokens/range` request.
 
         @since 3.16.0
@@ -1317,7 +1339,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.SignatureHelpParams,
         callback: Optional[Callable[[Optional[types.SignatureHelp]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.SignatureHelp]]:
         """Make a :lsp:`textDocument/signatureHelp` request.
 
 
@@ -1344,7 +1366,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.TypeDefinitionParams,
         callback: Optional[Callable[[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[types.Location, Sequence[types.Location], Sequence[types.LocationLink], None]]:
         """Make a :lsp:`textDocument/typeDefinition` request.
 
         A request to resolve the type definition locations of a symbol at a given text
@@ -1375,7 +1397,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.WillSaveTextDocumentParams,
         callback: Optional[Callable[[Optional[Sequence[types.TextEdit]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TextEdit]]]:
         """Make a :lsp:`textDocument/willSaveWaitUntil` request.
 
         A document will save request is sent from the client to the server before
@@ -1412,7 +1434,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.TypeHierarchySubtypesParams,
         callback: Optional[Callable[[Optional[Sequence[types.TypeHierarchyItem]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TypeHierarchyItem]]]:
         """Make a :lsp:`typeHierarchy/subtypes` request.
 
         A request to resolve the subtypes for a given `TypeHierarchyItem`.
@@ -1443,7 +1465,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.TypeHierarchySupertypesParams,
         callback: Optional[Callable[[Optional[Sequence[types.TypeHierarchyItem]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.TypeHierarchyItem]]]:
         """Make a :lsp:`typeHierarchy/supertypes` request.
 
         A request to resolve the supertypes for a given `TypeHierarchyItem`.
@@ -1474,7 +1496,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.WorkspaceDiagnosticParams,
         callback: Optional[Callable[[types.WorkspaceDiagnosticReport], None]] = None,
-    ) -> Future:
+    ) -> Future[types.WorkspaceDiagnosticReport]:
         """Make a :lsp:`workspace/diagnostic` request.
 
         The workspace diagnostic request definition.
@@ -1505,7 +1527,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.ExecuteCommandParams,
         callback: Optional[Callable[[Optional[Any]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Any]]:
         """Make a :lsp:`workspace/executeCommand` request.
 
         A request send from the client to the server to execute a command. The request might return
@@ -1534,7 +1556,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.WorkspaceSymbolParams,
         callback: Optional[Callable[[Union[Sequence[types.SymbolInformation], Sequence[types.WorkspaceSymbol], None]], None]] = None,
-    ) -> Future:
+    ) -> Future[Union[Sequence[types.SymbolInformation], Sequence[types.WorkspaceSymbol], None]]:
         """Make a :lsp:`workspace/symbol` request.
 
         A request to list project-wide symbols matching the query string given
@@ -1575,7 +1597,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.WorkspaceSymbol,
         callback: Optional[Callable[[types.WorkspaceSymbol], None]] = None,
-    ) -> Future:
+    ) -> Future[types.WorkspaceSymbol]:
         """Make a :lsp:`workspaceSymbol/resolve` request.
 
         A request to resolve the range inside the workspace
@@ -1608,7 +1630,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.TextDocumentContentParams,
         callback: Optional[Callable[[types.TextDocumentContentResult], None]] = None,
-    ) -> Future:
+    ) -> Future[types.TextDocumentContentResult]:
         """Make a :lsp:`workspace/textDocumentContent` request.
 
         The `workspace/textDocumentContent` request is sent from the client to the
@@ -1643,7 +1665,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.CreateFilesParams,
         callback: Optional[Callable[[Optional[types.WorkspaceEdit]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.WorkspaceEdit]]:
         """Make a :lsp:`workspace/willCreateFiles` request.
 
         The will create files request is sent from the client to the server before files are actually
@@ -1684,7 +1706,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.DeleteFilesParams,
         callback: Optional[Callable[[Optional[types.WorkspaceEdit]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.WorkspaceEdit]]:
         """Make a :lsp:`workspace/willDeleteFiles` request.
 
         The did delete files notification is sent from the client to the server when
@@ -1717,7 +1739,7 @@ class BaseLanguageClient(JsonRPCClient):
         self,
         params: types.RenameFilesParams,
         callback: Optional[Callable[[Optional[types.WorkspaceEdit]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.WorkspaceEdit]]:
         """Make a :lsp:`workspace/willRenameFiles` request.
 
         The will rename files request is sent from the client to the server before files are actually
