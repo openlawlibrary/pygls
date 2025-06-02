@@ -1,4 +1,4 @@
-"""Script to automatically generate a lanaguge client and server from `lsprotocol` 
+"""Script to automatically generate a lanaguge client and server from `lsprotocol`
 type definitons."""
 
 import argparse
@@ -20,8 +20,28 @@ cli = argparse.ArgumentParser(
 )
 cli.add_argument("output", type=pathlib.Path)
 
+LICENSE_HEADER = """\
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
+"""
+
 
 def write_imports(imports: Set[Tuple[str, str]]) -> str:
+    """Write the standard runtime Python imports for the given set of ``imports``"""
     lines = []
 
     for import_ in sorted(list(imports), key=lambda i: (i[0], i[1])):
@@ -32,6 +52,15 @@ def write_imports(imports: Set[Tuple[str, str]]) -> str:
 
         lines.append(f"import {import_}")
 
+    return "\n".join(lines)
+
+
+def write_typing_imports(imports: Set[Tuple[str, str]]) -> str:
+    """Write ``TYPE_CHECKING`` imports for the given set of ``imports``"""
+    lines = [
+        "if typing.TYPE_CHECKING:",
+        textwrap.indent(write_imports(imports), " " * 4),
+    ]
     return "\n".join(lines)
 
 
@@ -142,7 +171,7 @@ def write_client_method(
             "    self,",
             f"    params: {param_mod}{param_name},",
             f"    callback: Optional[Callable[[{result_type}], None]] = None,",
-            ") -> Future:",
+            f") -> Future[{result_type}]:",
             f'    """Make a :lsp:`{method}` request.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
@@ -193,7 +222,7 @@ def write_server_method(
             "    self,",
             f"    params: {param_mod}{param_name},",
             f"    callback: Optional[Callable[[{result_type}], None]] = None,",
-            ") -> Future:",
+            f") -> Future[{result_type}]:",
             f'    """Make a :lsp:`{method}` request.',
             "",
             textwrap.indent(inspect.getdoc(request) or "", "    "),
@@ -217,11 +246,16 @@ def write_server_method(
 def generate_client() -> str:
     methods = []
     imports = {
-        ("concurrent.futures", "Future"),
+        "typing",
         ("lsprotocol", "types"),
         ("pygls.protocol", "LanguageServerProtocol"),
         ("pygls.protocol", "default_converter"),
         ("pygls.client", "JsonRPCClient"),
+    }
+
+    typing_imports = {
+        "cattrs",
+        ("concurrent.futures", "Future"),
         ("typing", "Callable"),
         ("typing", "Optional"),
     }
@@ -234,18 +268,25 @@ def generate_client() -> str:
         request, response, params, _ = types
 
         if response is None:
-            method = write_client_notification(method_name, request, params, imports)
+            method = write_client_notification(
+                method_name, request, params, typing_imports
+            )
         else:
             method = write_client_method(
-                method_name, request, params, response, imports
+                method_name, request, params, response, typing_imports
             )
 
         methods.append(textwrap.indent(method, "    "))
 
     code = [
+        LICENSE_HEADER,
         "# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT",
         "# flake8: noqa",
+        "from __future__ import annotations",
+        "",
         write_imports(imports),
+        "",
+        write_typing_imports(typing_imports),
         "",
         "",
         "class BaseLanguageClient(JsonRPCClient):",
@@ -254,13 +295,12 @@ def generate_client() -> str:
         "        self,",
         "        name: str,",
         "        version: str,",
-        "        protocol_cls=LanguageServerProtocol,",
-        "        converter_factory=default_converter,",
-        "        **kwargs,",
+        "        protocol_cls: type[LanguageServerProtocol] = LanguageServerProtocol,",
+        "        converter_factory: Callable[[], cattrs.Converter] = default_converter,",
         "    ):",
         "        self.name = name",
         "        self.version = version",
-        "        super().__init__(protocol_cls, converter_factory, **kwargs)",
+        "        super().__init__(protocol_cls, converter_factory)",
         "",
         *methods,
     ]
@@ -271,15 +311,17 @@ def generate_server() -> str:
     methods = []
     imports = {
         "typing",
-        ("concurrent.futures", "Future"),
         ("lsprotocol", "types"),
-        ("cattrs", "Converter"),
         ("pygls.protocol", "LanguageServerProtocol"),
         ("pygls.protocol", "default_converter"),
         ("pygls.server", "JsonRPCServer"),
+    }
+
+    typing_imports = {
+        ("concurrent.futures", "Future"),
         ("typing", "Callable"),
         ("typing", "Optional"),
-        ("typing", "Type"),
+        ("cattrs", "Converter"),
     }
 
     for method_name, types in METHOD_TO_TYPES.items():
@@ -290,18 +332,25 @@ def generate_server() -> str:
         request, response, params, _ = types
 
         if response is None:
-            method = write_server_notification(method_name, request, params, imports)
+            method = write_server_notification(
+                method_name, request, params, typing_imports
+            )
         else:
             method = write_server_method(
-                method_name, request, params, response, imports
+                method_name, request, params, response, typing_imports
             )
 
         methods.append(textwrap.indent(method, "    "))
 
     code = [
+        LICENSE_HEADER,
         "# GENERATED FROM scripts/generate_code.py -- DO NOT EDIT",
         "# flake8: noqa",
+        "from __future__ import annotations",
+        "",
         write_imports(imports),
+        "",
+        write_typing_imports(typing_imports),
         "",
         "",
         "class BaseLanguageServer(JsonRPCServer):",
@@ -310,12 +359,11 @@ def generate_server() -> str:
         "",
         "    def __init__(",
         "        self,",
-        "        protocol_cls: Type[LanguageServerProtocol] = LanguageServerProtocol,",
+        "        protocol_cls: type[LanguageServerProtocol] = LanguageServerProtocol,",
         "        converter_factory: Callable[[], Converter] = default_converter,",
-        "        max_workers: Optional[int] = None,",
-        "        **kwargs,",
+        "        max_workers: int | None = None,",
         "    ):",
-        "        super().__init__(protocol_cls, converter_factory, max_workers, **kwargs)",
+        "        super().__init__(protocol_cls, converter_factory, max_workers)",
         "",
         *methods,
     ]

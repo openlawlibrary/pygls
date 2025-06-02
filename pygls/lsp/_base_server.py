@@ -1,17 +1,37 @@
+############################################################################
+# Copyright(c) Open Law Library. All rights reserved.                      #
+# See ThirdPartyNotices.txt in the project root for additional notices.    #
+#                                                                          #
+# Licensed under the Apache License, Version 2.0 (the "License")           #
+# you may not use this file except in compliance with the License.         #
+# You may obtain a copy of the License at                                  #
+#                                                                          #
+#     http: // www.apache.org/licenses/LICENSE-2.0                         #
+#                                                                          #
+# Unless required by applicable law or agreed to in writing, software      #
+# distributed under the License is distributed on an "AS IS" BASIS,        #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+# See the License for the specific language governing permissions and      #
+# limitations under the License.                                           #
+############################################################################
+
 # GENERATED FROM scripts/generate_code.py -- DO NOT EDIT
 # flake8: noqa
-from cattrs import Converter
-from concurrent.futures import Future
+from __future__ import annotations
+
 from lsprotocol import types
 from pygls.protocol import LanguageServerProtocol
 from pygls.protocol import default_converter
 from pygls.server import JsonRPCServer
 import typing
-from typing import Any
-from typing import Callable
-from typing import Optional
-from typing import Sequence
-from typing import Type
+
+if typing.TYPE_CHECKING:
+    from cattrs import Converter
+    from concurrent.futures import Future
+    from typing import Any
+    from typing import Callable
+    from typing import Optional
+    from typing import Sequence
 
 
 class BaseLanguageServer(JsonRPCServer):
@@ -20,18 +40,17 @@ class BaseLanguageServer(JsonRPCServer):
 
     def __init__(
         self,
-        protocol_cls: Type[LanguageServerProtocol] = LanguageServerProtocol,
+        protocol_cls: type[LanguageServerProtocol] = LanguageServerProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
-        max_workers: Optional[int] = None,
-        **kwargs,
+        max_workers: int | None = None,
     ):
-        super().__init__(protocol_cls, converter_factory, max_workers, **kwargs)
+        super().__init__(protocol_cls, converter_factory, max_workers)
 
     def client_register_capability(
         self,
         params: types.RegistrationParams,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`client/registerCapability` request.
 
         The `client/registerCapability` request is sent from the server to the client to register a new capability
@@ -54,7 +73,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.UnregistrationParams,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`client/unregisterCapability` request.
 
         The `client/unregisterCapability` request is sent from the server to the client to unregister a previously registered capability
@@ -77,7 +96,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.ShowDocumentParams,
         callback: Optional[Callable[[types.ShowDocumentResult], None]] = None,
-    ) -> Future:
+    ) -> Future[types.ShowDocumentResult]:
         """Make a :lsp:`window/showDocument` request.
 
         A request to show a document. This request might open an
@@ -108,7 +127,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.ShowMessageRequestParams,
         callback: Optional[Callable[[Optional[types.MessageActionItem]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[types.MessageActionItem]]:
         """Make a :lsp:`window/showMessageRequest` request.
 
         The show message request is sent from the server to the client to show a message
@@ -131,7 +150,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.WorkDoneProgressCreateParams,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`window/workDoneProgress/create` request.
 
         The `window/workDoneProgress/create` request is sent from the server to the client to initiate progress
@@ -154,7 +173,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.ApplyWorkspaceEditParams,
         callback: Optional[Callable[[types.ApplyWorkspaceEditResult], None]] = None,
-    ) -> Future:
+    ) -> Future[types.ApplyWorkspaceEditResult]:
         """Make a :lsp:`workspace/applyEdit` request.
 
         A request sent from the server to the client to modified certain resources.
@@ -175,7 +194,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/codeLens/refresh` request.
 
         A request to refresh all code actions
@@ -200,7 +219,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.ConfigurationParams,
         callback: Optional[Callable[[Sequence[Optional[Any]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Sequence[Optional[Any]]]:
         """Make a :lsp:`workspace/configuration` request.
 
         The 'workspace/configuration' request is sent from the server to the client to fetch a certain
@@ -233,7 +252,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/diagnostic/refresh` request.
 
         The diagnostic refresh request definition.
@@ -258,7 +277,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/foldingRange/refresh` request.
 
         @since 3.18.0
@@ -281,7 +300,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/inlayHint/refresh` request.
 
         @since 3.17.0
@@ -302,7 +321,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/inlineValue/refresh` request.
 
         @since 3.17.0
@@ -323,7 +342,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/semanticTokens/refresh` request.
 
         @since 3.16.0
@@ -344,7 +363,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: types.TextDocumentContentRefreshParams,
         callback: Optional[Callable[[None], None]] = None,
-    ) -> Future:
+    ) -> Future[None]:
         """Make a :lsp:`workspace/textDocumentContent/refresh` request.
 
         The `workspace/textDocumentContent` request is sent from the server to the client to refresh
@@ -373,7 +392,7 @@ class BaseLanguageServer(JsonRPCServer):
         self,
         params: None,
         callback: Optional[Callable[[Optional[Sequence[types.WorkspaceFolder]]], None]] = None,
-    ) -> Future:
+    ) -> Future[Optional[Sequence[types.WorkspaceFolder]]]:
         """Make a :lsp:`workspace/workspaceFolders` request.
 
         The `workspace/workspaceFolders` is sent from the server to the client to fetch the open workspace folders.
