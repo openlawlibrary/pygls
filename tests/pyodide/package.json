@@ -5,6 +5,6 @@
     "main": "run_server.js",
     "author": "openlawlibrary",
     "dependencies": {
-        "pyodide": "^0.26"
+        "pyodide": "^0.27"
     }
 }
