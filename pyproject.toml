@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygls"
-version = "2.0.0a3"
+version = "2.0.0a4"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
 authors = ["Open Law Library <info@openlawlib.org>"]
 maintainers = [
