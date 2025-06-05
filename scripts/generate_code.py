@@ -445,7 +445,7 @@ def write_capability_overloads_for(
             field_name = field.name
 
         result_types = []
-        result_type_names = {"T", "None"}
+        result_type_names = {"None"}
 
         if "typing." in str(field.type):
             inner_types = typing.get_args(field.type)
@@ -458,21 +458,37 @@ def write_capability_overloads_for(
             result_types.append(field_type)
             result_type_names.add(rewrite_type(str(field_type), imports))
 
-        args = [
-            *base_args,
-            ("field", f"Literal['{field_name}']"),
-            ("default", "T | None = None"),
-        ]
-
         if field_name not in processed_capabilities:
             processed_capabilities.add(field_name)
+
+            # First we write the overload in which the caller does not provide a default
+            # (or provides None) and we may return None.
+            result_type_names_string = " | ".join(
+                sorted(result_type_names, key=len, reverse=True)
+            )
+            args = [
+                *base_args,
+                ("field", f"Literal['{field_name}']"),
+                ("default", "None = None"),
+            ]
+
             overloads.append(
-                write_overload(
-                    "get_capability",
-                    args,
-                    # sort values so that we get a consistent result
-                    " | ".join(sorted(result_type_names, key=len, reverse=True)),
-                )
+                write_overload("get_capability", args, result_type_names_string)
+            )
+
+            # Then we write the overload in which the caller provides a default value.
+            result_type_names.remove("None")
+            result_type_names_string = " | ".join(
+                sorted(result_type_names, key=len, reverse=True)
+            )
+            args = [
+                *base_args,
+                ("field", f"Literal['{field_name}']"),
+                ("default", result_type_names_string),
+            ]
+
+            overloads.append(
+                write_overload("get_capability", args, result_type_names_string)
             )
 
         for nested_type in result_types:
@@ -494,7 +510,6 @@ def generate_capabilities() -> str:
 
     typing_imports = {
         ("typing", "Literal"),
-        ("typing", "TypeVar"),
         ("lsprotocol", "types"),
     }
 
@@ -525,8 +540,6 @@ def generate_capabilities() -> str:
         write_imports(imports),
         "",
         write_typing_imports(typing_imports),
-        "",
-        "    T = TypeVar('T')",
         "",
         *overloads,
         "@typing.overload",
