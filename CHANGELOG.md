@@ -1,6 +1,39 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0a4] - 2025-06-05
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a4
+
+### Bug Fixes
+
+- Update the hello world example to the v2.0 syntax ([#533](https://github.com/openlawlibrary/pygls/issues/533))
+- `workspace/executeCommand` with async handlers
+- Crash on unknown message ids
+
+### CI
+
+- Start testing on Python 3.14
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Lsprotocol 2025.0.0rc1
+- Improve type annotations and docstrings
+- Improve type annotations in generated code
+- Improve typing of get_capability
+- Bump pyodide version
+- Add devcontainer and Makefiles
+
+### Testing
+
+- Update error message regex
+- Fix pyodide test suite
+
+### Build
+
+- V2.0.0a4
+
 ## [2.0.0a3] - 2025-05-18
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a3
 
