@@ -21,7 +21,7 @@ import logging
 import os
 import pathlib
 import re
-from typing import List, Optional, Pattern
+from typing import Optional, Pattern, Sequence
 
 from lsprotocol import types
 
@@ -163,8 +163,8 @@ class TextDocument(object):
             self._apply_full_change(change)
 
     @property
-    def lines(self) -> List[str]:
-        return self.source.splitlines(True)
+    def lines(self) -> Sequence[str]:
+        return tuple(self.source.splitlines(True))
 
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
