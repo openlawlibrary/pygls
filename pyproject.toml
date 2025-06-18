@@ -21,7 +21,7 @@ readme = "README.md"
 python = ">=3.9"
 attrs = ">=24.3.0"
 cattrs = ">=23.1.2"
-lsprotocol = "2025.0.0rc1"
+lsprotocol = "2025.0.0"
 websockets = { version = ">=13.0", optional = true }
 
 [tool.poetry.extras]

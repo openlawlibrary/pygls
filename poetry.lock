@@ -466,14 +466,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "lsprotocol"
-version = "2025.0.0rc1"
+version = "2025.0.0"
 description = "Python types for Language Server Protocol."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "lsprotocol-2025.0.0rc1-py3-none-any.whl", hash = "sha256:84704c5331de95c06fa4f2584525e99476da62582b11fae59fa2aae98a6cf580"},
-    {file = "lsprotocol-2025.0.0rc1.tar.gz", hash = "sha256:22ee3dc898f0d15b7befeb923073e46e1cd2661c01365f7f7da113d1f168c555"},
+    {file = "lsprotocol-2025.0.0-py3-none-any.whl", hash = "sha256:f9d78f25221f2a60eaa4a96d3b4ffae011b107537facee61d3da3313880995c7"},
+    {file = "lsprotocol-2025.0.0.tar.gz", hash = "sha256:e879da2b9301e82cfc3e60d805630487ac2f7ab17492f4f5ba5aaba94fe56c29"},
 ]
 
 [package.dependencies]
@@ -1356,4 +1356,4 @@ ws = ["websockets"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9"
-content-hash = "42407fd7302e32b853ad0ed033dbcbeee62d0ad55cdc080ee159e77b82705fde"
+content-hash = "935667eb0b013e44d1d54f85cc8df5a0dfe65d8bc239b32b9fe8a5f6c5b2df7a"
