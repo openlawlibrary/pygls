@@ -51,7 +51,7 @@ def test_document_end_of_file_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == [
+    assert list(doc.lines) == [
         "print 'a'\n",
         "print 'b'\n",
         "o",
@@ -73,7 +73,7 @@ def test_document_full_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == ["print a, b"]
+    assert list(doc.lines) == ["print a, b"]
 
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
@@ -87,7 +87,7 @@ def test_document_full_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == ["print a, b"]
+    assert list(doc.lines) == ["print a, b"]
 
 
 def test_document_line_edit():
@@ -125,7 +125,7 @@ def test_document_multiline_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == ["def hello(a, b):\n", "    print a, b\n"]
+    assert list(doc.lines) == ["def hello(a, b):\n", "    print a, b\n"]
 
     doc = TextDocument(
         "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
@@ -139,7 +139,7 @@ def test_document_multiline_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == ["def hello(a, b):\n", "    print a, b\n"]
+    assert list(doc.lines) == ["def hello(a, b):\n", "    print a, b\n"]
 
 
 def test_document_no_edit():
@@ -157,7 +157,7 @@ def test_document_no_edit():
     )
     doc.apply_change(change)
 
-    assert doc.lines == old
+    assert list(doc.lines) == old
 
 
 def test_document_props():
