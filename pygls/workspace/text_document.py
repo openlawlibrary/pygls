@@ -66,6 +66,8 @@ class TextDocument(object):
         self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
 
         self._position_codec = position_codec if position_codec else PositionCodec()
+        self._lines_cache: Optional[Sequence[str]] = None
+        self._lines_version: Optional[int] = None
 
     def __str__(self):
         return str(self.uri)
@@ -164,7 +166,18 @@ class TextDocument(object):
 
     @property
     def lines(self) -> Sequence[str]:
-        return tuple(self.source.splitlines(True))
+        version = self.version
+        if version is not None and version == self._lines_version:
+            cached = self._lines_cache
+            # mostly for the typing
+            assert cached is not None
+            return cached
+
+        result = tuple(self.source.splitlines(True))
+        if version is not None:
+            self._lines_cache = None
+            self._lines_version = version
+        return result
 
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
