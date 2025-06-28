@@ -1,52 +1,47 @@
-[tool.poetry]
+[project]
 name = "pygls"
 version = "2.0.0a4"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
-authors = ["Open Law Library <info@openlawlib.org>"]
-maintainers = [
-    "Tom BH <tom@tombh.co.uk>",
-    "Alex Carney <alcarneyme@gmail.com>",
-]
 repository = "https://github.com/openlawlibrary/pygls"
-documentation = "https://pygls.readthedocs.io/en/latest"
-license = "Apache-2.0"
+authors = [
+  { name = "Open Law Library", email = "info@openlawlib.org"}
+]
+maintainers = [
+  { name = "Tom BH", email = "tom@tombh.co.uk" },
+  { name = "Alex Carney", email = "alcarneyme@gmail.com"}
+]
 readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "attrs>=24.3.0",
+    "cattrs>=23.1.2",
+    "lsprotocol==2025.0.0",
+]
+[project.optional-dependencies]
+ws = [
+  "websockets>=13.0"
+]
 
-# You may want to use the Poetry "Up" plugin to automatically update all dependencies to
-# their latest major versions. But bear in mind that this is a library, so the non-development
-# dependency versions will be forced on downstream users. Therefore the very latest versions
-# may be too restrictive.
-# See https://github.com/MousaZeidBaker/poetry-plugin-up
-[tool.poetry.dependencies]
-python = ">=3.9"
-attrs = ">=24.3.0"
-cattrs = ">=23.1.2"
-lsprotocol = "2025.0.0"
-websockets = { version = ">=13.0", optional = true }
-
-[tool.poetry.extras]
-ws = ["websockets"]
-
-[tool.poetry.group.dev.dependencies]
-# Replaces (amongst many other things) flake8 and bandit
-ruff = ">=0.1.6"
-poethepoet = ">=0.24.4"
-mypy = ">=1.7.1"
-black = "^24.4.1"
-
-[tool.poetry.group.test.dependencies]
-# Note: `coverage` requires that your Python was built with system `sqlite` development files
-coverage = { version = ">=7.3.2", extras = ["toml"] }
-pytest = ">=7.4.3"
-pytest-asyncio = ">=0.21.0"
-pytest-cov = ">=5"
-
-[tool.poetry.group.docs.dependencies]
-# TODO `sphinx>=7.26` needs python 3.9
-myst-parser = ">=2.0"
-sphinx = ">=7.1.2"
-sphinx-design = ">=0.5.0"
-sphinx-rtd-theme = ">=1.3.0"
+[dependency-groups]
+dev = [
+    "poethepoet>=0.35.0",
+    "ruff>=0.1.6",
+    "mypy>=1.7.1",
+    "black~=24.4.1",
+    "requests>=2.32.4",
+]
+test = [
+    "coverage[toml]>=7.3.2",
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=6.2.1",
+]
+docs = [
+    "myst-parser>=2.0",
+    "sphinx>=7.1.2",
+    "sphinx-design>=0.5.0",
+    "sphinx-rtd-theme>=1.3.0"
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -61,7 +56,7 @@ check_commit_style = "npx commitlint --from origin/main --to HEAD --verbose --co
 generate_code = "python scripts/generate_code.py pygls/lsp"
 generate_contributors_md = "python scripts/generate_contributors_md.py"
 black_check = "black --check ."
-poetry_lock_check = "poetry check"
+uv_lock_check = "uv lock --check"
 
 [tool.poe.tasks.test]
 sequence = [
@@ -78,7 +73,7 @@ sequence = [
     "check_generated_code",
     "check_commit_style",
     "black_check",
-    "poetry_lock_check"
+    "uv_lock_check"
 ]
 ignore_fail = "return_non_zero"
 

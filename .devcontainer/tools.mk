@@ -77,21 +77,6 @@ endef
 #$(foreach version,$(PYXX_versions),$(info $(call PYXX,$(version))))
 $(foreach version,$(PYXX_versions),$(eval $(call PYXX,$(version))))
 
-POETRY ?= $(shell command -v poetry)
-
-ifeq ($(strip $(POETRY)),)
-
-POETRY := $(BIN)/poetry
-
-$(POETRY): | $(UV)
-	$(UV) tool install poetry
-	$@ --version
-
-endif
-
-
-PY_TOOLS := $(POETRY)
-
 # Set a default `python` command if there is not one already
 PY ?= $(shell command -v python)
 
@@ -136,5 +121,5 @@ endif
 
 # One command to bootstrap all tools and check their versions
 .PHONY: tools
-tools: $(UV) $(PY) $(PY_TOOLS) $(NPM) $(NPX)
+tools: $(UV) $(PY) $(NPM) $(NPX)
 	for prog in $^ ; do echo -n "$${prog}\t" ; PATH=$(BIN) $${prog} --version; done

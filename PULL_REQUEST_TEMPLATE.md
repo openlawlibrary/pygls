@@ -15,8 +15,7 @@ _Please replace this description with a concise description of this Pull Request
 
 You can run the lints that are run on CI locally with:
 ```sh
-poetry install --all-extras --with dev
-poetry run poe lint
+uv run --all-extras poe lint
 ```
 
 [commit messages]: https://conventionalcommits.org/
