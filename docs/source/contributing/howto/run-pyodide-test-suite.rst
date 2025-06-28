@@ -5,9 +5,7 @@ How To Run the Pyodide Test Suite
 
 This guide outlines how to setup the environment needed to run the `Pyodide <https://pyodide.org/en/stable/>`__ test suite.
 
-#. If you haven't done so already, install ``pytest`` and the other testing dependencies using poetry::
-
-     $ poetry install --with test
+#. If you haven't done so already, install `uv <https://docs.astral.sh/uv/getting-started/installation>`__ to manage dependencies and tasks.
 
 #. In order to run Pyodide outside of the browser you will need `NodeJs <https://nodejs.org/en>`__ installed.
 
@@ -17,15 +15,15 @@ This guide outlines how to setup the environment needed to run the `Pyodide <htt
      tests/pyodide $ npm ci
 
 #. To bootstrap the Python environment within the Pyodide runtime the test suite needs to install ``pygls`` from its wheel archive.
-   From the repository root, use poetry to package the current development version::
+   From the repository root, use ``uv`` to package the current development version::
 
-     $ poetry build
+     $ uv build
 
    This will place the required ``*.whl`` file in the ``dist/`` folder
 
 #. Finally, to run the end-to-end tests against Pyodide, pass the ``--lsp-runtime pyodide`` option to ``pytest``::
 
-     $ poetry run pytest --lsp-runtime pyodide
+     $ uv run pytest --lsp-runtime pyodide
      ============================================ test session starts ============================================
      platform linux -- Python 3.13.0, pytest-8.3.3, pluggy-1.5.0
      rootdir: /var/home/alex/Projects/openlawlibrary/pygls/main

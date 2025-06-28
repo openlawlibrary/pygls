@@ -36,34 +36,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Use Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        id: setup-python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
+          version: "0.7.16"
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: "1.8.3"
-          virtualenvs-in-project: true
-      - run: |
-          cat *.log
-        if: failure()
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras
       - name: Run tests
-        run: |
-          source $VENV # Only needed because of Github Action caching
-          poe test
+        run: uv run --all-extras --group test poe test
 
   test-pyodide:
     needs: [pre_job, build]
@@ -78,15 +60,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'tests/pyodide/package-lock.json'
 
-      - id: setup-python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.x"
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
+          version: "0.7.16"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - uses: actions/download-artifact@v4
         with:
@@ -95,15 +74,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          poetry install --with test
+          uv sync --group test
 
           cd tests/pyodide
           npm ci
 
       - name: Run tests
         run: |
-          source $VENV
-          poe test-pyodide
+          uv run --all-extras poe test-pyodide
 
   lint:
     needs: pre_job
@@ -113,30 +91,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use Python
-        id: use-python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.x"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
-      - name: Load cached venv
-        # I wonder if we can replace this whole step with with the "Use Python" step above's `cache` field?
-        # See: https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#outputs-and-environment-variables
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ hashFiles('**/poetry.lock') }}-${{ steps.use-python.outputs.python-version }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras --with dev
+          version: "0.7.16"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Run lints
-        run: |
-          source $VENV
-          poe lint
+        run: uv run --all-extras poe lint
 
   build:
     needs: pre_job
@@ -146,27 +108,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Use Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.x"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras
+          version: "0.7.16"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Build packages (sdist and wheel)
         run: |
           git describe --tags --abbrev=0
-          poetry build
+          uv build
       - name: Upload builds
         uses: actions/upload-artifact@v4
         with:

@@ -2,7 +2,7 @@
 
 This is the bare-minimum, working example of a Pygls-based Language Server. It is the same as that shown in the main README, it autocompletes `hello.` with the options, "world" and "friend".
 
-You will only need to have installed Pygls on your system. Eg; `pip install pygls`. Normally you will want to formally define `pygls` as a dependency of your Language Server, with something like [venv](https://docs.python.org/3/library/venv.html), [Poetry](https://python-poetry.org/), etc.
+You will only need to have installed Pygls on your system. Eg; `pip install pygls`. Normally you will want to formally define `pygls` as a dependency of your Language Server, with something like [venv](https://docs.python.org/3/library/venv.html), [uv](https://docs.astral.sh/uv/getting-started/installation), etc.
 
 # Editor Configurations
 

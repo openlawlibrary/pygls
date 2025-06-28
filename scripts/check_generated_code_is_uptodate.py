@@ -23,7 +23,7 @@ else:
     print(
         (
             "🔴 Pygls client or server not up to date\n"
-            "1. Re-generate with: `poetry run poe generate_code`\n"
+            "1. Re-generate with: `uv run poe generate_code`\n"
             "2. Commit"
         )
     )
