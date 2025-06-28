@@ -131,7 +131,12 @@ def pytest_report_header(config: pytest.Config):
     runtime = config.getoption("lsp_runtime")
     transport = config.getoption("lsp_transport")
 
-    return [f"pygls: {runtime=}, {transport=}"]
+    try:
+        gil_enabled = "enabled" if sys._is_gil_enabled() else "disabled"
+    except AttributeError:
+        gil_enabled = "enabled"
+
+    return [f"pygls: {runtime=}, {transport=}", f"GIL: {gil_enabled}"]
 
 
 @pytest.fixture(scope="session")
