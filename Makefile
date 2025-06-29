@@ -9,13 +9,12 @@ lint: | $(UV)
 
 .PHONY: test
 test: | $(UV)
-	$(UV) run --all-extras poe test
+	$(UV) run --group test --all-extras poe test
 
 .PHONY: test-pyodide
 test-pyodide: dist | $(NPM) $(UV)
-	$(UV) sync --group test
 	cd tests/pyodide && $(NPM) ci
-	$(UV) run poe test-pyodide
+	$(UV) run --group test poe test-pyodide
 
 .PHONY: pygls-playground
 pygls-playground: | $(NPM) $(UV)
