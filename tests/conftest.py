@@ -111,6 +111,26 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_collection_modifyitems(items):
+    """Re-order tests so that end-to-end tests are run last.
+
+    Idea taken from:
+    https://timonweb.com/django/optimizing-test-execution-running-live_server-tests-last-with-pytest
+    """
+    e2e_tests = []
+    other_tests = []
+
+    for item in items:
+        if "get_client_for" in getattr(item, "fixturenames", ()):
+            item.add_marker("e2e")
+            e2e_tests.append(item)
+        else:
+            other_tests.append(item)
+
+    # Modify the items list to run end-to-end tests last
+    items[:] = other_tests + e2e_tests
+
+
 @pytest.fixture(scope="session")
 def runtime(request):
     """This fixture is the source of truth as to which environment we should run the

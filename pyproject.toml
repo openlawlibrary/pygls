@@ -46,6 +46,9 @@ docs = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "e2e: tests that run a language server in a subprocess",
+]
 
 [tool.poe.tasks]
 test-pyodide = "pytest tests/e2e --lsp-runtime pyodide"
