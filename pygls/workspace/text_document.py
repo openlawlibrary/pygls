@@ -21,7 +21,8 @@ import logging
 import os
 import pathlib
 import re
-from typing import Optional, Pattern, Sequence
+from typing import Optional, Pattern, Sequence, List
+import bisect
 
 from lsprotocol import types
 
@@ -60,12 +61,12 @@ class TextDocument(object):
         self._source = source
 
         self._is_sync_kind_full = sync_kind == types.TextDocumentSyncKind.Full
-        self._is_sync_kind_incremental = (
-            sync_kind == types.TextDocumentSyncKind.Incremental
-        )
+        self._is_sync_kind_incremental = sync_kind == types.TextDocumentSyncKind.Incremental
         self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
 
         self._position_codec = position_codec if position_codec else PositionCodec()
+
+        self._line_offsets: Optional[List[int]] = None
 
     def __str__(self):
         return str(self.uri)
@@ -74,9 +75,7 @@ class TextDocument(object):
     def position_codec(self) -> PositionCodec:
         return self._position_codec
 
-    def _apply_incremental_change(
-        self, change: types.TextDocumentContentChangePartial
-    ) -> None:
+    def _apply_incremental_change(self, change: types.TextDocumentContentChangePartial) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
@@ -169,13 +168,9 @@ class TextDocument(object):
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
         lines = self.lines
-        server_position = self._position_codec.position_from_client_units(
-            lines, client_position
-        )
+        server_position = self._position_codec.position_from_client_units(lines, client_position)
         row, col = server_position.line, server_position.character
-        return col + sum(
-            self._position_codec.client_num_units(line) for line in lines[:row]
-        )
+        return col + sum(self._position_codec.client_num_units(line) for line in lines[:row])
 
     @property
     def source(self) -> str:
@@ -183,6 +178,45 @@ class TextDocument(object):
             return pathlib.Path(self.path).read_text(encoding="utf-8")
 
         return self._source or ""
+
+    def position_at_offset(self, offset: int) -> types.Position:
+        """Return the client_position by the given character offset pointed at."""
+        offset = max(min(offset, len(self.source)), 0)
+
+        line_offsets = self._get_line_offsets()
+        if not line_offsets:
+            position = types.Position(line=0, character=offset)
+        else:
+            low = bisect.bisect_right(line_offsets, offset)
+            # low is the least x for which the line offset is larger than the current offset
+            # or len(list) if no line offset is larger than the current offset
+            line = low - 1
+            offset = self._ensure_before_eol(offset, line_offsets[line])
+            position = types.Position(line=line, character=offset - line_offsets[line])
+        return self._position_codec.position_to_client_units(self.lines, position)
+
+    def _get_line_offsets(self) -> List[int]:
+        if self._line_offsets is None:
+            self._line_offsets = self._compute_line_offsets(self.source, True)
+        return self._line_offsets
+
+    def _ensure_before_eol(self, offset: int, line_offset: int) -> int:
+        while offset > line_offset and self.source[offset - 1] in {"\r", "\n"}:
+            offset -= 1
+        return offset
+
+    @staticmethod
+    def _compute_line_offsets(text: str, is_at_line_start: bool, text_offset: int = 0) -> List[int]:
+        result: List[int] = [text_offset] if is_at_line_start else []
+        i = 0
+        while i < len(text):
+            char = text[i]
+            if char in {"\r", "\n"}:
+                if char == "\r" and i + 1 < len(text) and text[i + 1] == "\n":
+                    i += 1
+                result.append(text_offset + i + 1)
+            i += 1
+        return result
 
     def word_at_position(
         self,
@@ -223,9 +257,7 @@ class TextDocument(object):
         if client_position.line >= len(lines):
             return ""
 
-        server_position = self._position_codec.position_from_client_units(
-            lines, client_position
-        )
+        server_position = self._position_codec.position_from_client_units(lines, client_position)
         row, col = server_position.line, server_position.character
         line = lines[row]
         # Split word in two

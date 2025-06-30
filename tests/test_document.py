@@ -60,9 +60,7 @@ def test_document_end_of_file_edit():
 
 def test_document_full_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = TextDocument(
-        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
-    )
+    doc = TextDocument("file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full)
     change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
@@ -75,9 +73,7 @@ def test_document_full_edit():
 
     assert list(doc.lines) == ["print a, b"]
 
-    doc = TextDocument(
-        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full
-    )
+    doc = TextDocument("file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Full)
     change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=0, character=0),
@@ -112,9 +108,7 @@ def test_document_lines():
 
 def test_document_multiline_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = TextDocument(
-        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
-    )
+    doc = TextDocument("file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental)
     change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
@@ -127,9 +121,7 @@ def test_document_multiline_edit():
 
     assert list(doc.lines) == ["def hello(a, b):\n", "    print a, b\n"]
 
-    doc = TextDocument(
-        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental
-    )
+    doc = TextDocument("file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.Incremental)
     change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
@@ -144,9 +136,7 @@ def test_document_multiline_edit():
 
 def test_document_no_edit():
     old = ["def hello(a, b):\n", "    print a\n", "    print b\n"]
-    doc = TextDocument(
-        "file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.None_
-    )
+    doc = TextDocument("file:///uri", "".join(old), sync_kind=types.TextDocumentSyncKind.None_)
     change = types.TextDocumentContentChangePartial(
         range=types.Range(
             start=types.Position(line=1, character=4),
@@ -175,65 +165,65 @@ def test_document_source_unicode():
 
 def test_position_from_utf16():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf16)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=5)
-    ) == types.Position(line=0, character=4)
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=5)) == types.Position(
+        line=0, character=4
+    )
 
 
 def test_position_from_utf32():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf32)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=4)
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=4)) == types.Position(
+        line=0, character=4
+    )
 
 
 def test_position_from_utf8():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf8)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
-    assert codec.position_from_client_units(
-        ['x="😋"'], types.Position(line=0, character=7)
-    ) == types.Position(line=0, character=4)
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
+    assert codec.position_from_client_units(['x="😋"'], types.Position(line=0, character=7)) == types.Position(
+        line=0, character=4
+    )
 
 
 def test_position_to_utf16():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf16)
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
 
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=5)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=4)) == types.Position(
+        line=0, character=5
+    )
 
 
 def test_position_to_utf32():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf32)
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
 
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=4)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=4)) == types.Position(
+        line=0, character=4
+    )
 
 
 def test_position_to_utf8():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf8)
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=3)) == types.Position(
+        line=0, character=3
+    )
 
-    assert codec.position_to_client_units(
-        ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=6)
+    assert codec.position_to_client_units(['x="😋"'], types.Position(line=0, character=4)) == types.Position(
+        line=0, character=6
+    )
 
 
 def test_range_from_utf16():
@@ -319,47 +309,78 @@ def test_offset_at_position_utf8():
     assert doc.offset_at_position(types.Position(line=5, character=0)) == 41
 
 
+def test_position_at_offset_utf16():
+    doc = TextDocument(DOC_URI, DOC)
+    assert doc.position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.position_at_offset(12) == types.Position(line=1, character=3)
+    assert doc.position_at_offset(13) == types.Position(line=2, character=0)
+    assert doc.position_at_offset(17) == types.Position(line=2, character=4)
+    assert doc.position_at_offset(27) == types.Position(line=3, character=6)
+    assert doc.position_at_offset(28) == types.Position(line=3, character=8)
+    assert doc.position_at_offset(40) == types.Position(line=4, character=0)
+
+
+def test_position_at_offset_utf32():
+    doc = TextDocument(
+        DOC_URI,
+        DOC,
+        position_codec=PositionCodec(encoding=types.PositionEncodingKind.Utf32),
+    )
+    assert doc.position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.position_at_offset(39) == types.Position(line=4, character=0)
+
+
+def test_position_at_offset_utf8():
+    doc = TextDocument(
+        DOC_URI,
+        DOC,
+        position_codec=PositionCodec(encoding=types.PositionEncodingKind.Utf8),
+    )
+    assert doc.position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.position_at_offset(41) == types.Position(line=4, character=0)
+
+
 def test_utf16_to_utf32_position_cast():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf16)
     lines = ["", "😋😋", ""]
-    assert codec.position_from_client_units(
-        lines, types.Position(line=0, character=0)
-    ) == types.Position(line=0, character=0)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=0, character=1)
-    ) == types.Position(line=0, character=0)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=0)
-    ) == types.Position(line=1, character=0)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=2)
-    ) == types.Position(line=1, character=1)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=3)
-    ) == types.Position(line=1, character=2)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=4)
-    ) == types.Position(line=1, character=2)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=100)
-    ) == types.Position(line=1, character=2)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=3, character=0)
-    ) == types.Position(line=2, character=0)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=4, character=10)
-    ) == types.Position(line=2, character=0)
+    assert codec.position_from_client_units(lines, types.Position(line=0, character=0)) == types.Position(
+        line=0, character=0
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=0, character=1)) == types.Position(
+        line=0, character=0
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=0)) == types.Position(
+        line=1, character=0
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=2)) == types.Position(
+        line=1, character=1
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=3)) == types.Position(
+        line=1, character=2
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=4)) == types.Position(
+        line=1, character=2
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=100)) == types.Position(
+        line=1, character=2
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=3, character=0)) == types.Position(
+        line=2, character=0
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=4, character=10)) == types.Position(
+        line=2, character=0
+    )
 
 
 def test_position_for_line_endings():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf16)
     lines = ["x\r\n", "y\n"]
-    assert codec.position_from_client_units(
-        lines, types.Position(line=0, character=10)
-    ) == types.Position(line=0, character=1)
-    assert codec.position_from_client_units(
-        lines, types.Position(line=1, character=10)
-    ) == types.Position(line=1, character=1)
+    assert codec.position_from_client_units(lines, types.Position(line=0, character=10)) == types.Position(
+        line=0, character=1
+    )
+    assert codec.position_from_client_units(lines, types.Position(line=1, character=10)) == types.Position(
+        line=1, character=1
+    )
 
 
 def test_word_at_position():
