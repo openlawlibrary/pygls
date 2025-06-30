@@ -61,7 +61,9 @@ class TextDocument(object):
         self._source = source
 
         self._is_sync_kind_full = sync_kind == types.TextDocumentSyncKind.Full
-        self._is_sync_kind_incremental = sync_kind == types.TextDocumentSyncKind.Incremental
+        self._is_sync_kind_incremental = (
+            sync_kind == types.TextDocumentSyncKind.Incremental
+        )
         self._is_sync_kind_none = sync_kind == types.TextDocumentSyncKind.None_
 
         self._position_codec = position_codec if position_codec else PositionCodec()
@@ -75,7 +77,9 @@ class TextDocument(object):
     def position_codec(self) -> PositionCodec:
         return self._position_codec
 
-    def _apply_incremental_change(self, change: types.TextDocumentContentChangePartial) -> None:
+    def _apply_incremental_change(
+        self, change: types.TextDocumentContentChangePartial
+    ) -> None:
         """Apply an ``Incremental`` text change to the document"""
         lines = self.lines
         text = change.text
@@ -168,9 +172,13 @@ class TextDocument(object):
     def offset_at_position(self, client_position: types.Position) -> int:
         """Return the character offset pointed at by the given client_position."""
         lines = self.lines
-        server_position = self._position_codec.position_from_client_units(lines, client_position)
+        server_position = self._position_codec.position_from_client_units(
+            lines, client_position
+        )
         row, col = server_position.line, server_position.character
-        return col + sum(self._position_codec.client_num_units(line) for line in lines[:row])
+        return col + sum(
+            self._position_codec.client_num_units(line) for line in lines[:row]
+        )
 
     @property
     def source(self) -> str:
@@ -206,7 +214,9 @@ class TextDocument(object):
         return offset
 
     @staticmethod
-    def _compute_line_offsets(text: str, is_at_line_start: bool, text_offset: int = 0) -> List[int]:
+    def _compute_line_offsets(
+        text: str, is_at_line_start: bool, text_offset: int = 0
+    ) -> List[int]:
         result: List[int] = [text_offset] if is_at_line_start else []
         i = 0
         while i < len(text):
@@ -257,7 +267,9 @@ class TextDocument(object):
         if client_position.line >= len(lines):
             return ""
 
-        server_position = self._position_codec.position_from_client_units(lines, client_position)
+        server_position = self._position_codec.position_from_client_units(
+            lines, client_position
+        )
         row, col = server_position.line, server_position.character
         line = lines[row]
         # Split word in two
