@@ -19,7 +19,12 @@
 import re
 
 from lsprotocol import types
-from pygls.workspace import TextDocument, PositionCodec
+from pygls.workspace import (
+    TextDocument,
+    PositionCodec,
+    ServerTextPosition,
+    ServerTextRange,
+)
 import pytest
 from .conftest import DOC, DOC_URI
 
@@ -220,7 +225,7 @@ def test_length_consistency(position_codec, codec_name, code_unit_size):
 def test_encoding_position_consistency(position_codec, codec_name, code_unit_size):
     encoded = SAMPLE_STRING.encode(codec_name)
     for column in range(len(SAMPLE_STRING)):
-        utf32_pos = types.Position(line=0, character=column)
+        utf32_pos = ServerTextPosition(line=0, character=column)
         client_pos = position_codec.position_to_client_units([SAMPLE_STRING], utf32_pos)
         # The position that we get from position_to_client_units
         # should be the right number of code units to cut off the
@@ -242,30 +247,30 @@ def test_position_from_utf16():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf16)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    ) == ServerTextPosition(line=0, character=3)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=5)
-    ) == types.Position(line=0, character=4)
+    ) == ServerTextPosition(line=0, character=4)
 
 
 def test_position_from_utf32():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf32)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    ) == ServerTextPosition(line=0, character=3)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=4)
+    ) == ServerTextPosition(line=0, character=4)
 
 
 def test_position_from_utf8():
     codec = PositionCodec(encoding=types.PositionEncodingKind.Utf8)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=3)
-    ) == types.Position(line=0, character=3)
+    ) == ServerTextPosition(line=0, character=3)
     assert codec.position_from_client_units(
         ['x="😋"'], types.Position(line=0, character=7)
-    ) == types.Position(line=0, character=4)
+    ) == ServerTextPosition(line=0, character=4)
 
 
 def test_position_to_utf16():
@@ -309,9 +314,9 @@ def test_range_from_utf16():
             start=types.Position(line=0, character=3),
             end=types.Position(line=0, character=5),
         ),
-    ) == types.Range(
-        start=types.Position(line=0, character=3),
-        end=types.Position(line=0, character=4),
+    ) == ServerTextRange(
+        start=ServerTextPosition(line=0, character=3),
+        end=ServerTextPosition(line=0, character=4),
     )
 
     range = types.Range(
@@ -319,9 +324,9 @@ def test_range_from_utf16():
         end=types.Position(line=0, character=5),
     )
     actual = codec.range_from_client_units(['x="😋😋"'], range)
-    expected = types.Range(
-        start=types.Position(line=0, character=3),
-        end=types.Position(line=0, character=4),
+    expected = ServerTextRange(
+        start=ServerTextPosition(line=0, character=3),
+        end=ServerTextPosition(line=0, character=4),
     )
     assert actual == expected
 
@@ -417,31 +422,31 @@ def test_utf16_to_utf32_position_cast():
     lines = ["", "😋😋", ""]
     assert codec.position_from_client_units(
         lines, types.Position(line=0, character=0)
-    ) == types.Position(line=0, character=0)
+    ) == ServerTextPosition(line=0, character=0)
     assert codec.position_from_client_units(
         lines, types.Position(line=0, character=1)
-    ) == types.Position(line=0, character=0)
+    ) == ServerTextPosition(line=0, character=0)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=0)
-    ) == types.Position(line=1, character=0)
+    ) == ServerTextPosition(line=1, character=0)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=2)
-    ) == types.Position(line=1, character=1)
+    ) == ServerTextPosition(line=1, character=1)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=3)
-    ) == types.Position(line=1, character=2)
+    ) == ServerTextPosition(line=1, character=2)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=4)
-    ) == types.Position(line=1, character=2)
+    ) == ServerTextPosition(line=1, character=2)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=100)
-    ) == types.Position(line=1, character=2)
+    ) == ServerTextPosition(line=1, character=2)
     assert codec.position_from_client_units(
         lines, types.Position(line=3, character=0)
-    ) == types.Position(line=2, character=0)
+    ) == ServerTextPosition(line=2, character=0)
     assert codec.position_from_client_units(
         lines, types.Position(line=4, character=10)
-    ) == types.Position(line=2, character=0)
+    ) == ServerTextPosition(line=2, character=0)
 
 
 def test_position_for_line_endings():
@@ -449,10 +454,10 @@ def test_position_for_line_endings():
     lines = ["x\r\n", "y\n"]
     assert codec.position_from_client_units(
         lines, types.Position(line=0, character=10)
-    ) == types.Position(line=0, character=1)
+    ) == ServerTextPosition(line=0, character=1)
     assert codec.position_from_client_units(
         lines, types.Position(line=1, character=10)
-    ) == types.Position(line=1, character=1)
+    ) == ServerTextPosition(line=1, character=1)
 
 
 def test_word_at_position():
