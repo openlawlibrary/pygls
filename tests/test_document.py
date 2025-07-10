@@ -20,6 +20,7 @@ import re
 
 from lsprotocol import types
 from pygls.workspace import TextDocument, PositionCodec
+import pytest
 from .conftest import DOC, DOC_URI
 
 
@@ -171,6 +172,64 @@ def test_document_source_unicode():
     document_mem = TextDocument(DOC_URI, "my source")
     document_disk = TextDocument(DOC_URI)
     assert isinstance(document_mem.source, type(document_disk.source))
+
+
+SAMPLE_STRING = (
+    "\u00e4"  # Non-ASCII character (latin small letter a with diaeresis) -- one utf-16 code units, 2 utf-8 code units
+    "\u0061\u0308"  # Same letter but decomposed to "a" and combining diaeresis (NFD) -- 2 utf-16 code units, 3 utf-8 code units
+    "錯誤"  # Characters in BMP but with 3-byte utf-8 encodings -- 2 utf-16 code units, 2x3 utf-8 code units
+    "😋"  # Emoji (outside Basic Multilingual Plane) -- one codepoint, 2 utf-16 codepoints, 4 utf-8 codepoints
+)
+
+CODECS = (
+    # use explicit little-endian encodings that don't emit a byte order mark
+    (PositionCodec(encoding=types.PositionEncodingKind.Utf32), "utf-32-le", 4),
+    (PositionCodec(encoding=types.PositionEncodingKind.Utf16), "utf-16-le", 2),
+    (PositionCodec(encoding=types.PositionEncodingKind.Utf8), "utf-8", 1),
+)
+
+
+@pytest.mark.parametrize(
+    ["position_codec", "codec_name", "code_unit_size"],
+    CODECS,
+)
+def test_length_consistency(position_codec, codec_name, code_unit_size):
+    # Test that the string codec and the position codec agree on how long the encoded string is
+    assert (
+        len(SAMPLE_STRING.encode(codec_name))
+        == position_codec.client_num_units(SAMPLE_STRING) * code_unit_size
+    )
+
+    # and that they agree going through codepoint by codepoint as well (to avoid off-by-ones cancelling each other out)
+    for end in range(len(SAMPLE_STRING) + 1):
+        sliced = SAMPLE_STRING[:end]
+        encoded = sliced.encode(codec_name)
+        assert position_codec.client_num_units(sliced) * code_unit_size == len(encoded)
+
+
+@pytest.mark.parametrize(
+    ["position_codec", "codec_name", "code_unit_size"],
+    CODECS,
+)
+def test_encoding_position_consistency(position_codec, codec_name, code_unit_size):
+    encoded = SAMPLE_STRING.encode(codec_name)
+    for column in range(len(SAMPLE_STRING)):
+        utf32_pos = types.Position(line=0, character=column)
+        client_pos = position_codec.position_to_client_units([SAMPLE_STRING], utf32_pos)
+        # The position that we get from position_to_client_units
+        # should be the right number of code units to cut off the
+        # beginning in order to get back the same string. This
+        # assertion ensures both that the codecs agree on the offsets,
+        # and that we don't emit positions in the middle of a
+        # multi-code-unit codepoint (since then the `decode` would fail).
+        byte_pos = client_pos.character * code_unit_size
+        assert encoded[byte_pos:].decode(codec_name) == SAMPLE_STRING[column:]
+
+        # And the conversion should roundtrip.
+        assert (
+            position_codec.position_from_client_units([SAMPLE_STRING], client_pos)
+            == utf32_pos
+        )
 
 
 def test_position_from_utf16():
