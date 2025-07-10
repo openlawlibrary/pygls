@@ -49,6 +49,16 @@ class PositionCodec:
         """
         return sum(self.is_char_beyond_multilingual_plane(ch) for ch in chars)
 
+    def utf8_bytes(self, char: str) -> int:
+        codepoint = ord(char)
+        if codepoint < 0x80:
+            return 1
+        if codepoint < 0x800:
+            return 2
+        if codepoint < 0x10000:
+            return 3
+        return 4
+
     def client_num_units(self, chars: str):
         """
         Calculate the length of `str` in client-supported UTF-[32|16|8] code units.
@@ -61,7 +71,7 @@ class PositionCodec:
             return utf32_units
 
         if self.encoding == types.PositionEncodingKind.Utf8:
-            return utf32_units + (self.utf16_unit_offset(chars) * 2)
+            return sum(self.utf8_bytes(c) for c in chars)
 
         return utf32_units + self.utf16_unit_offset(chars)
 
@@ -133,6 +143,8 @@ class PositionCodec:
                     _client_index += 4
                 _client_index += 2
             else:
+                if self.encoding == types.PositionEncodingKind.Utf8 and ord(_current_char) > 127:
+                    _client_index += 1
                 _client_index += 1
             utf32_index += 1
 
