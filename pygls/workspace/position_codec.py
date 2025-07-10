@@ -33,6 +33,9 @@ class PositionCodec:
     ):
         self.encoding = encoding
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, encoding {self.encoding}>"
+
     @classmethod
     def is_char_beyond_multilingual_plane(cls, char: str) -> bool:
         return ord(char) > 0xFFFF
