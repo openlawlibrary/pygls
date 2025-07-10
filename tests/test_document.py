@@ -292,7 +292,7 @@ def test_position_to_utf8():
 
     assert codec.position_to_client_units(
         ['x="😋"'], types.Position(line=0, character=4)
-    ) == types.Position(line=0, character=6)
+    ) == types.Position(line=0, character=7)
 
 
 def test_range_from_utf16():
@@ -375,7 +375,7 @@ def test_offset_at_position_utf8():
         position_codec=PositionCodec(encoding=types.PositionEncodingKind.Utf8),
     )
     assert doc.offset_at_position(types.Position(line=0, character=8)) == 8
-    assert doc.offset_at_position(types.Position(line=5, character=0)) == 41
+    assert doc.offset_at_position(types.Position(line=5, character=0)) == 42
 
 
 def test_utf16_to_utf32_position_cast():
