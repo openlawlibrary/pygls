@@ -24,32 +24,51 @@ from lsprotocol import types
 log = logging.getLogger(__name__)
 
 
-class PositionCodec:
-    def __init__(
-        self,
-        encoding: Optional[
-            Union[types.PositionEncodingKind, str]
-        ] = types.PositionEncodingKind.Utf16,
-    ):
-        self.encoding = encoding
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__}, encoding {self.encoding}>"
-
-    @classmethod
-    def is_char_beyond_multilingual_plane(cls, char: str) -> bool:
-        return ord(char) > 0xFFFF
-
-    def utf16_unit_offset(self, chars: str):
+class UnitCounter:
+    def code_units_for_char(self, char: str) -> int:
         """
-        Calculate the number of characters which need two utf-16 code units.
-
-        Arguments:
-            chars (str): The string to count occurrences of utf-16 code units for.
+        Get the number of code units used to encode the given single character.
         """
-        return sum(self.is_char_beyond_multilingual_plane(ch) for ch in chars)
+        raise NotImplementedError
 
-    def utf8_bytes(self, char: str) -> int:
+    def num_units(self, chars: str) -> int:
+        """
+        Get the number of code units used to encode the given string.
+        """
+        return sum(self.code_units_for_char(c) for c in chars)
+
+    def column_from_utf32(self, line: str, column: int) -> int:
+        """
+        Convert the codepoint index `column` into code units.
+        """
+        return sum(self.code_units_for_char(c) for c in line[:column])
+
+
+class Utf32(UnitCounter):
+    def code_units_for_char(self, char: str) -> int:
+        return 1
+
+    def num_units(self, chars: str) -> int:
+        # We can avoid the loop needed for other encodings here
+        return len(chars)
+
+    def column_from_utf32(self, line: str, column: int) -> int:
+        return column
+
+
+def is_beyond_basic_multilingual_plane(char: str) -> bool:
+    return ord(char) > 0xFFFF
+
+
+class Utf16(UnitCounter):
+    def code_units_for_char(self, char: str) -> int:
+        if is_beyond_basic_multilingual_plane(char):
+            return 2
+        return 1
+
+
+class Utf8(UnitCounter):
+    def code_units_for_char(self, char: str) -> int:
         codepoint = ord(char)
         if codepoint < 0x80:
             return 1
@@ -59,21 +78,29 @@ class PositionCodec:
             return 3
         return 4
 
-    def client_num_units(self, chars: str):
-        """
-        Calculate the length of `str` in client-supported UTF-[32|16|8] code units.
 
-        Arguments:
-            chars (str): The string to return the length in UTF-[32|16|8] code units for.
-        """
-        utf32_units = len(chars)
-        if self.encoding == types.PositionEncodingKind.Utf32:
-            return utf32_units
+impls: dict["str | types.PositionEncodingKind | None", UnitCounter] = {
+    types.PositionEncodingKind.Utf8: Utf8(),
+    types.PositionEncodingKind.Utf16: Utf16(),
+    types.PositionEncodingKind.Utf32: Utf32(),
+}
 
-        if self.encoding == types.PositionEncodingKind.Utf8:
-            return sum(self.utf8_bytes(c) for c in chars)
 
-        return utf32_units + self.utf16_unit_offset(chars)
+class PositionCodec:
+    def __init__(
+        self,
+        encoding: Optional[
+            Union[types.PositionEncodingKind, str]
+        ] = types.PositionEncodingKind.Utf16,
+    ):
+        self.encoding = encoding
+        self.impl = impls.get(encoding, Utf16())
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, encoding {self.encoding}>"
+
+    def client_num_units(self, string: str):
+        return self.impl.num_units(string)
 
     def position_from_client_units(
         self, lines: Sequence[str], position: types.Position
@@ -107,44 +134,30 @@ class PositionCodec:
         if len(lines) == 0:
             return types.Position(0, 0)
         if position.line >= len(lines):
-            return types.Position(len(lines) - 1, self.client_num_units(lines[-1]))
+            return types.Position(len(lines) - 1, self.impl.num_units(lines[-1]))
 
         _line = lines[position.line]
         _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
-        _client_len = self.client_num_units(_line)
-        _utf32_len = len(_line)
+        _client_len = self.impl.num_units(_line)
 
         if _client_len == 0:
             return types.Position(position.line, 0)
 
-        _client_end_of_line = self.client_num_units(_line)
-        if position.character > _client_end_of_line:
-            position.character = _client_end_of_line - 1
+        if position.character > _client_len:
+            position.character = _client_len - 1
 
-        _client_index = 0
+        client_position = 0
         utf32_index = 0
-        while True:
-            _is_searching_queried_position = _client_index < position.character
-            _is_before_end_of_line = utf32_index < _utf32_len
-            _is_searching_for_position = (
-                _is_searching_queried_position and _is_before_end_of_line
-            )
-            if not _is_searching_for_position:
+        for c in _line:
+            if client_position >= position.character:
                 break
-
-            _current_char = _line[utf32_index]
-            if self.encoding == types.PositionEncodingKind.Utf8:
-                _client_index += self.utf8_bytes(_current_char)
-            elif self.encoding == types.PositionEncodingKind.Utf16:
-                _client_index += (
-                    2 if self.is_char_beyond_multilingual_plane(_current_char) else 1
-                )
-            else:
-                _client_index += 1
+            client_position += self.impl.code_units_for_char(c)
             utf32_index += 1
 
-        position = types.Position(line=position.line, character=utf32_index)
-        return position
+        if client_position < position.character:
+            utf32_index = len(_line)
+
+        return types.Position(line=position.line, character=utf32_index)
 
     def position_to_client_units(
         self, lines: Sequence[str], position: types.Position
@@ -163,9 +176,7 @@ class PositionCodec:
             The position with `character` being converted to UTF-[32|16|8] code units.
         """
         try:
-            character = self.client_num_units(
-                lines[position.line][: position.character]
-            )
+            character = self.impl.num_units(lines[position.line][: position.character])
             return types.Position(
                 line=position.line,
                 character=character,
