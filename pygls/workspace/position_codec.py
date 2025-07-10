@@ -17,11 +17,30 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
+from dataclasses import dataclass
 from typing import Optional, Union, Sequence
 
 from lsprotocol import types
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class ServerTextPosition:
+    line: int
+    character: int
+
+    def __repr__(self) -> str:
+        return f"{self.line}:{self.character}"
+
+
+@dataclass
+class ServerTextRange:
+    start: ServerTextPosition
+    end: ServerTextPosition
+
+    def __repr__(self):
+        return f"{self.start}-{self.end}"
 
 
 class UnitCounter:
@@ -104,7 +123,7 @@ class PositionCodec:
 
     def position_from_client_units(
         self, lines: Sequence[str], position: types.Position
-    ) -> types.Position:
+    ) -> ServerTextPosition:
         """
         Convert the position.character from UTF-[32|16|8] code units to UTF-32.
 
@@ -132,16 +151,16 @@ class PositionCodec:
             The position with `character` being converted to UTF-32 code units.
         """
         if len(lines) == 0:
-            return types.Position(0, 0)
+            return ServerTextPosition(0, 0)
         if position.line >= len(lines):
-            return types.Position(len(lines) - 1, self.impl.num_units(lines[-1]))
+            return ServerTextPosition(len(lines) - 1, self.impl.num_units(lines[-1]))
 
         _line = lines[position.line]
         _line = _line.replace("\r\n", "\n")  # TODO: it's a bit of a hack
         _client_len = self.impl.num_units(_line)
 
         if _client_len == 0:
-            return types.Position(position.line, 0)
+            return ServerTextPosition(position.line, 0)
 
         if position.character > _client_len:
             position.character = _client_len - 1
@@ -157,10 +176,10 @@ class PositionCodec:
         if client_position < position.character:
             utf32_index = len(_line)
 
-        return types.Position(line=position.line, character=utf32_index)
+        return ServerTextPosition(line=position.line, character=utf32_index)
 
     def position_to_client_units(
-        self, lines: Sequence[str], position: types.Position
+        self, lines: Sequence[str], position: "ServerTextPosition | types.Position"
     ) -> types.Position:
         """
         Convert the position.character from its internal UTF-32 representation
@@ -186,7 +205,7 @@ class PositionCodec:
 
     def range_from_client_units(
         self, lines: Sequence[str], range: types.Range
-    ) -> types.Range:
+    ) -> ServerTextRange:
         """
         Convert range.[start|end].character from UTF-[32|16|8] code units to UTF-32.
 
@@ -199,14 +218,13 @@ class PositionCodec:
         Returns:
             The range with `character` offsets being converted to UTF-32 code units.
         """
-        range_new = types.Range(
+        return ServerTextRange(
             start=self.position_from_client_units(lines, range.start),
             end=self.position_from_client_units(lines, range.end),
         )
-        return range_new
 
     def range_to_client_units(
-        self, lines: Sequence[str], range: types.Range
+        self, lines: Sequence[str], range: "ServerTextRange | types.Range"
     ) -> types.Range:
         """
         Convert range.[start|end].character from UTF-32 to UTF-[32|16|8] code units.
