@@ -133,18 +133,13 @@ class PositionCodec:
                 break
 
             _current_char = _line[utf32_index]
-            _is_double_width = PositionCodec.is_char_beyond_multilingual_plane(
-                _current_char
-            )
-            if _is_double_width:
-                if self.encoding == types.PositionEncodingKind.Utf32:
-                    _client_index += 1
-                if self.encoding == types.PositionEncodingKind.Utf8:
-                    _client_index += 4
-                _client_index += 2
+            if self.encoding == types.PositionEncodingKind.Utf8:
+                _client_index += self.utf8_bytes(_current_char)
+            elif self.encoding == types.PositionEncodingKind.Utf16:
+                _client_index += (
+                    2 if self.is_char_beyond_multilingual_plane(_current_char) else 1
+                )
             else:
-                if self.encoding == types.PositionEncodingKind.Utf8 and ord(_current_char) > 127:
-                    _client_index += 1
                 _client_index += 1
             utf32_index += 1
 
