@@ -1,6 +1,51 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## [2.0.0a5] - 2025-07-14
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a5
+
+### Bug Fixes
+
+- Utf8 encodings
+
+### CI
+
+- Migrate from `poetry` to `uv`
+- Pin all action versions
+
+### Features
+
+- Make `TextDocument.lines` be a `Sequence[str]`
+- Provide encoding hint in __repr__
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Re-export get_capability
+- More accurate typing
+- Lsprotocol 2025.0.0
+- Fix indentation
+- Add required groups to Makefile
+- Update Makefiles to make it easy to switch Python versions
+
+### Refactor
+
+- Use clearer logic for accumulating code unit count
+
+### Testing
+
+- Run slow tests last
+- Test position codecs against actual string encoding
+- Fix some incorrect utf-8 offsets
+
+### Build
+
+- Bump the pip group across 2 directories with 5 updates
+- V2.0.0a5
+
+
 ## [2.0.0a4] - 2025-06-05
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a4
 
