@@ -167,15 +167,22 @@ class TextDocument(object):
         return tuple(self.source.splitlines(True))
 
     def offset_at_position(self, client_position: types.Position) -> int:
-        """Return the character offset pointed at by the given client_position."""
+        """
+        Convert client_position to an index into self.source.
+
+        The index is the number of code points preceding the client_position in self.source.
+
+        Example in a code action request handler:
+            selected_string = document.source[
+                document.offset_at_position(params.range.start) : document.offset_at_position(params.range.end)
+            ]
+        """
         lines = self.lines
         server_position = self._position_codec.position_from_client_units(
             lines, client_position
         )
         row, col = server_position.line, server_position.character
-        return col + sum(
-            self._position_codec.client_num_units(line) for line in lines[:row]
-        )
+        return col + sum(len(line) for line in lines[:row])
 
     @property
     def source(self) -> str:

@@ -204,10 +204,10 @@ class PositionCodec:
             lines (sequence):
                 The content of the document which the range refers to.
             range (Range):
-                The line and character offset in  code units.
+                The line and character offset in code points.
 
         Returns:
-            The range with `character` offsets being converted to UTF-[32|16|8] code units.
+            The range with `character` offsets converted to UTF-[32|16|8] code units.
         """
         return types.Range(
             start=self.position_to_client_units(lines, range.start),
