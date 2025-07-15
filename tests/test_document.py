@@ -179,6 +179,12 @@ SAMPLE_STRING = (
     "\u0061\u0308"  # Same letter but decomposed to "a" and combining diaeresis (NFD) -- 2 utf-16 code units, 3 utf-8 code units
     "錯誤"  # Characters in BMP but with 3-byte utf-8 encodings -- 2 utf-16 code units, 2x3 utf-8 code units
     "😋"  # Emoji (outside Basic Multilingual Plane) -- one codepoint, 2 utf-16 codepoints, 4 utf-8 codepoints
+    "\n"  # To trigger offset calculation bugs in multiline documents
+    # and all that again
+    "\u00e4"
+    "\u0061\u0308"
+    "錯誤"
+    "😋"
 )
 
 CODECS = (
@@ -343,6 +349,34 @@ def test_range_to_utf16():
         end=types.Position(line=0, character=5),
     )
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["position_codec", "codec_name", "code_unit_size"],
+    CODECS,
+)
+def test_offset_at_position(position_codec, codec_name, code_unit_size):
+    document = TextDocument(
+        DOC_URI,
+        SAMPLE_STRING,
+        position_codec=position_codec,
+    )
+    # Test all existing positions in the document
+    expected_offset = 0
+    for line_index, line in enumerate(document.lines):
+        for code_point_index, code_point in enumerate(line):
+            # The encoded partial line is needed to calculate the number of code units in the respective encoding
+            # The python encode method is assumed to be correct and therefore used as a reference
+            partial_line_encoded = line[:code_point_index].encode(codec_name)
+            client_position = types.Position(
+                line=line_index, character=len(partial_line_encoded) // code_unit_size
+            )
+            offset = document.offset_at_position(client_position)
+            assert document.source[offset] == code_point
+            assert offset == expected_offset
+            # When iterating over the code points of document.source,
+            # the correct offset is always one more than in the previous iteration
+            expected_offset += 1
 
 
 def test_offset_at_position_utf16():
