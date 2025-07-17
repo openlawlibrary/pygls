@@ -10,68 +10,6 @@ The language server is responsible for managing the connection with the client a
 the `Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__
 which is based on the `Json RPC protocol <https://www.jsonrpc.org/specification>`__.
 
-Connections
-~~~~~~~~~~~
-
-*pygls* supports :ref:`ls-tcp`, :ref:`ls-stdio` and :ref:`ls-websocket` connections.
-
-.. _ls-tcp:
-
-TCP
-^^^
-
-TCP connections are usually used while developing the language server.
-This way the server can be started in *debug* mode separately and wait
-for the client connection.
-
-.. note:: Server should be started **before** the client.
-
-The code snippet below shows how to start the server in *TCP* mode.
-
-.. code:: python
-
-    from pygls.lsp.server import LanguageServer
-
-    server = LanguageServer('example-server', 'v0.1')
-
-    server.start_tcp('127.0.0.1', 8080)
-
-.. _ls-stdio:
-
-STDIO
-^^^^^
-
-STDIO connections are useful when client is starting the server as a child
-process. This is the way to go in production.
-
-The code snippet below shows how to start the server in *STDIO* mode.
-
-.. code:: python
-
-    from pygls.lsp.server import LanguageServer
-
-    server = LanguageServer('example-server', 'v0.1')
-
-    server.start_io()
-
-.. _ls-websocket:
-
-WEBSOCKET
-^^^^^^^^^
-
-WEBSOCKET connections are used when you want to expose language server to
-browser based editors.
-
-The code snippet below shows how to start the server in *WEBSOCKET* mode.
-
-.. code:: python
-
-    from pygls.lsp.server import LanguageServer
-
-    server = LanguageServer('example-server', 'v0.1')
-
-    server.start_ws('0.0.0.0', 1234)
-
 Logging
 ~~~~~~~
 

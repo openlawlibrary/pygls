@@ -1,7 +1,7 @@
 .. _howto-use-pyodide:
 
-How To Run a Server in Pyodide
-==============================
+How To Run a Server with Pyodide
+================================
 
 .. highlight:: none
 
