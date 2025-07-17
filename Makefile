@@ -5,6 +5,17 @@ dist: | $(UV)
 	git describe --tags --abbrev=0
 	$(UV) build
 
+.PHONY: clean-docs
+clean-docs:
+	rm -r docs/build
+
+.PHONY: docs
+docs: docs/requirements.txt | $(UV)
+	$(UV) run --group docs sphinx-build -M html docs/source docs/build
+
+docs/requirements.txt: uv.lock | $(UV)
+	$(UV) export --format requirements.txt --no-emit-project  --group docs --output-file $@
+
 .PHONY: lint
 lint: | $(UV)
 	$(UV) run --all-extras poe lint
