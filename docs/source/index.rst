@@ -24,6 +24,7 @@ allows you to write your own `language server`_ in just a few lines of code
    servers/getting-started
    servers/user-guide
    How To <servers/howto>
+   servers/reference
 
 .. toctree::
    :hidden:

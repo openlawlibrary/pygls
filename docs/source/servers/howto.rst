@@ -6,6 +6,7 @@ This section contains focused guides on how to perform language server related t
 .. toctree::
    :maxdepth: 1
 
+   Add Notebook Support <howto/add-notebook-support>
    Handle Invalid Data <howto/handle-invalid-data>
    Run a Server <howto/run-a-server>
    Run a Server with Pyodide <howto/run-a-server-in-pyodide>

@@ -70,54 +70,6 @@ For the majority of the time, a language server will be responding to requests a
 The Language Server protocol allows a server to define named methods that a client can invoke by sending a :lsp:`workspace/executeCommand` request.
 Unsurprisingly, *pygls* refers to these named methods a *commands*.
 
-*Built-In* Features
-~~~~~~~~~~~~~~~~~~~
-
-*pygls* comes with following predefined set of handlers for the following
-`Language Server Protocol <https://microsoft.github.io/language-server-protocol/>`__
-(LSP) features:
-
-.. note::
-
-    *Built-in* features in most cases should *not* be overridden.
-
-    If you need to do some additional processing of one of the messages listed below, register a feature with the same name and your handler will be called immediately after the corresponding built-in feature.
-
-**Lifecycle Messages**
-
-- The :lsp:`initialize` request is sent as a first request from client to the server to setup their communication.
-  *pygls* automatically computes registered LSP capabilities and sends them as part of the :class:`~lsprotocol.types.InitializeResult` response.
-
-- The :lsp:`shutdown` request is sent from the client to the server to ask the server to shutdown.
-
-- The :lsp:`exit` notification is sent from client to the server to ask the server to exit the process.
-  *pygls* automatically releases all resources and stops the process.
-
-**Text Document Synchronization**
-
-- The :lsp:`textDocument/didOpen` notification will tell *pygls* to create a document in the in-memory workspace which will exist as long as the document is opened in editor.
-
-- The :lsp:`textDocument/didChange` notification will tell *pygls* to update the document text.
-  *pygls* supports *full* and *incremental* document changes.
-
-- The :lsp:`textDocument/didClose` notification will tell *pygls* to remove a document from the in-memory workspace.
-
-**Notebook Document Synchronization**
-
-- The :lsp:`notebookDocument/didOpen` notification will tell *pygls* to create a notebook document in the in-memory workspace which will exist as long as the document is opened in editor.
-
-- The :lsp:`notebookDocument/didChange` notification will tell *pygls* to update the notebook document include its content, metadata, execution results and cell structure.
-
-- The :lsp:`notebookDocument/didClose` notification will tell *pygls* to remove the notebook from the in-memory workspace.
-
-**Miscellanous**
-
-- The :lsp:`workspace/didChangeWorkspaceFolders` notification will tell *pygls* to update in-memory workspace folders.
-
-- The :lsp:`workspace/executeCommand` request will tell *pygls* to execute a custom command.
-
-- The :lsp:`$/setTrace` notification tells *pygls* to update the server's :class:`TraceValue <lsprotocol.types.TraceValues>`.
-
 .. _ls-handlers:
 
 Registering Handlers
