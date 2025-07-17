@@ -101,6 +101,10 @@ show_missing = true
 skip_covered = true
 sort = "Cover"
 
+[tool.esbonio.sphinx]
+pythonCommand = ["uv", "run", "--group", "docs", "python"]
+buildCommand = ["sphinx-build", "-M", "html", "docs/source", "${defaultBuildDir}"]
+
 [tool.mypy]
 check_untyped_defs = true
 
