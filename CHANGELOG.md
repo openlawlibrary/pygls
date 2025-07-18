@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.0.0a6] - 2025-07-18
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a6
+
+### Bug Fixes
+
+- 🐛 fix conversion of client_position into offset_at_position
+
+### CI
+
+- Pin all action versions
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+
+### Build
+
+- V2.0.0a6
+
+
+
 ## [2.0.0a5] - 2025-07-14
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a5
 
