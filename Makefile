@@ -14,7 +14,7 @@ docs: docs/requirements.txt | $(UV)
 	$(UV) run --group docs sphinx-build -M html docs/source docs/build
 
 docs/requirements.txt: uv.lock | $(UV)
-	$(UV) export --format requirements.txt --no-emit-project  --group docs --output-file $@
+	$(UV) export --format requirements.txt --all-extras --no-emit-project --no-default-groups --group docs --output-file $@
 
 .PHONY: lint
 lint: | $(UV)
