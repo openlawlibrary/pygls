@@ -22,7 +22,6 @@ allows you to write your own `language server`_ in just a few lines of code
    :caption: Language Servers
 
    servers/getting-started
-   servers/user-guide
    How To <servers/howto>
    servers/reference
 
