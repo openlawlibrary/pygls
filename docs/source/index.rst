@@ -44,6 +44,7 @@ allows you to write your own `language server`_ in just a few lines of code
 
    pygls/howto
    pygls/reference
+   pygls/api-reference
 
 .. toctree::
    :hidden:
