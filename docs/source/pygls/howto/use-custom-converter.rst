@@ -1,9 +1,34 @@
-How To Handle Invalid Data
-==========================
+.. _howto-use-custom-converter:
+
+How To Use a Custom Converter
+=============================
+
+.. admonition:: Help Wanted
+   :class: tip
+
+   This page needs reworking slightly, it currently gives an approach for handling invalid data, but it should also be made clear that this approach can also be used to handle custom data types.
+
+``pygls`` relies on `lsprotocol <https://github.com/microsoft/lsprotocol/>`__ for all of its type definitions.
+``lsprotocol`` in turn builds on `attrs <https://www.attrs.org/en/stable/>`__ and `cattrs <https://catt.rs/en/stable/>`__ to provide the serialisation and deserialisation of types to/from JSON.
+
+This is done through a ``converter`` object::
+
+   >>> from lsprotocol.types import Position
+   >>> from pygls.protocol import default_converter
+
+   >>> converter = default_converter()
+   >>> p = converter.structure({"line": 1, "character": 2}, Position)
+   >>> p.line
+   1
+   >>> p.character
+   2
+
+Each language client/server receives a :func:`~pygls.protocol.default_converter` which is derived from the converter provided by ``lsprotocol``.
+This means it will follow the Language Server Protocol exactly.
 
 .. highlight:: python
 
-By default, servers written with *pygls* are quite pedantic and will complain loudly when given data they consider to be invalid
+Therefore, clients/servers written with *pygls* are pedantic and will complain loudly when given data they consider to be invalid
 
 .. dropdown:: Example Data
    :open:
@@ -94,24 +119,6 @@ By default, servers written with *pygls* are quite pedantic and will complain lo
       Traceback (most recent call last):
          ...
       pygls.exceptions.JsonRpcInvalidParams: Invalid Params
-
-This is due to the fact ``pygls`` relies on `lsprotocol <https://github.com/microsoft/lsprotocol/>`__ for all of its type definitions.
-``lsprotocol`` in turn builds on `attrs <https://www.attrs.org/en/stable/>`__ and `cattrs <https://catt.rs/en/stable/>`__ to provide the serialisation and deserialisation of types to/from JSON.
-
-This is done through a ``converter`` object::
-
-   >>> from lsprotocol.types import Position
-   >>> from pygls.protocol import default_converter
-
-   >>> converter = default_converter()
-   >>> p = converter.structure({"line": 1, "character": 2}, Position)
-   >>> p.line
-   1
-   >>> p.character
-   2
-
-Each language server receives a :func:`~pygls.protocol.default_converter` which is derived from the converter provided by ``lsprotocol``.
-This means it will follow the Language Server Protocol exactly.
 
 Structure Hooks
 ---------------
