@@ -10,3 +10,4 @@ This section contains focused guides on how to perform language server related t
    Implement Workspace Commands <howto/implement-workspace-commands>
    Run a Server <howto/run-a-server>
    Run a Server with Pyodide <howto/run-a-server-in-pyodide>
+   Work with Text Documents <howto/work-with-text-documents>
