@@ -230,52 +230,6 @@ Communicating with the Client
 
 In addition to responding to requests, there are a number of additional messages a server can send to the client.
 
-Configuration
-~~~~~~~~~~~~~
-
-The :lsp:`workspace/configuration` request is sent from the server to the client in order to fetch configuration settings from the client.
-Depending on how the handler is registered (see :ref:`here <ls-handlers>`) you can use the :meth:`~pygls.server.LanguageServer.get_configuration` or :meth:`~pygls.server.LanguageServer.get_configuration_async` methods to request configuration from the client:
-
--  *asynchronous* functions (*coroutines*)
-
-   .. code:: python
-
-      # await keyword tells event loop to switch to another task until notification is received
-      config = await ls.get_configuration(
-          ConfigurationParams(
-              items=[
-                  ConfigurationItem(scope_uri='doc_uri_here', section='section')
-              ]
-          )
-      )
-
--  *synchronous* functions
-
-   .. code:: python
-
-      # callback is called when notification is received
-      def callback(config):
-          # Omitted
-
-      params = ConfigurationParams(
-          items=[
-              ConfigurationItem(scope_uri='doc_uri_here', section='section')
-          ]
-      )
-      config = ls.get_configuration(params, callback)
-
--  *threaded* functions
-
-   .. code:: python
-
-      # .result() will block the thread
-      config = ls.get_configuration(
-          ConfigurationParams(
-              items=[
-                  ConfigurationItem(scope_uri='doc_uri_here', section='section')
-              ]
-          )
-      ).result()
 
 Publish Diagnostics
 ~~~~~~~~~~~~~~~~~~~
@@ -335,18 +289,6 @@ Show Message Log
            ls.show_message_log(f"Counting down... {10 - i}")
            await asyncio.sleep(1)
 
-Workspace Edits
-~~~~~~~~~~~~~~~
-
-The :lsp:`workspace/applyEdit` request allows your language server to ask the client to modify particular documents in the client's workspace.
-
-.. code:: python
-
-   def apply_edit(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
-       # Omitted
-
-   def apply_edit_async(self, edit: WorkspaceEdit, label: str = None) -> ApplyWorkspaceEditResponse:
-       # Omitted
 
 Custom Notifications
 ~~~~~~~~~~~~~~~~~~~~

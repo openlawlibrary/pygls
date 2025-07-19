@@ -3,6 +3,8 @@ Servers
 
 .. autoclass:: pygls.lsp.server.LanguageServer
    :members:
+   :inherited-members:
+
 
 .. autofunction:: pygls.cli.start_server
 
