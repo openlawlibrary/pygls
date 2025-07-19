@@ -1,10 +1,6 @@
 How To Migrate to v2.0
 ======================
 
-.. note::
-
-   This guide is still a draft, some details may change
-
 The highlight of the *pygls* v2 release is upgrading ``lsprotocol`` to ``v2024.x`` bringing with it support for the proposed LSP v3.18 types and methods.
 The new version includes standardised object names (so no more classes like ``NotebookDocumentSyncRegistrationOptionsNotebookSelectorType2CellsType``!)
 
@@ -12,6 +8,12 @@ With the major version bump, this release also takes the opportunity to clean up
 This guide outlines how to adapt an existing server to the breaking changes introduced in this release.
 
 **Known Migrations**
+
+.. admonition:: Finished your migration?
+   :class: tip
+
+   Have you migrated your server to ``v2``?
+   Feel free to open a pull request and add yours to the list below!
 
 You may find these projects that have already successfully migrated to v2 a useful reference:
 
@@ -22,7 +24,10 @@ You may find these projects that have already successfully migrated to v2 a usef
 Python Support
 --------------
 
-*pygls v2* removes support for Python 3.8 and adds support for Python 3.13 (with the GIL, you are welcome to try the free-threaded version just note that it has not been tested yet!)
+*pygls v2*
+
+- Removes support for Python 3.8
+- Adds support for Python 3.13 and 3.14 (with the GIL, you are welcome to try a free-threaded build just note that it has not been tested yet!)
 
 URI Handling
 ------------
@@ -51,6 +56,24 @@ The following methods and functions have been deprecated for some time and have 
 ``Worspace.remove_document``                        ``Workspace.remove_text_document``
 ``Worspace.update_document``                        ``Workspace.update_text_document``
 ==================================================  ==============
+
+Sending Custom Notifications
+----------------------------
+
+The ``send_notification`` method on the ``LanguageServer`` has been removed without a prior deprecation notice (sorry!)
+
+To send custom notifications in v2, use the ``notify`` method on the underlying protocol object.
+
+.. code-block:: python
+
+   # Before
+   server.send_notification("my/customNotification", {"example": "data"})
+
+   # After
+   server.protocol.notify("my/customNotification", {"example": "data"})
+
+See :ref:`howto-send-custom-messages` for more details
+
 
 Server commands can now use type annotations
 --------------------------------------------
