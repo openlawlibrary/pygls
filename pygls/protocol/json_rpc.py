@@ -542,7 +542,7 @@ class JsonRPCProtocol:
             if inspect.isawaitable(res):
                 asyncio.ensure_future(res)
 
-        except BrokenPipeError as e:
+        except BrokenPipeError:
             logger.exception("Error sending data. BrokenPipeError", exc_info=True)
             raise
         except Exception as error:
