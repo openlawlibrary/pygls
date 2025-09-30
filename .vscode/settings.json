@@ -3,24 +3,35 @@
         // Uncomment to enable `textDocument/onTypeFormatting` requests
         // "editor.formatOnType": true
     },
-    // Uncomment to override Python interpreter used.
-    // "pygls.server.pythonPath": "/path/to/python",
-    "pygls.server.debug": false,
+    // Uncomment to override Python environment used.
+    // "pygls.server.pythonCommand": ["uv", "run", "--no-project", "--prerelease=allow", "--with", "pygls==2.0a2", "python"],
+    //
+    // Uncomment to debug the server process in VSCode
+    // "pygls.server.debug": true,
+    //
+    // Uncomment to change where the debugger should be hosted
     // "pygls.server.debugHost": "localhost",
     // "pygls.server.debugPort": 5678,
+    //
+    // Controls which LSP server is launched
     "pygls.server.launchScript": "code_actions.py", // This is relative to `pygls.server.cwd`
     "pygls.server.cwd": "${workspaceFolder}/examples/servers",
-    "pygls.trace.server": "off",
+    //
+    // Uncomment to view all LSP messages between the client and server
+    // "pygls.trace.server": "verbose",
+    //
+    // Controls which documents VSCode will ask your LSP server about
     "pygls.client.documentSelector": [
         {
-            "scheme": "file",
             "language": "plaintext"
         }
     ],
+    // "pygls.jsonServer.exampleConfiguration": "some value here",
+    //
+    // Below are standard VSCode project settings.
     "python.testing.pytestArgs": [
         "."
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    // "pygls.jsonServer.exampleConfiguration": "some value here",
 }
