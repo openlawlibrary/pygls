@@ -50,6 +50,9 @@ markers = [
     "e2e: tests that run a language server in a subprocess",
 ]
 
+[tool.poe]
+executor.type = "uv"
+
 [tool.poe.tasks]
 test-pyodide = "pytest tests/e2e --lsp-runtime pyodide"
 ruff = "ruff check ."
