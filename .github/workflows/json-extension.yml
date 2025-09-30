@@ -57,7 +57,7 @@ jobs:
           replace_packagejson_version package.json $GITHUB_RUN_ID
 
       - name: Build VSIX
-        run: npx vsce package
+        run: make dist
 
       - name: Validate VSIX
         run: |
