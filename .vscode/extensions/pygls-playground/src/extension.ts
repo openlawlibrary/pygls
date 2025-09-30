@@ -26,7 +26,7 @@ import * as semver from "semver";
 import { PythonExtension } from "@vscode/python-extension";
 import { LanguageClient, LanguageClientOptions, ServerOptions, State, integer } from "vscode-languageclient/node";
 
-const MIN_PYTHON = semver.parse("3.7.9")
+const MIN_PYTHON = semver.parse("3.9.0")
 
 // Some other nice to haves.
 // TODO: Check selected env satisfies pygls' requirements - if not offer to run the select env command.
@@ -317,15 +317,14 @@ function getServerPath(): string {
  */
 async function getPythonCommand(resource?: vscode.Uri): Promise<string[] | undefined> {
     const config = vscode.workspace.getConfiguration("pygls.server", resource)
-    const pythonPath = await getPythonInterpreter(resource)
-    if (!pythonPath) {
+    const pythonCommand = await getPythonInterpreterCmd(resource)
+    if (!pythonCommand) {
         return
     }
-    const command = [pythonPath]
     const enableDebugger = config.get<boolean>('debug')
 
     if (!enableDebugger) {
-        return command
+        return pythonCommand
     }
 
     const debugHost = config.get<string>('debugHost')
@@ -333,29 +332,29 @@ async function getPythonCommand(resource?: vscode.Uri): Promise<string[] | undef
     try {
         const debugArgs = await python.debug.getRemoteLauncherCommand(debugHost, debugPort, true)
         // Debugpy recommends we disable frozen modules
-        command.push("-Xfrozen_modules=off", ...debugArgs)
+        pythonCommand.push("-Xfrozen_modules=off", ...debugArgs)
     } catch (err) {
         logger.error(`Unable to get debugger command: ${err}`)
         logger.error("Debugger will not be available.")
     }
 
-    return command
+    return pythonCommand
 }
 
 /**
- * Return the python interpreter to use when starting the server.
+ * Return the command to use to start the python interpreter
  *
- * This uses the official python extension to grab the user's currently
- * configured environment.
+ * If no command is configured, this uses the official python extension to
+ * grab the user's currently configured environment.
  *
- * @returns The python interpreter to use to launch the server
+ * @returns The command needed to invoke the python interpreter
  */
-async function getPythonInterpreter(resource?: vscode.Uri): Promise<string | undefined> {
+async function getPythonInterpreterCmd(resource?: vscode.Uri): Promise<string[] | undefined> {
     const config = vscode.workspace.getConfiguration("pygls.server", resource)
-    const pythonPath = config.get<string>('pythonPath')
-    if (pythonPath) {
-        logger.info(`Using user configured python environment: '${pythonPath}'`)
-        return pythonPath
+    const pythonCommand = config.get<string[]>('pythonCommand')
+    if (pythonCommand) {
+        logger.info(`Using user configured python command: '${pythonCommand}'`)
+        return pythonCommand
     }
 
     if (!python) {
@@ -400,7 +399,7 @@ async function getPythonInterpreter(resource?: vscode.Uri): Promise<string | und
         return
     }
 
-    return pythonUri.fsPath
+    return [pythonUri.fsPath]
 }
 
 async function getPythonExtension() {
