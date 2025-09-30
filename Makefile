@@ -32,7 +32,6 @@ test-pyodide: dist | $(NPM) $(UV)
 .PHONY: pygls-playground
 pygls-playground: | $(NPM) $(UV)
 	$(UV) sync --managed-python --python $(PY) --all-extras
-	cd .vscode/extensions/pygls-playground && $(NPM) install --no-save
-	cd .vscode/extensions/pygls-playground && $(NPM) run compile
+	cd .vscode/extensions/pygls-playground && make dist
 
 include .devcontainer/tools.mk
