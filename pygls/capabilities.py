@@ -427,6 +427,14 @@ class ServerCapabilitiesBuilder:
             self.server_cap.inline_value_provider = value
         return self
 
+    def _with_inline_completion_provider(self):
+        value = self._provider_options(
+            types.TEXT_DOCUMENT_INLINE_COMPLETION, default=None
+        )
+        if value is not None:
+            self.server_cap.inline_completion_provider = value
+        return self
+
     def _build(self):
         return self.server_cap
 
@@ -465,5 +473,6 @@ class ServerCapabilitiesBuilder:
             ._with_workspace_capabilities()
             ._with_diagnostic_provider()
             ._with_inline_value_provider()
+            ._with_inline_completion_provider()
             ._build()
         )

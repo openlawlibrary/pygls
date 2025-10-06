@@ -684,6 +684,22 @@ def server_capabilities(**kwargs):
                 ),
             ),
         ),
+        (
+            lsp.TEXT_DOCUMENT_INLINE_COMPLETION,
+            None,
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                inline_completion_provider=None,
+            ),
+        ),
+        (
+            lsp.TEXT_DOCUMENT_INLINE_COMPLETION,
+            lsp.InlineCompletionOptions(),
+            lsp.ClientCapabilities(),
+            server_capabilities(
+                inline_completion_provider=lsp.InlineCompletionOptions(),
+            ),
+        ),
     ],
 )
 def test_register_feature(
