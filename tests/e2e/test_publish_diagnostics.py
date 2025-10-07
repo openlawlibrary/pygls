@@ -66,7 +66,7 @@ async def test_publish_diagnostics(
     await asyncio.sleep(0.5)
     assert test_uri in client.diagnostics
 
-    expected = [
+    expected = (
         types.Diagnostic(
             message="Missing answer",
             severity=types.DiagnosticSeverity.Warning,
@@ -91,9 +91,9 @@ async def test_publish_diagnostics(
                 end=types.Position(line=6, character=7),
             ),
         ),
-    ]
+    )
 
-    assert expected == client.diagnostics[test_uri]
+    assert expected == tuple(client.diagnostics[test_uri])
 
     # Write an incorrect answer...
     client.text_document_did_change(
@@ -116,7 +116,7 @@ async def test_publish_diagnostics(
     await asyncio.sleep(0.5)
     assert test_uri in client.diagnostics
 
-    expected = [
+    expected = (
         types.Diagnostic(
             message="Incorrect answer: 12",
             severity=types.DiagnosticSeverity.Error,
@@ -141,6 +141,6 @@ async def test_publish_diagnostics(
                 end=types.Position(line=6, character=7),
             ),
         ),
-    ]
+    )
 
-    assert expected == client.diagnostics[test_uri]
+    assert expected == tuple(client.diagnostics[test_uri])

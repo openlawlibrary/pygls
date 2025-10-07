@@ -17,12 +17,14 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Sequence
 import time
 import typing
 from functools import partial
 
 import pytest
 import pytest_asyncio
+import cattrs
 from lsprotocol import types
 
 from pygls import IS_WIN
@@ -63,14 +65,16 @@ async def test_countdown_blocking(
     client, initialize_result = threaded_handlers
 
     completion_options = initialize_result.capabilities.completion_provider
-    assert completion_options == types.CompletionOptions(trigger_characters=["."])
+    # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+    seq = type(cattrs.structure([], Sequence[str]))
+    assert completion_options == types.CompletionOptions(trigger_characters=seq((".",)))
 
     command_provider = initialize_result.capabilities.execute_command_provider
-    assert command_provider.commands == [
+    assert tuple(command_provider.commands) == (
         "count.down.blocking",
         "count.down.thread",
         "count.down.error",
-    ]
+    )
 
     test_uri = uri_for("code.txt")
 
@@ -141,14 +145,16 @@ async def test_countdown_threaded(
     client, initialize_result = threaded_handlers
 
     completion_options = initialize_result.capabilities.completion_provider
-    assert completion_options == types.CompletionOptions(trigger_characters=["."])
+    # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+    seq = type(cattrs.structure([], Sequence[str]))
+    assert completion_options == types.CompletionOptions(trigger_characters=seq((".",)))
 
     command_provider = initialize_result.capabilities.execute_command_provider
-    assert command_provider.commands == [
+    assert tuple(command_provider.commands) == (
         "count.down.blocking",
         "count.down.thread",
         "count.down.error",
-    ]
+    )
 
     test_uri = uri_for("code.txt")
 
@@ -215,14 +221,16 @@ async def test_countdown_error(
     client, initialize_result = threaded_handlers
 
     completion_options = initialize_result.capabilities.completion_provider
-    assert completion_options == types.CompletionOptions(trigger_characters=["."])
+    # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+    seq = type(cattrs.structure([], Sequence[str]))
+    assert completion_options == types.CompletionOptions(trigger_characters=seq((".",)))
 
     command_provider = initialize_result.capabilities.execute_command_provider
-    assert command_provider.commands == [
+    assert tuple(command_provider.commands) == (
         "count.down.blocking",
         "count.down.thread",
         "count.down.error",
-    ]
+    )
 
     with pytest.raises(JsonRpcInternalError, match="ZeroDivisionError"):
         await client.workspace_execute_command_async(

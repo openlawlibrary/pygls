@@ -62,7 +62,7 @@ async def test_document_color(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.ColorInformation(
             range=range_from_str("0:7-0:14"),
             color=types.Color(red=1.0, green=0.0, blue=0.0, alpha=1.0),
@@ -99,7 +99,7 @@ async def test_document_color(
             range=range_from_str("9:55-9:59"),
             color=types.Color(red=0.0, green=0.0, blue=1.0, alpha=1.0),
         ),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")
@@ -120,4 +120,4 @@ async def test_color_presentation(
         )
     )
 
-    assert response == [types.ColorPresentation(label="#3f7fbf")]
+    assert tuple(response) == (types.ColorPresentation(label="#3f7fbf"),)

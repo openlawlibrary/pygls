@@ -42,8 +42,8 @@ async def test_completion(
 
     completion_provider = initialize_result.capabilities.completion_provider
     assert completion_provider
-    assert completion_provider.trigger_characters == [","]
-    assert completion_provider.all_commit_characters == [":"]
+    assert tuple(completion_provider.trigger_characters) == (",",)
+    assert tuple(completion_provider.all_commit_characters) == (":",)
 
     test_uri = uri_for("test.json")
     assert test_uri is not None

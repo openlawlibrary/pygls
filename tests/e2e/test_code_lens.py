@@ -16,10 +16,12 @@
 ############################################################################
 from __future__ import annotations
 
+from collections.abc import Sequence
 import typing
 
 import pytest
 import pytest_asyncio
+import cattrs
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
@@ -50,7 +52,7 @@ async def test_code_lens(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
         )
     )
-    assert response == [
+    assert tuple(response) == (
         types.CodeLens(
             range=types.Range(
                 start=types.Position(line=0, character=0),
@@ -72,7 +74,7 @@ async def test_code_lens(
             ),
             data=dict(left=6, right=6, uri=test_uri),
         ),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")
@@ -101,10 +103,12 @@ async def test_code_lens_resolve(
     assert result.data == lens.data
 
     # The command field should also be filled in.
+    # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+    seq = type(cattrs.structure([], Sequence[str]))
     assert result.command == types.Command(
         title="Evaluate 1 + 1",
         command="codeLens.evaluateSum",
-        arguments=[dict(uri=test_uri, left=1, right=1, line=0)],
+        arguments=seq((dict(uri=test_uri, left=1, right=1, line=0),)),
     )
 
 
@@ -124,7 +128,7 @@ async def test_evaluate_sum(
         return types.ApplyWorkspaceEditResult(applied=True)
 
     provider = initialize_result.capabilities.execute_command_provider
-    assert provider.commands == ["codeLens.evaluateSum"]
+    assert tuple(provider.commands) == ("codeLens.evaluateSum",)
 
     test_uri = uri_for("sums.txt")
     assert test_uri is not None
@@ -136,20 +140,24 @@ async def test_evaluate_sum(
         )
     )
 
+    # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+    seq = type(cattrs.structure([], Sequence[str]))
     assert workspace_edit == [
         types.TextDocumentEdit(
             text_document=types.OptionalVersionedTextDocumentIdentifier(
                 uri=test_uri,
                 version=None,
             ),
-            edits=[
-                types.TextEdit(
-                    new_text="1 + 1 = 2\n",
-                    range=types.Range(
-                        start=types.Position(line=0, character=0),
-                        end=types.Position(line=1, character=0),
+            edits=seq(
+                (
+                    types.TextEdit(
+                        new_text="1 + 1 = 2\n",
+                        range=types.Range(
+                            start=types.Position(line=0, character=0),
+                            end=types.Position(line=1, character=0),
+                        ),
                     ),
                 )
-            ],
+            ),
         )
     ]

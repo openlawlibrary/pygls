@@ -23,7 +23,7 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -38,35 +38,35 @@ async def semantic_tokens(get_client_for):
     "text,expected",
     [
         # Just a handful of cases to check we've got the basics right
-        ("fn", [0, 0, 2, 0, 0]),
-        ("type", [0, 0, 4, 0, 0]),
-        ("Rectangle", [0, 0, 9, 5, 0]),
+        ("fn", (0, 0, 2, 0, 0)),
+        ("type", (0, 0, 4, 0, 0)),
+        ("Rectangle", (0, 0, 9, 5, 0)),
         (
             "type Rectangle",
-            [
+            (
                 # fmt: off
             0, 0, 4, 0, 0,
             0, 5, 9, 5, 8,
                 # fmt: on
-            ],
+            ),
         ),
         (
             "fn area",
-            [
+            (
                 # fmt: off
             0, 0, 2, 0, 0,
             0, 3, 4, 2, 8,
                 # fmt: on
-            ],
+            ),
         ),
         (
             "fn\n area",
-            [
+            (
                 # fmt: off
             0, 0, 2, 0, 0,
             1, 1, 4, 2, 8,
                 # fmt: on
-            ],
+            ),
         ),
     ],
 )
@@ -76,7 +76,7 @@ async def test_semantic_tokens_full(
     uri_for,
     path_for,
     text: str,
-    expected: List[int],
+    expected: Tuple[int],
 ):
     """Ensure that the example semantic tokens server is working as expected."""
     client, initialize_result = semantic_tokens
@@ -85,20 +85,20 @@ async def test_semantic_tokens_full(
     assert semantic_tokens_options.full is True
 
     legend = semantic_tokens_options.legend
-    assert legend.token_types == [
+    assert tuple(legend.token_types) == (
         "keyword",
         "variable",
         "function",
         "operator",
         "parameter",
         "type",
-    ]
-    assert legend.token_modifiers == [
+    )
+    assert tuple(legend.token_modifiers) == (
         "deprecated",
         "readonly",
         "defaultLibrary",
         "definition",
-    ]
+    )
 
     test_uri = uri_for("code.txt")
 
@@ -118,4 +118,4 @@ async def test_semantic_tokens_full(
             text_document=types.TextDocumentIdentifier(uri=test_uri),
         )
     )
-    assert response.data == expected
+    assert tuple(response.data) == expected
