@@ -65,7 +65,7 @@ async def test_document_diagnostics(
         )
     )
 
-    expected = [
+    expected = (
         types.Diagnostic(
             message="Missing answer",
             severity=types.DiagnosticSeverity.Warning,
@@ -90,10 +90,10 @@ async def test_document_diagnostics(
                 end=types.Position(line=6, character=7),
             ),
         ),
-    ]
+    )
 
     assert result.result_id == f"{test_uri}@{0}"
-    assert result.items == expected
+    assert tuple(result.items) == expected
     assert result.kind == types.DocumentDiagnosticReportKind.Full
 
     # Write a correct answer...
@@ -120,7 +120,7 @@ async def test_document_diagnostics(
         )
     )
 
-    expected = [
+    expected = (
         types.Diagnostic(
             message="Missing answer",
             severity=types.DiagnosticSeverity.Warning,
@@ -137,10 +137,10 @@ async def test_document_diagnostics(
                 end=types.Position(line=6, character=7),
             ),
         ),
-    ]
+    )
 
     assert result.result_id == f"{test_uri}@{1}"
-    assert result.items == expected
+    assert tuple(result.items) == expected
     assert result.kind == types.DocumentDiagnosticReportKind.Full
 
 
@@ -224,7 +224,7 @@ async def test_workspace_diagnostic(
         types.WorkspaceDiagnosticParams(previous_result_ids=[])
     )
 
-    expected = [
+    expected = (
         types.Diagnostic(
             message="Missing answer",
             severity=types.DiagnosticSeverity.Warning,
@@ -249,12 +249,12 @@ async def test_workspace_diagnostic(
                 end=types.Position(line=6, character=7),
             ),
         ),
-    ]
+    )
 
     report = result.items[0]
     assert report.uri == test_uri
     assert report.version == 0
-    assert report.items == expected
+    assert tuple(report.items) == expected
     assert report.kind == types.DocumentDiagnosticReportKind.Full
 
     result = await client.workspace_diagnostic_async(

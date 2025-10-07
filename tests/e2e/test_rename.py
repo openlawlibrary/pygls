@@ -16,10 +16,12 @@
 ############################################################################
 from __future__ import annotations
 
+from collections.abc import Sequence
 import typing
 
 import pytest
 import pytest_asyncio
+import cattrs
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
@@ -96,7 +98,7 @@ async def test_prepare_rename(
         (types.Position(line=5, character=1), None),
         (
             types.Position(line=3, character=6),
-            [
+            (
                 types.TextEdit(
                     new_text="my_name",
                     range=types.Range(
@@ -111,7 +113,7 @@ async def test_prepare_rename(
                         end=types.Position(line=5, character=49),
                     ),
                 ),
-            ],
+            ),
         ),
     ],
 )
@@ -154,4 +156,6 @@ async def test_rename(
         assert result is None
 
     else:
-        assert result == types.WorkspaceEdit(changes={test_uri: expected})
+        # https://catt.rs/en/latest/migrations.html#sequences-structuring-into-tuples
+        seq = type(cattrs.structure([], Sequence[str]))
+        assert result == types.WorkspaceEdit(changes={test_uri: seq(expected)})

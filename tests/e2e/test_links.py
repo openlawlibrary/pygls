@@ -62,7 +62,7 @@ async def test_document_link(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.DocumentLink(
             range=range_from_str("0:6-0:35"),
             data=dict(type="github", target="openlawlibrary/pygls"),
@@ -75,7 +75,7 @@ async def test_document_link(
             range=range_from_str("1:73-1:90"),
             data=dict(type="pypi", target="lsprotocol"),
         ),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")

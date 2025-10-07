@@ -63,7 +63,7 @@ async def test_document_format(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.TextEdit(
             new_text="|   a   |   b    |\n", range=range_from_str("0:0-1:0")
         ),
@@ -73,7 +73,7 @@ async def test_document_format(
         types.TextEdit(
             new_text="| apple | banana |\n", range=range_from_str("2:0-3:0")
         ),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")
@@ -95,10 +95,10 @@ async def test_document_range_format_one(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.TextEdit(new_text="| a | b |\n", range=range_from_str("0:0-1:0")),
         types.TextEdit(new_text="|---|---|\n", range=range_from_str("1:0-2:0")),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")
@@ -120,14 +120,14 @@ async def test_document_range_format_two(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.TextEdit(
             new_text="|-------|--------|\n", range=range_from_str("1:0-2:0")
         ),
         types.TextEdit(
             new_text="| apple | banana |\n", range=range_from_str("2:0-3:0")
         ),
-    ]
+    )
 
 
 @pytest.mark.asyncio(loop_scope="module")
@@ -181,11 +181,11 @@ async def test_document_on_type_format(
         )
     )
 
-    assert response == [
+    assert tuple(response) == (
         types.TextEdit(
             new_text="| header one | header two |\n", range=range_from_str("0:0-1:0")
         ),
         types.TextEdit(
             new_text="|------------|------------|\n", range=range_from_str("1:0-2:0")
         ),
-    ]
+    )
