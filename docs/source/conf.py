@@ -111,10 +111,6 @@ html_theme_options = {
     "source_repository": "https://github.com/openlawlibrary/pygls/",
     "source_branch": "main",
     "source_directory": "docs/source",
-    "announcement": (
-        "This is the documentation for the in-development v2.0 release of pygls. "
-        '<a href="/en/stable">Click here</a> to view the documentation for the current stable version'
-    ),
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
