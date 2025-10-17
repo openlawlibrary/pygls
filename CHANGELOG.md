@@ -2,6 +2,58 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.0.0] - 2025-10-17
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0
+
+### Bug Fixes
+
+- Handle a special case of BrokenPipeError exception  ([#573](https://github.com/openlawlibrary/pygls/issues/573))
+- Missing inline completion provider server capability
+
+### Documentation
+
+- Switch to furo theme
+- Add how-to guide on running a server
+- Add reference on pygls' built in features
+- Add (incomplete) guide on supporting notebooks
+- Move guide on custom converters to the library
+- Move guide on pygls-playground to the library
+- Add (incomplete) guide on working with text docs
+- Add how-to guide on getting the client's configuration
+- Add reference on supported handler types
+- Add how-to guide on custom error reporting
+- Add (incomplete) guide on implementing diagnostics
+- Add how-to guide on giving user feedback
+- Add how-to guide on sending custom messages
+- Add howto guide on accessing the server instance
+
+### Features
+
+- Change `pythonPath` to `pythonCommand`
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Remove unecessary dependencies from requirements.txt
+- Add esbonio config
+- Ensure poe uses uv
+- Add local Makefile
+- Bump node to v20
+- Npm audit fix
+- Update cattrs to 25.3.0 in uv.lock
+- Drop call for testing
+
+### Testing
+
+- Adjust tests for cattrs structuring sequences as tuples
+
+### Build
+
+- V2.0.0
+
+
+
 ## [2.0.0a6] - 2025-07-18
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.0a6
 
