@@ -4,14 +4,10 @@
 
 _pygls_ (pronounced like "pie glass") is a pythonic generic implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specification) for use as a foundation for writing your own [Language Servers](https://langserver.org/) in just a few lines of code.
 
-> [!IMPORTANT]
-> The next major version, *pygls v2* is ready for testing. 
-> We encourage all existing server authors to try the [migration guide](https://pygls.readthedocs.io/en/latest/pygls/howto/migrate-to-v2.html) and let us know how you get on!
-
 ## Quickstart
 ```python
 from pygls.lsp.server import LanguageServer
-from lsprotocol import types 
+from lsprotocol import types
 
 server = LanguageServer("example-server", "v0.1")
 
