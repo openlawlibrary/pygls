@@ -1,7 +1,7 @@
 How To Migrate to v2.0
 ======================
 
-The highlight of the *pygls* v2 release is upgrading ``lsprotocol`` to ``v2024.x`` bringing with it support for the proposed LSP v3.18 types and methods.
+The highlight of the *pygls* v2 release is upgrading ``lsprotocol`` to ``v2025.x`` bringing with it support for the proposed LSP v3.18 types and methods.
 The new version includes standardised object names (so no more classes like ``NotebookDocumentSyncRegistrationOptionsNotebookSelectorType2CellsType``!)
 
 With the major version bump, this release also takes the opportunity to clean up the codebase by removing deprecated code and renaming a few things to try and improve overall consistency.
@@ -310,10 +310,10 @@ The helper is now accessed via ``LanguageServer.work_done_progress``
 Renamed LSP Types
 -----------------
 
-As part of the update to ``lsprotocol v2024``, the following types have been renamed.
+As part of the update to ``lsprotocol v2025``, the following types have been renamed.
 
 ===================================================================================  ==============
-**lsprotocol 2023.x**                                                                **lsprotocol 2024.x**
+**lsprotocol 2023.x**                                                                **lsprotocol 2025.x**
 ===================================================================================  ==============
 ``CancelRequestNotification``                                                        ``CancelNotification``
 ``ClientRegisterCapabilityRequest``                                                  ``RegistrationRequest``
