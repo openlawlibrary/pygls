@@ -1,6 +1,6 @@
 # Example Servers
 
-See the [docs](https://pygls.readthedocs.io/en/latest/servers/howto/use-the-pygls-playground.html#howto-use-pygls-playground) for instructions on how to run these in VSCode.
+See the [docs](https://pygls.readthedocs.io/en/latest/pygls/howto/use-the-pygls-playground.html#howto-use-pygls-playground) for instructions on how to run these in VSCode.
 
 | Filename | Works With | Description |
 |-|-|-|
