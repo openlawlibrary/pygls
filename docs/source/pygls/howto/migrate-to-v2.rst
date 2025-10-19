@@ -75,12 +75,14 @@ To send custom notifications in v2, use the ``notify`` method on the underlying 
 See :ref:`howto-send-custom-messages` for more details
 
 
-Server commands can now use type annotations
---------------------------------------------
+Server commands are now called with individual arguments and can use type annotations
+-------------------------------------------------------------------------------------
+
+Instead of calling sever commands with a single arguments of type list containing all the command arguments, *pygls v2* now unpacks the arguments and passes them as individual parameters to the command method.
 
 *pygls* will now inspect a function's type annotations when handling ``workspace/executeCommand`` requests, automatically converting JSON values to ``attrs`` class instances, or responding with an error if appropriate.
 
-It is **not mandatory** to start using type annotations in your command definitions, but you may notice a difference in how *pygls* calls your server command methods.
+It is **not mandatory** to start using type annotations in your command definitions, but you will notice a difference in how *pygls* calls your server command methods if they take arguments.
 
 **Before**
 
@@ -88,7 +90,7 @@ It is **not mandatory** to start using type annotations in your command definiti
 
    @server.command("codeLens.evaluateSum")
    def evaluate_sum(ls: LanguageServer, args):
-       logging.info("arguments: %s", args)
+       logging.info("arguments: %s", args)  # here args is a list of dict
 
        arguments = args[0]
        document = ls.workspace.get_text_document(arguments["uri"])
@@ -142,7 +144,7 @@ It is **not mandatory** to start using type annotations in your command definiti
 
     @server.command("codeLens.evaluateSum")
     def evaluate_sum(ls: LanguageServer, args: EvaluateSumArgs):
-        logging.info("arguments: %s", args)
+        logging.info("arguments: %s", args)  # here args is an instance of EvaluateSumArgs
 
         document = ls.workspace.get_text_document(args.uri)
         line = document.lines[args.line]
