@@ -2,6 +2,7 @@
 
 | Name                     | Maintainer                                                            | Repository (optional)                                                      | Notes                                                                                                                         |
 |--------------------------|-----------------------------------------------------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| _Aeon Programming Language_ | [Alcides Fonseca](https://github.com/alcides) | [aeon](https://github.com/alcides/aeon) | A programming language with liquid types and program synthesis built-in. |
 | _Anakin Language Server_ | [Andrii Kolomoiets](https://github.com/muffinmad) | [anakin-language-server](https://github.com/muffinmad/anakin-language-server) | Yet another Jedi Python Language Server |
 | _Chapel Language Server_ | [Chapel Team](https://github.com/chapel-lang) | [chapel](https://github.com/chapel-lang/chapel/tree/main/tools/chpl-language-server) | [Chapel](https://chapel-lang.org/) language server |
 | _Cmake Language Server_  | [Regen100](https://github.com/regen100)                               | [cmake-language-server](https://github.com/regen100/cmake-language-server) | CMake LSP Implementation
