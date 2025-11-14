@@ -51,10 +51,10 @@ The following methods and functions have been deprecated for some time and have 
 ``pygls.workspace.range_from_utf16``                ``TextDocument.position_codec.range_from_client_units`` or ``Workspace.position_codec.range_from_client_units``
 ``pygls.workspace.range_to_utf16``                  ``TextDocument.position_codec.range_to_client_units`` or ``Workspace.position_codec.range_to_client_units``
 ``Workspace.documents``                             ``Workspace.text_documents``
-``Worspace.get_document``                           ``Workspace.get_text_document``
-``Worspace.put_document``                           ``Workspace.put_text_document``
-``Worspace.remove_document``                        ``Workspace.remove_text_document``
-``Worspace.update_document``                        ``Workspace.update_text_document``
+``Workspace.get_document``                           ``Workspace.get_text_document``
+``Workspace.put_document``                           ``Workspace.put_text_document``
+``Workspace.remove_document``                        ``Workspace.remove_text_document``
+``Workspace.update_document``                        ``Workspace.update_text_document``
 ==================================================  ==============
 
 Sending Custom Notifications
