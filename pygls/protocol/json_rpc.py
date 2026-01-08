@@ -321,7 +321,7 @@ class JsonRPCProtocol:
 
         Used when handling notification messages
         """
-        if (exc := future.exception()) is not None:
+        if not future.cancelled() and (exc := future.exception()) is not None:
             try:
                 raise exc
             except Exception:
