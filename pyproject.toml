@@ -86,6 +86,9 @@ ignore_fail = "return_non_zero"
 [tool.pyright]
 strict = ["pygls"]
 
+pythonVersion = "3.9"
+pythonPlatform = "All"
+
 [tool.ruff]
 # Sometimes Black can't reduce line length without breaking more imortant rules.
 # So allow Ruff to be more lenient.
