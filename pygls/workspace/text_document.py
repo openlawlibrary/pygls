@@ -192,6 +192,24 @@ class TextDocument(object):
         )
         return self.offset_at_server_position(server_position)
 
+    def server_position_at_offset(self, offset: int) -> ServerTextPosition:
+        """
+        Convert a numeric character offset (index into self.source) into a line-column position.
+        """
+        remaining_offset = offset
+        for lineno, line in enumerate(self.lines):
+            if remaining_offset < len(line):
+                return ServerTextPosition(lineno, remaining_offset)
+            remaining_offset -= len(line)
+        # The desired position is beyond the end of the last line.
+        return ServerTextPosition(lineno + 1, 0)
+
+    def client_position_at_offset(self, offset: int) -> types.Position:
+        """
+        Convert a numeric character offset (index into self.source) into a line-column position in client units.
+        """
+        return self.position_to_client_units(self.server_position_at_offset(offset))
+
     def range_from_client_units(self, range: types.Range) -> ServerTextRange:
         """
         Convert a range from client units into code points, suitable for indexing into `self.lines`.
