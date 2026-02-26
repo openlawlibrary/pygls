@@ -26,7 +26,7 @@ from typing import Optional, Pattern, Sequence
 from lsprotocol import types
 
 from pygls.uris import urlparse, to_fs_path
-from .position_codec import PositionCodec
+from .position_codec import PositionCodec, ServerTextPosition, ServerTextRange
 
 # TODO: this is not the best e.g. we capture numbers
 RE_END_WORD = re.compile("^[A-Za-z_0-9]*")
@@ -166,6 +166,15 @@ class TextDocument(object):
     def lines(self) -> Sequence[str]:
         return tuple(self.source.splitlines(True))
 
+    def offset_at_server_position(self, server_position: ServerTextPosition) -> int:
+        """
+        Convert server_position to an index into self.source.
+
+        The index is the number of code points preceding the client_position in self.source.
+        """
+        row, col = server_position.line, server_position.character
+        return col + sum(len(line) for line in self.lines[:row])
+
     def offset_at_position(self, client_position: types.Position) -> int:
         """
         Convert client_position to an index into self.source.
@@ -181,8 +190,49 @@ class TextDocument(object):
         server_position = self._position_codec.position_from_client_units(
             lines, client_position
         )
-        row, col = server_position.line, server_position.character
-        return col + sum(len(line) for line in lines[:row])
+        return self.offset_at_server_position(server_position)
+
+    def range_from_client_units(self, range: types.Range) -> ServerTextRange:
+        """
+        Convert a range from client units into code points, suitable for indexing into `self.lines`.
+        """
+        return self.position_codec.range_from_client_units(self.lines, range)
+
+    def position_from_client_units(
+        self, position: types.Position
+    ) -> ServerTextPosition:
+        """
+        Convert a position from client units into code points, suitable for indexing into `self.lines`.
+        """
+        return self.position_codec.position_from_client_units(self.lines, position)
+
+    def range_to_client_units(self, range: ServerTextRange) -> types.Range:
+        """
+        Convert a range from code points into client units, suitable for sending to the client.
+        """
+        return self.position_codec.range_to_client_units(self.lines, range)
+
+    def position_to_client_units(self, position: ServerTextPosition) -> types.Position:
+        """
+        Convert a position from code points into client units, suitable for sending to the client.
+        """
+        return self.position_codec.position_to_client_units(self.lines, position)
+
+    def text_in_client_range(self, range: types.Range) -> str:
+        """
+        Given a range in client units, return the text in this range in this document.
+        """
+        return self.text_in_server_range(self.range_from_client_units(range))
+
+    def text_in_server_range(self, range: ServerTextRange) -> str:
+        """
+        Given a range in server units, return the text in this range in this document.
+        """
+        return self.source[
+            self.offset_at_server_position(
+                range.start
+            ) : self.offset_at_server_position(range.end)
+        ]
 
     @property
     def source(self) -> str:
