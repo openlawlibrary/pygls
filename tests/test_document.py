@@ -486,3 +486,34 @@ def test_word_at_position():
         )
         == "unicode."
     )
+
+
+def test_position_at_offset_utf16():
+    doc = TextDocument(DOC_URI, DOC)
+    assert doc.client_position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.client_position_at_offset(12) == types.Position(line=1, character=3)
+    assert doc.client_position_at_offset(13) == types.Position(line=2, character=0)
+    assert doc.client_position_at_offset(17) == types.Position(line=2, character=4)
+    assert doc.client_position_at_offset(27) == types.Position(line=3, character=6)
+    assert doc.client_position_at_offset(28) == types.Position(line=3, character=8)
+    assert doc.client_position_at_offset(40) == types.Position(line=4, character=0)
+
+
+def test_position_at_offset_utf32():
+    doc = TextDocument(
+        DOC_URI,
+        DOC,
+        position_codec=PositionCodec(encoding=types.PositionEncodingKind.Utf32),
+    )
+    assert doc.client_position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.client_position_at_offset(39) == types.Position(line=4, character=0)
+
+
+def test_position_at_offset_utf8():
+    doc = TextDocument(
+        DOC_URI,
+        DOC,
+        position_codec=PositionCodec(encoding=types.PositionEncodingKind.Utf8),
+    )
+    assert doc.client_position_at_offset(8) == types.Position(line=0, character=8)
+    assert doc.client_position_at_offset(41) == types.Position(line=4, character=0)
