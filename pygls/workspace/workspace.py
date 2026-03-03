@@ -20,6 +20,7 @@ import copy
 import logging
 import os
 from typing import Dict, Optional, Sequence, Union
+from urllib.parse import unquote
 
 from lsprotocol import types
 from lsprotocol.types import (
@@ -90,7 +91,7 @@ class Workspace(object):
         )
 
     def add_folder(self, folder: WorkspaceFolder):
-        self._folders[folder.uri] = folder
+        self._folders[unquote(folder.uri)] = folder
 
     @property
     def notebook_documents(self):
@@ -127,10 +128,10 @@ class Workspace(object):
            The requested notebook document if found, ``None`` otherwise.
         """
         if notebook_uri is not None:
-            return self._notebook_documents.get(notebook_uri)
+            return self._notebook_documents.get(unquote(notebook_uri))
 
         if cell_uri is not None:
-            notebook_uri = self._cell_in_notebook.get(cell_uri)
+            notebook_uri = self._cell_in_notebook.get(unquote(cell_uri))
             if notebook_uri is None:
                 return None
 
@@ -145,7 +146,9 @@ class Workspace(object):
 
         See https://github.com/Microsoft/language-server-protocol/issues/177
         """
-        return self._text_documents.get(doc_uri) or self._create_text_document(doc_uri)
+        return self._text_documents.get(unquote(doc_uri)) or self._create_text_document(
+            doc_uri
+        )
 
     def is_local(self):
 
@@ -161,7 +164,7 @@ class Workspace(object):
         notebook = params.notebook_document
 
         # Create a fresh instance to ensure our copy cannot be accidentally modified.
-        self._notebook_documents[notebook.uri] = copy.deepcopy(notebook)
+        self._notebook_documents[unquote(notebook.uri)] = copy.deepcopy(notebook)
 
         for cell_document in params.cell_text_documents:
             self.put_text_document(cell_document, notebook_uri=notebook.uri)
@@ -184,7 +187,7 @@ class Workspace(object):
         """
         doc_uri = text_document.uri
 
-        self._text_documents[doc_uri] = self._create_text_document(
+        self._text_documents[unquote(doc_uri)] = self._create_text_document(
             doc_uri,
             source=text_document.text,
             version=text_document.version,
@@ -192,23 +195,23 @@ class Workspace(object):
         )
 
         if notebook_uri:
-            self._cell_in_notebook[doc_uri] = notebook_uri
+            self._cell_in_notebook[unquote(doc_uri)] = unquote(notebook_uri)
 
     def remove_notebook_document(self, params: types.DidCloseNotebookDocumentParams):
         notebook_uri = params.notebook_document.uri
-        self._notebook_documents.pop(notebook_uri, None)
+        self._notebook_documents.pop(unquote(notebook_uri), None)
 
         for cell_document in params.cell_text_documents:
             self.remove_text_document(cell_document.uri)
 
     def remove_text_document(self, doc_uri: str):
-        self._text_documents.pop(doc_uri, None)
-        self._cell_in_notebook.pop(doc_uri, None)
+        self._text_documents.pop(unquote(doc_uri), None)
+        self._cell_in_notebook.pop(unquote(doc_uri), None)
 
     def remove_folder(self, folder_uri: str):
-        self._folders.pop(folder_uri, None)
+        self._folders.pop(unquote(folder_uri), None)
         try:
-            del self._folders[folder_uri]
+            del self._folders[unquote(folder_uri)]
         except KeyError:
             pass
 
@@ -222,7 +225,7 @@ class Workspace(object):
 
     def update_notebook_document(self, params: types.DidChangeNotebookDocumentParams):
         uri = params.notebook_document.uri
-        notebook = self._notebook_documents[uri]
+        notebook = self._notebook_documents[unquote(uri)]
         notebook.version = params.notebook_document.version
 
         if params.change.metadata:
@@ -274,5 +277,5 @@ class Workspace(object):
         change: types.TextDocumentContentChangeEvent,
     ):
         doc_uri = text_doc.uri
-        self._text_documents[doc_uri].apply_change(change)
-        self._text_documents[doc_uri].version = text_doc.version
+        self._text_documents[unquote(doc_uri)].apply_change(change)
+        self._text_documents[unquote(doc_uri)].version = text_doc.version

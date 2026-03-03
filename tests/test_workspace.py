@@ -440,3 +440,107 @@ def test_null_workspace():
 
     assert workspace.root_uri is None
     assert workspace.root_path is None
+
+
+# -- Percent-encoding normalization tests --
+
+ENCODED_DOC_URI = "file:///C%3A/path/to/file.py"
+DECODED_DOC_URI = "file:///C:/path/to/file.py"
+ENCODED_DOC = types.TextDocumentItem(
+    uri=ENCODED_DOC_URI, language_id="python", version=0, text="# encoded"
+)
+
+ENCODED_NB_URI = "file:///C%3A/path/to/notebook.ipynb"
+DECODED_NB_URI = "file:///C:/path/to/notebook.ipynb"
+ENCODED_NOTEBOOK = types.NotebookDocument(
+    uri=ENCODED_NB_URI,
+    notebook_type="jupyter-notebook",
+    version=0,
+    cells=[
+        types.NotebookCell(
+            kind=types.NotebookCellKind.Code,
+            document="nb-cell-scheme://C%3A/path/to/notebook.ipynb#cell1",
+        ),
+    ],
+)
+ENCODED_NB_CELL = types.TextDocumentItem(
+    uri="nb-cell-scheme://C%3A/path/to/notebook.ipynb#cell1",
+    language_id="python",
+    version=0,
+    text="# cell",
+)
+
+
+def test_get_text_document_percent_encoded(workspace):
+    """Looking up a document with a decoded URI after storing with an encoded one."""
+    workspace.put_text_document(ENCODED_DOC)
+    assert workspace.get_text_document(DECODED_DOC_URI).source == "# encoded"
+
+
+def test_get_text_document_percent_decoded(workspace):
+    """Looking up a document with an encoded URI after storing with a decoded one."""
+    decoded_doc = types.TextDocumentItem(
+        uri=DECODED_DOC_URI, language_id="python", version=0, text="# decoded"
+    )
+    workspace.put_text_document(decoded_doc)
+    assert workspace.get_text_document(ENCODED_DOC_URI).source == "# decoded"
+
+
+def test_remove_text_document_percent_encoded(workspace):
+    """Removing a document stored with an encoded URI using a decoded URI."""
+    workspace.put_text_document(ENCODED_DOC)
+    workspace.remove_text_document(DECODED_DOC_URI)
+    assert workspace.get_text_document(DECODED_DOC_URI)._source is None
+
+
+def test_get_notebook_document_percent_encoded(workspace):
+    """Looking up a notebook with a decoded URI after storing with an encoded one."""
+    params = types.DidOpenNotebookDocumentParams(
+        notebook_document=ENCODED_NOTEBOOK,
+        cell_text_documents=[ENCODED_NB_CELL],
+    )
+    workspace.put_notebook_document(params)
+
+    notebook = workspace.get_notebook_document(notebook_uri=DECODED_NB_URI)
+    assert notebook is not None
+    assert notebook.uri == ENCODED_NB_URI
+
+
+def test_update_notebook_document_percent_encoded(workspace):
+    """Updating a notebook stored with an encoded URI using a decoded URI."""
+    params = types.DidOpenNotebookDocumentParams(
+        notebook_document=ENCODED_NOTEBOOK,
+        cell_text_documents=[ENCODED_NB_CELL],
+    )
+    workspace.put_notebook_document(params)
+
+    update_params = types.DidChangeNotebookDocumentParams(
+        notebook_document=types.VersionedNotebookDocumentIdentifier(
+            uri=DECODED_NB_URI, version=5
+        ),
+        change=types.NotebookDocumentChangeEvent(
+            metadata={"updated": True},
+        ),
+    )
+    workspace.update_notebook_document(update_params)
+
+    notebook = workspace.get_notebook_document(notebook_uri=ENCODED_NB_URI)
+    assert notebook.version == 5
+    assert notebook.metadata == {"updated": True}
+
+
+def test_add_folder_percent_encoded(workspace):
+    """Looking up a folder with a decoded URI after adding with an encoded one."""
+    encoded_uri = "file:///C%3A/workspace"
+    decoded_uri = "file:///C:/workspace"
+    workspace.add_folder(types.WorkspaceFolder(uri=encoded_uri, name="ws"))
+    assert decoded_uri in workspace.folders
+
+
+def test_remove_folder_percent_encoded(workspace):
+    """Removing a folder stored with an encoded URI using a decoded URI."""
+    encoded_uri = "file:///C%3A/workspace"
+    decoded_uri = "file:///C:/workspace"
+    workspace.add_folder(types.WorkspaceFolder(uri=encoded_uri, name="ws"))
+    workspace.remove_folder(decoded_uri)
+    assert decoded_uri not in workspace.folders
