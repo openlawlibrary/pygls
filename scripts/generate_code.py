@@ -460,7 +460,7 @@ def write_capability_overloads_for(
             # First we write the overload in which the caller does not provide a default
             # (or provides None) and we may return None.
             result_type_names_string = " | ".join(
-                sorted(result_type_names, key=len, reverse=True)
+                sorted(result_type_names, key=len_but_none_last, reverse=True)
             )
             args = [
                 *base_args,
@@ -475,7 +475,7 @@ def write_capability_overloads_for(
             # Then we write the overload in which the caller provides a default value.
             result_type_names.remove("None")
             result_type_names_string = " | ".join(
-                sorted(result_type_names, key=len, reverse=True)
+                sorted(result_type_names, key=len_but_none_last, reverse=True)
             )
             args = [
                 *base_args,
@@ -496,6 +496,16 @@ def write_capability_overloads_for(
                 processed_capabilities,
                 prefix=field_name,
             )
+
+
+def len_but_none_last(item: str) -> int:
+    """A sort function that sorts by string length, unless item is ``None``, in which
+    case we return a negative number to ensure it comes last"""
+
+    if item == "None":
+        return -1
+
+    return len(item)
 
 
 def generate_capabilities() -> str:
