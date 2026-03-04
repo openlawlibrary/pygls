@@ -674,7 +674,7 @@ wheels = [
 
 [[package]]
 name = "pygls"
-version = "2.0.0a6"
+version = "2.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
