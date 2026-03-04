@@ -443,7 +443,7 @@ def write_capability_overloads_for(
         result_types = []
         result_type_names = {"None"}
 
-        if "typing." in str(field.type):
+        if str(field.type).startswith("typing.Optional["):
             inner_types = typing.get_args(field.type)
             for field_type in inner_types:
                 result_types.append(field_type)
