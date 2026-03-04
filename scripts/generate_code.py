@@ -1,17 +1,14 @@
 """Script to automatically generate a lanaguge client and server from `lsprotocol`
 type definitons."""
 
+from __future__ import annotations
+
 import argparse
 import inspect
 import pathlib
 import re
 import textwrap
 import typing
-from typing import Any
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Type
 
 from lsprotocol._hooks import _resolve_forward_references
 from lsprotocol.types import ClientCapabilities
@@ -19,10 +16,15 @@ from lsprotocol.types import ServerCapabilities
 from lsprotocol.types import METHOD_TO_TYPES
 from lsprotocol.types import message_direction
 
+if typing.TYPE_CHECKING:
+    from typing import Any
+
+    Imports = set[str | tuple[str, str]]
+
 cli = argparse.ArgumentParser(
     description="generate language client from lsprotocol types."
 )
-cli.add_argument("output", type=pathlib.Path)
+_ = cli.add_argument("output", type=pathlib.Path)
 
 LICENSE_HEADER = """\
 ############################################################################
@@ -44,9 +46,9 @@ LICENSE_HEADER = """\
 """
 
 
-def write_imports(imports: Set[Tuple[str, str]]) -> str:
+def write_imports(imports: Imports) -> str:
     """Write the standard runtime Python imports for the given set of ``imports``"""
-    lines = []
+    lines: list[str] = []
 
     for import_ in sorted(list(imports), key=lambda i: (i[0], i[1])):
         if isinstance(import_, tuple):
@@ -59,7 +61,7 @@ def write_imports(imports: Set[Tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def write_typing_imports(imports: Set[Tuple[str, str]]) -> str:
+def write_typing_imports(imports: Imports) -> str:
     """Write ``TYPE_CHECKING`` imports for the given set of ``imports``"""
     lines = [
         "if typing.TYPE_CHECKING:",
@@ -74,9 +76,8 @@ def to_snake_case(string: str) -> str:
 
 def write_client_notification(
     method: str,
-    request: Type,
-    params: Optional[Type],
-    imports: Set[Tuple[str, str]],
+    request: type[Any],
+    params: type[Any] | None,
 ) -> str:
     python_name = to_snake_case(method).replace("/", "_").replace("$_", "")
 
@@ -105,9 +106,8 @@ def write_client_notification(
 
 def write_server_notification(
     method: str,
-    request: Type,
-    params: Optional[Type],
-    imports: Set[Tuple[str, str]],
+    request: type[Any],
+    params: type[Any] | None,
 ) -> str:
     python_name = to_snake_case(method).replace("/", "_").replace("$_", "")
 
@@ -134,13 +134,13 @@ def write_server_notification(
     )
 
 
-def get_response_type(response: Type, imports: Set[Tuple[str, str]]) -> str:
+def get_response_type(response: type[Any], imports: Imports) -> str:
     # Find the response type.
     result_field = [f for f in response.__attrs_attrs__ if f.name == "result"][0]
     return rewrite_type(str(result_field.type), imports)
 
 
-def rewrite_type(type_name: str, imports: set[tuple[str, str]]) -> str:
+def rewrite_type(type_name: str, imports: Imports) -> str:
     result = re.sub(r"<class '([\w.]+)'>", r"\1", type_name)
 
     # For some reason enum reprs are not namespaced...
@@ -161,10 +161,10 @@ def rewrite_type(type_name: str, imports: set[tuple[str, str]]) -> str:
 
 def write_client_method(
     method: str,
-    request: Type,
-    params: Optional[Type],
-    response: Type,
-    imports: Set[Tuple[str, str]],
+    request: type[Any],
+    params: type[Any] | None,
+    response: type[Any],
+    imports: Imports,
 ) -> str:
     python_name = to_snake_case(method).replace("/", "_").replace("$_", "")
 
@@ -212,10 +212,10 @@ def write_client_method(
 
 def write_server_method(
     method: str,
-    request: Type,
-    params: Optional[Type],
-    response: Type,
-    imports: Set[Tuple[str, str]],
+    request: type[Any],
+    params: type[Any] | None,
+    response: type[Any],
+    imports: Imports,
 ) -> str:
     python_name = to_snake_case(method).replace("/", "_").replace("$_", "")
 
@@ -256,7 +256,7 @@ def write_server_method(
 
 
 def generate_client() -> str:
-    methods = []
+    methods: list[str] = []
     imports = {
         "typing",
         ("lsprotocol", "types"),
@@ -280,9 +280,7 @@ def generate_client() -> str:
         request, response, params, _ = types
 
         if response is None:
-            method = write_client_notification(
-                method_name, request, params, typing_imports
-            )
+            method = write_client_notification(method_name, request, params)
         else:
             method = write_client_method(
                 method_name, request, params, response, typing_imports
@@ -320,8 +318,8 @@ def generate_client() -> str:
 
 
 def generate_server() -> str:
-    methods = []
-    imports = {
+    methods: list[str] = []
+    imports: Imports = {
         "typing",
         ("lsprotocol", "types"),
         ("pygls.protocol", "LanguageServerProtocol"),
@@ -329,7 +327,7 @@ def generate_server() -> str:
         ("pygls.server", "JsonRPCServer"),
     }
 
-    typing_imports = {
+    typing_imports: Imports = {
         ("concurrent.futures", "Future"),
         ("typing", "Callable"),
         ("typing", "Optional"),
@@ -344,9 +342,7 @@ def generate_server() -> str:
         request, response, params, _ = types
 
         if response is None:
-            method = write_server_notification(
-                method_name, request, params, typing_imports
-            )
+            method = write_server_notification(method_name, request, params)
         else:
             method = write_server_method(
                 method_name, request, params, response, typing_imports
@@ -399,7 +395,7 @@ def write_capability_overloads_for(
     base_type: str,
     obj: type[Any],
     overloads: list[str],
-    imports: set[tuple[str, str]],
+    imports: Imports,
     processed_capabilities: set[str],
     prefix: str = "",
 ):
@@ -503,17 +499,17 @@ def write_capability_overloads_for(
 
 
 def generate_capabilities() -> str:
-    imports = {
+    imports: Imports = {
         "typing",
         ("functools", "reduce"),
     }
 
-    typing_imports = {
+    typing_imports: Imports = {
         ("typing", "Literal"),
         ("lsprotocol", "types"),
     }
 
-    overloads = []
+    overloads: list[str] = []
     write_capability_overloads_for(
         "types.ClientCapabilities",
         ClientCapabilities,
@@ -546,7 +542,7 @@ def generate_capabilities() -> str:
         "def get_capability(capabilities: Any, field: str, default: Any | None = None) -> Any | None: ...",
         "def get_capability(capabilities, field, default = None):",
         '    """Return the value of some nested capability with a fallback value to use in the',
-        '       case where it does not exist."""' "",
+        '       case where it does not exist."""',
         "    try:",
         '        value = reduce(getattr, field.split("."), capabilities)',
         "    except AttributeError:",
@@ -565,16 +561,16 @@ def main():
     _resolve_forward_references()
 
     client = generate_client()
-    output = args.output / "_base_client.py"
-    output.write_text(client)
+    output: pathlib.Path = args.output / "_base_client.py"
+    _ = output.write_text(client)
 
     server = generate_server()
     output = args.output / "_base_server.py"
-    output.write_text(server)
+    _ = output.write_text(server)
 
     capabilities = generate_capabilities()
     output = args.output / "_capabilities.py"
-    output.write_text(capabilities)
+    _ = output.write_text(capabilities)
 
 
 if __name__ == "__main__":
