@@ -20,6 +20,7 @@ You may find these projects that have already successfully migrated to v2 a usef
 - Our `example servers <https://github.com/openlawlibrary/pygls/commit/e90f88ad642a20d3a16551e00a5a0abe0a1e041f>`__
 - `pytest-lsp <https://github.com/swyddfa/lsp-devtools/pull/177>`__
 - `esbonio <https://github.com/swyddfa/esbonio/pull/882>`__
+- `galaxy-language-server <https://github.com/galaxyproject/galaxy-language-server/pull/308>`__
 
 Python Support
 --------------
