@@ -18,7 +18,7 @@
 ############################################################################
 import logging
 from dataclasses import dataclass
-from typing import Optional, Union, Sequence
+from typing import Optional, Union, Sequence, Any
 
 from lsprotocol import types
 
@@ -41,6 +41,25 @@ class ServerTextRange:
 
     def __repr__(self):
         return f"{self.start}-{self.end}"
+
+    def __contains__(self, position: Any) -> bool:
+        if not isinstance(position, ServerTextPosition):
+            raise TypeError("ServerTextRanges can only contain ServerTextPositions.")
+        return self.start <= position <= self.end
+
+    def includes(self, inner: "ServerTextRange") -> bool:
+        """
+        Returns whether `inner` is entirely contained within self, i.e. all
+        positions in `inner` are also in `self`.
+        """
+        return self.start <= inner.start and inner.end <= self.end
+
+    def overlaps(self, other: "ServerTextRange") -> bool:
+        """
+        Returns whether `self` and `other` overlap, i.e. any positions exist that
+        are included in both self and other.
+        """
+        return self.start <= other.end and other.start <= self.end
 
 
 class UnitCounter:
