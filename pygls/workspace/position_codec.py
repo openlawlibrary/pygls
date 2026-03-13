@@ -25,7 +25,7 @@ from lsprotocol import types
 log = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(order=True)
 class ServerTextPosition:
     line: int
     character: int
