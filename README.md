@@ -53,7 +53,6 @@ All Pygls sub-tasks require the `uv`: https://docs.astral.sh/uv/getting-started/
 * `uv run --all-extras poe test`
 * `uv run --all-extras poe test-pyodide`
 
-
 ## Contributing
 
 Your contributions to _pygls_ are most welcome ❤️ Please review the [Contributing](https://github.com/openlawlibrary/pygls/blob/master/CONTRIBUTING.md) and [Code of Conduct](https://github.com/openlawlibrary/pygls/blob/master/CODE_OF_CONDUCT.md) documents for how to get started.

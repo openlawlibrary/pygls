@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-"""This demonstrates the different ways in which server commands can be registered.
-"""
+"""This demonstrates the different ways in which server commands can be registered."""
 from __future__ import annotations
 
 import asyncio

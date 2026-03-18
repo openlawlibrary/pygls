@@ -49,7 +49,7 @@ async def commands(get_client_for):
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_command_not_defined(
-    commands: Tuple[LanguageClient, types.InitializeResult]
+    commands: Tuple[LanguageClient, types.InitializeResult],
 ):
     """Ensure that the example commands server handles the case where
     the requested command is not defined."""
