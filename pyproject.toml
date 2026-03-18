@@ -1,6 +1,6 @@
 [project]
 name = "pygls"
-version = "2.0.1"
+version = "2.1.0"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
 repository = "https://github.com/openlawlibrary/pygls"
 authors = [
@@ -24,17 +24,17 @@ ws = [
 
 [dependency-groups]
 dev = [
-    "poethepoet>=0.35.0",
-    "ruff>=0.1.6",
-    "mypy>=1.7.1",
-    "black~=24.4.1",
-    "requests>=2.32.4",
+    "poethepoet>=0.37.0",
+    "ruff>=0.15.6",
+    "mypy>=1.16.1",
+    "black~=25.11.0",
+    "requests>=2.32.5",
 ]
 test = [
-    "coverage[toml]>=7.3.2",
-    "pytest>=7.4.3",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=6.2.1",
+    "coverage[toml]>=7.9.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
 ]
 docs = [
     "furo>=2024.8.6",
