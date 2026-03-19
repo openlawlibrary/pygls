@@ -2,6 +2,51 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.1.0] - 2026-03-19
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.1.0
+
+### Bug Fixes
+
+- Only recursively generate overloads for optional types
+
+### Documentation
+
+- Add Galaxy Language Server to Implementations.md and v2 migration examples
+
+### Features
+
+- Normalize percent-encoded uris used as workspace dict keys
+- Introduce server-side position types
+- Add utility functions for converting positions and accessing contents
+- Add utility function for getting a position from an offset
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+- Set python version for pyright
+- Update type annotations
+- Regenerate capability overloads
+
+### Refactor
+
+- Add encoding-specific implementation classes
+
+### Styling
+
+- Ensure None sorts last
+
+### Testing
+
+- Add tests for client_position_at_offset
+
+### Build
+
+- Bump the pip group across 2 directories with 1 update
+- Release v2.1.0 and upgrade dev deps
+
+
+
 ## [2.0.1] - 2026-01-26
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.0.1
 
