@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.1.1] - 2026-03-25
+More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.1.1
+
+### Features
+
+- Implement comparison operators
+- Add utility functions for overlap and inclusion
+
+### Miscellaneous Tasks
+
+- Update CHANGELOG.md
+- Update CONTRIBUTORS.md
+
+### Build
+
+- V2.1.1
+
+
+
 ## [2.1.0] - 2026-03-19
 More details: https://github.com/openlawlibrary/pygls/releases/tag/v2.1.0
 
