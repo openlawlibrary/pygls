@@ -5,6 +5,9 @@
 # Required
 version: 2
 
+# Build all formats
+formats: all
+
 # Set the OS, Python version and other tools you might need
 build:
   os: ubuntu-22.04
