@@ -433,6 +433,12 @@ class JsonRPCProtocol:
             logger.warning('Received response to unknown message id "%s"', msg_id)
             return
 
+        if future.cancelled():
+            logger.debug(
+                'Received response to cancelled message "%s": %s', msg_id, result
+            )
+            return
+
         if error is not None:
             logger.debug('Received error response to message "%s": %s', msg_id, error)
             future.set_exception(JsonRpcException.from_error(error))
