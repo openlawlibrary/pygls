@@ -1,4 +1,4 @@
-PY ?= 3.13
+PY ?= 3.14
 
 .PHONY: dist
 dist: | $(UV)
