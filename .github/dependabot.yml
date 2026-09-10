@@ -17,3 +17,14 @@ updates:
     cooldown:
       default-days: 7
 
+  - package-ecosystem: "npm"
+    directory: "tests/pyodide"
+    target-branch: "main"
+    schedule:
+      interval: "monthly"
+    groups:
+      test-pyodide:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7
