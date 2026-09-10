@@ -28,3 +28,15 @@ updates:
           - "*"
     cooldown:
       default-days: 7
+
+  - package-ecosystem: "npm"
+    directory: ".vscode/extensions/pygls-playground/"
+    target-branch: "main"
+    schedule:
+      interval: "monthly"
+    groups:
+      pygls-playground:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7
