@@ -4,11 +4,11 @@
   "author": "Open Law Library",
   "repository": "https://github.com/openlawlibrary/pygls",
   "license": "Apache-2.0",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "publisher": "openlawlibrary",
   "engines": {
-    "node": ">=20",
-    "vscode": "^1.78.0"
+    "node": ">=24",
+    "vscode": "^1.91.0"
   },
   "extensionDependencies": [
     "ms-python.python"
@@ -136,17 +136,17 @@
     "watch": "tsc -p . -w"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/semver": "^7.5.0",
-    "@types/vscode": "^1.78.0",
+    "@types/vscode": "^1.91.0",
     "@typescript-eslint/eslint-plugin": "^5.3.0",
     "@typescript-eslint/parser": "^5.3.0",
     "eslint": "^8.2.0",
-    "typescript": "^5.1.0"
+    "typescript": "^7.0"
   },
   "dependencies": {
-    "@vscode/python-extension": "^1.0.4",
+    "@vscode/python-extension": "^1",
     "semver": "^7.5.4",
-    "vscode-languageclient": "^8.1.0"
+    "vscode-languageclient": "^10"
   }
 }

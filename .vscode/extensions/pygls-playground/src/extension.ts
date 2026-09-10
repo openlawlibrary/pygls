@@ -26,7 +26,7 @@ import * as semver from "semver";
 import { PythonExtension } from "@vscode/python-extension";
 import { LanguageClient, LanguageClientOptions, ServerOptions, State, integer } from "vscode-languageclient/node";
 
-const MIN_PYTHON = semver.parse("3.9.0")
+const MIN_PYTHON = semver.parse("3.11.0")!
 
 // Some other nice to haves.
 // TODO: Check selected env satisfies pygls' requirements - if not offer to run the select env command.
@@ -34,7 +34,7 @@ const MIN_PYTHON = semver.parse("3.9.0")
 // TODO: WS Transport
 // TODO: Web Extension support (requires WASM-WASI!)
 
-let client: LanguageClient;
+let client: LanguageClient | undefined;
 let clientStarting = false
 let python: PythonExtension;
 let logger: vscode.LogOutputChannel
@@ -110,7 +110,13 @@ export async function activate(context: vscode.ExtensionContext) {
     // Restart the server if the user modifies it.
     context.subscriptions.push(
         vscode.workspace.onDidSaveTextDocument(async (document: vscode.TextDocument) => {
-            const expectedUri = vscode.Uri.file(path.join(getCwd(), getServerPath()))
+            let serverPath = getServerPath()
+            if (!serverPath) {
+                logger.error("Not (re)starting server, 'pygls.server.launchScript' not configured")
+                return
+
+            }
+            const expectedUri = vscode.Uri.file(path.join(getCwd(), serverPath))
 
             if (expectedUri.toString() === document.uri.toString()) {
                 logger.info('server modified, restarting...')
@@ -139,13 +145,19 @@ async function startLangServer() {
         return
     }
 
+    const serverPath = getServerPath()
+    if (!serverPath) {
+        logger.error("Not (re)starting the server, 'pygls.server.launchScript' not configured.")
+        return
+    }
+
     clientStarting = true
     if (client) {
         await stopLangServer()
     }
     const config = vscode.workspace.getConfiguration("pygls.server")
     const cwd = getCwd()
-    const serverPath = getServerPath()
+
 
     logger.info(`cwd: '${cwd}'`)
     logger.info(`server: '${serverPath}'`)
@@ -165,7 +177,7 @@ async function startLangServer() {
     };
 
     client = new LanguageClient('pygls', serverOptions, getClientOptions());
-    const promises = [client.start()]
+    const promises: Promise<any>[] = [client.start()]
 
     if (config.get<boolean>("debug")) {
         promises.push(startDebugging())
@@ -194,15 +206,25 @@ async function stopLangServer(): Promise<void> {
     client = undefined
 }
 
-function startDebugging(): Promise<void> {
-    if (!vscode.workspace.workspaceFolders) {
-        logger.error("Unable to start debugging, there is no workspace.")
-        return Promise.reject("Unable to start debugging, there is no workspace.")
-    }
-    // TODO: Is there a more reliable way to ensure the debug adapter is ready?
-    setTimeout(async () => {
-        await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "pygls: Debug Server")
-    }, 2000)
+function startDebugging(): Promise<boolean> {
+    let promise: Promise<boolean> = new Promise((resolve, reject) => {
+        // TODO: Is there a more reliable way to ensure the debug adapter is ready?
+        const delay = 2000 // ms
+        setTimeout(async () => {
+            if (!vscode.workspace.workspaceFolders) {
+                logger.error("Unable to start debugging, there is no workspace.")
+                reject("Unable to start debugging, there is no workspace")
+                return
+            }
+            try {
+                resolve(await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], "pygls: Debug Server"))
+            } catch (err) {
+                reject(err)
+            }
+        }, delay)
+
+    })
+    return promise
 }
 
 function getClientOptions(): LanguageClientOptions {
@@ -244,6 +266,11 @@ function startLangServerTCP(addr: number): LanguageClient {
 async function executeServerCommand() {
     if (!client || client.state !== State.Running) {
         await vscode.window.showErrorMessage("There is no language server running.")
+        return
+    }
+
+    if (!client.initializeResult) {
+        logger.error("Unable to execute command, server is running, but LSP session not initialized.")
         return
     }
 
@@ -301,7 +328,7 @@ function getCwd(): string {
  *
  * @returns The python script that implements the server.
  */
-function getServerPath(): string {
+function getServerPath(): string | undefined {
     const config = vscode.workspace.getConfiguration("pygls.server")
     const server = config.get<string>('launchScript')
     return server
@@ -329,13 +356,22 @@ async function getPythonCommand(resource?: vscode.Uri): Promise<string[] | undef
 
     const debugHost = config.get<string>('debugHost')
     const debugPort = config.get<integer>('debugPort')
-    try {
-        const debugArgs = await python.debug.getRemoteLauncherCommand(debugHost, debugPort, true)
-        // Debugpy recommends we disable frozen modules
-        pythonCommand.push("-Xfrozen_modules=off", ...debugArgs)
-    } catch (err) {
-        logger.error(`Unable to get debugger command: ${err}`)
-        logger.error("Debugger will not be available.")
+    if (debugHost && debugPort) {
+        try {
+            const debugArgs = await python.debug.getRemoteLauncherCommand(debugHost, debugPort, true)
+            // Debugpy recommends we disable frozen modules
+            pythonCommand.push("-Xfrozen_modules=off", ...debugArgs)
+        } catch (err) {
+            logger.error(`Unable to get debugger command: ${err}`)
+            logger.error("Debugger will not be available.")
+        }
+    } else {
+        if (!debugHost) {
+            logger.error("Cannot enable debugger, 'pygls.server.debugHost' not configured.")
+        }
+        if (!debugPort) {
+            logger.error("Cannot enable debugger, 'pygls.server.debugPort' not configured.")
+        }
     }
 
     return pythonCommand
@@ -370,12 +406,22 @@ async function getPythonInterpreterCmd(resource?: vscode.Uri): Promise<string[] 
 
     const activeEnv = await python.environments.resolveEnvironment(activeEnvPath)
     if (!activeEnv) {
-        logger.error(`Unable to resolve envrionment: ${activeEnvPath}`)
+        logger.error(`Unable to resolve envrionment: ${activeEnvPath.path}`)
         return
     }
 
     const v = activeEnv.version
-    const pythonVersion = semver.parse(`${v.major}.${v.minor}.${v.micro}`)
+    if (!v) {
+        logger.error(`Unable to use environment: ${activeEnvPath.path}: Python version is undefined.`)
+        return
+    }
+
+    const versionString = `${v.major}.${v.minor}.${Math.max(0, v.micro)}` // ${v.micro}` can sometimes be `-1`
+    const pythonVersion = semver.parse(versionString)
+    if (!pythonVersion) {
+        logger.error(`Unable to use environment: ${activeEnvPath.path}: failed to parse version string '${versionString}'`)
+        return
+    }
 
     // Check to see if the environment satisfies the min Python version.
     if (semver.lt(pythonVersion, MIN_PYTHON)) {
