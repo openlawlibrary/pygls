@@ -47,7 +47,7 @@ Open terminal in the same directory as this file and execute following commands:
    ```
    Alternatively you can run `npm run watch` if you are going to be actively working on the extension itself.
 
-### Run Extension (VSCode v1.89+)
+### Run Extension (VSCode v1.91.0+)
 
 > [!IMPORTANT]
 > In order for VSCode to recognise `pygls-playground` as a valid extension, you need to complete the setup steps above **before** opening this repo inside VSCode.
@@ -57,22 +57,6 @@ Open terminal in the same directory as this file and execute following commands:
 
 1. Goto the `Extensions` tab (`Ctrl+Shift+X`), find the `pygls-playground` extension in the *Recommended* section (not by searching in the marketplace!) and click the `Install Workspace Extension` button.
    **If the button only says "Install", you've not found the right version of this extension**
-
-1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`.
-   The `Python: Select Interpreter` command can be used to pick the correct one.
-
-   Alternatively, you can set the `pygls.server.pythonPath` option in the `.vscode/settings.json` file
-
-### Run Extension (VSCode v1.88 and older)
-
-1. Open this directory in VS Code
-
-1. The playground relies on the [Python extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for choosing the appropriate Python environment in which to run the example language servers.
-   If you haven't already, you will need to install it and reload the window.
-
-1. Open the Run and Debug view (`ctrl + shift + D`)
-
-1. Select `Launch Client` and press `F5`, this will open a second VSCode window with the `pygls-playground` extension enabled.
 
 1. You will need to make sure that VSCode is using a virtual environment that contains an installation of `pygls`.
    The `Python: Select Interpreter` command can be used to pick the correct one.
