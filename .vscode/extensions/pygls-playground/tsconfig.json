@@ -5,6 +5,9 @@
         "lib": [
             "ES2019"
         ],
+        "types": [
+            "node",
+        ],
         "rootDir": "src",
         "outDir": "out",
         "sourceMap": true

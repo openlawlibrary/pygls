@@ -8,6 +8,10 @@ clean:
 	-test -d out && rm -r out/
 	-rm *.vsix
 
+.PHONY: watch
+watch: node_modules/.installed | $(NPM)
+	$(NPM) run watch
+
 out/extension.js: src/extension.ts node_modules/.installed | $(NPM)
 	$(NPM) run compile
 
