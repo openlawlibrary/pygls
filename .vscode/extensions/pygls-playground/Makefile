@@ -12,6 +12,9 @@ clean:
 watch: node_modules/.installed | $(NPM)
 	$(NPM) run watch
 
+.PHONY: compile
+compile: out/extension.js
+
 out/extension.js: src/extension.ts node_modules/.installed | $(NPM)
 	$(NPM) run compile
 

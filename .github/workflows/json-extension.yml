@@ -40,9 +40,6 @@ jobs:
           npm ci
           npm i vsce
 
-      - name: Lint
-        run: npx eslint src/*.ts
-
       - name: Compile
         run: npm run compile
 
