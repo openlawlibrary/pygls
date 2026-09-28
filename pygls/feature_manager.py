@@ -19,7 +19,7 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional, get_type_hints
+from typing import Any, Callable, Dict, Optional, TypeVar, get_type_hints
 
 from pygls.constants import (
     ATTR_COMMAND_TYPE,
@@ -36,6 +36,8 @@ from pygls.exceptions import (
     ValidationError,
 )
 from pygls.lsp import get_method_options_type, is_instance
+
+F = TypeVar("F", bound=Callable)
 
 logger = logging.getLogger(__name__)
 
@@ -133,14 +135,14 @@ class FeatureManager:
         """Returns server builtin features."""
         return self._builtin_features
 
-    def command(self, command_name: str) -> Callable:
+    def command(self, command_name: str) -> Callable[[F], F]:
         """Decorator used to register custom commands.
 
         Example:
             @ls.command('myCustomCommand')
         """
 
-        def decorator(f):
+        def decorator(f: F) -> F:
             # Validate
             if command_name is None or command_name.strip() == "":
                 logger.error("Missing command name.")
@@ -174,14 +176,14 @@ class FeatureManager:
         self,
         feature_name: str,
         options: Optional[Any] = None,
-    ) -> Callable:
+    ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
         Example:
             @ls.feature('textDocument/completion', CompletionItems(trigger_characters=['.']))
         """
 
-        def decorator(f):
+        def decorator(f: F) -> F:
             # Validate
             if feature_name is None or feature_name.strip() == "":
                 logger.error("Missing feature name.")
@@ -230,10 +232,10 @@ class FeatureManager:
         """Returns registered features"""
         return self._features
 
-    def thread(self) -> Callable:
+    def thread(self) -> Callable[[F], F]:
         """Decorator that mark function to execute it in a thread."""
 
-        def decorator(f):
+        def decorator(f: F) -> F:
             if asyncio.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
                     f'Thread decorator cannot be used with async functions "{f.__name__}"'

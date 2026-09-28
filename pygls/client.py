@@ -32,8 +32,11 @@ if typing.TYPE_CHECKING:
     from typing import List
     from typing import Optional
     from typing import Type
+    from typing import TypeVar
 
     from cattrs import Converter
+
+    F = TypeVar("F", bound=Callable)
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +67,7 @@ class JsonRPCClient:
         self,
         feature_name: str,
         options: Optional[Any] = None,
-    ):
+    ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
         Example
