@@ -206,7 +206,7 @@ class LanguageServerProtocol(JsonRPCProtocol):
         # Don't cancel the future for this request!
         current_id = self.msg_id
 
-        for msg_id, future in self._request_futures.items():
+        for msg_id, future in self._request_futures.copy().items():
             if msg_id != current_id and not future.done():
                 future.cancel()
 
