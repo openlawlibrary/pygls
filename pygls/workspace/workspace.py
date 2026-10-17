@@ -228,7 +228,7 @@ class Workspace(object):
         notebook = self._notebook_documents[unquote(uri)]
         notebook.version = params.notebook_document.version
 
-        if params.change.metadata:
+        if params.change.metadata is not None:
             notebook.metadata = params.change.metadata
 
         cell_changes = params.change.cells
