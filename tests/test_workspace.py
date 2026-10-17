@@ -219,6 +219,43 @@ def test_update_notebook_metadata(workspace):
     assert notebook.metadata == {"custom": "metadata"}
 
 
+@pytest.mark.parametrize(
+    "metadata,expected",
+    [
+        ({}, {}),
+        (None, {"custom": "metadata"}),
+        ({"replacement": True}, {"replacement": True}),
+    ],
+)
+def test_replace_notebook_metadata(workspace, metadata, expected):
+    """An empty metadata object clears old values; omission preserves them."""
+    notebook = types.NotebookDocument(
+        uri=NOTEBOOK.uri,
+        notebook_type=NOTEBOOK.notebook_type,
+        version=0,
+        cells=[],
+        metadata={"custom": "metadata"},
+    )
+    workspace.put_notebook_document(
+        types.DidOpenNotebookDocumentParams(
+            notebook_document=notebook, cell_text_documents=[]
+        )
+    )
+
+    workspace.update_notebook_document(
+        types.DidChangeNotebookDocumentParams(
+            notebook_document=types.VersionedNotebookDocumentIdentifier(
+                uri=notebook.uri, version=1
+            ),
+            change=types.NotebookDocumentChangeEvent(metadata=metadata),
+        )
+    )
+
+    updated = workspace.get_notebook_document(notebook_uri=notebook.uri)
+    assert updated.version == 1
+    assert updated.metadata == expected
+
+
 def test_update_notebook_cell_data(workspace):
     """Ensure we can update a notebook correctly when cell data changes."""
     params = types.DidOpenNotebookDocumentParams(
