@@ -488,6 +488,19 @@ def test_word_at_position():
     )
 
 
+@pytest.mark.parametrize("position_codec", [codec for codec, _, _ in CODECS])
+@pytest.mark.parametrize(
+    "method, expected",
+    [
+        ("server_position_at_offset", ServerTextPosition(line=0, character=0)),
+        ("client_position_at_offset", types.Position(line=0, character=0)),
+    ],
+)
+def test_position_at_offset_empty_document(position_codec, method, expected):
+    doc = TextDocument(DOC_URI, "", position_codec=position_codec)
+    assert getattr(doc, method)(0) == expected
+
+
 def test_position_at_offset_utf16():
     doc = TextDocument(DOC_URI, DOC)
     assert doc.client_position_at_offset(8) == types.Position(line=0, character=8)

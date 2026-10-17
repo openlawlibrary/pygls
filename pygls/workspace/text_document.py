@@ -197,12 +197,13 @@ class TextDocument(object):
         Convert a numeric character offset (index into self.source) into a line-column position.
         """
         remaining_offset = offset
-        for lineno, line in enumerate(self.lines):
+        lines = self.lines
+        for lineno, line in enumerate(lines):
             if remaining_offset < len(line):
                 return ServerTextPosition(lineno, remaining_offset)
             remaining_offset -= len(line)
         # The desired position is beyond the end of the last line.
-        return ServerTextPosition(lineno + 1, 0)
+        return ServerTextPosition(len(lines), 0)
 
     def client_position_at_offset(self, offset: int) -> types.Position:
         """
