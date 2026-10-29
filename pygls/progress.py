@@ -22,7 +22,8 @@ class Progress:
         _lsp(LanguageServerProtocol): Language server protocol instance
         tokens(dict): Holds futures for work done progress tokens that are
             already registered. These futures will be cancelled if the client
-            sends a cancel work done process notification.
+            sends a cancel work done process notification, and removed when
+            progress ends.
     """
 
     def __init__(self, lsp: LanguageServerProtocol) -> None:
@@ -76,4 +77,5 @@ class Progress:
 
     def end(self, token: ProgressToken, value: WorkDoneProgressEnd) -> None:
         """Notify end of work."""
+        self.tokens.pop(token, None)
         self._lsp.notify(PROGRESS, ProgressParams(token=token, value=value))
