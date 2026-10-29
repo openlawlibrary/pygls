@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import asyncio
 import functools
 import inspect
 import itertools
@@ -85,7 +84,7 @@ def wrap_with_server(f, server):
     if not has_ls_param_or_annotation(f, type(server)):
         return f
 
-    if asyncio.iscoroutinefunction(f):
+    if inspect.iscoroutinefunction(f):
 
         async def wrapped(*args, **kwargs):
             return await f(server, *args, **kwargs)
@@ -236,7 +235,7 @@ class FeatureManager:
         """Decorator that mark function to execute it in a thread."""
 
         def decorator(f: F) -> F:
-            if asyncio.iscoroutinefunction(f):
+            if inspect.iscoroutinefunction(f):
                 raise ThreadDecoratorError(
                     f'Thread decorator cannot be used with async functions "{f.__name__}"'
                 )
