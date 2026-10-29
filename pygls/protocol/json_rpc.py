@@ -204,7 +204,7 @@ class JsonRPCProtocol:
         args = args or tuple()
         kwargs = kwargs or {}
 
-        if asyncio.iscoroutinefunction(handler):
+        if inspect.iscoroutinefunction(handler):
             future = asyncio.ensure_future(handler(*args, **kwargs))
             self._request_futures[msg_id] = future
             future.add_done_callback(callback)
