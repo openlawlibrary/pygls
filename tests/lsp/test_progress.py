@@ -17,6 +17,7 @@
 
 import asyncio
 from typing import List, Optional
+from unittest.mock import Mock
 
 import pytest
 from lsprotocol.types import (
@@ -39,6 +40,8 @@ from lsprotocol.types import (
 )
 from ..conftest import ClientServer
 from pygls import IS_PYODIDE
+from pygls.progress import Progress
+from pygls.lsp.server import LanguageServer
 
 
 class ConfiguredLS(ClientServer):
@@ -114,7 +117,7 @@ def test_capabilities(client_server):
 @pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 @ConfiguredLS.decorate()
 async def test_progress_notifications(client_server):
-    client, _ = client_server
+    client, server = client_server
     client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
@@ -137,13 +140,14 @@ async def test_progress_notifications(client_server):
         {"kind": "end", "message": "done"},
     ]
     assert {notif.token for notif in client.notifications} == {"token"}
+    assert server.protocol.progress.tokens == {}
 
 
 @pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 @pytest.mark.parametrize("registration", ("sync", "async"))
 @ConfiguredLS.decorate()
 async def test_server_initiated_progress_notifications(client_server, registration):
-    client, _ = client_server
+    client, server = client_server
     client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
@@ -173,12 +177,13 @@ async def test_server_initiated_progress_notifications(client_server, registrati
     assert [mc.token for mc in client.method_calls] == [
         f"server_initiated_token_{registration}"
     ]
+    assert server.protocol.progress.tokens == {}
 
 
 @pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
 @ConfiguredLS.decorate()
 def test_progress_cancel_notifications(client_server):
-    client, _ = client_server
+    client, server = client_server
     client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
@@ -197,6 +202,7 @@ def test_progress_cancel_notifications(client_server):
     assert {notif.token for notif in client.notifications} == {
         "token_with_cancellation"
     }
+    assert server.protocol.progress.tokens == {}
 
 
 @pytest.mark.skipif(IS_PYODIDE, reason="threads are not available in pyodide.")
@@ -205,7 +211,7 @@ def test_progress_cancel_notifications(client_server):
 def test_server_initiated_progress_progress_cancel_notifications(
     client_server, registration
 ):
-    client, _ = client_server
+    client, server = client_server
     client.protocol.send_request(
         TEXT_DOCUMENT_CODE_LENS,
         CodeLensParams(
@@ -223,3 +229,83 @@ def test_server_initiated_progress_progress_cancel_notifications(
         },
         {"kind": "end", "message": "cancelled"},
     ]
+    assert server.protocol.progress.tokens == {}
+
+
+@pytest.mark.parametrize("token", (1, "token"))
+@pytest.mark.parametrize("cancelled", (False, True))
+def test_end_releases_only_the_finished_token(token, cancelled):
+    protocol = Mock()
+    progress = Progress(protocol)
+    progress.begin(token, WorkDoneProgressBegin(title="finished"))
+    progress.begin("active", WorkDoneProgressBegin(title="still running"))
+    finished = progress.tokens[token]
+    active = progress.tokens["active"]
+    if cancelled:
+        finished.cancel()
+
+    value = WorkDoneProgressEnd(message="done")
+    progress.end(token, value)
+
+    assert progress.tokens == {"active": active}
+    assert finished.cancelled() is cancelled
+    assert not active.done()
+    protocol.notify.assert_called_with(
+        PROGRESS, ProgressParams(token=token, value=value)
+    )
+
+
+def test_end_releases_token_before_notifying():
+    server = LanguageServer("progress-test", "v1")
+    progress = server.work_done_progress
+    server.protocol.notify = Mock()
+    progress.begin("token", WorkDoneProgressBegin(title="finished"))
+    finished = progress.tokens["token"]
+
+    # A late cancellation received while publishing the end notification must
+    # not reach the finished operation's cancellation future.
+    server.protocol.notify.side_effect = lambda *_: list(
+        server.protocol.lsp_work_done_progress_cancel(
+            WorkDoneProgressCancelParams(token="token")
+        )
+    )
+    progress.end("token", WorkDoneProgressEnd())
+
+    assert progress.tokens == {}
+    assert not finished.cancelled()
+
+
+def test_end_releases_token_if_notification_fails():
+    protocol = Mock()
+    progress = Progress(protocol)
+    progress.begin("token", WorkDoneProgressBegin(title="finished"))
+    protocol.notify.side_effect = BrokenPipeError
+
+    with pytest.raises(BrokenPipeError):
+        progress.end("token", WorkDoneProgressEnd())
+
+    assert progress.tokens == {}
+
+
+def test_end_unknown_token_still_notifies():
+    protocol = Mock()
+    progress = Progress(protocol)
+    value = WorkDoneProgressEnd(message="done")
+
+    progress.end("unknown", value)
+
+    assert progress.tokens == {}
+    protocol.notify.assert_called_once_with(
+        PROGRESS, ProgressParams(token="unknown", value=value)
+    )
+
+
+def test_finished_operations_do_not_accumulate_tokens():
+    progress = Progress(Mock())
+    progress.begin("active", WorkDoneProgressBegin(title="still running"))
+    active = progress.tokens["active"]
+
+    for token in range(100):
+        progress.begin(token, WorkDoneProgressBegin(title="finished"))
+        progress.end(token, WorkDoneProgressEnd())
+        assert progress.tokens == {"active": active}
