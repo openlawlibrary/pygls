@@ -10,6 +10,20 @@ updates:
     target-branch: "main"
     schedule:
       interval: "monthly"
+    ignore:
+      - dependency-name: "poethepoet"
+      - dependency-name: "ruff"
+      - dependency-name: "black"
+      - dependency-name: "mypy"
+      - dependency-name: "requests"
+      - dependency-name: "coverage"
+      - dependency-name: "pytest"
+      - dependency-name: "pytest-asyncio"
+      - dependency-name: "pytest-cov"
+      - dependency-name: "furo"
+      - dependency-name: "myst-parser"
+      - dependency-name: "sphinx"
+      - dependency-name: "sphinx-design"
     groups:
       actions:
         patterns:
