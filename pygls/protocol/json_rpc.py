@@ -316,11 +316,13 @@ class JsonRPCProtocol:
             self._send_response(msg_id, error=error.to_response_error())
             self._server._report_server_error(error, FeatureRequestError)
 
-    def _check_handler_result(self, future: Future[Any]):
+    def _check_handler_result(self, future: Future[Any], *, msg_id: MsgId):
         """Check the result of the future to see if an error occurred.
 
         Used when handling notification messages
         """
+        self._request_futures.pop(msg_id, None)
+
         if not future.cancelled() and (exc := future.exception()) is not None:
             try:
                 raise exc
@@ -359,11 +361,12 @@ class JsonRPCProtocol:
 
         try:
             handler = self._get_handler(method_name)
+            msg_id = str(uuid.uuid4())
             self._execute_handler(
-                msg_id=str(uuid.uuid4()),
+                msg_id=msg_id,
                 handler=handler,
                 args=(params,),
-                callback=self._check_handler_result,
+                callback=partial(self._check_handler_result, msg_id=msg_id),
             )
         except JsonRpcMethodNotFound:
             logger.warning("Ignoring notification for unknown method %r", method_name)
