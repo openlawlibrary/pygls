@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
+import asyncio
 import io
 import json
 from typing import Optional
@@ -42,6 +43,7 @@ from pygls.protocol import (
     JsonRPCResponseMessage,
     default_converter,
 )
+from pygls.server import JsonRPCServer
 
 EXAMPLE_NOTIFICATION = "example/notification"
 EXAMPLE_REQUEST = "example/request"
@@ -93,6 +95,49 @@ class ExampleProtocol(JsonRPCProtocol):
 @pytest.fixture()
 def protocol():
     return ExampleProtocol(None, default_converter())
+
+
+@pytest.mark.parametrize("outcome", ["success", "error", "cancelled"])
+async def test_completed_notification_releases_future(outcome):
+    server = JsonRPCServer(JsonRPCProtocol, default_converter)
+    protocol = server.protocol
+    release = asyncio.Event()
+
+    @protocol.fm.feature(EXAMPLE_NOTIFICATION)
+    async def notification(params):
+        await release.wait()
+        if outcome == "error":
+            raise ValueError("notification failed")
+
+    protocol.handle_message(JsonRPCNotification(EXAMPLE_NOTIFICATION, "2.0", None))
+    assert len(protocol._request_futures) == 1
+    future = next(iter(protocol._request_futures.values()))
+    if outcome == "cancelled":
+        future.cancel()
+    else:
+        release.set()
+    await asyncio.gather(future, return_exceptions=True)
+
+    assert protocol._request_futures == {}
+
+
+def test_completed_threaded_notification_releases_future():
+    server = JsonRPCServer(JsonRPCProtocol, default_converter, max_workers=1)
+    protocol = server.protocol
+    handled = []
+
+    @protocol.fm.feature(EXAMPLE_NOTIFICATION)
+    @protocol.fm.thread()
+    def notification(params):
+        handled.append(params)
+
+    try:
+        protocol.handle_message(JsonRPCNotification(EXAMPLE_NOTIFICATION, "2.0", 42))
+    finally:
+        server.shutdown()
+
+    assert handled == [42]
+    assert protocol._request_futures == {}
 
 
 def test_deserialize_notification_message_valid_params(protocol):
