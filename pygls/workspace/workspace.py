@@ -19,7 +19,7 @@
 import copy
 import logging
 import os
-from typing import Dict, Optional, Sequence, Union
+from collections.abc import Sequence
 from urllib.parse import unquote
 
 from lsprotocol import types
@@ -35,15 +35,15 @@ from pygls.workspace.position_codec import PositionCodec
 logger = logging.getLogger(__name__)
 
 
-class Workspace(object):
+class Workspace:
     def __init__(
         self,
-        root_uri: Optional[str],
+        root_uri: str | None,
         sync_kind: TextDocumentSyncKind = TextDocumentSyncKind.Incremental,
-        workspace_folders: Optional[Sequence[WorkspaceFolder]] = None,
-        position_encoding: Optional[
-            Union[PositionEncodingKind, str]
-        ] = PositionEncodingKind.Utf16,
+        workspace_folders: Sequence[WorkspaceFolder] | None = None,
+        position_encoding: None | (
+            PositionEncodingKind | str
+        ) = PositionEncodingKind.Utf16,
     ):
         self._root_uri = root_uri
         if self._root_uri is not None:
@@ -52,13 +52,13 @@ class Workspace(object):
         else:
             self._root_path = None
         self._sync_kind = sync_kind
-        self._text_documents: Dict[str, TextDocument] = {}
-        self._notebook_documents: Dict[str, types.NotebookDocument] = {}
+        self._text_documents: dict[str, TextDocument] = {}
+        self._notebook_documents: dict[str, types.NotebookDocument] = {}
 
         # Used to lookup notebooks which contain a given cell.
-        self._cell_in_notebook: Dict[str, str] = {}
-        self._folders: Dict[str, WorkspaceFolder] = {}
-        self._docs: Dict[str, TextDocument] = {}
+        self._cell_in_notebook: dict[str, str] = {}
+        self._folders: dict[str, WorkspaceFolder] = {}
+        self._docs: dict[str, TextDocument] = {}
         self._position_encoding = position_encoding
         self._position_codec = PositionCodec(encoding=position_encoding)
 
@@ -67,7 +67,7 @@ class Workspace(object):
                 self.add_folder(folder)
 
     @property
-    def position_encoding(self) -> Optional[Union[PositionEncodingKind, str]]:
+    def position_encoding(self) -> PositionEncodingKind | str | None:
         return self._position_encoding
 
     @property
@@ -77,9 +77,9 @@ class Workspace(object):
     def _create_text_document(
         self,
         doc_uri: str,
-        source: Optional[str] = None,
-        version: Optional[int] = None,
-        language_id: Optional[str] = None,
+        source: str | None = None,
+        version: int | None = None,
+        language_id: str | None = None,
     ) -> TextDocument:
         return TextDocument(
             doc_uri,
@@ -106,8 +106,8 @@ class Workspace(object):
         return self._folders
 
     def get_notebook_document(
-        self, *, notebook_uri: Optional[str] = None, cell_uri: Optional[str] = None
-    ) -> Optional[types.NotebookDocument]:
+        self, *, notebook_uri: str | None = None, cell_uri: str | None = None
+    ) -> types.NotebookDocument | None:
         """Return the notebook corresponding with the given uri.
 
         If both ``notebook_uri`` and ``cell_uri`` are given, ``notebook_uri`` takes
@@ -172,7 +172,7 @@ class Workspace(object):
     def put_text_document(
         self,
         text_document: types.TextDocumentItem,
-        notebook_uri: Optional[str] = None,
+        notebook_uri: str | None = None,
     ):
         """Add a text document to the workspace.
 

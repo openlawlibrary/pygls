@@ -28,10 +28,7 @@ from pygls.protocol import JsonRPCProtocol, default_converter
 
 if typing.TYPE_CHECKING:
     from typing import Any
-    from typing import Callable
-    from typing import List
-    from typing import Optional
-    from typing import Type
+    from collections.abc import Callable
     from typing import TypeVar
 
     from cattrs import Converter
@@ -46,7 +43,7 @@ class JsonRPCClient:
 
     def __init__(
         self,
-        protocol_cls: Type[JsonRPCProtocol] = JsonRPCProtocol,
+        protocol_cls: type[JsonRPCProtocol] = JsonRPCProtocol,
         converter_factory: Callable[[], Converter] = default_converter,
     ):
         # Strictly speaking, `JsonRPCProtocol` wants a `JsonRPCServer`, not a
@@ -54,9 +51,9 @@ class JsonRPCClient:
         # is that this client will mostly be used in testing contexts.
         self.protocol = protocol_cls(self, converter_factory())  # type: ignore
 
-        self._server: Optional[asyncio.subprocess.Process] = None
+        self._server: asyncio.subprocess.Process | None = None
         self._stop_event = Event()
-        self._async_tasks: List[asyncio.Task[Any]] = []
+        self._async_tasks: list[asyncio.Task[Any]] = []
 
     @property
     def stopped(self) -> bool:
@@ -66,7 +63,7 @@ class JsonRPCClient:
     def feature(
         self,
         feature_name: str,
-        options: Optional[Any] = None,
+        options: Any | None = None,
     ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 

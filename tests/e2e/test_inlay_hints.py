@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def inlay_hints(get_client_for):
 
 
 async def test_inlay_hints(
-    inlay_hints: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    inlay_hints: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code action server is working as expected."""
     client, initialize_result = inlay_hints
