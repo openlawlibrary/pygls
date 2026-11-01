@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import traceback
 from typing import Any
+
 from lsprotocol.types import ResponseError
 
 
@@ -42,7 +43,7 @@ class JsonRpcException(Exception):
         self.code: int = code or self.CODE
         self.data = data
 
-    def __eq__(self, other: Any):
+    def __eq__(self, other: object):
         return (
             isinstance(other, self.__class__)
             and self.code == other.code

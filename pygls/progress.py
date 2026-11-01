@@ -7,10 +7,11 @@ from lsprotocol.types import (
     ProgressParams,
     ProgressToken,
     WorkDoneProgressBegin,
+    WorkDoneProgressCreateParams,
     WorkDoneProgressEnd,
     WorkDoneProgressReport,
-    WorkDoneProgressCreateParams,
 )
+
 from pygls.protocol import LanguageServerProtocol
 
 

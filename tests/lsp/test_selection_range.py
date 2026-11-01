@@ -15,8 +15,8 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from lsprotocol.types import TEXT_DOCUMENT_SELECTION_RANGE
 from lsprotocol.types import (
+    TEXT_DOCUMENT_SELECTION_RANGE,
     Position,
     Range,
     SelectionRange,

@@ -26,10 +26,11 @@ action which, when invoked will fill in the answer.
 """
 
 import re
-from pygls.cli import start_server
-from pygls.lsp.server import LanguageServer
+
 from lsprotocol import types
 
+from pygls.cli import start_server
+from pygls.lsp.server import LanguageServer
 
 ADDITION = re.compile(r"^\s*(\d+)\s*\+\s*(\d+)\s*=(?=\s*$)")
 server = LanguageServer("code-action-server", "v0.1")

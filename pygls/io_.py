@@ -27,10 +27,9 @@ from pygls.exceptions import JsonRpcException
 if typing.TYPE_CHECKING:
     import logging
     import threading
-    from collections.abc import Awaitable
+    from collections.abc import Awaitable, Callable
     from concurrent.futures import ThreadPoolExecutor
     from typing import Any, BinaryIO, Protocol
-    from collections.abc import Callable
 
     from websockets.asyncio.client import ClientConnection
     from websockets.asyncio.server import ServerConnection

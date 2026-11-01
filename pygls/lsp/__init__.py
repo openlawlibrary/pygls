@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-import cattrs
-from typing import Any, Union
 from collections.abc import Callable
+from typing import Any, Union
 
+import cattrs
 from lsprotocol.types import (
     ALL_TYPES_MAP,
     METHOD_TO_TYPES,

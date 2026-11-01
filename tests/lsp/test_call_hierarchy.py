@@ -19,8 +19,6 @@ from lsprotocol.types import (
     CALL_HIERARCHY_INCOMING_CALLS,
     CALL_HIERARCHY_OUTGOING_CALLS,
     TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
-)
-from lsprotocol.types import (
     CallHierarchyIncomingCall,
     CallHierarchyIncomingCallsParams,
     CallHierarchyItem,

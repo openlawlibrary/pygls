@@ -16,8 +16,8 @@
 ############################################################################
 
 
-from lsprotocol.types import TEXT_DOCUMENT_MONIKER
 from lsprotocol.types import (
+    TEXT_DOCUMENT_MONIKER,
     Moniker,
     MonikerKind,
     MonikerOptions,

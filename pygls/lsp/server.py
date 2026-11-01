@@ -12,8 +12,8 @@ if typing.TYPE_CHECKING:
     from collections.abc import Callable
     from typing import TypeVar
 
-    from pygls.server import ServerErrors
     from pygls.progress import Progress
+    from pygls.server import ServerErrors
     from pygls.workspace import Workspace
 
     F = TypeVar("F", bound=Callable)

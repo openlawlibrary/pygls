@@ -8,12 +8,8 @@ import operator
 import pathlib
 import string
 import textwrap
-import typing
 from dataclasses import dataclass, field
 from functools import reduce
-
-if typing.TYPE_CHECKING:
-    from typing import List, Optional, Tuple, Type
 
 
 class TokenModifier(enum.IntFlag):
@@ -32,7 +28,7 @@ class Token:
     text: str
 
     tok_type: str
-    tok_modifiers: List[TokenModifier] = field(default_factory=list)
+    tok_modifiers: list[TokenModifier] = field(default_factory=list)
 
     @property
     def tok_id(self):
@@ -408,7 +404,7 @@ def render_table(tokens: list[Token]) -> str:
 
 def render_token_list(
     tokens: list[Token],
-    token_types: Optional[List[str]] = None,
+    token_types: list[str] | None = None,
     include_modifiers: bool = False,
 ) -> str:
     """Render the list of tokens.
@@ -449,7 +445,7 @@ def render_token_list(
     return "\n".join(lines)
 
 
-def render_token_types(token_types: List[str]) -> str:
+def render_token_types(token_types: list[str]) -> str:
     """Render the list of token types."""
     lines = []
 
@@ -462,7 +458,7 @@ def render_token_types(token_types: List[str]) -> str:
     return "\n".join(lines)
 
 
-def render_token_modifiers(modifiers: Type[enum.IntFlag]) -> Tuple[str, str]:
+def render_token_modifiers(modifiers: type[enum.IntFlag]) -> tuple[str, str]:
     """Render the list of token modifiers."""
     list_lines = []
 
@@ -474,8 +470,8 @@ def render_token_modifiers(modifiers: Type[enum.IntFlag]) -> Tuple[str, str]:
         )
         list_lines.append("</li>")
 
-    idx_cells: List[str] = []
-    value_cells: List[str] = []
+    idx_cells: list[str] = []
+    value_cells: list[str] = []
 
     for idx, modifier in enumerate(modifiers):
         idx_cells.insert(0, f'<td style="text-align: center">{idx}</td>')
@@ -498,7 +494,7 @@ def render_token_modifiers(modifiers: Type[enum.IntFlag]) -> Tuple[str, str]:
     return "\n".join(list_lines), "\n".join(table_lines)
 
 
-def render_token_type_styles(tokens: List[Token], token_types: List[str]) -> str:
+def render_token_type_styles(tokens: list[Token], token_types: list[str]) -> str:
     """Render the CSS styles for the list of token types."""
     lines = []
 
@@ -540,7 +536,7 @@ def render_position_calculation(
     return "\n".join(lines)
 
 
-def render_token_position_calcs_and_styles(tokens: list[Token]) -> Tuple[str, str]:
+def render_token_position_calcs_and_styles(tokens: list[Token]) -> tuple[str, str]:
     """Render the set of line and offset calculations."""
     calc_lines = []
     style_lines = []
@@ -608,8 +604,8 @@ def render_token_position_calcs_and_styles(tokens: list[Token]) -> Tuple[str, st
 
 
 def render_token_modifier_calcs_and_styles(
-    tokens: list[Token], modifiers: Type[enum.IntFlag]
-) -> Tuple[str, str]:
+    tokens: list[Token], modifiers: type[enum.IntFlag]
+) -> tuple[str, str]:
     """Render the set of modifier calculations."""
     calc_lines = []
     style_lines = []

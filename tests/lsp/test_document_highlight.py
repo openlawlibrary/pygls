@@ -16,8 +16,8 @@
 ############################################################################
 
 
-from lsprotocol.types import TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT
 from lsprotocol.types import (
+    TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT,
     DocumentHighlight,
     DocumentHighlightKind,
     DocumentHighlightOptions,

@@ -32,7 +32,6 @@ operation as invalid.
 
 import logging
 import re
-from typing import List
 
 from lsprotocol import types
 
@@ -114,7 +113,7 @@ def rename(ls: RenameLanguageServer, params: types.RenameParams):
     if not is_object:
         return None
 
-    edits: List[types.TextEdit] = []
+    edits: list[types.TextEdit] = []
     for linum, line in enumerate(doc.lines):
         for match in re.finditer(f"\\b{word}\\b", line):
             edits.append(

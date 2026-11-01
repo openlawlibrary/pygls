@@ -19,7 +19,6 @@ from lsprotocol import types as lsp
 
 from ..conftest import ClientServer
 
-
 TYPE_HIERARCHY_ITEM = lsp.TypeHierarchyItem(
     name="test_name",
     kind=lsp.SymbolKind.Class,

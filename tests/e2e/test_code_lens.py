@@ -16,12 +16,12 @@
 ############################################################################
 from __future__ import annotations
 
-from collections.abc import Sequence
 import typing
+from collections.abc import Sequence
 
+import cattrs
 import pytest
 import pytest_asyncio
-import cattrs
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:

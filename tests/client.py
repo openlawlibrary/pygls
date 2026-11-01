@@ -26,12 +26,10 @@ import pytest
 import pytest_asyncio
 from lsprotocol import types
 
-from pygls import IS_PYODIDE
-from pygls import uris
+from pygls import IS_PYODIDE, uris
 from pygls.exceptions import JsonRpcMethodNotFound
 from pygls.lsp.client import BaseLanguageClient
-from pygls.protocol import LanguageServerProtocol
-from pygls.protocol import default_converter
+from pygls.protocol import LanguageServerProtocol, default_converter
 
 logger = logging.getLogger(__name__)
 

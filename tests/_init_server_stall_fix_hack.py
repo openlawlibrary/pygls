@@ -5,8 +5,8 @@ fix to actually guarantee it doesn't generate false negatives in the test
 suite.
 """
 
-import os
 import concurrent
+import os
 
 RETRIES = 3
 

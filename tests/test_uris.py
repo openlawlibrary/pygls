@@ -19,6 +19,7 @@
 import pytest
 
 from pygls import uris
+
 from . import unix_only, windows_only
 
 

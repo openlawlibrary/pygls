@@ -61,11 +61,11 @@ def default_converter():
 
 
 __all__ = (
+    "JsonRPCNotification",
     "JsonRPCProtocol",
-    "LanguageServerProtocol",
     "JsonRPCRequestMessage",
     "JsonRPCResponseMessage",
-    "JsonRPCNotification",
+    "LanguageServerProtocol",
     "_dict_to_object",
     "_params_field_structure_hook",
     "_result_field_structure_hook",

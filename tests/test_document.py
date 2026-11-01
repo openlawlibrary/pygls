@@ -18,14 +18,16 @@
 ############################################################################
 import re
 
+import pytest
 from lsprotocol import types
+
 from pygls.workspace import (
-    TextDocument,
     PositionCodec,
     ServerTextPosition,
     ServerTextRange,
+    TextDocument,
 )
-import pytest
+
 from .conftest import DOC, DOC_URI
 
 

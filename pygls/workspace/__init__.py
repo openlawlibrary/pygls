@@ -1,11 +1,11 @@
-from .workspace import Workspace
-from .text_document import TextDocument
 from .position_codec import PositionCodec, ServerTextPosition, ServerTextRange
+from .text_document import TextDocument
+from .workspace import Workspace
 
 __all__ = (
-    "Workspace",
-    "TextDocument",
     "PositionCodec",
     "ServerTextPosition",
     "ServerTextRange",
+    "TextDocument",
+    "Workspace",
 )

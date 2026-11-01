@@ -23,7 +23,6 @@ https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef
 """
 from __future__ import annotations
 
-
 import re
 from urllib import parse
 

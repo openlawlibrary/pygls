@@ -17,9 +17,9 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
-from collections.abc import Sequence
 
 from lsprotocol import types
 

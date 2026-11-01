@@ -16,8 +16,8 @@
 ############################################################################
 
 
-from lsprotocol.types import TEXT_DOCUMENT_FOLDING_RANGE
 from lsprotocol.types import (
+    TEXT_DOCUMENT_FOLDING_RANGE,
     FoldingRange,
     FoldingRangeKind,
     FoldingRangeOptions,

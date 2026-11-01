@@ -15,13 +15,13 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import Any
 import time
+from typing import Any
 
 import pytest
 from lsprotocol import types
 
-from pygls.exceptions import JsonRpcInternalError, PyglsError, JsonRpcException
+from pygls.exceptions import JsonRpcException, JsonRpcInternalError, PyglsError
 from pygls.lsp.server import LanguageServer
 
 from ..conftest import ClientServer

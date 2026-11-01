@@ -30,9 +30,9 @@ to when they are required.
 """
 
 import re
-from typing import Optional
 
 from lsprotocol import types
+
 from pygls.cli import start_server
 from pygls.lsp.server import LanguageServer
 
@@ -40,7 +40,7 @@ NUMBER = re.compile(r"\d+")
 server = LanguageServer("inlay-hint-server", "v1")
 
 
-def parse_int(chars: str) -> Optional[int]:
+def parse_int(chars: str) -> int | None:
     try:
         return int(chars)
     except Exception:

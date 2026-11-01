@@ -17,9 +17,8 @@
 
 
 import pytest
-
-from lsprotocol.types import TEXT_DOCUMENT_SIGNATURE_HELP
 from lsprotocol.types import (
+    TEXT_DOCUMENT_SIGNATURE_HELP,
     ParameterInformation,
     Position,
     SignatureHelp,
