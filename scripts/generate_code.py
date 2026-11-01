@@ -12,7 +12,12 @@ import textwrap
 import typing
 
 from lsprotocol._hooks import _resolve_forward_references
-from lsprotocol.types import METHOD_TO_TYPES, ClientCapabilities, ServerCapabilities, message_direction
+from lsprotocol.types import (
+    METHOD_TO_TYPES,
+    ClientCapabilities,
+    ServerCapabilities,
+    message_direction,
+)
 
 if typing.TYPE_CHECKING:
     from typing import Any
@@ -48,7 +53,7 @@ def write_imports(imports: Imports) -> str:
     """Write the standard runtime Python imports for the given set of ``imports``"""
     lines: list[str] = []
 
-    for import_ in sorted(list(imports), key=lambda i: (i[0], i[1])):
+    for import_ in sorted(imports, key=lambda i: (i[0], i[1])):
         if isinstance(import_, tuple):
             mod, name = import_
             lines.append(f"from {mod} import {name}")
@@ -590,6 +595,7 @@ def main():
             str(base_server),
             str(caps),
         ],
+        check=False,
     )
 
 

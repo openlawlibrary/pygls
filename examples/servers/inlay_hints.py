@@ -29,6 +29,7 @@ uses the ``inlayHint/resolve`` to demonstrate how you can defer expensive comput
 to when they are required.
 """
 
+import contextlib
 import re
 
 from lsprotocol import types
@@ -82,11 +83,9 @@ def inlay_hints(params: types.InlayHintParams):
 
 @server.feature(types.INLAY_HINT_RESOLVE)
 def inlay_hint_resolve(hint: types.InlayHint):
-    try:
+    with contextlib.suppress(Exception):
         n = int(hint.label[1:], 2)
         hint.tooltip = f"Binary representation of the number: {n}"
-    except Exception:
-        pass
 
     return hint
 

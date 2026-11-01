@@ -83,10 +83,9 @@ class LanguageClient(BaseLanguageClient):
     async def server_exit(self, server: asyncio.subprocess.Process):
         # -15: terminated (probably by the client)
         #   0: all ok
-        if server.returncode not in {-15, 0}:
-            if server.stderr is not None:
-                err = await server.stderr.read()
-                print(f"stderr: {err.decode('utf8')}", file=sys.stderr)
+        if server.returncode not in {-15, 0} and server.stderr is not None:
+            err = await server.stderr.read()
+            print(f"stderr: {err.decode('utf8')}", file=sys.stderr)
 
 
 def pytest_addoption(parser):

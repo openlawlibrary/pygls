@@ -98,7 +98,7 @@ async def calculate_pow_async_wrapped(s: LanguageServer, x, n: int):
 
 @server.command("calculate.div")
 def calculate_div(x: float, n):
-    """"""
+    """One typed, one un-typed argument, sync"""
     logging.info("x: %r, n: %r", x, n)
     return x / n
 

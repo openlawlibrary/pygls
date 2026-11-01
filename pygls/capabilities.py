@@ -19,7 +19,7 @@ from typing import Any, TypeVar
 
 from lsprotocol import types
 
-from pygls.lsp._capabilities import get_capability as get_capability
+from pygls.lsp._capabilities import get_capability
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")

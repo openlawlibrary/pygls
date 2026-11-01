@@ -109,7 +109,7 @@ def rename(ls: RenameLanguageServer, params: types.RenameParams):
         return None
 
     word = doc.word_at_position(params.position)
-    is_object = any([word in index[name] for name in index])
+    is_object = any(word in index[name] for name in index)
     if not is_object:
         return None
 
@@ -141,7 +141,7 @@ def prepare_rename(ls: RenameLanguageServer, params: types.PrepareRenameParams):
         return None
 
     word = doc.word_at_position(params.position)
-    is_object = any([word in index[name] for name in index])
+    is_object = any(word in index[name] for name in index)
     if not is_object:
         return None
 

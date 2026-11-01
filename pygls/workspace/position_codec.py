@@ -191,7 +191,7 @@ class PositionCodec:
             if client_position >= position.character:
                 break
             client_position += self.impl.code_units_for_char(c)
-            utf32_index += 1
+            utf32_index += 1  # noqa: SIM113
 
         if client_position < position.character:
             utf32_index = len(_line)
