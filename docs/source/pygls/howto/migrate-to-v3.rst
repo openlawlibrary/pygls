@@ -8,5 +8,5 @@ Python Support
 
 *pygls v3*
 
-- Removes support for Python 3.9
+- Removes support for Python 3.9 and 3.10
 - Adds support for Python 3.15
