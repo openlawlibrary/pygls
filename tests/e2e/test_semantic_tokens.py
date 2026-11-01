@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -72,11 +71,11 @@ async def semantic_tokens(get_client_for):
 )
 @pytest.mark.asyncio(loop_scope="module")
 async def test_semantic_tokens_full(
-    semantic_tokens: Tuple[BaseLanguageClient, types.InitializeResult],
+    semantic_tokens: tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
     path_for,
     text: str,
-    expected: Tuple[int],
+    expected: tuple[int],
 ):
     """Ensure that the example semantic tokens server is working as expected."""
     client, initialize_result = semantic_tokens

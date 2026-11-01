@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -47,7 +46,7 @@ def range_from_str(range_: str) -> types.Range:
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_link(
-    links: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    links: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example links server is working as expected."""
     client, initialize_result = links
@@ -80,7 +79,7 @@ async def test_document_link(
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_link_resolve(
-    links: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    links: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the server can resolve document links correctly."""
 

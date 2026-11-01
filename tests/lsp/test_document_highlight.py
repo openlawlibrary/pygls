@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import List, Optional
 
 from lsprotocol.types import TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT
 from lsprotocol.types import (
@@ -39,7 +38,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_DOCUMENT_HIGHLIGHT,
             DocumentHighlightOptions(),
         )
-        def f(params: DocumentHighlightParams) -> Optional[List[DocumentHighlight]]:
+        def f(params: DocumentHighlightParams) -> list[DocumentHighlight] | None:
             if params.text_document.uri == "file://return.list":
                 return [
                     DocumentHighlight(

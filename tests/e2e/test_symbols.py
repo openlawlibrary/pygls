@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -47,7 +46,7 @@ def range_from_str(range_: str) -> types.Range:
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_symbols(
-    symbols: Tuple[BaseLanguageClient, types.InitializeResult], uri_for, path_for
+    symbols: tuple[BaseLanguageClient, types.InitializeResult], uri_for, path_for
 ):
     """Ensure that the example symbols server is working as expected."""
     client, initialize_result = symbols
@@ -284,7 +283,7 @@ async def test_document_symbols(
 )
 @pytest.mark.asyncio(loop_scope="module")
 async def test_workspace_symbols(
-    symbols: Tuple[BaseLanguageClient, types.InitializeResult],
+    symbols: tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
     path_for,
     query,

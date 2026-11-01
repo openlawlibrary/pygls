@@ -15,7 +15,8 @@
 # limitations under the License.                                           #
 ############################################################################
 import cattrs
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Union
+from collections.abc import Callable
 
 from lsprotocol.types import (
     ALL_TYPES_MAP,
@@ -39,7 +40,7 @@ from lsprotocol.types import (
 
 from pygls.exceptions import MethodTypeNotRegisteredError
 
-ConfigCallbackType = Callable[[List[Any]], None]
+ConfigCallbackType = Callable[[list[Any]], None]
 ShowDocumentCallbackType = Callable[[ShowDocumentResult], None]
 
 METHOD_TO_OPTIONS = {
@@ -64,7 +65,7 @@ METHOD_TO_OPTIONS = {
 
 def get_method_registration_options_type(
     method_name, lsp_methods_map=METHOD_TO_TYPES
-) -> Optional[Any]:
+) -> Any | None:
     """The type corresponding with a method's options when dynamically registering
     capability for it."""
 
@@ -76,7 +77,7 @@ def get_method_registration_options_type(
 
 def get_method_options_type(
     method_name, lsp_options_map=METHOD_TO_OPTIONS, lsp_methods_map=METHOD_TO_TYPES
-) -> Optional[Any]:
+) -> Any | None:
     """Return the type corresponding with a method's ``ServerCapabilities`` fields.
 
     In the majority of cases this simply means returning the ``<MethodName>Options``

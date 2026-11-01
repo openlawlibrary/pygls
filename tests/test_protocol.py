@@ -16,7 +16,6 @@
 ############################################################################
 import io
 import json
-from typing import Optional
 
 import attrs
 import pytest
@@ -61,7 +60,7 @@ class ExampleParams:
         inner_field: str
 
     field_a: str
-    field_b: Optional[InnerType] = None
+    field_b: InnerType | None = None
 
 
 @attrs.define

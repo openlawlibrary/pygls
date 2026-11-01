@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import List, Optional
 
 from lsprotocol.types import TEXT_DOCUMENT_FOLDING_RANGE
 from lsprotocol.types import (
@@ -37,7 +36,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_FOLDING_RANGE,
             FoldingRangeOptions(),
         )
-        def f(params: FoldingRangeParams) -> Optional[List[FoldingRange]]:
+        def f(params: FoldingRangeParams) -> list[FoldingRange] | None:
             if params.text_document.uri == "file://return.list":
                 return [
                     FoldingRange(

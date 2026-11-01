@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import Optional
 
 import pytest
 
@@ -46,7 +45,7 @@ class ConfiguredLS(ClientServer):
                 retrigger_characters=["c", "d"],
             ),
         )
-        def f(params: SignatureHelpParams) -> Optional[SignatureHelp]:
+        def f(params: SignatureHelpParams) -> SignatureHelp | None:
             if params.text_document.uri == "file://return.signature_help":
                 return SignatureHelp(
                     signatures=[

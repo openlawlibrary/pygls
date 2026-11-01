@@ -17,7 +17,6 @@
 import asyncio
 import pathlib
 import sys
-from typing import Union
 
 import pytest
 from pygls import IS_PYODIDE
@@ -61,7 +60,7 @@ async def test_client_detect_invalid_json():
         future = None
 
         def report_server_error(
-            self, error: Exception, source: Union[PyglsError, JsonRpcException]
+            self, error: Exception, source: PyglsError | JsonRpcException
         ):
             self.report_error_called = True
             self.future.cancel()

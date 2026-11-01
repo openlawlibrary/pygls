@@ -27,7 +27,6 @@ from lsprotocol import types
 from pygls.exceptions import JsonRpcInternalError, JsonRpcInvalidParams
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import LanguageClient
 
@@ -49,7 +48,7 @@ async def commands(get_client_for):
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_command_not_defined(
-    commands: Tuple[LanguageClient, types.InitializeResult],
+    commands: tuple[LanguageClient, types.InitializeResult],
 ):
     """Ensure that the example commands server handles the case where
     the requested command is not defined."""
@@ -70,7 +69,7 @@ async def test_command_not_defined(
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize("name", ["random", "random.wrapped"])
 async def test_random(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server can execute both the wrapped and
     unwrapped ``calculate.triangle.hypotenuse`` commands correctly."""
@@ -93,7 +92,7 @@ async def test_random(
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize("name", ["random", "random.wrapped"])
 async def test_random_invalid(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server handles the case when a command is called
     with too many arguments."""
@@ -130,7 +129,7 @@ async def test_random_invalid(
     ],
 )
 async def test_calculate_sum(
-    commands: Tuple[LanguageClient, types.InitializeResult],
+    commands: tuple[LanguageClient, types.InitializeResult],
     name: str,
     setup: tuple[list[int], int],
 ):
@@ -156,7 +155,7 @@ async def test_calculate_sum(
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize("name", ["calculate.pow", "calculate.pow.wrapped"])
 async def test_calculate_pow_invalid(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server handles the case where not enough
     arguments are given."""
@@ -188,7 +187,7 @@ async def test_calculate_pow_invalid(
     ],
 )
 async def test_calculate_pow(
-    commands: Tuple[LanguageClient, types.InitializeResult],
+    commands: tuple[LanguageClient, types.InitializeResult],
     name: str,
     runtime: str,
 ):
@@ -216,7 +215,7 @@ async def test_calculate_pow(
 @pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.parametrize("name", ["calculate.div", "calculate.div.wrapped"])
 async def test_calculate_div_invalid(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server handles the case where
     there is a error in the command handler."""
@@ -243,7 +242,7 @@ async def test_calculate_div_invalid(
     ["calculate.div", "calculate.div.wrapped"],
 )
 async def test_calculate_div(
-    commands: Tuple[LanguageClient, types.InitializeResult],
+    commands: tuple[LanguageClient, types.InitializeResult],
     name: str,
 ):
     """Ensure that the example commands server can execute both the wrapped and
@@ -275,7 +274,7 @@ async def test_calculate_div(
     ],
 )
 async def test_calculate_hypotenuse(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server can execute both the wrapped and
     unwrapped ``calculate.triangle.hypotenuse`` commands correctly."""
@@ -304,7 +303,7 @@ async def test_calculate_hypotenuse(
     ],
 )
 async def test_calculate_hypotenuse_invalid(
-    commands: Tuple[LanguageClient, types.InitializeResult], name: str
+    commands: tuple[LanguageClient, types.InitializeResult], name: str
 ):
     """Ensure that the example commands server handles the case where the given argument
     does not align to the expected type

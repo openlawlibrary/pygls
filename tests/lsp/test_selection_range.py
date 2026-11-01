@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import List, Optional
 
 from lsprotocol.types import TEXT_DOCUMENT_SELECTION_RANGE
 from lsprotocol.types import (
@@ -37,7 +36,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_SELECTION_RANGE,
             SelectionRangeOptions(),
         )
-        def f(params: SelectionRangeParams) -> Optional[List[SelectionRange]]:
+        def f(params: SelectionRangeParams) -> list[SelectionRange] | None:
             if params.text_document.uri == "file://return.list":
                 root = SelectionRange(
                     range=Range(
