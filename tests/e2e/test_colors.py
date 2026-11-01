@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -47,7 +46,7 @@ def range_from_str(range_: str) -> types.Range:
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_color(
-    colors: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    colors: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example colors server is working as expected."""
     client, initialize_result = colors
@@ -104,7 +103,7 @@ async def test_document_color(
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_color_presentation(
-    colors: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    colors: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the server can convert colors to their string representation
     correctly."""

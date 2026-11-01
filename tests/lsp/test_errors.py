@@ -15,7 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import Any, List, Union
+from typing import Any
 import time
 
 import pytest
@@ -32,21 +32,21 @@ ERROR_MESSAGE = "Testing errors"
 
 class CustomLanguageServerSafe(LanguageServer):
     def report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self, error: Exception, source: PyglsError | JsonRpcException
     ):
         pass
 
 
 class CustomLanguageServerPotentialRecursion(LanguageServer):
     def report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self, error: Exception, source: PyglsError | JsonRpcException
     ):
         raise Exception()
 
 
 class CustomLanguageServerSendAll(LanguageServer):
     def report_server_error(
-        self, error: Exception, source: Union[PyglsError, JsonRpcException]
+        self, error: Exception, source: PyglsError | JsonRpcException
     ):
         self.window_show_message(
             types.ShowMessageParams(
@@ -62,7 +62,7 @@ class ConfiguredLS(ClientServer):
         self.init()
 
     def init(self):
-        self.client.messages: List[str] = []
+        self.client.messages: list[str] = []
 
         @self.server.feature(ERROR_TRIGGER)
         def f1(params: Any):

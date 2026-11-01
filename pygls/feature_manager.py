@@ -18,7 +18,8 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional, TypeVar, get_type_hints
+from typing import Any, TypeVar, get_type_hints
+from collections.abc import Callable
 
 from pygls.constants import (
     ATTR_COMMAND_TYPE,
@@ -130,7 +131,7 @@ class FeatureManager:
         logger.info("Registered builtin feature %s", feature_name)
 
     @property
-    def builtin_features(self) -> Dict:
+    def builtin_features(self) -> dict:
         """Returns server builtin features."""
         return self._builtin_features
 
@@ -167,14 +168,14 @@ class FeatureManager:
         return decorator
 
     @property
-    def commands(self) -> Dict:
+    def commands(self) -> dict:
         """Returns registered custom commands."""
         return self._commands
 
     def feature(
         self,
         feature_name: str,
-        options: Optional[Any] = None,
+        options: Any | None = None,
     ) -> Callable[[F], F]:
         """Decorator used to register LSP features.
 
@@ -207,11 +208,9 @@ class FeatureManager:
                     self.converter, options, options_type
                 ):
                     raise TypeError(
-                        (
-                            f'Options of method "{feature_name}"'
-                            f" is instance of type {type(options)}"
-                            f" which is not a subtype of {options_type}"
-                        )
+                        f'Options of method "{feature_name}"'
+                        f" is instance of type {type(options)}"
+                        f" which is not a subtype of {options_type}"
                     )
                 self._feature_options[feature_name] = options
 
@@ -222,12 +221,12 @@ class FeatureManager:
         return decorator
 
     @property
-    def feature_options(self) -> Dict:
+    def feature_options(self) -> dict:
         """Returns feature options for registered features."""
         return self._feature_options
 
     @property
-    def features(self) -> Dict:
+    def features(self) -> dict:
         """Returns registered features"""
         return self._features
 

@@ -15,7 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import logging
-from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, TypeVar
 
 from lsprotocol import types
 
@@ -41,14 +41,14 @@ class ServerCapabilitiesBuilder:
     def __init__(
         self,
         client_capabilities: types.ClientCapabilities,
-        features: Set[str],
-        feature_options: Dict[str, Any],
-        commands: List[str],
+        features: set[str],
+        feature_options: dict[str, Any],
+        commands: list[str],
         text_document_sync_kind: types.TextDocumentSyncKind,
-        notebook_document_sync: Optional[types.NotebookDocumentSyncOptions] = None,
-        position_encoding: Union[
-            types.PositionEncodingKind, str
-        ] = types.PositionEncodingKind.Utf16,
+        notebook_document_sync: types.NotebookDocumentSyncOptions | None = None,
+        position_encoding: (
+            types.PositionEncodingKind | str
+        ) = types.PositionEncodingKind.Utf16,
     ):
         self.client_capabilities = client_capabilities
         self.features = features
@@ -60,7 +60,7 @@ class ServerCapabilitiesBuilder:
         self.server_cap = types.ServerCapabilities()
         self.server_cap.position_encoding = position_encoding
 
-    def _provider_options(self, feature: str, default: T) -> Optional[Union[T, Any]]:
+    def _provider_options(self, feature: str, default: T) -> T | Any | None:
         if feature in self.features:
             return self.feature_options.get(feature, default)
         return None
@@ -68,8 +68,8 @@ class ServerCapabilitiesBuilder:
     @classmethod
     def choose_position_encoding(
         cls, client_capabilities: types.ClientCapabilities
-    ) -> Union[types.PositionEncodingKind, str]:
-        server_encoding: Union[types.PositionEncodingKind, str] = (
+    ) -> types.PositionEncodingKind | str:
+        server_encoding: types.PositionEncodingKind | str = (
             types.PositionEncodingKind.Utf16
         )
 
@@ -338,7 +338,7 @@ class ServerCapabilitiesBuilder:
             self.server_cap.semantic_tokens_provider = value
             return self
 
-        full_support: Union[bool, types.SemanticTokensFullDelta] = (
+        full_support: bool | types.SemanticTokensFullDelta = (
             types.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL in self.features
         )
 

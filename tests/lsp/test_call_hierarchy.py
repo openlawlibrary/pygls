@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import List, Optional
 
 from lsprotocol.types import (
     CALL_HIERARCHY_INCOMING_CALLS,
@@ -82,7 +81,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_PREPARE_CALL_HIERARCHY,
             CallHierarchyOptions(),
         )
-        def f1(params: CallHierarchyPrepareParams) -> Optional[List[CallHierarchyItem]]:
+        def f1(params: CallHierarchyPrepareParams) -> list[CallHierarchyItem] | None:
             if params.text_document.uri == "file://return.list":
                 return [CALL_HIERARCHY_ITEM]
             else:
@@ -91,7 +90,7 @@ class ConfiguredLS(ClientServer):
         @self.server.feature(CALL_HIERARCHY_INCOMING_CALLS)
         def f2(
             params: CallHierarchyIncomingCallsParams,
-        ) -> Optional[List[CallHierarchyIncomingCall]]:
+        ) -> list[CallHierarchyIncomingCall] | None:
             return [
                 CallHierarchyIncomingCall(
                     from_=params.item,
@@ -107,7 +106,7 @@ class ConfiguredLS(ClientServer):
         @self.server.feature(CALL_HIERARCHY_OUTGOING_CALLS)
         def f3(
             params: CallHierarchyOutgoingCallsParams,
-        ) -> Optional[List[CallHierarchyOutgoingCall]]:
+        ) -> list[CallHierarchyOutgoingCall] | None:
             return [
                 CallHierarchyOutgoingCall(
                     to=params.item,

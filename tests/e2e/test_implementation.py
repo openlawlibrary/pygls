@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def goto(get_client_for):
 
 
 async def test_implementation(
-    goto: Tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
+    goto: tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
 ):
     """Ensure that we can implement type implementation requests."""
     client, initialize_result = goto
