@@ -12,12 +12,11 @@ maintainers = [
   { name = "Alex Carney", email = "alcarneyme@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -99,13 +98,33 @@ ignore_fail = "return_non_zero"
 [tool.pyright]
 strict = ["pygls"]
 
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 
 [tool.ruff]
-# Sometimes Black can't reduce line length without breaking more imortant rules.
+# Sometimes Black can't reduce line length without breaking more important rules.
 # So allow Ruff to be more lenient.
 line-length = 120
+
+[tool.ruff.lint]
+ignore = [
+  "BLE001",  # catching blind Exceptions
+  "UP007",   # use X | Y for type annotations
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/{examples,tests,docs,scripts}/*" = [
+  "B023",    # function does not bind loop variable
+  "C408",    # rewrite as a literal
+  "FLY002",  # prefer f-string over str.join
+  "LOG015",  # using the root logger
+  "RUF012",  # mutable default class attribute
+  "RUF015",  # prefer next(iter) over list(iter)[0]
+  "RUF028",  # invalid suppression comment
+  "RUF059",  # unused variables
+  "SIM102",  # use if x and y over nested ifs
+  "TRY002",  # create your own exception
+]
 
 [tool.black]
 line-length = 88

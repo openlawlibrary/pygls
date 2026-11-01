@@ -25,7 +25,6 @@ import typing
 from pygls.exceptions import JsonRpcException
 
 if typing.TYPE_CHECKING:
-    import logging
     import threading
     from collections.abc import Awaitable, Callable
     from concurrent.futures import ThreadPoolExecutor

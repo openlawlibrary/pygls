@@ -41,8 +41,7 @@ for contributor in contributors:
     url = contributor["html_url"]
     contents += f"* [{name}]({url}) ({contributions})\n"
 
-file = open(CONTRIBUTORS_FILE, "w")
-n = file.write(contents)
-file.close()
+with open(CONTRIBUTORS_FILE, "w") as file:
+    n = file.write(contents)
 
 print("✅ CONTRIBUTORS.md updated")

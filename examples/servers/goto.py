@@ -189,7 +189,7 @@ def find_references(ls: GotoLanguageServer, params: types.ReferenceParams):
         return
 
     word = doc.word_at_position(params.position)
-    is_object = any([word in index[name] for name in index])
+    is_object = any(word in index[name] for name in index)
     if not is_object:
         return
 

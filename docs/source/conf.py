@@ -194,8 +194,11 @@ epub_title = project
 epub_exclude_files = ["search.html"]
 
 
-def lsp_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+def lsp_role(name, rawtext, text, lineno, inliner, options=None, content=None):
     """Link to sections within the lsp specification."""
+
+    options = options or {}
+    content = content or []
 
     anchor = text.replace("$/", "").replace("/", "_")
     ref = f"https://microsoft.github.io/language-server-protocol/specification.html#{anchor}"

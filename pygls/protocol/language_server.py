@@ -22,7 +22,6 @@ import json
 import logging
 import sys
 import typing
-from functools import lru_cache
 from itertools import zip_longest
 
 from lsprotocol import types
@@ -102,12 +101,10 @@ class LanguageServerProtocol(JsonRPCProtocol):
 
         return self._workspace
 
-    @lru_cache
     def get_message_type(self, method: str) -> type[Any] | None:
         """Return LSP type definitions, as provided by `lsprotocol`"""
         return types.METHOD_TO_TYPES.get(method, (None,))[0]
 
-    @lru_cache
     def get_result_type(self, method: str) -> type[Any] | None:
         return types.METHOD_TO_TYPES.get(method, (None, None))[1]
 
@@ -358,7 +355,7 @@ def _prepare_command_arguments(
     """Prepare the arguments to pass to the command handler."""
 
     if params.arguments is None:
-        return tuple(), {}
+        return (), {}
 
     # Import this here to not introduce an import cycle at the module level
     from pygls.lsp.server import LanguageServer

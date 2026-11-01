@@ -136,7 +136,7 @@ def uri_with(
     )
 
     if path is None:
-        raise Exception("`path` must not be None")
+        raise ValueError("`path` must not be None")
 
     path, _ = _normalize_win_path(path)
     return urlunparse(

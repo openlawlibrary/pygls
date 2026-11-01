@@ -33,7 +33,7 @@ class Progress:
 
     def _check_token_registered(self, token: ProgressToken) -> None:
         if token in self.tokens:
-            raise Exception("Token is already registered!")
+            raise ValueError("Token is already registered!")
 
     def _register_token(self, token: ProgressToken) -> None:
         self.tokens[token] = Future()

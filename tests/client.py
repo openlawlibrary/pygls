@@ -89,7 +89,7 @@ class LanguageClient(BaseLanguageClient):
         **kwargs,
     ):
         super().__init__(
-            "pygls-test-client", "v1", protocol_cls=protocol_cls, *args, **kwargs
+            "pygls-test-client", "v1", *args, protocol_cls=protocol_cls, **kwargs
         )
 
         self.diagnostics: dict[str, list[types.Diagnostic]] = {}

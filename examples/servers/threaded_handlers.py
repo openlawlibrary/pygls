@@ -89,7 +89,7 @@ def count_down_thread(ls: LanguageServer, *args):
 @server.command("count.down.error")
 def count_down_error(ls: LanguageServer, *args):
     """A threaded handler that throws an error."""
-    1 / 0
+    1 / 0  # noqa: B018
 
 
 if __name__ == "__main__":

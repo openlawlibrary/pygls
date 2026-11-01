@@ -202,7 +202,7 @@ class JsonRPCProtocol:
            Keyword arguments to pass to the handler
         """
         future: Future[Any]
-        args = args or tuple()
+        args = args or ()
         kwargs = kwargs or {}
 
         if inspect.iscoroutinefunction(handler):
@@ -370,10 +370,7 @@ class JsonRPCProtocol:
             logger.warning("Ignoring notification for unknown method %r", method_name)
         except Exception as error:
             logger.exception(
-                "Failed to handle notification %r: %s",
-                method_name,
-                params,
-                exc_info=True,
+                "Failed to handle notification %r: %s", method_name, params
             )
             self._server._report_server_error(error, FeatureNotificationError)
 
@@ -401,21 +398,13 @@ class JsonRPCProtocol:
             self._server._report_server_error(error, FeatureRequestError)
         except JsonRpcException as error:
             logger.exception(
-                "Failed to handle request %s %s %s",
-                msg_id,
-                method_name,
-                params,
-                exc_info=True,
+                "Failed to handle request %s %s %s", msg_id, method_name, params
             )
             self._send_response(msg_id, None, error.to_response_error())
             self._server._report_server_error(error, FeatureRequestError)
         except Exception as error:
             logger.exception(
-                "Failed to handle request %s %s %s",
-                msg_id,
-                method_name,
-                params,
-                exc_info=True,
+                "Failed to handle request %s %s %s", msg_id, method_name, params
             )
             err = JsonRpcInternalError.of(sys.exc_info()).to_response_error()
             self._send_response(msg_id, None, err)
@@ -550,10 +539,10 @@ class JsonRPCProtocol:
                 asyncio.ensure_future(res)
 
         except BrokenPipeError:
-            logger.exception("Error sending data. BrokenPipeError", exc_info=True)
+            logger.exception("Error sending data. BrokenPipeError")
             raise
         except Exception as error:
-            logger.exception("Error sending data", exc_info=True)
+            logger.exception("Error sending data")
             self._server._report_server_error(error, JsonRpcInternalError)
 
     def _send_response(
