@@ -26,10 +26,10 @@ import sys
 import traceback
 import typing
 import uuid
+from collections.abc import Callable
 from concurrent.futures import Future
 from functools import partial
 from typing import Any, Protocol, Union, runtime_checkable
-from collections.abc import Callable
 
 import attrs
 from cattrs.errors import ClassValidationError

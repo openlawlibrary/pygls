@@ -20,27 +20,27 @@ from unittest.mock import Mock
 
 import pytest
 from lsprotocol.types import (
+    PROGRESS,
     TEXT_DOCUMENT_CODE_LENS,
     WINDOW_WORK_DONE_PROGRESS_CANCEL,
     WINDOW_WORK_DONE_PROGRESS_CREATE,
-    PROGRESS,
-)
-from lsprotocol.types import (
     CodeLens,
-    CodeLensParams,
     CodeLensOptions,
+    CodeLensParams,
     ProgressParams,
     TextDocumentIdentifier,
     WorkDoneProgressBegin,
-    WorkDoneProgressEnd,
-    WorkDoneProgressReport,
     WorkDoneProgressCancelParams,
     WorkDoneProgressCreateParams,
+    WorkDoneProgressEnd,
+    WorkDoneProgressReport,
 )
-from ..conftest import ClientServer
+
 from pygls import IS_PYODIDE
-from pygls.progress import Progress
 from pygls.lsp.server import LanguageServer
+from pygls.progress import Progress
+
+from ..conftest import ClientServer
 
 
 class ConfiguredLS(ClientServer):

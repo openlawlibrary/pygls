@@ -1,5 +1,6 @@
-from pygls.lsp.server import LanguageServer
 from lsprotocol import types
+
+from pygls.lsp.server import LanguageServer
 
 server = LanguageServer("example-server", "v0.1")
 

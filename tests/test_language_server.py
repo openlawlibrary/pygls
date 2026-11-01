@@ -21,23 +21,22 @@ from time import sleep
 from unittest.mock import Mock
 
 import pytest
-
-from pygls import IS_PYODIDE
 from lsprotocol.types import (
     INITIALIZE,
     SHUTDOWN,
     TEXT_DOCUMENT_DID_OPEN,
     WORKSPACE_EXECUTE_COMMAND,
-)
-from lsprotocol.types import (
     ClientCapabilities,
     DidOpenTextDocumentParams,
     ExecuteCommandParams,
     InitializeParams,
     TextDocumentItem,
 )
-from pygls.protocol import LanguageServerProtocol
+
+from pygls import IS_PYODIDE
 from pygls.lsp.server import LanguageServer
+from pygls.protocol import LanguageServerProtocol
+
 from . import CMD_ASYNC, CMD_SYNC, CMD_THREAD
 
 

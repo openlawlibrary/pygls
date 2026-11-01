@@ -125,7 +125,7 @@ def test_register_feature_with_wrong_options(feature_manager):
 
     with pytest.raises(
         AttributeError,
-        match=("'Options' object has no attribute 'trigger_characters'"),  # noqa
+        match=("'Options' object has no attribute 'trigger_characters'"),
     ):
 
         @feature_manager.feature(lsp.TEXT_DOCUMENT_COMPLETION, Options())

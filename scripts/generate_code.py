@@ -7,14 +7,12 @@ import argparse
 import inspect
 import pathlib
 import re
+import subprocess
 import textwrap
 import typing
 
 from lsprotocol._hooks import _resolve_forward_references
-from lsprotocol.types import ClientCapabilities
-from lsprotocol.types import ServerCapabilities
-from lsprotocol.types import METHOD_TO_TYPES
-from lsprotocol.types import message_direction
+from lsprotocol.types import METHOD_TO_TYPES, ClientCapabilities, ServerCapabilities, message_direction
 
 if typing.TYPE_CHECKING:
     from typing import Any
@@ -571,16 +569,28 @@ def main():
     _resolve_forward_references()
 
     client = generate_client()
-    output: pathlib.Path = args.output / "_base_client.py"
-    _ = output.write_text(client)
+    base_client: pathlib.Path = args.output / "_base_client.py"
+    _ = base_client.write_text(client)
 
     server = generate_server()
-    output = args.output / "_base_server.py"
-    _ = output.write_text(server)
+    base_server = args.output / "_base_server.py"
+    _ = base_server.write_text(server)
 
     capabilities = generate_capabilities()
-    output = args.output / "_capabilities.py"
-    _ = output.write_text(capabilities)
+    caps = args.output / "_capabilities.py"
+    _ = caps.write_text(capabilities)
+
+    # Modernise the generated code.
+    subprocess.run(
+        [
+            "uvx",
+            "pyupgrade",
+            "--py310-plus",
+            str(base_client),
+            str(base_server),
+            str(caps),
+        ],
+    )
 
 
 if __name__ == "__main__":

@@ -35,9 +35,8 @@ from pygls.uris import from_fs_path
 from pygls.workspace import Workspace
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from typing import Any, TypeVar
-    from collections.abc import Callable
 
     from cattrs import Converter
 

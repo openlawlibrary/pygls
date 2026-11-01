@@ -26,7 +26,8 @@ from re import Pattern
 
 from lsprotocol import types
 
-from pygls.uris import urlparse, to_fs_path
+from pygls.uris import to_fs_path, urlparse
+
 from .position_codec import PositionCodec, ServerTextPosition, ServerTextRange
 
 # TODO: this is not the best e.g. we capture numbers
@@ -126,7 +127,6 @@ class TextDocument:
 
         Currently does nothing, provided for consistency.
         """
-        pass
 
     def apply_change(self, change: types.TextDocumentContentChangeEvent) -> None:
         """Apply a text change to a document, considering TextDocumentSyncKind

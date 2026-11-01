@@ -35,9 +35,6 @@ import logging
 import operator
 import re
 from functools import reduce
-from typing import Dict
-from typing import List
-from typing import Optional
 
 import attrs
 from lsprotocol import types
@@ -61,7 +58,7 @@ class Token:
     text: str
 
     tok_type: str = ""
-    tok_modifiers: List[TokenModifier] = attrs.field(factory=list)
+    tok_modifiers: list[TokenModifier] = attrs.field(factory=list)
 
 
 TokenTypes = ["keyword", "variable", "function", "operator", "parameter", "type"]
@@ -73,49 +70,49 @@ SPACE = re.compile(r"\s+")
 KEYWORDS = {"type", "fn"}
 
 
-def is_type(token: Optional[Token]) -> bool:
+def is_type(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == "type" and token.tok_type == "keyword"
 
 
-def is_fn(token: Optional[Token]) -> bool:
+def is_fn(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == "fn" and token.tok_type == "keyword"
 
 
-def is_lparen(token: Optional[Token]) -> bool:
+def is_lparen(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == "(" and token.tok_type == "operator"
 
 
-def is_rparen(token: Optional[Token]) -> bool:
+def is_rparen(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == ")" and token.tok_type == "operator"
 
 
-def is_lbrace(token: Optional[Token]) -> bool:
+def is_lbrace(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == "{" and token.tok_type == "operator"
 
 
-def is_rbrace(token: Optional[Token]) -> bool:
+def is_rbrace(token: Token | None) -> bool:
     if token is None:
         return False
 
     return token.text == "}" and token.tok_type == "operator"
 
 
-def is_colon(token: Optional[Token]) -> bool:
+def is_colon(token: Token | None) -> bool:
     if token is None:
         return False
 
@@ -128,7 +125,7 @@ class SemanticTokensServer(LanguageServer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tokens: Dict[str, List[Token]] = {}
+        self.tokens: dict[str, list[Token]] = {}
 
     def parse(self, doc: TextDocument):
         """Convert the given document into a list of tokens"""
@@ -138,7 +135,7 @@ class SemanticTokensServer(LanguageServer):
         # logging.info("%s", tokens)
         self.tokens[doc.uri] = tokens
 
-    def classify_tokens(self, tokens: List[Token]):
+    def classify_tokens(self, tokens: list[Token]):
         """Given a list of tokens, determine their type and modifiers."""
 
         def prev(idx):
@@ -197,7 +194,7 @@ class SemanticTokensServer(LanguageServer):
             else:
                 token.tok_type = "variable"
 
-    def lex(self, doc: TextDocument) -> List[Token]:
+    def lex(self, doc: TextDocument) -> list[Token]:
         """Convert the given document into a list of tokens"""
         tokens = []
 

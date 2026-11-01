@@ -16,8 +16,8 @@
 ############################################################################
 from __future__ import annotations
 
-import logging
 import itertools
+import logging
 import typing
 
 import pytest

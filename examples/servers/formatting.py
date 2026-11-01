@@ -35,9 +35,6 @@ between client and server.
 """
 
 import logging
-from typing import Dict
-from typing import List
-from typing import Optional
 
 import attrs
 from lsprotocol import types
@@ -51,8 +48,8 @@ from pygls.workspace import TextDocument
 class Row:
     """Represents a row in the table"""
 
-    cells: List[str]
-    cell_widths: List[int]
+    cells: list[str]
+    cell_widths: list[int]
     line_number: int
 
 
@@ -93,17 +90,17 @@ def format_on_type(ls: LanguageServer, params: types.DocumentOnTypeFormattingPar
 
 
 def format_table(
-    rows: List[Row], range_: Optional[types.Range] = None
-) -> List[types.TextEdit]:
+    rows: list[Row], range_: types.Range | None = None
+) -> list[types.TextEdit]:
     """Format the given table, returning the list of edits to make to the document.
 
     If range is given, this method will only modify the document within the specified
     range.
     """
-    edits: List[types.TextEdit] = []
+    edits: list[types.TextEdit] = []
 
     # Determine max widths
-    columns: Dict[int, int] = {}
+    columns: dict[int, int] = {}
     for row in rows:
         for idx, cell in enumerate(row.cells):
             columns[idx] = max(len(cell), columns.get(idx, 0))
@@ -117,7 +114,7 @@ def format_table(
 
         if len(row.cells) == 0:
             # If there are no cells on the row, then this must be a separator row
-            cells: List[str] = []
+            cells: list[str] = []
             empty_cells = [
                 "-" * (columns[i] + cell_padding) for i in range(len(columns))
             ]
@@ -143,13 +140,13 @@ def format_table(
 
 
 def parse_document(
-    document: TextDocument, range_: Optional[types.Range] = None
-) -> List[Row]:
+    document: TextDocument, range_: types.Range | None = None
+) -> list[Row]:
     """Parse the given document into a list of table rows.
 
     If range_ is given, only consider lines within the range part of the table.
     """
-    rows: List[Row] = []
+    rows: list[Row] = []
     for linum, line in enumerate(document.lines):
         if skip_line(linum, range_):
             continue
@@ -184,7 +181,7 @@ def parse_document(
     return rows
 
 
-def skip_line(line: int, range_: Optional[types.Range]) -> bool:
+def skip_line(line: int, range_: types.Range | None) -> bool:
     """Given a range, determine if we should skip the given line number."""
 
     if range_ is None:

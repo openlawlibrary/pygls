@@ -19,11 +19,10 @@ import pathlib
 import sys
 
 import pytest
-from pygls import IS_PYODIDE
 
+from pygls import IS_PYODIDE
 from pygls.client import JsonRPCClient
 from pygls.exceptions import JsonRpcException, PyglsError
-
 
 SERVERS = pathlib.Path(__file__).parent / "servers"
 

@@ -27,9 +27,8 @@ from pygls.io_ import run_async, run_websocket
 from pygls.protocol import JsonRPCProtocol, default_converter
 
 if typing.TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Callable
-    from typing import TypeVar
+    from typing import Any, TypeVar
 
     from cattrs import Converter
 
@@ -192,7 +191,7 @@ class JsonRPCClient:
         """Called when the server process exits."""
 
     def _report_server_error(
-        self, error: Exception, source: type[PyglsError] | type[JsonRpcException]
+        self, error: Exception, source: type[PyglsError | JsonRpcException]
     ):
         try:
             self.report_server_error(error, source)
@@ -200,7 +199,7 @@ class JsonRPCClient:
             logger.exception("Unable to report error")
 
     def report_server_error(
-        self, error: Exception, source: type[PyglsError] | type[JsonRpcException]
+        self, error: Exception, source: type[PyglsError | JsonRpcException]
     ):
         """Called when the server does something unexpected e.g. respond with malformed
         JSON."""

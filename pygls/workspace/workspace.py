@@ -28,9 +28,10 @@ from lsprotocol.types import (
     TextDocumentSyncKind,
     WorkspaceFolder,
 )
+
 from pygls.uris import to_fs_path, uri_scheme
-from pygls.workspace.text_document import TextDocument
 from pygls.workspace.position_codec import PositionCodec
+from pygls.workspace.text_document import TextDocument
 
 logger = logging.getLogger(__name__)
 

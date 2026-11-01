@@ -17,14 +17,14 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Sequence
 import time
 import typing
+from collections.abc import Sequence
 from functools import partial
 
+import cattrs
 import pytest
 import pytest_asyncio
-import cattrs
 from lsprotocol import types
 
 from pygls import IS_WIN

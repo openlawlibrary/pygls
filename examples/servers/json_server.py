@@ -33,7 +33,6 @@ guides.
 import asyncio
 import uuid
 from functools import partial
-from typing import Optional
 
 from lsprotocol import types as lsp
 
@@ -62,7 +61,7 @@ json_server = JsonLanguageServer("pygls-json-example", "v0.1")
     lsp.TEXT_DOCUMENT_COMPLETION,
     lsp.CompletionOptions(trigger_characters=[","], all_commit_characters=[":"]),
 )
-def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.CompletionList:
+def completions(params: lsp.CompletionParams | None = None) -> lsp.CompletionList:
     """Returns completion items."""
     return lsp.CompletionList(
         is_incomplete=False,

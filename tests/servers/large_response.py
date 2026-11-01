@@ -2,8 +2,8 @@
 
 import sys
 
-from pygls.server import JsonRPCServer
 from pygls.protocol import JsonRPCProtocol, default_converter
+from pygls.server import JsonRPCServer
 
 server = JsonRPCServer(JsonRPCProtocol, default_converter)
 

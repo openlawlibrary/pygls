@@ -18,8 +18,8 @@ import functools
 import inspect
 import itertools
 import logging
-from typing import Any, TypeVar, get_type_hints
 from collections.abc import Callable
+from typing import Any, TypeVar, get_type_hints
 
 from pygls.constants import (
     ATTR_COMMAND_TYPE,

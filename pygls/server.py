@@ -31,14 +31,14 @@ from pygls.io_ import StdinAsyncReader, StdoutWriter, run, run_async, run_websoc
 from pygls.protocol import JsonRPCProtocol
 
 if typing.TYPE_CHECKING:
-    from typing import Any, BinaryIO, TypeVar, Union
     from collections.abc import Callable
+    from typing import Any, BinaryIO, TypeVar
 
     from websockets.asyncio.server import Server as WSServer
     from websockets.asyncio.server import ServerConnection
 
     F = TypeVar("F", bound=Callable)
-    ServerErrors = Union[type[PyglsError], type[JsonRpcException]]
+    ServerErrors = type[PyglsError | JsonRpcException]
 
 
 logger = logging.getLogger(__name__)

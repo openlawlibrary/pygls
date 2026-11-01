@@ -16,8 +16,8 @@
 ############################################################################
 
 
-from lsprotocol.types import TEXT_DOCUMENT_LINKED_EDITING_RANGE
 from lsprotocol.types import (
+    TEXT_DOCUMENT_LINKED_EDITING_RANGE,
     LinkedEditingRangeOptions,
     LinkedEditingRangeParams,
     LinkedEditingRanges,
