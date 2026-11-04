@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def json_server(get_client_for):
 
 
 async def test_completion(
-    json_server: Tuple[BaseLanguageClient, types.InitializeResult],
+    json_server: tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
 ):
     """Ensure that the completion methods are working as expected."""
@@ -56,4 +55,4 @@ async def test_completion(
     )
 
     labels = {i.label for i in response.items}
-    assert labels == set(['"', "[", "]", "{", "}"])
+    assert labels == {'"', "[", "]", "{", "}"}

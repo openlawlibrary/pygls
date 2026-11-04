@@ -21,7 +21,7 @@ from __future__ import annotations
 import asyncio
 import pathlib
 import sys
-from typing import Any, Optional
+from typing import Any
 
 import pytest
 from lsprotocol import converters, types
@@ -209,8 +209,8 @@ def get_client_for_cpython_server(transport, uri_fixture):
 
     async def fn(
         server_name: str,
-        capabilities: Optional[types.ClientCapabilities] = None,
-        initialization_options: Optional[Any] = None,
+        capabilities: types.ClientCapabilities | None = None,
+        initialization_options: Any | None = None,
         auto_shutdown: bool = True,
     ):
         client = LanguageClient("pygls-test-suite", "v1")
@@ -274,8 +274,8 @@ def get_client_for_pyodide_server(transport, uri_fixture):
 
     async def fn(
         server_name: str,
-        capabilities: Optional[types.ClientCapabilities] = None,
-        initialization_options: Optional[Any] = None,
+        capabilities: types.ClientCapabilities | None = None,
+        initialization_options: Any | None = None,
         auto_shutdown: bool = True,
     ):
         client = LanguageClient("pygls-test-suite", "v1")

@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def pull_diagnostics(get_client_for):
 
 
 async def test_document_diagnostics(
-    pull_diagnostics: Tuple[BaseLanguageClient, types.InitializeResult],
+    pull_diagnostics: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
 ):
@@ -145,7 +144,7 @@ async def test_document_diagnostics(
 
 
 async def test_document_diagnostic_unchanged(
-    pull_diagnostics: Tuple[BaseLanguageClient, types.InitializeResult],
+    pull_diagnostics: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
 ):
@@ -195,7 +194,7 @@ async def test_document_diagnostic_unchanged(
 
 
 async def test_workspace_diagnostic(
-    pull_diagnostics: Tuple[BaseLanguageClient, types.InitializeResult],
+    pull_diagnostics: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
 ):

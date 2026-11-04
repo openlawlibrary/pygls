@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import Optional
 
 from lsprotocol.types import TEXT_DOCUMENT_LINKED_EDITING_RANGE
 from lsprotocol.types import (
@@ -38,7 +37,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_LINKED_EDITING_RANGE,
             LinkedEditingRangeOptions(),
         )
-        def f(params: LinkedEditingRangeParams) -> Optional[LinkedEditingRanges]:
+        def f(params: LinkedEditingRangeParams) -> LinkedEditingRanges | None:
             if params.text_document.uri == "file://return.ranges":
                 return LinkedEditingRanges(
                     ranges=[

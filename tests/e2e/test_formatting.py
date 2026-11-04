@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -47,7 +46,7 @@ def range_from_str(range_: str) -> types.Range:
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_format(
-    formatting: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    formatting: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example document format server method is working as expected."""
     client, initialize_result = formatting
@@ -78,7 +77,7 @@ async def test_document_format(
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_range_format_one(
-    formatting: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    formatting: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example range format server method is working as expected."""
     client, initialize_result = formatting
@@ -103,7 +102,7 @@ async def test_document_range_format_one(
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_range_format_two(
-    formatting: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    formatting: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example range format server method is working as expected."""
     client, initialize_result = formatting
@@ -132,7 +131,7 @@ async def test_document_range_format_two(
 
 @pytest.mark.asyncio(loop_scope="module")
 async def test_document_on_type_format(
-    formatting: Tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
+    formatting: tuple[BaseLanguageClient, types.InitializeResult], path_for, uri_for
 ):
     """Ensure that the example on type format server method is working as expected."""
     client, initialize_result = formatting

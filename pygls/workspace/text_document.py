@@ -21,7 +21,8 @@ import logging
 import os
 import pathlib
 import re
-from typing import Optional, Pattern, Sequence
+from collections.abc import Sequence
+from re import Pattern
 
 from lsprotocol import types
 
@@ -35,16 +36,16 @@ RE_START_WORD = re.compile("[A-Za-z_0-9]*$")
 logger = logging.getLogger(__name__)
 
 
-class TextDocument(object):
+class TextDocument:
     def __init__(
         self,
         uri: str,
-        source: Optional[str] = None,
-        version: Optional[int] = None,
-        language_id: Optional[str] = None,
+        source: str | None = None,
+        version: int | None = None,
+        language_id: str | None = None,
         local: bool = True,
         sync_kind: types.TextDocumentSyncKind = types.TextDocumentSyncKind.Incremental,
-        position_codec: Optional[PositionCodec] = None,
+        position_codec: PositionCodec | None = None,
     ):
         self.uri = uri
         self.version = version
@@ -54,7 +55,7 @@ class TextDocument(object):
 
         self.path = path
         self.language_id = language_id
-        self.filename: Optional[str] = os.path.basename(self.path)
+        self.filename: str | None = os.path.basename(self.path)
 
         self._local = local
         self._source = source

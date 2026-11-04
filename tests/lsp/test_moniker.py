@@ -15,7 +15,6 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from typing import List, Optional
 
 from lsprotocol.types import TEXT_DOCUMENT_MONIKER
 from lsprotocol.types import (
@@ -39,7 +38,7 @@ class ConfiguredLS(ClientServer):
             TEXT_DOCUMENT_MONIKER,
             MonikerOptions(),
         )
-        def f(params: MonikerParams) -> Optional[List[Moniker]]:
+        def f(params: MonikerParams) -> list[Moniker] | None:
             if params.text_document.uri == "file://return.list":
                 return [
                     Moniker(
