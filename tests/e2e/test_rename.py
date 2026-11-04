@@ -25,7 +25,6 @@ import cattrs
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -53,7 +52,7 @@ async def rename(get_client_for):
     ],
 )
 async def test_prepare_rename(
-    rename: Tuple[BaseLanguageClient, types.InitializeResult],
+    rename: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
     position: types.Position,
@@ -118,7 +117,7 @@ async def test_prepare_rename(
     ],
 )
 async def test_rename(
-    rename: Tuple[BaseLanguageClient, types.InitializeResult],
+    rename: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
     position: types.Position,

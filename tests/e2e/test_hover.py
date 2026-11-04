@@ -23,8 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import List
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -73,10 +71,10 @@ async def hover(get_client_for):
 )
 @pytest.mark.asyncio(loop_scope="module")
 async def test_hover(
-    hover: Tuple[BaseLanguageClient, types.InitializeResult],
+    hover: tuple[BaseLanguageClient, types.InitializeResult],
     uri_for,
     position: types.Position,
-    expected: List[str],
+    expected: list[str],
 ):
     """Ensure that the example hover server is working as expected."""
     client, initialize_result = hover

@@ -31,7 +31,8 @@ from pygls.io_ import StdinAsyncReader, StdoutWriter, run, run_async, run_websoc
 from pygls.protocol import JsonRPCProtocol
 
 if typing.TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, Optional, Type, TypeVar, Union
+    from typing import Any, BinaryIO, TypeVar, Union
+    from collections.abc import Callable
 
     from websockets.asyncio.server import Server as WSServer
     from websockets.asyncio.server import ServerConnection
@@ -64,7 +65,7 @@ class JsonRPCServer:
 
     def __init__(
         self,
-        protocol_cls: Type[JsonRPCProtocol],
+        protocol_cls: type[JsonRPCProtocol],
         converter_factory: Callable[[], cattrs.Converter],
         max_workers: int | None = None,
     ):
@@ -103,9 +104,7 @@ class JsonRPCServer:
         """Default error reporter."""
         logger.error("%s", error)
 
-    def start_io(
-        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
-    ):
+    def start_io(self, stdin: BinaryIO | None = None, stdout: BinaryIO | None = None):
         """Starts an IO server."""
 
         if IS_WASM:
@@ -114,7 +113,7 @@ class JsonRPCServer:
             self._start_io_async(stdin, stdout)
 
     def _start_io_async(
-        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+        self, stdin: BinaryIO | None = None, stdout: BinaryIO | None = None
     ):
         """Starts an asynchronous IO server."""
         logger.info("Starting async IO server")
@@ -142,7 +141,7 @@ class JsonRPCServer:
             self.shutdown()
 
     def _start_io_sync(
-        self, stdin: Optional[BinaryIO] = None, stdout: Optional[BinaryIO] = None
+        self, stdin: BinaryIO | None = None, stdout: BinaryIO | None = None
     ):
         """Starts an synchronous IO server."""
         logger.info("Starting sync IO server")
@@ -213,7 +212,7 @@ class JsonRPCServer:
             )
             sys.exit(1)
 
-        logger.info("Starting WebSocket server on {}:{}".format(host, port))
+        logger.info(f"Starting WebSocket server on {host}:{port}")
         self._stop_event = stop_event = Event()
 
         async def lsp_connection(websocket: ServerConnection):

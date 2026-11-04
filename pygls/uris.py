@@ -23,7 +23,6 @@ https://github.com/Microsoft/vscode-uri/blob/e59cab84f5df6265aed18ae5f43552d3eef
 """
 from __future__ import annotations
 
-from typing import Optional, Tuple
 
 import re
 from urllib import parse
@@ -32,7 +31,7 @@ from pygls import IS_WIN
 
 RE_DRIVE_LETTER_PATH = re.compile(r"^\/[a-zA-Z]:")
 
-URLParts = Tuple[str, str, str, str, str, str]
+URLParts = tuple[str, str, str, str, str, str]
 
 
 def _normalize_win_path(path: str):
@@ -122,12 +121,12 @@ def uri_scheme(uri: str):
 # TODO: Use `URLParts` type
 def uri_with(
     uri: str,
-    scheme: Optional[str] = None,
-    netloc: Optional[str] = None,
-    path: Optional[str] = None,
-    params: Optional[str] = None,
-    query: Optional[str] = None,
-    fragment: Optional[str] = None,
+    scheme: str | None = None,
+    netloc: str | None = None,
+    path: str | None = None,
+    params: str | None = None,
+    query: str | None = None,
+    fragment: str | None = None,
 ):
     """
     Return a URI with the given part(s) replaced.

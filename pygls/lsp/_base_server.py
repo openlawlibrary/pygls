@@ -29,9 +29,9 @@ if typing.TYPE_CHECKING:
     from cattrs import Converter
     from concurrent.futures import Future
     from typing import Any
-    from typing import Callable
+    from collections.abc import Callable
     from typing import Optional
-    from typing import Sequence
+    from collections.abc import Sequence
 
 
 class BaseLanguageServer(JsonRPCServer):
@@ -49,7 +49,7 @@ class BaseLanguageServer(JsonRPCServer):
     def client_register_capability(
         self,
         params: types.RegistrationParams,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`client/registerCapability` request.
 
@@ -72,7 +72,7 @@ class BaseLanguageServer(JsonRPCServer):
     def client_unregister_capability(
         self,
         params: types.UnregistrationParams,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`client/unregisterCapability` request.
 
@@ -95,7 +95,7 @@ class BaseLanguageServer(JsonRPCServer):
     def window_show_document(
         self,
         params: types.ShowDocumentParams,
-        callback: Optional[Callable[[types.ShowDocumentResult], None]] = None,
+        callback: Callable[[types.ShowDocumentResult], None] | None = None,
     ) -> Future[types.ShowDocumentResult]:
         """Make a :lsp:`window/showDocument` request.
 
@@ -126,8 +126,8 @@ class BaseLanguageServer(JsonRPCServer):
     def window_show_message_request(
         self,
         params: types.ShowMessageRequestParams,
-        callback: Optional[Callable[[Optional[types.MessageActionItem]], None]] = None,
-    ) -> Future[Optional[types.MessageActionItem]]:
+        callback: Callable[[types.MessageActionItem | None], None] | None = None,
+    ) -> Future[types.MessageActionItem | None]:
         """Make a :lsp:`window/showMessageRequest` request.
 
         The show message request is sent from the server to the client to show a message
@@ -138,7 +138,7 @@ class BaseLanguageServer(JsonRPCServer):
     async def window_show_message_request_async(
         self,
         params: types.ShowMessageRequestParams,
-    ) -> Optional[types.MessageActionItem]:
+    ) -> types.MessageActionItem | None:
         """Make a :lsp:`window/showMessageRequest` request.
 
         The show message request is sent from the server to the client to show a message
@@ -149,7 +149,7 @@ class BaseLanguageServer(JsonRPCServer):
     def window_work_done_progress_create(
         self,
         params: types.WorkDoneProgressCreateParams,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`window/workDoneProgress/create` request.
 
@@ -172,7 +172,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_apply_edit(
         self,
         params: types.ApplyWorkspaceEditParams,
-        callback: Optional[Callable[[types.ApplyWorkspaceEditResult], None]] = None,
+        callback: Callable[[types.ApplyWorkspaceEditResult], None] | None = None,
     ) -> Future[types.ApplyWorkspaceEditResult]:
         """Make a :lsp:`workspace/applyEdit` request.
 
@@ -193,7 +193,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_code_lens_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/codeLens/refresh` request.
 
@@ -218,8 +218,8 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_configuration(
         self,
         params: types.ConfigurationParams,
-        callback: Optional[Callable[[Sequence[Optional[Any]]], None]] = None,
-    ) -> Future[Sequence[Optional[Any]]]:
+        callback: Callable[[Sequence[Any | None]], None] | None = None,
+    ) -> Future[Sequence[Any | None]]:
         """Make a :lsp:`workspace/configuration` request.
 
         The 'workspace/configuration' request is sent from the server to the client to fetch a certain
@@ -235,7 +235,7 @@ class BaseLanguageServer(JsonRPCServer):
     async def workspace_configuration_async(
         self,
         params: types.ConfigurationParams,
-    ) -> Sequence[Optional[Any]]:
+    ) -> Sequence[Any | None]:
         """Make a :lsp:`workspace/configuration` request.
 
         The 'workspace/configuration' request is sent from the server to the client to fetch a certain
@@ -251,7 +251,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_diagnostic_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/diagnostic/refresh` request.
 
@@ -276,7 +276,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_folding_range_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/foldingRange/refresh` request.
 
@@ -299,7 +299,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_inlay_hint_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/inlayHint/refresh` request.
 
@@ -320,7 +320,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_inline_value_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/inlineValue/refresh` request.
 
@@ -341,7 +341,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_semantic_tokens_refresh(
         self,
         params: None,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/semanticTokens/refresh` request.
 
@@ -362,7 +362,7 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_text_document_content_refresh(
         self,
         params: types.TextDocumentContentRefreshParams,
-        callback: Optional[Callable[[None], None]] = None,
+        callback: Callable[[None], None] | None = None,
     ) -> Future[None]:
         """Make a :lsp:`workspace/textDocumentContent/refresh` request.
 
@@ -391,8 +391,8 @@ class BaseLanguageServer(JsonRPCServer):
     def workspace_workspace_folders(
         self,
         params: None,
-        callback: Optional[Callable[[Optional[Sequence[types.WorkspaceFolder]]], None]] = None,
-    ) -> Future[Optional[Sequence[types.WorkspaceFolder]]]:
+        callback: Callable[[Sequence[types.WorkspaceFolder] | None], None] | None = None,
+    ) -> Future[Sequence[types.WorkspaceFolder] | None]:
         """Make a :lsp:`workspace/workspaceFolders` request.
 
         The `workspace/workspaceFolders` is sent from the server to the client to fetch the open workspace folders.
@@ -402,7 +402,7 @@ class BaseLanguageServer(JsonRPCServer):
     async def workspace_workspace_folders_async(
         self,
         params: None,
-    ) -> Optional[Sequence[types.WorkspaceFolder]]:
+    ) -> Sequence[types.WorkspaceFolder] | None:
         """Make a :lsp:`workspace/workspaceFolders` request.
 
         The `workspace/workspaceFolders` is sent from the server to the client to fetch the open workspace folders.
@@ -430,7 +430,7 @@ class BaseLanguageServer(JsonRPCServer):
         """
         self.protocol.notify("$/progress", params)
 
-    def telemetry_event(self, params: typing.Optional[typing.Any]) -> None:
+    def telemetry_event(self, params: typing.Any | None) -> None:
         """Send a :lsp:`telemetry/event` notification.
 
         The telemetry event notification is sent from the server to the client to ask

@@ -36,7 +36,8 @@ from pygls.workspace import Workspace
 
 if typing.TYPE_CHECKING:
     from collections.abc import Generator
-    from typing import Any, Callable, Optional, Type, TypeVar
+    from typing import Any, TypeVar
+    from collections.abc import Callable
 
     from cattrs import Converter
 
@@ -69,7 +70,7 @@ class LanguageServerProtocol(JsonRPCProtocol):
     def __init__(self, server: LanguageServer, converter: Converter):
         super().__init__(server, converter)
 
-        self._workspace: Optional[Workspace] = None
+        self._workspace: Workspace | None = None
         self.trace = types.TraceValue.Off
 
         from pygls.progress import Progress
@@ -102,13 +103,13 @@ class LanguageServerProtocol(JsonRPCProtocol):
 
         return self._workspace
 
-    @lru_cache()
-    def get_message_type(self, method: str) -> Type[Any] | None:
+    @lru_cache
+    def get_message_type(self, method: str) -> type[Any] | None:
         """Return LSP type definitions, as provided by `lsprotocol`"""
         return types.METHOD_TO_TYPES.get(method, (None,))[0]
 
-    @lru_cache()
-    def get_result_type(self, method: str) -> Type[Any] | None:
+    @lru_cache
+    def get_result_type(self, method: str) -> type[Any] | None:
         return types.METHOD_TO_TYPES.get(method, (None, None))[1]
 
     @lsp_method(types.EXIT)

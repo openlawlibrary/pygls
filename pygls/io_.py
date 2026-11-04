@@ -29,7 +29,8 @@ if typing.TYPE_CHECKING:
     import threading
     from collections.abc import Awaitable
     from concurrent.futures import ThreadPoolExecutor
-    from typing import Any, BinaryIO, Callable, Protocol
+    from typing import Any, BinaryIO, Protocol
+    from collections.abc import Callable
 
     from websockets.asyncio.client import ClientConnection
     from websockets.asyncio.server import ServerConnection

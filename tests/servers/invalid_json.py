@@ -11,7 +11,7 @@ class InvalidJsonProtocol(JsonRPCProtocol):
     """A protocol that only sends messages containing invalid JSON."""
 
     def handle_message(self, message):
-        content = 'Content-Length: 5\r\n\r\n{"ll}'.encode("utf8")
+        content = b'Content-Length: 5\r\n\r\n{"ll}'
         sys.stdout.buffer.write(content)
         sys.stdout.flush()
 

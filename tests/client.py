@@ -21,9 +21,6 @@ import logging
 import pathlib
 import sys
 from concurrent.futures import Future
-from typing import Dict
-from typing import List
-from typing import Type
 
 import pytest
 import pytest_asyncio
@@ -89,7 +86,7 @@ class LanguageClient(BaseLanguageClient):
 
     def __init__(
         self,
-        protocol_cls: Type[LanguageClientProtocol] = LanguageClientProtocol,
+        protocol_cls: type[LanguageClientProtocol] = LanguageClientProtocol,
         *args,
         **kwargs,
     ):
@@ -97,13 +94,13 @@ class LanguageClient(BaseLanguageClient):
             "pygls-test-client", "v1", protocol_cls=protocol_cls, *args, **kwargs
         )
 
-        self.diagnostics: Dict[str, List[types.Diagnostic]] = {}
+        self.diagnostics: dict[str, list[types.Diagnostic]] = {}
         """Used to hold any recieved diagnostics."""
 
-        self.messages: List[types.ShowMessageParams] = []
+        self.messages: list[types.ShowMessageParams] = []
         """Holds any received ``window/showMessage`` requests."""
 
-        self.log_messages: List[types.LogMessageParams] = []
+        self.log_messages: list[types.LogMessageParams] = []
         """Holds any received ``window/logMessage`` requests."""
 
     async def wait_for_notification(self, method: str):

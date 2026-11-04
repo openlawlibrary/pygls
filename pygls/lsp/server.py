@@ -9,7 +9,7 @@ from pygls.exceptions import FeatureRequestError
 from ._base_server import BaseLanguageServer
 
 if typing.TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
     from typing import TypeVar
 
     from pygls.server import ServerErrors
