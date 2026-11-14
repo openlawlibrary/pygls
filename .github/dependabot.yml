@@ -24,6 +24,7 @@ updates:
       - dependency-name: "myst-parser"
       - dependency-name: "sphinx"
       - dependency-name: "sphinx-design"
+      - directory: "/docs"
     groups:
       actions:
         patterns:
