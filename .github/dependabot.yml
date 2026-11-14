@@ -7,6 +7,13 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: "pip"
+    directory: "/"
     target-branch: "main"
     schedule:
       interval: "monthly"
@@ -20,12 +27,25 @@ updates:
       - dependency-name: "pytest"
       - dependency-name: "pytest-asyncio"
       - dependency-name: "pytest-cov"
+    groups:
+      pygls:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: "pip"
+    directory: "/docs"
+    target-branch: "main"
+    schedule:
+      interval: "monthly"
+    ignore:
       - dependency-name: "furo"
       - dependency-name: "myst-parser"
       - dependency-name: "sphinx"
       - dependency-name: "sphinx-design"
     groups:
-      actions:
+      pygls-docs:
         patterns:
           - "*"
     cooldown:
