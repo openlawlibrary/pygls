@@ -23,7 +23,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -42,7 +41,7 @@ async def push_diagnostics(get_client_for):
 
 
 async def test_publish_diagnostics(
-    push_diagnostics: Tuple[BaseLanguageClient, types.InitializeResult],
+    push_diagnostics: tuple[BaseLanguageClient, types.InitializeResult],
     path_for,
     uri_for,
 ):

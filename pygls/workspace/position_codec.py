@@ -18,7 +18,8 @@
 ############################################################################
 import logging
 from dataclasses import dataclass
-from typing import Optional, Union, Sequence, Any
+from typing import Any
+from collections.abc import Sequence
 
 from lsprotocol import types
 
@@ -127,9 +128,9 @@ impls: dict["str | types.PositionEncodingKind | None", UnitCounter] = {
 class PositionCodec:
     def __init__(
         self,
-        encoding: Optional[
-            Union[types.PositionEncodingKind, str]
-        ] = types.PositionEncodingKind.Utf16,
+        encoding: None | (
+            types.PositionEncodingKind | str
+        ) = types.PositionEncodingKind.Utf16,
     ):
         self.encoding = encoding
         self.impl = impls.get(encoding, Utf16())

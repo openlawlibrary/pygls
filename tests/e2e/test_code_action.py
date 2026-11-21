@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def code_actions(get_client_for):
 
 
 async def test_code_actions(
-    code_actions: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    code_actions: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the example code action server is working as expected."""
     client, initialize_result = code_actions

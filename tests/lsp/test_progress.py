@@ -16,7 +16,6 @@
 ############################################################################
 
 import asyncio
-from typing import List, Optional
 from unittest.mock import Mock
 
 import pytest
@@ -47,14 +46,14 @@ from pygls.lsp.server import LanguageServer
 class ConfiguredLS(ClientServer):
     def __init__(self):
         super().__init__()
-        self.client.notifications: List[ProgressParams] = []
-        self.client.method_calls: List[WorkDoneProgressCreateParams] = []
+        self.client.notifications: list[ProgressParams] = []
+        self.client.method_calls: list[WorkDoneProgressCreateParams] = []
 
         @self.server.feature(
             TEXT_DOCUMENT_CODE_LENS,
             CodeLensOptions(resolve_provider=False, work_done_progress=True),
         )
-        async def f1(params: CodeLensParams) -> Optional[List[CodeLens]]:
+        async def f1(params: CodeLensParams) -> list[CodeLens] | None:
             if "client_initiated_token" in params.text_document.uri:
                 token = params.work_done_token
             else:

@@ -22,7 +22,6 @@ import pytest_asyncio
 from lsprotocol import types
 
 if typing.TYPE_CHECKING:
-    from typing import Tuple
 
     from pygls.lsp.client import BaseLanguageClient
 
@@ -34,7 +33,7 @@ async def without_formatting(get_client_for):
 
 
 async def test_without_formatting(
-    without_formatting: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    without_formatting: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the formatting provider is not set by default."""
     client, initialize_result = without_formatting
@@ -54,7 +53,7 @@ async def with_formatting(get_client_for):
 
 
 async def test_with_formatting(
-    with_formatting: Tuple[BaseLanguageClient, types.InitializeResult], uri_for
+    with_formatting: tuple[BaseLanguageClient, types.InitializeResult], uri_for
 ):
     """Ensure that the formatting provider is present when requested."""
     client, initialize_result = with_formatting
