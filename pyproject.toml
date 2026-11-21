@@ -12,12 +12,11 @@ maintainers = [
   { name = "Alex Carney", email = "alcarneyme@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -99,7 +98,7 @@ ignore_fail = "return_non_zero"
 [tool.pyright]
 strict = ["pygls"]
 
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 
 [tool.ruff]

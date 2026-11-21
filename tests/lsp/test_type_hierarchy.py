@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 ############################################################################
-from typing import List, Optional
 
 from lsprotocol import types as lsp
 
@@ -51,7 +50,7 @@ class ConfiguredLS(ClientServer):
         @self.server.feature(lsp.TEXT_DOCUMENT_PREPARE_TYPE_HIERARCHY)
         def f1(
             params: lsp.TypeHierarchyPrepareParams,
-        ) -> Optional[List[lsp.TypeHierarchyItem]]:
+        ) -> list[lsp.TypeHierarchyItem] | None:
             if params.text_document.uri == "file://return.list":
                 return [TYPE_HIERARCHY_ITEM]
             else:
@@ -60,13 +59,13 @@ class ConfiguredLS(ClientServer):
         @self.server.feature(lsp.TYPE_HIERARCHY_SUPERTYPES)
         def f2(
             params: lsp.TypeHierarchySupertypesParams,
-        ) -> Optional[List[lsp.TypeHierarchyItem]]:
+        ) -> list[lsp.TypeHierarchyItem] | None:
             return [TYPE_HIERARCHY_ITEM]
 
         @self.server.feature(lsp.TYPE_HIERARCHY_SUBTYPES)
         def f3(
             params: lsp.TypeHierarchySubtypesParams,
-        ) -> Optional[List[lsp.TypeHierarchyItem]]:
+        ) -> list[lsp.TypeHierarchyItem] | None:
             return [TYPE_HIERARCHY_ITEM]
 
 
