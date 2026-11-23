@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions: {}
 
@@ -15,21 +20,7 @@ defaults:
     shell: bash
 
 jobs:
-  pre_job:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@b974a9395958c231af965b70070979a577efa578 # v5.3.2
-        with:
-          concurrent_skipping: "outdated_runs"
-          cancel_others: "true"
-          skip_after_successful_duplicate: "false"
-
   build:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -44,8 +35,7 @@ jobs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
 
   test:
-    needs: [pre_job, build]
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -70,8 +60,7 @@ jobs:
         run: uv run --all-extras --group test poe test
 
   test-pyodide:
-    needs: [pre_job, build]
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -97,7 +86,6 @@ jobs:
           name: 'Packages'
           path: 'dist'
 
-
       - name: Install Dependencies
         run: |
           uv sync --group test
@@ -110,8 +98,6 @@ jobs:
           uv run --all-extras poe test-pyodide
 
   lint:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
