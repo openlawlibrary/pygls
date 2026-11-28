@@ -17,6 +17,8 @@
 import asyncio
 import pathlib
 import sys
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -25,6 +27,21 @@ from pygls.client import JsonRPCClient
 from pygls.exceptions import JsonRpcException, PyglsError
 
 SERVERS = pathlib.Path(__file__).parent / "servers"
+
+
+@pytest.mark.asyncio
+async def test_server_exit_releases_multiple_pending_requests():
+    client = JsonRPCClient()
+    client._server = SimpleNamespace(wait=AsyncMock(), pid=1, returncode=1)
+
+    first = client.protocol.send_request("first", msg_id=1)
+    second = client.protocol.send_request("second", msg_id=2)
+    await client._server_exit()
+
+    assert isinstance(first.exception(), RuntimeError)
+    assert isinstance(second.exception(), RuntimeError)
+    assert client.protocol._request_futures == {}
+    assert client.protocol._result_types == {}
 
 
 @pytest.mark.asyncio
