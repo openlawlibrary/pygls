@@ -418,6 +418,7 @@ class JsonRPCProtocol:
     ):
         """Handles a response from the client."""
         future = self._request_futures.pop(msg_id, None)
+        self._result_types.pop(msg_id, None)
 
         if not future:
             logger.warning('Received response to unknown message id "%s"', msg_id)
@@ -692,6 +693,13 @@ class JsonRPCProtocol:
 
         self._request_futures[msg_id] = future
         self._result_types[msg_id] = self.get_result_type(method)
+
+        def cleanup_request(fut: Future[Any]):
+            if self._request_futures.get(msg_id) is fut:
+                self._request_futures.pop(msg_id, None)
+                self._result_types.pop(msg_id, None)
+
+        future.add_done_callback(cleanup_request)
 
         self._send_data(request)
 

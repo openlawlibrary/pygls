@@ -14,13 +14,15 @@
 # See the License for the specific language governing permissions and      #
 # limitations under the License.                                           #
 #############################################################################
-"""Regression tests for issue #621: a response arriving after its request
-future was cancelled must not crash the message handler with
-``InvalidStateError``."""
+"""Regression tests for outgoing JSON-RPC request cleanup and late responses."""
+import asyncio
+import io
 from concurrent.futures import Future
 
+import pytest
 from lsprotocol.types import ResponseError
 
+from pygls.protocol import default_converter
 from pygls.protocol.json_rpc import JsonRPCProtocol
 
 
@@ -29,6 +31,7 @@ def _make_protocol() -> JsonRPCProtocol:
     _handle_response only touches _request_futures."""
     protocol = JsonRPCProtocol.__new__(JsonRPCProtocol)
     protocol._request_futures = {}
+    protocol._result_types = {}
     return protocol
 
 
@@ -63,3 +66,46 @@ def test_response_to_unknown_message_id_still_warns_not_raises():
     # Existing behaviour: unknown ids are ignored (warning only).
     protocol._handle_response(99, result={"ok": True})
     assert protocol._request_futures == {}
+
+
+def test_cancelled_outgoing_request_releases_bookkeeping():
+    protocol = JsonRPCProtocol(None, default_converter())
+    protocol.set_writer(io.BytesIO(), include_headers=False)
+
+    future = protocol.send_request("test/request", msg_id=1)
+    assert 1 in protocol._request_futures
+    assert 1 in protocol._result_types
+
+    assert future.cancel()
+    assert protocol._request_futures == {}
+    assert protocol._result_types == {}
+
+
+@pytest.mark.asyncio
+async def test_cancelled_async_request_releases_bookkeeping():
+    protocol = JsonRPCProtocol(None, default_converter())
+    protocol.set_writer(io.BytesIO(), include_headers=False)
+
+    future = protocol.send_request_async("test/request", msg_id=1)
+    assert future.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await future
+    await asyncio.sleep(0)
+
+    assert protocol._request_futures == {}
+    assert protocol._result_types == {}
+
+
+def test_failed_outgoing_request_releases_bookkeeping():
+    protocol = JsonRPCProtocol(None, default_converter())
+    protocol.set_writer(io.BytesIO(), include_headers=False)
+
+    future = protocol.send_request("test/request", msg_id=1)
+    response = protocol.structure_message(
+        {"jsonrpc": "2.0", "id": 1, "error": {"code": -32601, "message": "missing"}}
+    )
+    protocol.handle_message(response)
+
+    assert future.done()
+    assert protocol._request_futures == {}
+    assert protocol._result_types == {}

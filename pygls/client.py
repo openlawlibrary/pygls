@@ -175,7 +175,7 @@ class JsonRPCClient:
         logger.debug(reason)
 
         # Cancel any pending requests
-        for id_, fut in self.protocol._request_futures.items():
+        for id_, fut in list(self.protocol._request_futures.items()):
             if not fut.done():
                 fut.set_exception(RuntimeError(reason))
                 logger.debug("Cancelled pending request '%s': %s", id_, reason)
